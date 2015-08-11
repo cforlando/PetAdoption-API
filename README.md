@@ -24,10 +24,10 @@ Describe and show how to run the tests with code examples.
 
 ## Contributors
 
-If you would like to join the API group, our contact info is below.  You can also check out the other projects Code for Orlando has been working on @ (https://github.com/cforlando) and (http://codefororlando.com/)
+If you would like to join the API group, our contact info is below.  You can also check out the other projects Code for Orlando has been working on @ (https://github.com/cforlando) and (http://codefororlando.com/) <br />
 
-Luis Moraguez (lmoraguez@kissimmee.org) - Slack (@lmoraguez) - API Group Lead
-Eric Fisher (Place email here if you would like to disclose) - Slack (@ericjfisher)
+Luis Moraguez (lmoraguez@kissimmee.org) - Slack (@lmoraguez) - API Group Lead <br />
+Eric Fisher (Place email here if you would like to disclose) - Slack (@ericjfisher) <br />
 Andrew Studnicky (Place email here if you would like to disclose) - Slack (@studnicky)
 
 ## License
