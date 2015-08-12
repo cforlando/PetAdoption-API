@@ -1,6 +1,6 @@
 ## Synopsis
 
-The Pet Adoption API is a project using the MS Stack.  Project is set and built with Visual Studio 2015 Community Edition as it is open-source. Using Restful API.  Database and API hosted in Azure Platform.
+The Pet Adoption API is a project using the ASP.NET WebAPI and MVC stack (We have not yet discussed whether we should use the OData stack as well).  Project is set and built with Visual Studio 2015 Community Edition as it is open-source. Database and API hosted in Azure Platform.
 
 ## Code Example
 
@@ -26,9 +26,9 @@ Describe and show how to run the tests with code examples.
 
 If you would like to join the API group, our contact info is below.  You can also check out the other projects Code for Orlando has been working on @ (https://github.com/cforlando) and (http://codefororlando.com/) <br />
 
-Luis Moraguez (lmoraguez@kissimmee.org) - Slack (@lmoraguez) - API Group Lead <br />
-Eric Fisher (Place email here if you would like to disclose) - Slack (@ericjfisher) <br />
-Andrew Studnicky (Place email here if you would like to disclose) - Slack (@studnicky)
+**Luis Moraguez** (lmoraguez@kissimmee.org) - Slack (@lmoraguez) - API Group Lead <br />
+**Eric Fisher** (<i>Place email here if you would like to disclose</i>) - Slack (@ericjfisher) <br />
+**Andrew Studnicky** (<i>Place email here if you would like to disclose</i>) - Slack (@studnicky)
 
 ## License
 
