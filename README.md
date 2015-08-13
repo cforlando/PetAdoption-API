@@ -12,7 +12,7 @@ Nobody likes to see animals be put down due to overcrowding at animal control ce
 
 ## Task List
 
-<input type="checkbox" checked> Set up Git repo - <i>Completed - LMM</i>  
+<s>Set up Git repo</s> - <i>Completed - LMM</i>  
 [x] Initial Commit - <i>Completed - LMM</i>  
 [x] Set up Default App Scaffolding - <i>Completed - LMM</i>  
 [x] Commit Scaffolding to Git - <i>Completed - LMM</i>  
