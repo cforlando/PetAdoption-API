@@ -13,9 +13,9 @@ Nobody likes to see animals be put down due to overcrowding at animal control ce
 ## Task List
 
 <s>Set up Git repo</s> - <i>Completed - LMM</i>  
-[x] Initial Commit - <i>Completed - LMM</i>  
-[x] Set up Default App Scaffolding - <i>Completed - LMM</i>  
-[x] Commit Scaffolding to Git - <i>Completed - LMM</i>  
+<s>Initial Commit</s> - <i>Completed - LMM</i>  
+<s>Set up Default App Scaffolding</s> - <i>Completed - LMM</i>  
+<s>Commit Scaffolding to Git</s> - <i>Completed - LMM</i>  
 [ ] Set up Azure account  
 [ ] Link app to Azure (via Web Conference)  
 [ ] Create Database Project (via Web Conference)  
