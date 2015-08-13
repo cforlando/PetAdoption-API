@@ -12,14 +12,14 @@ Nobody likes to see animals be put down due to overcrowding at animal control ce
 
 ## Task List
 
-[x] Set up Git repo - <i>Completed - LMM</i>
-[x] Initial Commit - <i>Completed - LMM</i>
-[x] Set up Default App Scaffolding - <i>Completed - LMM</i>
-[x] Commit Scaffolding to Git - <i>Completed - LMM</i>
-[ ] Set up Azure account
-[ ] Link app to Azure (via Web Conference)
-[ ] Create Database Project (via Web Conference)
-[ ] Identify the calls (gets, puts, deletes, posts, etc)
+<input type="checkbox" readonly checked> Set up Git repo - <i>Completed - LMM</i>  
+[x] Initial Commit - <i>Completed - LMM</i>  
+[x] Set up Default App Scaffolding - <i>Completed - LMM</i>  
+[x] Commit Scaffolding to Git - <i>Completed - LMM</i>  
+[ ] Set up Azure account  
+[ ] Link app to Azure (via Web Conference)  
+[ ] Create Database Project (via Web Conference)  
+[ ] Identify the calls (gets, puts, deletes, posts, etc)  
 
 
 ## Installation
