@@ -1,6 +1,6 @@
 ## Synopsis
 
-The Pet Adoption API is a project using the ASP.NET WebAPI and MVC stack (We have not yet discussed whether we should use the OData stack as well).  Project is set and built with Visual Studio 2015 Community Edition as it is open-source. Database and API hosted in Azure Platform.
+The Pet Adoption API is a project using the ASP.NET WebAPI and MVC stack.  Project is set and built with Visual Studio 2015 Community Edition as it is open-source. Database and API hosted in Azure Platform.
 
 ## Code Example
 
