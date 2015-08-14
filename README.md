@@ -10,18 +10,6 @@ Show what the library does as concisely as possible, developers should be able t
 
 Nobody likes to see animals be put down due to overcrowding at animal control centers and shelters.  We would like to see animals at these facilities be adopted at a much higher rate, and for those animals who were lost and found, for their rightful owners to be reunited with them once more.  We would like to thank the City of Lady Lake for their wonderful contribution to the project, as they are the project's pilot city.  For that, we are ever grateful!
 
-## Task List
-
-<s>Set up Git repo</s> - <i>Completed - LMM</i>  
-<s>Initial Commit</s> - <i>Completed - LMM</i>  
-<s>Set up Default App Scaffolding</s> - <i>Completed - LMM</i>  
-<s>Commit Scaffolding to Git</s> - <i>Completed - LMM</i>  
-[ ] Set up Azure account  
-[ ] Link app to Azure (via Web Conference)  
-[ ] Create Database Project (via Web Conference)  
-[ ] Identify the calls (gets, puts, deletes, posts, etc)  
-
-
 ## Installation
 
 Provide code examples and explanations of how to get the project.
