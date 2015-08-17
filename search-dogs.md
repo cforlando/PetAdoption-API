@@ -1,13 +1,21 @@
 ---
 ---
 <!--- Author: Chad Miller -->
+<link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:700' rel='stylesheet' type='text/css'>
 
 <style>
 body {
 	margin: 3% 10%;
 }
 
+@media (max-width: 500px) {
+	body {
+		margin: 2% 5%;
+	}
+}
+
 label {
+	white-space: nowrap;
 	vertical-align: middle;
 	margin: auto 1ex;
 }
@@ -27,12 +35,13 @@ fieldset legend {
 }
 
 h1, h2 {
-	margin-top: 4ex;
-	margin-bottom: 1ex;
+	padding-top: 4ex;
+	padding-bottom: 1ex;
 	clear: both;
 }
 
 ol#petlist {
+	text-align: center;
 	padding: 0px;
 	margin: 0px;
 }
@@ -43,15 +52,47 @@ ol#petlist li {
 
 ol#petlist li h3 {
 	text-align: center;
+	margin-bottom: 13ex;
+	font-size: larger;
+}
+
+ol#petlist li * {
+	font-family: 'Roboto Condensed', sans-serif;
+	color: white;
+	text-shadow: 1px 1px 0.6ex black; 
+	background-color: rgba(0, 0, 0, 0.1);
+	font-size: larger;
+	font-weight: 700;
 }
 
 ol#petlist li {
 	display: inline-block;
-	width: 20ex;
-	height: 35ex;
+	width: 30ex;
+	height: 55ex;
 	border: 2px solid white;
 	margin: 0.7ex;
 	padding: 0.6ex 1ex;
+}
+
+@media (max-width: 700px) {
+	ol#petlist li h3 {
+		background-color: black;
+		margin-bottom: 20ex;
+	}
+
+	ol#petlist li {
+		display: block;
+		height: 55ex;
+		width: auto;
+	}
+
+	ol#petlist li p, ol#petlist li p a {
+		background: rgba(255, 255, 255, 0.1);
+		text-align: left;
+		text-shadow: none; 
+		color: black;
+		margin: 0.3ex;
+	}
 }
 
 input[type="range"] {
@@ -59,6 +100,9 @@ input[type="range"] {
 }
 
 </style>
+
+Demo!
+-----
 
 Have a breed of dog in mind? Shelters usually can't attest to the genetics or lineage of a pet, but they can describe the characteristics they observe. If you have a breed in mind, you can [start your search with those breed's features](javascript: display_breed_filler(); false;), to get pets that are closest what you want.
 
@@ -69,13 +113,13 @@ pick traits
 <form id="search" onchange="change(this);" action="javascript: false;">
 <fieldset id="shapesfields"><legend>shape</legend></fieldset>
 <fieldset id="colorsfields"><legend>colors</legend></fieldset>
-<fieldset id="weightlabel"><legend>adult weight</legend></fieldset>
-<fieldset id="weightlabel"><legend>known good with*</legend><label><input type="checkbox" id="goodwithkids">&#x1f476;&#x1f6bc;</label><label><input type="checkbox" id="goodwithdogs">&#x1f436;&#x1f415;</label><label><input type="checkbox" id="goodwithcats">&#x1f431;&#x1f408;</label></fieldset>
-<fieldset id="energylabel"><legend>energy level</legend><input id="energy" type="range" min="0" max="1" step="0.1"></fieldset>
+<fieldset id="goodwithfields"><legend title="Stewards at shelters can not judge this very well, so it doesn't have a strong weight in searching.">known good with&#x2a;</legend><label><input type="checkbox" id="goodwithkids">&#x1f476;&#x1f6bc;</label><label><input type="checkbox" id="goodwithdogs">&#x1f436;&#x1f415;</label><label><input type="checkbox" id="goodwithcats">&#x1f431;&#x1f408;</label></fieldset>
+<fieldset id="weightfield"><legend>adult weight</legend></fieldset>
+<fieldset id="energyfield"><legend>energy level</legend><input id="energy" type="range" min="0" max="1" step="0.1"></fieldset>
 <fieldset><legend>sex</legend><label><input id="sexf" type="checkbox" checked>female</label> <label><input id="sexm" type="checkbox" checked>male</label></fieldset>
 </form>
 
-<p><small>*&nbsp;Stewards&nbsp;at shelters can not judge this very well, so it doesn't have a strong weight in searching.</small></p>
+
 
 best matches
 ------------
@@ -83,7 +127,7 @@ best matches
 <ol id="petlist"></ol>
 
 <script>
-var max_to_show = 120;
+var max_to_show = 60;
 var breed_info;
 var breed_aliases;
 var pet_info;
@@ -149,7 +193,6 @@ function change(frm) {
 		for (shape in shape) {
 			if (needle["shape" + shape.replace(" ", "")]) {
 				if (pet_info[i].shapes.indexOf(shape.replace(" ", "")) >= 0) {
-					console.log("found wanted " + shape);
 					score += 60;
 				}
 			}
@@ -163,7 +206,6 @@ function change(frm) {
 
 	for (var i = 0; i < max_to_show; i++) {
 		search_result_indexes[i] = scores_for_index[i][1];
-		console.log(scores_for_index[i]);
 	}
 
 	render();
@@ -206,19 +248,50 @@ function post_loading_activate() {
 
 		var li = document.createElement("li");
 		var name = document.createElement("h3")
-		name.appendChild(document.createTextNode(pet_info[pet]["name"]));
-		//li.setAttribute("style", "background: url("+pet_info[pet].images_urls[0]+") no-repeat 50% 50%");
+		var link = document.createElement("a")
+		link.setAttribute("href", pet_info[pet].agency[2]);
+		link.setAttribute("title", "Find out about adopting " + pet_info[pet]["name"]);
+		link.appendChild(document.createTextNode(pet_info[pet]["name"]));
+		name.appendChild(link)
+		li.setAttribute("style", "background: url("+pet_info[pet].images_urls[0][0].url+") no-repeat 50% 50%");
 		li.appendChild(name);
+		var para;
 
-		li.appendChild(document.createTextNode(pet_info[pet]["colors"].join("/") + " " + pet_info[pet]["shape"]));
+		para = document.createElement("p");
+		var link = document.createElement("a")
+		link.setAttribute("href", pet_info[pet].agency[2]);
+		link.setAttribute("title", "Find out about adopting " + pet_info[pet]["name"]);
+		link.appendChild(document.createTextNode(pet_info[pet]["colors"].join("/") + " " + pet_info[pet]["shape"]));
+		para.appendChild(link);
+		li.appendChild(para);
 
-		var div = document.createElement("p");
-		div.appendChild(document.createTextNode("Activity level: " + (pet_info[pet]["temperament_active_level"]*10) + "/10"));
-		li.appendChild(div);
+		para = document.createElement("p");
+		para.appendChild(document.createTextNode("Activity: " + (pet_info[pet]["temperament_active_level"]*10) + "/10"));
+		li.appendChild(para);
+
+
+		para = document.createElement("p");
+		if (pet_info[pet]["current_age_years"] < 0.3) {
+			para.appendChild(document.createTextNode("Age: " + Math.round(pet_info[pet]["current_age_years"]*52) + " weeks"));
+		} else if (pet_info[pet]["current_age_years"] < 2) {
+			para.appendChild(document.createTextNode("Age: " + Math.round(pet_info[pet]["current_age_years"]*12) + " months"));
+		} else {
+			para.appendChild(document.createTextNode("Age: " + Math.round(pet_info[pet]["current_age_years"]) + " years"));
+		}
+		li.appendChild(para);
+
+
+		para = document.createElement("p");
+		if (pet_info[pet]["current_age_years"] < 2) {
+			para.appendChild(document.createTextNode("Expected adult weight: " + Math.round(pet_info[pet]["adult_size_lbs"]) + " lbs"));
+		} else {
+			para.appendChild(document.createTextNode("Weight: " + Math.round(pet_info[pet]["adult_size_lbs"]) + " lbs"));
+		}
+		li.appendChild(para);
 
 		if (pet_info[pet]["known_good_with"].length > 0) {
 			var p = document.createElement("p");
-			p.appendChild(document.createTextNode("Known to be good with "));
+			p.appendChild(document.createTextNode("Known good with "));
 			for (i in pet_info[pet]["known_good_with"]) {
 				p.appendChild(document.createTextNode(pet_info[pet]["known_good_with"][i]));
 
@@ -228,20 +301,18 @@ function post_loading_activate() {
 					if (pet_info[pet]["known_good_with"].length != 2) {
 						p.appendChild(document.createTextNode(","));
 					}
-					p.appendChild(document.createTextNode(" and "));
+					p.appendChild(document.createTextNode(" & "));
 				}
 			}
-			p.appendChild(document.createTextNode("."));
 			li.appendChild(p);
 		}
-		
 
 		pets.push(li);
 		search_result_indexes[pet] = pet; // int index
 
 	}
 
-	var weightlabel = document.getElementById("weightlabel");
+	var weightlabel = document.getElementById("weightfield");
 
 	var weightslider = document.createElement("input");
 	weightslider.setAttribute("id", "weight");
@@ -252,15 +323,15 @@ function post_loading_activate() {
 	weightslider.setAttribute("min", min_weight);
 	weightslider.setAttribute("max", max_weight);
 
-	var weightsliderindicator = document.createElement("span");
-	weightsliderindicator.setAttribute("id", "weightsliderindicator");
-	weightsliderindicator.setAttribute("class", "valueindicator");
-	weightsliderindicator.appendChild(document.createTextNode("(any)"));
+	//var weightsliderindicator = document.createElement("span");
+	//weightsliderindicator.setAttribute("id", "weightsliderindicator");
+	//weightsliderindicator.setAttribute("class", "valueindicator");
+	//weightsliderindicator.appendChild(document.createTextNode("(any)"));
 
-	weightlabel.appendChild(weightsliderindicator);
+	//weightlabel.appendChild(weightsliderindicator);
 	weightlabel.appendChild(weightslider);
 
-	weightslider.addEventListener("onchange", (function() { console.log(this); weightsliderindicator.contents = this.value; return true; })());
+	//weightslider.addEventListener("onchange", (function() { weightsliderindicator.contents = this.value; return true; })());
 
 	var shapesfields = document.getElementById("shapesfields");
 	shapes.sort();
@@ -272,6 +343,7 @@ function post_loading_activate() {
 		shapelabel.appendChild(shapecheckbox);
 		shapelabel.appendChild(document.createTextNode(shape));
 		shapesfields.appendChild(shapelabel);
+		shapesfields.appendChild(document.createTextNode(" "));
 	}
 
 	var colorsfields = document.getElementById("colorsfields");
@@ -284,6 +356,7 @@ function post_loading_activate() {
 		colorlabel.appendChild(colorcheckbox);
 		colorlabel.appendChild(document.createTextNode(color));
 		colorsfields.appendChild(colorlabel);
+		colorsfields.appendChild(document.createTextNode(" "));
 	}
 
 	render();

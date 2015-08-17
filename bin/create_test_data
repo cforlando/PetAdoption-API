@@ -75,7 +75,7 @@ for canonical_breed_name in os.listdir("breeddata"):
         m = re.search(r"""<img class="breed-thumbnail" src="(http://[^"]+\.jpg)" alt=""", contents)
         if m:
             breed_traits[canonical_breed_name]["thumbnail_image"] = m.group(1)
-        image_urls.append([["https://s3.amazonaws.com/filestore.rescuegroups.org/2098/pictures/animals/8531/8531755/26029688_500x375.jpg", [213,93], [301,104]]])
+        image_urls.append([{ "url":"https://s3.amazonaws.com/filestore.rescuegroups.org/2098/pictures/animals/8531/8531755/26029688_500x375.jpg", "eyebox":[213, 93, 301, 104]}])
 
         m = re.search(r"""<p><span class="left">OTHER NAME</span>\s+<span class="right">([^<]*)</span></p>""", contents)
         for name in m.group(1).split(", "):
@@ -87,8 +87,9 @@ for canonical_breed_name in os.listdir("breeddata"):
 available_shapes = sorted(available_shapes)
 
 animals = list()
-for _ in range(500):
+for petid in range(500):
     animal = dict()
+    animal["id"] = petid + 142345
     animal["species"] = "dog"
     animal["colors"] = sorted(set(random.choice(available_colors) for _ in range(random.randint(1, 3))))
     animal["temperament_active_level"] = random.randint(0, 10) / 10.0
@@ -97,13 +98,14 @@ for _ in range(500):
     animal["known_good_with"] = sorted(set(random.choice(available_good_with) for _ in range(random.randint(0, 2))))
     if random.random() > 0.95:  # known to be good with all, sometimes
         animal["known_good_with"] = available_good_with
-    animal["current_age_years"] = random.randint(1, 10) * 15
+    animal["current_age_years"] = random.random() * 15
     animal["sex"] = "f" if random.random() > 0.5 else "m"
     animal["health_requirements"] = [ "medicine" ] if random.random() > 0.9 else  []
     animal["import_date"] = (datetime.datetime.now().date() - datetime.timedelta(days=random.randint(1, 15))).strftime("%Y-%m-%d")
     animal["name"] = random.choice(available_names[animal["sex"]])
     animal["shape"] = random.choice(available_shapes)
     animal["images_urls"] = [ random.choice(image_urls) ]
+    animal["agency"] = [ "SPCA of Foo", "http://spca.example.com/", "http://spca.example.com/register_interest/{0}".format(animal["id"])]
     animals.append(animal)
 
 
