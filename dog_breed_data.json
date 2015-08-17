@@ -1,0 +1,1553 @@
+{
+    "breed_aliases": {
+        "aberdeen terrier": "scottish terrier",
+        "african lion hound": "rhodesian ridgeback",
+        "akita inu": "akita",
+        "alpine mastiff": "saint bernard",
+        "alsatian": "german shepherd dog",
+        "american black and tan coonhound": "black and tan coonhound",
+        "american toy terrier": "toy fox terrier",
+        "amertoy": "toy fox terrier",
+        "arctic husky": "siberian husky",
+        "australian silky terrier": "silky terrier",
+        "balaeric dog": "ibizan hound",
+        "baluchi hound": "afghan hound",
+        "barbone": "poodle (standard)",
+        "bas-rouge": "beauceron",
+        "belgian cattle dog": "bouvier des flandres",
+        "belgian griffon": "brussels griffon",
+        "berger de beauce": "beauceron",
+        "berger de brie": "briard",
+        "berner sennenhund": "bernese mountain dog",
+        "bernese cattle dog": "bernese mountain dog",
+        "bichon a poil frise": "bichon frise",
+        "bichon havanais": "havanese",
+        "bichon maltiase": "maltese",
+        "bichon tenerife": "bichon frise",
+        "bingley terrier": "airedale terrier",
+        "black and tan terrier": "manchester terrier (standard)",
+        "black and tan toy terrier": "manchester terrier (toy)",
+        "blue heeler": "australian cattle dog",
+        "bouledogue francais": "french bulldog",
+        "brittany spaniel": "brittany",
+        "brushwood dog": "shiba inu",
+        "ca eibisenc": "ibizan hound",
+        "caniche": "poodle (standard)",
+        "cao de agua": "portuguese water dog",
+        "carlin": "pug",
+        "chien de berger belge": "belgian sheepdog",
+        "chien de montagne des pyrenees": "great pyrenees",
+        "chien des pyrenees": "great pyrenees",
+        "chien st. hubert": "bloodhound",
+        "chinese fighting dog": "chinese shar-pei",
+        "chornyi": "black russian terrier",
+        "chrysanthemum dog": "shih tzu",
+        "coban kopegi": "anatolian shepherd",
+        "cocker spaniel": "american cocker spaniel",
+        "congo dog": "basenji",
+        "congo terrier": "basenji",
+        "deerhound": "scottish deerhound",
+        "deutsche dogge": "great dane",
+        "deutscher": "german shorthaired pointer",
+        "deutscher drahthaariger": "german wirehaired pointer",
+        "deutscher schaferhund": "german shepherd dog",
+        "dhokhi apso": "tibetan terrier",
+        "do-khyi": "tibetan mastiff",
+        "dobermann": "doberman pinscher",
+        "drahthaar": "german wirehaired pointer",
+        "drotszoru magyar vizsla": "vizsla",
+        "elkhound": "norwegian elkhound",
+        "english beagle": "beagle",
+        "english bull terrier": "bull terrier",
+        "english bulldog": "bulldog",
+        "english mastiff": "mastiff",
+        "english pointer": "pointer",
+        "english toy terrier": "manchester terrier (toy)",
+        "epagneul breton": "brittany",
+        "epagneul nain (phalene is also known as continental toy spaniel)": "papillon",
+        "finsk spets": "finnish spitz",
+        "foxhound": "english foxhound",
+        "gazelle hound": "saluki (or gazelle hound)",
+        "german mastiff": "great dane",
+        "german pointer (shorthaired)": "german shorthaired pointer",
+        "german pointer (wirehaired)": "german wirehaired pointer",
+        "great swiss cattle dog": "greater swiss mountain dog",
+        "griffon belge": "brussels griffon",
+        "griffon bruxellois": "brussels griffon",
+        "griffon d'arrjt a poil dur": "wirehaired pointing griffon",
+        "groenendael": "belgian sheepdog",
+        "grosser schweizer sennenhund": "greater swiss mountain dog",
+        "hall's heeler": "australian cattle dog",
+        "hungarian kuvasz": "kuvasz",
+        "hungarian pointer": "vizsla",
+        "hungarian puli": "puli",
+        "hungarian vizsla": "vizsla",
+        "hungarian water dog": "puli",
+        "irish blue terrier": "kerry blue terrier",
+        "irish glen of imaal terrier": "glen of imaal terrier",
+        "irish red terrier": "irish terrier",
+        "italian spinone": "spinone italiano",
+        "jack russell terrier": "parson russell terrier",
+        "japanese akita": "akita",
+        "japanese small-size dog": "shiba inu",
+        "japanese spaniel": "japanese chin",
+        "kalef k'naani": "canaan dog",
+        "kangal dog": "anatolian shepherd",
+        "kara bas": "anatolian shepherd",
+        "karabash dog": "anatolian shepherd",
+        "kelb-tal fenek": "pharaoh hound",
+        "king charles spaniel": "english toy spaniel",
+        "korthals griffon": "wirehaired pointing griffon",
+        "kurzhaar": "german shorthaired pointer",
+        "kurzhaariger vortsehund": "german shorthaired pointer",
+        "lion dog": "pekingese",
+        "little griffon vendeen basset": "petit basset griffon vendeen",
+        "little lion dog": "lowchen",
+        "little river duck dog": "nova scotia duck tolling retriever",
+        "magyar vizsla": "vizsla",
+        "malinois": "belgian malinois",
+        "mastino napoletano": "neapolitan mastiff",
+        "mittelschnauzer": "standard schnauzer",
+        "mops": "pug",
+        "mustaterrieri": "black russian terrier",
+        "none": "german pinscher",
+        "norsk elghund": "norwegian elkhound",
+        "parson jack russell terrier": "parson russell terrier",
+        "peking palasthund": "pekingese",
+        "persian greyhound": "saluki (or gazelle hound)",
+        "piccolo levrieve italiani": "italian greyhound",
+        "plott coonhound": "plott",
+        "plott hound": "plott",
+        "podenco ibicenco": "ibizan hound",
+        "pointing wirehaired griffon": "wirehaired pointing griffon",
+        "polski owczarek nizinny": "polish lowland sheepdog",
+        "poltalloch terrier": "west highland white terrier",
+        "pon": "polish lowland sheepdog",
+        "pyrenean mountain dog": "great pyrenees",
+        "queensland heeler": "australian cattle dog",
+        "red setter": "irish setter",
+        "redbone hound": "redbone coonhound",
+        "reh pinscher": "miniature pinscher",
+        "riesenschnauzer": "giant schnauzer",
+        "rothbury terrier": "bedlington terrier",
+        "russian wolfhound": "borzoi",
+        "samoyedskaya": "samoyed",
+        "schwarzer russicher terrier": "black russian terrier",
+        "scottish collie": "collie",
+        "st. bernhardshund": "saint bernard",
+        "st. hubert hound": "bloodhound",
+        "suomenpystykorva": "finnish spitz",
+        "sydney silky": "silky terrier",
+        "tazi": "afghan hound",
+        "tchiorny terrier": "black russian terrier",
+        "teckel (miniature: zwergteckel)": "dachshund (miniature)",
+        "tenerife dog": "bichon frise",
+        "terrier noir russem": "black russian terrier",
+        "tervuren": "belgian tervuren",
+        "vorstehund": "german wirehaired pointer",
+        "waterside terrier": "airedale terrier",
+        "weimaraner vorstehhund": "weimaraner",
+        "wolf spitz": "keeshond",
+        "yellow retriever": "golden retriever",
+        "zwergpinscher": "miniature pinscher",
+        "zwergschnauzer": "miniature schnauzer"
+    },
+    "breed_shorthands": {
+        "affenpinscher": {
+            "activity": 0.8,
+            "family": [
+                "terrier",
+                "pinscher"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/8135141fc19fa2ef01bf9b56124a13f35057d746_8135141fc19fa2ef01bf9b56124a13f35057d746.jpg",
+            "weight": 8.0
+        },
+        "afghan hound": {
+            "activity": 0.2,
+            "family": [
+                "sighthound",
+                "sighthound"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/2679cd12f5806bf07da04d38dbd1979a58e309d2T.jpg",
+            "weight": 60.0
+        },
+        "airedale terrier": {
+            "activity": 0.8,
+            "family": [
+                "terrier"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/thumbnails2/3ea30f63bcc53c39c25cfdf19257cee88710f199T.jpg",
+            "weight": 55.0
+        },
+        "akita": {
+            "activity": 0.5,
+            "family": [
+                "spitz",
+                "hunting"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/f475495f9cc5bcc37ac6f71ac08eb7181628abc3T.jpg",
+            "weight": 107.5
+        },
+        "alaskan malamute": {
+            "activity": 0.5,
+            "family": [
+                "spitz",
+                "draft"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/eb737ecf5a6841f5da038696d653bceb4369ca64T.jpg",
+            "weight": 85.0
+        },
+        "american cocker spaniel": {
+            "activity": 0.5,
+            "family": [
+                "gundog",
+                "spaniel"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/e0a86b87be409125732f136067ebd7505576b8c3_e0a86b87be409125732f136067ebd7505576b8c3.jpg",
+            "weight": 26.0
+        },
+        "american eskimo dog (miniature)": {
+            "activity": 0.5,
+            "family": [
+                "spitz",
+                "companion"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/c3a864b74126f1d5c155a6ea980264f83f78b5bb_c3a864b74126f1d5c155a6ea980264f83f78b5bb.jpg",
+            "weight": 15.5
+        },
+        "american eskimo dog (standard)": {
+            "activity": 0.5,
+            "family": [
+                "spitz",
+                "companion"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/c3a864b74126f1d5c155a6ea980264f83f78b5bb_c3a864b74126f1d5c155a6ea980264f83f78b5bb.jpg",
+            "weight": 30.0
+        },
+        "american eskimo dog (toy)": {
+            "activity": 0.5,
+            "family": [
+                "spitz",
+                "companion"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/c3a864b74126f1d5c155a6ea980264f83f78b5bb_c3a864b74126f1d5c155a6ea980264f83f78b5bb.jpg",
+            "weight": 8.0
+        },
+        "american foxhound": {
+            "activity": 0.8,
+            "family": [
+                "scenthound"
+            ],
+            "weight": 52.5
+        },
+        "american staffordshire terrier": {
+            "activity": 0.5,
+            "family": [
+                "terrier",
+                "mastiff"
+            ],
+            "weight": 62.0
+        },
+        "american water spaniel": {
+            "activity": 0.8,
+            "family": [
+                "gundog",
+                "water dog",
+                "spaniel"
+            ],
+            "weight": 37.5
+        },
+        "anatolian shepherd": {
+            "activity": 0.2,
+            "family": [
+                "livestock dog",
+                "mastiff",
+                "flock guard"
+            ],
+            "weight": 130.0
+        },
+        "australian cattle dog": {
+            "activity": 0.8,
+            "family": [
+                "livestock",
+                "herding"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/8ec11ee543bbdb5384175a5ea2118d6b22c079d6_8ec11ee543bbdb5384175a5ea2118d6b22c079d6.jpg",
+            "weight": 40.0
+        },
+        "australian shepherd": {
+            "activity": 0.8,
+            "family": [
+                "livestock",
+                "herding"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/bd62c1444d280f6340a302fc34e4963f40ce5b57T.jpg",
+            "weight": 57.5
+        },
+        "australian terrier": {
+            "activity": 0.5,
+            "family": [
+                "terrier"
+            ],
+            "weight": 13.0
+        },
+        "basenji": {
+            "activity": 0.8,
+            "family": [
+                "sighthound",
+                "scenthound",
+                "primitive",
+                "pariah"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/2ef8118e1d4979793df571fab7747a363703f6cc_2ef8118e1d4979793df571fab7747a363703f6cc.jpg",
+            "weight": 24.0
+        },
+        "basset hound": {
+            "activity": 0.2,
+            "family": [
+                "scenthound"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/319862f99ec2c155c5b8bd4431eca52bb6af5ba6T.jpg",
+            "weight": 50.0
+        },
+        "beagle": {
+            "activity": 0.5,
+            "family": [
+                "scenthound"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/b269191978e268b8c91f793ede1ee906c5db83edT.jpg",
+            "weight": 24.0
+        },
+        "bearded collie": {
+            "activity": 0.8,
+            "family": [
+                "livestock",
+                "herding"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/7134a3fe202c0cd681ef257f0c9d7818e09bfd5a_7134a3fe202c0cd681ef257f0c9d7818e09bfd5a.jpg",
+            "weight": 50.0
+        },
+        "beauceron": {
+            "activity": 0.8,
+            "family": [
+                "herding"
+            ],
+            "weight": 75.0
+        },
+        "bedlington terrier": {
+            "activity": 0.5,
+            "family": [
+                "terrier"
+            ],
+            "weight": 20.0
+        },
+        "belgian malinois": {
+            "activity": 0.8,
+            "family": [
+                "livestock",
+                "herding"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/92e0ae0a72b977a7aac7fc0ef41b6da01a403690_92e0ae0a72b977a7aac7fc0ef41b6da01a403690.jpg",
+            "weight": 62.5
+        },
+        "belgian sheepdog": {
+            "activity": 0.8,
+            "family": [
+                "livestock",
+                "herding"
+            ],
+            "weight": 65.0
+        },
+        "belgian tervuren": {
+            "activity": 0.8,
+            "family": [
+                "livestock",
+                "herding"
+            ],
+            "weight": 60.0
+        },
+        "bernese mountain dog": {
+            "activity": 0.2,
+            "family": [
+                "livestock dog",
+                "mountain dog",
+                "mastiff"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/3d70d48384aa2c4e39483fd04cc577c997c8cb9cT.jpg",
+            "weight": 105.0
+        },
+        "bichon frise": {
+            "activity": 0.8,
+            "family": [
+                "bichon",
+                "companion",
+                "water dog"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/243cfa3f7ef40b4e12fe64504dea9437f00d0a5bT.jpg",
+            "weight": 13.5
+        },
+        "black and tan coonhound": {
+            "activity": 0.2,
+            "family": [
+                "scenthound"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/e40d4f088f23fc66f128c44248950479af5db0ad_e40d4f088f23fc66f128c44248950479af5db0ad.jpg",
+            "weight": 65.0
+        },
+        "black russian terrier": {
+            "activity": 0.2,
+            "family": [
+                "schnauzer"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/1dc4a98a79c317a566a7b191705546f351858bd1_1dc4a98a79c317a566a7b191705546f351858bd1.jpg",
+            "weight": 112.5
+        },
+        "bloodhound": {
+            "activity": 0.5,
+            "family": [
+                "scenthound"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/3f5ceabc3055c773a2c56b25bd227544135e2a15T.jpg",
+            "weight": 100.0
+        },
+        "border collie": {
+            "activity": 0.8,
+            "family": [
+                "livestock",
+                "herding"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/475d930f5f0625fada582a49c37c7605ebc1f829T.jpg",
+            "weight": 37.5
+        },
+        "border terrier": {
+            "activity": 0.5,
+            "family": [
+                "terrier"
+            ],
+            "weight": 14.25
+        },
+        "borzoi": {
+            "activity": 0.5,
+            "family": [
+                "sighthound",
+                "sighthound"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/351f5bf8d2dd2735813003093f74bc4133594977_351f5bf8d2dd2735813003093f74bc4133594977.jpg",
+            "weight": 90.0
+        },
+        "boston terrier": {
+            "activity": 0.5,
+            "family": [
+                "terrier",
+                "companion",
+                "mastiff"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/8762d1ab766ebda0e7127b313d48e86eee08362aT.jpg",
+            "weight": 17.5
+        },
+        "bouvier des flandres": {
+            "activity": 0.5,
+            "family": [
+                "livestock",
+                "herding"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/572804482df17fb001e70e9e57a24fab24bcba9f_572804482df17fb001e70e9e57a24fab24bcba9f.jpg",
+            "weight": 79.5
+        },
+        "boxer": {
+            "activity": 0.8,
+            "family": [
+                "livestock dog",
+                "mastiff"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/57a12b5a6e5017d66c2cf0c7657c75e5fc278a64T.jpg",
+            "weight": 72.5
+        },
+        "briard": {
+            "activity": 0.5,
+            "family": [
+                "livestock",
+                "herding"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/417a5575abccfe193483d2279bcbfc6edddeb5fb_417a5575abccfe193483d2279bcbfc6edddeb5fb.jpg",
+            "weight": 87.5
+        },
+        "brittany": {
+            "activity": 0.8,
+            "family": [
+                "gundog",
+                "setter",
+                "pointer"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/35b543305d5072b38c4375ff91a54f102745be14T.jpg",
+            "weight": 35.0
+        },
+        "brussels griffon": {
+            "activity": 0.8,
+            "family": [
+                "terrier"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/4d03f91f5d3bf64a91b48261ce9ec83c9e26515b_4d03f91f5d3bf64a91b48261ce9ec83c9e26515b.jpg",
+            "weight": 9.0
+        },
+        "bull terrier": {
+            "activity": 0.8,
+            "family": [
+                "terrier",
+                "mastiff"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/c618d347f14b8e2b2ad138274b8ace17624a4362_c618d347f14b8e2b2ad138274b8ace17624a4362.jpg",
+            "weight": 65.0
+        },
+        "bulldog": {
+            "activity": 0.2,
+            "family": [
+                "livestock dog",
+                "mountain dog",
+                "mastiff"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/d52439425153d53555dcc55f84d896e46494043dT.jpg",
+            "weight": 50.0
+        },
+        "bullmastiff": {
+            "activity": 0.2,
+            "family": [
+                "livestock dog",
+                "mastiff"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/2e5a6160b93f39057a06a7df1edbb1588d941b04_2e5a6160b93f39057a06a7df1edbb1588d941b04.jpg",
+            "weight": 120.0
+        },
+        "cairn terrier": {
+            "activity": 0.8,
+            "family": [
+                "terrier"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/8f390ee11aebdc6d536a31198f539e973c3a25b8T.jpg",
+            "weight": 14.0
+        },
+        "canaan dog": {
+            "activity": 0.5,
+            "family": [
+                "livestock",
+                "herding",
+                "primitive",
+                "pariah"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/cba8cf3f8516e1319e3fa937faa731c92f7e2ac5_cba8cf3f8516e1319e3fa937faa731c92f7e2ac5.jpg",
+            "weight": 50.0
+        },
+        "cardigan welsh corgi": {
+            "activity": 0.5,
+            "family": [
+                "livestock",
+                "herding"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/b57f2f2f56e30a9bdbc3a050f0d2fb6df466e4fd_b57f2f2f56e30a9bdbc3a050f0d2fb6df466e4fd.jpg",
+            "weight": 34.0
+        },
+        "cavalier king charles spaniel": {
+            "activity": 0.5,
+            "family": [
+                "spaniel",
+                "companion"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/4befde3eb7bf8219255f3bce862c27ccc88671e5T.jpg",
+            "weight": 15.5
+        },
+        "chesapeake bay retriever": {
+            "activity": 0.5,
+            "family": [
+                "gundog",
+                "retriever"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/3b5b212589c00927ac6d80a04b93c2123aae7049T.jpg",
+            "weight": 72.5
+        },
+        "chihuahua": {
+            "activity": 0.8,
+            "family": [
+                "companion",
+                "pariah"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/thumbnails2/33fa95498f9fb14c2f044d87a016fdf686607370T.jpg",
+            "weight": 6.0
+        },
+        "chinese crested dog": {
+            "activity": 0.5,
+            "family": [
+                "companion",
+                "hairless"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/7276c0b1e35ce2bddd9b8ec547987f5a73ea8a9fT.jpg",
+            "weight": 8.5
+        },
+        "chinese shar-pei": {
+            "activity": 0.5,
+            "family": [
+                "livestock dog",
+                "mountain dog",
+                "companion"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/thumbnails2/b6192ed1e4668cae965d6d9e90dab3a8705d4fb8T.jpg",
+            "weight": 52.5
+        },
+        "chow chow": {
+            "activity": 0.2,
+            "family": [
+                "spitz",
+                "companion"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/348d1d47e0acc447d10a341422f73e7fa2cf86b8T.jpg",
+            "weight": 57.5
+        },
+        "clumber spaniel": {
+            "activity": 0.2,
+            "family": [
+                "gundog",
+                "spaniel"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/b74eec5c4ca16e6c7cee253ee9f6072637f2c5c7_b74eec5c4ca16e6c7cee253ee9f6072637f2c5c7.jpg",
+            "weight": 77.5
+        },
+        "collie": {
+            "activity": 0.5,
+            "family": [
+                "livestock",
+                "herding"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/a4fd26ca20d79458eb533b4441748bab0ec9f6d4T.jpg",
+            "weight": 67.5
+        },
+        "curly-coated retriever": {
+            "activity": 0.5,
+            "family": [
+                "gundog",
+                "retriever"
+            ],
+            "weight": 65.0
+        },
+        "dachshund (miniature)": {
+            "activity": 0.8,
+            "family": [
+                "scenthound",
+                "terrier",
+                "dachshund"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/82eacd61ecd00ed85adacf7e9bb00843cfdca3edT.jpg",
+            "weight": 6.0
+        },
+        "dachshund (standard)": {
+            "activity": 0.8,
+            "family": [
+                "scenthound",
+                "terrier",
+                "dachshund"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/82eacd61ecd00ed85adacf7e9bb00843cfdca3edT.jpg",
+            "weight": 21.5
+        },
+        "dalmatian": {
+            "activity": 0.8,
+            "family": [
+                "scenthound",
+                "pointer"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/bc469f25056637f593f0151c876a301cde9640d5T.jpg",
+            "weight": 50.0
+        },
+        "dandie dinmont terrier": {
+            "activity": 0.5,
+            "family": [
+                "terrier"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/df127278833b57fd86e0496319131f86af057908_df127278833b57fd86e0496319131f86af057908.jpg",
+            "weight": 21.0
+        },
+        "doberman pinscher": {
+            "activity": 0.8,
+            "family": [
+                "mastiff"
+            ],
+            "weight": 77.5
+        },
+        "english cocker spaniel": {
+            "activity": 0.5,
+            "family": [
+                "gundog",
+                "spaniel"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/e0a86b87be409125732f136067ebd7505576b8c3_e0a86b87be409125732f136067ebd7505576b8c3.jpg",
+            "weight": 31.0
+        },
+        "english foxhound": {
+            "activity": 0.8,
+            "family": [
+                "scenthound"
+            ],
+            "weight": 65.0
+        },
+        "english setter": {
+            "activity": 0.8,
+            "family": [
+                "gundog",
+                "setter",
+                "pointer"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/8db34b20b4ec3f73bab63ddbad72fd873708234a_8db34b20b4ec3f73bab63ddbad72fd873708234a.jpg",
+            "weight": 62.5
+        },
+        "english springer spaniel": {
+            "activity": 0.8,
+            "family": [
+                "gundog",
+                "spaniel"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/f2e03d007ac28bc1ca658867cb3c7dbdfc233c76T.jpg",
+            "weight": 50.0
+        },
+        "english toy spaniel": {
+            "activity": 0.2,
+            "family": [
+                "spaniel",
+                "companion"
+            ],
+            "weight": 11.0
+        },
+        "field spaniel": {
+            "activity": 0.8,
+            "family": [
+                "gundog",
+                "spaniel"
+            ],
+            "weight": 42.5
+        },
+        "finnish spitz": {
+            "activity": 0.5,
+            "family": [
+                "spitz",
+                "hunting"
+            ],
+            "weight": 33.5
+        },
+        "flat-coated retriever": {
+            "activity": 0.5,
+            "family": [
+                "gundog",
+                "retriever",
+                "water dog"
+            ],
+            "weight": 65.0
+        },
+        "french bulldog": {
+            "activity": 0.5,
+            "family": [
+                "companion",
+                "mastiff"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/thumbnails2/945342ed0835bfaea68517a513d7a8ea4081e959T.jpg",
+            "weight": 28.0
+        },
+        "german pinscher": {
+            "activity": 0.8,
+            "family": [
+                "pinscher"
+            ],
+            "weight": 30.0
+        },
+        "german shepherd dog": {
+            "activity": 0.5,
+            "family": [
+                "livestock",
+                "herding"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/4a8346c74c553fb838eb21f5caea92ef38a21127T.jpg",
+            "weight": 85.0
+        },
+        "german shorthaired pointer": {
+            "activity": 0.8,
+            "family": [
+                "gundog",
+                "pointer"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/c4140be4577e40561d4c87651227a56d6e4be6c3T.jpg",
+            "weight": 62.5
+        },
+        "german wirehaired pointer": {
+            "activity": 0.8,
+            "family": [
+                "gundog",
+                "pointer"
+            ],
+            "weight": 60.0
+        },
+        "giant schnauzer": {
+            "activity": 0.5,
+            "family": [
+                "livestock dog",
+                "herding"
+            ],
+            "weight": 77.5
+        },
+        "glen of imaal terrier": {
+            "activity": 0.5,
+            "family": [
+                "terrier"
+            ],
+            "weight": 35.0
+        },
+        "golden retriever": {
+            "activity": 0.5,
+            "family": [
+                "gundog",
+                "retriever"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/0309dd018529881586a5d1414f0574eec5f0327dT.jpg",
+            "weight": 70.0
+        },
+        "gordon setter": {
+            "activity": 0.8,
+            "family": [
+                "gundog",
+                "setter",
+                "pointer"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/56cc9d01981bfa31c760cf0b0526abe489cac224_56cc9d01981bfa31c760cf0b0526abe489cac224.jpg",
+            "weight": 67.5
+        },
+        "great dane": {
+            "activity": 0.2,
+            "family": [
+                "livestock dog",
+                "mastiff"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/2de17f710a26d847f1b03b636ed39ce05a20098fT.jpg",
+            "weight": 155.0
+        },
+        "great pyrenees": {
+            "activity": 0.2,
+            "family": [
+                "livestock dog",
+                "flockguard"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/27b5c6ac266bbfc04cd7a94d6651a7105d2912da_27b5c6ac266bbfc04cd7a94d6651a7105d2912da.jpg",
+            "weight": 115.0
+        },
+        "greater swiss mountain dog": {
+            "activity": 0.2,
+            "family": [
+                "livestock dog",
+                "mastiff"
+            ],
+            "weight": 122.5
+        },
+        "greyhound": {
+            "activity": 0.2,
+            "family": [
+                "sighthound",
+                "sighthound"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/c08b1c7af9da4c1dbae7d0756df1c6eaa47826ee_c08b1c7af9da4c1dbae7d0756df1c6eaa47826ee.jpg",
+            "weight": 67.5
+        },
+        "harrier": {
+            "activity": 0.8,
+            "family": [
+                "scenthound"
+            ],
+            "weight": 52.5
+        },
+        "havanese": {
+            "activity": 0.8,
+            "family": [
+                "bichon",
+                "companion",
+                "water dog"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/a06c60eb16f0eb5c19deabf0e7a2b4753d88eceeT.jpg",
+            "weight": 10.0
+        },
+        "ibizan hound": {
+            "activity": 0.5,
+            "family": [
+                "sighthound",
+                "pariah",
+                "primitive"
+            ],
+            "weight": 50.0
+        },
+        "irish setter": {
+            "activity": 0.8,
+            "family": [
+                "gundog",
+                "setter",
+                "pointer"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/70d4123dbc948c0c6efb6a5171fe911d349ba752T.jpg",
+            "weight": 70.0
+        },
+        "irish terrier": {
+            "activity": 0.5,
+            "family": [
+                "terrier"
+            ],
+            "weight": 27.0
+        },
+        "irish water spaniel": {
+            "activity": 0.5,
+            "family": [
+                "gundog",
+                "spaniel"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/777bce79353d34bd35f941cd36f7400a142a697c_777bce79353d34bd35f941cd36f7400a142a697c.jpg",
+            "weight": 60.0
+        },
+        "irish wolfhound": {
+            "activity": 0.2,
+            "family": [
+                "sighthound",
+                "sighthound"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/682e185619232d19c58b0f48cef0d4fd3bf731d5_682e185619232d19c58b0f48cef0d4fd3bf731d5.jpg",
+            "weight": 120.0
+        },
+        "italian greyhound": {
+            "activity": 0.8,
+            "family": [
+                "sighthound",
+                "sighthound"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/bd1e27b65ce399a5bc77056e172f9fcaaf44b1e4T.jpg",
+            "weight": 10.5
+        },
+        "japanese chin": {
+            "activity": 0.5,
+            "family": [
+                "companion"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/d260513935074edbd75bd3f717335ca9312ea46d_d260513935074edbd75bd3f717335ca9312ea46d.jpg",
+            "weight": 5.5
+        },
+        "keeshond": {
+            "activity": 0.5,
+            "family": [
+                "spitz",
+                "companion"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/9280a7bc94718206eb630f0b4788a4808a0c6b6c_9280a7bc94718206eb630f0b4788a4808a0c6b6c.jpg",
+            "weight": 45.0
+        },
+        "kerry blue terrier": {
+            "activity": 0.5,
+            "family": [
+                "terrier"
+            ],
+            "weight": 36.5
+        },
+        "komondor": {
+            "activity": 0.5,
+            "family": [
+                "livestock dog",
+                "sheepdog",
+                "flockguard"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/88b8ff2a1db6ec20157733bb323d43e17f9257ea_88b8ff2a1db6ec20157733bb323d43e17f9257ea.jpg",
+            "weight": 80.0
+        },
+        "kuvasz": {
+            "activity": 0.5,
+            "family": [
+                "livestock dog",
+                "sheepdog",
+                "flockguard"
+            ],
+            "weight": 107.5
+        },
+        "labrador retriever": {
+            "activity": 0.8,
+            "family": [
+                "gundog",
+                "retriever"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/thumbnails2/86ae772aca70a717b66f2dbe88eb673d337b509eT.jpg",
+            "weight": 72.5
+        },
+        "lakeland terrier": {
+            "activity": 0.8,
+            "family": [
+                "terrier"
+            ],
+            "weight": 17.0
+        },
+        "lhasa apso": {
+            "activity": 0.5,
+            "family": [
+                "companion",
+                "herding"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/8b93b5b2e32e156bf0babe039a93f609dc0052bdT.jpg",
+            "weight": 14.0
+        },
+        "lowchen": {
+            "activity": 0.5,
+            "family": [
+                "companion",
+                "water dog"
+            ],
+            "weight": 13.0
+        },
+        "maltese": {
+            "activity": 0.8,
+            "family": [
+                "bichon",
+                "companion",
+                "terrier",
+                "water dog"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/b027a70fe442c38b3c1061fc7da57147fbde51f7T.jpg",
+            "weight": 5.5
+        },
+        "manchester terrier (standard)": {
+            "activity": 0.8,
+            "family": [
+                "terrier"
+            ],
+            "weight": 17.0
+        },
+        "manchester terrier (toy)": {
+            "activity": 0.8,
+            "family": [
+                "terrier"
+            ],
+            "weight": 7.0
+        },
+        "mastiff": {
+            "activity": 0.2,
+            "family": [
+                "livestock dog",
+                "sheepdog",
+                "mastiff"
+            ],
+            "weight": 182.5
+        },
+        "miniature bull terrier": {
+            "activity": 0.8,
+            "family": [
+                "terrier",
+                "mastiff"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/cf2b8eabe3d70004bb4f70f5da2442de9ea4ca19_cf2b8eabe3d70004bb4f70f5da2442de9ea4ca19.jpg",
+            "weight": 29.0
+        },
+        "miniature pinscher": {
+            "activity": 0.8,
+            "family": [
+                "terrier",
+                "pinscher"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/0f922dbeaa6b7486fe4741d025e5c8e27e33384dT.jpg",
+            "weight": 9.0
+        },
+        "miniature schnauzer": {
+            "activity": 0.5,
+            "family": [
+                "terrier"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/b3ed6315751a877d6976da9ce2d324d6a99a5306T.jpg",
+            "weight": 14.0
+        },
+        "neapolitan mastiff": {
+            "activity": 0.2,
+            "family": [
+                "mastiff"
+            ],
+            "weight": 150.0
+        },
+        "newfoundland": {
+            "activity": 0.2,
+            "family": [
+                "livestock dog",
+                "sheepdog",
+                "mastiff"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/8615ce746387a97dc679237500669b740faaf5e2T.jpg",
+            "weight": 140.0
+        },
+        "norfolk terrier": {
+            "activity": 0.8,
+            "family": [
+                "terrier"
+            ],
+            "weight": 11.5
+        },
+        "norwegian elkhound": {
+            "activity": 0.8,
+            "family": [
+                "spitz",
+                "hunting"
+            ],
+            "weight": 55.0
+        },
+        "norwich terrier": {
+            "activity": 0.8,
+            "family": [
+                "terrier"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/de04102d0fc81e7257f9392b365795c28c3647e3_de04102d0fc81e7257f9392b365795c28c3647e3.jpg",
+            "weight": 12.0
+        },
+        "nova scotia duck tolling retriever": {
+            "activity": 0.8,
+            "family": [
+                "gundog",
+                "retriever"
+            ],
+            "weight": 48.5
+        },
+        "old english sheepdog": {
+            "activity": 0.5,
+            "family": [
+                "livestock",
+                "herding"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/thumbnails2/527e79d6337e924804cd5f954fe6f011a52df2d1T.jpg",
+            "weight": 80.0
+        },
+        "otterhound": {
+            "activity": 0.2,
+            "family": [
+                "scenthound"
+            ],
+            "weight": 115.0
+        },
+        "papillon": {
+            "activity": 0.8,
+            "family": [
+                "spitz",
+                "spaniel",
+                "companion"
+            ],
+            "weight": 6.5
+        },
+        "parson russell terrier": {
+            "activity": 0.8,
+            "family": [
+                "terrier"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/573ecc587659d2a37fe792e53aafc99186f11b1eT.jpg",
+            "weight": 15.0
+        },
+        "pekingese": {
+            "activity": 0.2,
+            "family": [
+                "companion"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/dfdabf69d1fffd0f2aada86942272eec1a42eb18T.jpg",
+            "weight": 14.0
+        },
+        "pembroke welsh corgi": {
+            "activity": 0.5,
+            "family": [
+                "livestock",
+                "herding"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/ec775d40becace4b9c8ce3d355710b96fd406808T.jpg",
+            "weight": 27.0
+        },
+        "petit basset griffon vendeen": {
+            "activity": 0.8,
+            "family": [
+                "scenthound"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/144e9d6b4896b40f76d92a93379c8f18d1a5cc93_144e9d6b4896b40f76d92a93379c8f18d1a5cc93.jpg",
+            "weight": 30.0
+        },
+        "pharaoh hound": {
+            "activity": 0.5,
+            "family": [
+                "sighthound",
+                "pariah",
+                "primitive"
+            ],
+            "weight": 50.0
+        },
+        "plott": {
+            "activity": 0.5,
+            "family": [
+                "scenthound"
+            ],
+            "weight": 55.0
+        },
+        "pointer": {
+            "activity": 0.8,
+            "family": [
+                "gundog",
+                "pointer"
+            ],
+            "weight": 65.0
+        },
+        "polish lowland sheepdog": {
+            "activity": 0.8,
+            "family": [
+                "livestock",
+                "herding"
+            ],
+            "weight": 32.5
+        },
+        "pomeranian": {
+            "activity": 0.8,
+            "family": [
+                "spitz",
+                "companion"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/c5ee1fb62296804fca3453e9f71e792ae5d3c113T.jpg",
+            "weight": 5.0
+        },
+        "poodle (miniature)": {
+            "activity": 0.8,
+            "family": [
+                "gun dog",
+                "companion",
+                "water dog"
+            ],
+            "weight": 15.0
+        },
+        "poodle (standard)": {
+            "activity": 0.5,
+            "family": [
+                "gun dog",
+                "companion",
+                "water dog"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/thumbnails2/3dd7f9f67565c17dbe110826bd939f62c20bf7ddT.jpg",
+            "weight": 55.0
+        },
+        "poodle (toy)": {
+            "activity": 0.8,
+            "family": [
+                "water dog",
+                "companion"
+            ],
+            "weight": 6.0
+        },
+        "portuguese water dog": {
+            "activity": 0.8,
+            "family": [
+                "gundog",
+                "water dog"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/84a3df2f7d8deb9efcef59b849d95adb31529aa2T.jpg",
+            "weight": 51.0
+        },
+        "pug": {
+            "activity": 0.5,
+            "family": [
+                "companion",
+                "mastiff"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/965809a98448ae29f8a033df2b56e3ccb79ad82fT.jpg",
+            "weight": 16.0
+        },
+        "puli": {
+            "activity": 0.8,
+            "family": [
+                "livestock",
+                "herding",
+                "gundog"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/53cbc35cd811b2b3990b45d8020a666d93c086c1T.jpg",
+            "weight": 30.0
+        },
+        "redbone coonhound": {
+            "activity": 0.5,
+            "family": [
+                "scenthound"
+            ],
+            "weight": 55.0
+        },
+        "rhodesian ridgeback": {
+            "activity": 0.5,
+            "family": [
+                "sighthound",
+                "scenthound",
+                "sight"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/6dadaee07ad3aa2bd4447be0dbae2e409f9609edT.jpg",
+            "weight": 85.0
+        },
+        "rottweiler": {
+            "activity": 0.5,
+            "family": [
+                "livestock dog",
+                "sheepdog",
+                "mastiff"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/thumbnails2/e696fe85aa3b14c2f83508543dd1fd43512a837fT.jpg",
+            "weight": 110.0
+        },
+        "saint bernard": {
+            "activity": 0.2,
+            "family": [
+                "livestock dog",
+                "sheepdog",
+                "mastiff"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/07211b5ffb743d2ee63e74510d8c018b37263237T.jpg",
+            "weight": 160.0
+        },
+        "saluki (or gazelle hound)": {
+            "activity": 0.2,
+            "family": [
+                "sighthound",
+                "sighthound"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/721ea35fc4e26bb24ceaf85819ddc5a3a34dcb16_721ea35fc4e26bb24ceaf85819ddc5a3a34dcb16.jpg",
+            "weight": 50.0
+        },
+        "samoyed": {
+            "activity": 0.5,
+            "family": [
+                "spitz",
+                "herding"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/dc6c8f95bab58c9a1fdeffab84a9988ac844814d_dc6c8f95bab58c9a1fdeffab84a9988ac844814d.jpg",
+            "weight": 55.0
+        },
+        "schipperke": {
+            "activity": 0.8,
+            "family": [
+                "sheepdog",
+                "spitz",
+                "companion"
+            ],
+            "weight": 14.0
+        },
+        "scottish deerhound": {
+            "activity": 0.2,
+            "family": [
+                "sighthound",
+                "sighthound"
+            ],
+            "weight": 97.5
+        },
+        "scottish terrier": {
+            "activity": 0.5,
+            "family": [
+                "terrier"
+            ],
+            "weight": 20.5
+        },
+        "sealyham terrier": {
+            "activity": 0.2,
+            "family": [
+                "terrier"
+            ],
+            "weight": 23.5
+        },
+        "shetland sheepdog": {
+            "activity": 0.5,
+            "family": [
+                "livestock",
+                "herding"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/92b2cbac350b9a5b623812a95dadfe5ce8a67429_92b2cbac350b9a5b623812a95dadfe5ce8a67429.jpg",
+            "weight": 20.0
+        },
+        "shiba inu": {
+            "activity": 0.5,
+            "family": [
+                "spitz",
+                "companion"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/67ff33af64558f7539241b0dcbcb8e3ffd875fee_67ff33af64558f7539241b0dcbcb8e3ffd875fee.jpg",
+            "weight": 23.0
+        },
+        "shih tzu": {
+            "activity": 0.5,
+            "family": [
+                "companion",
+                "herding"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/f4cf1f637fc85080baef3b5cc352277b65009cf8T.jpg",
+            "weight": 12.5
+        },
+        "siberian husky": {
+            "activity": 0.5,
+            "family": [
+                "spitz",
+                "draft"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/fbbbf2748eab0ef8abba66a1d867c646c747f643T.jpg",
+            "weight": 52.5
+        },
+        "silky terrier": {
+            "activity": 0.8,
+            "family": [
+                "terrier"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/d98ed011f5e7defaaabe8e61bc5daf722755ee8a_d98ed011f5e7defaaabe8e61bc5daf722755ee8a.jpg",
+            "weight": 9.5
+        },
+        "skye terrier": {
+            "activity": 0.2,
+            "family": [
+                "terrier"
+            ],
+            "weight": 37.5
+        },
+        "smooth fox terrier": {
+            "activity": 0.8,
+            "family": [
+                "terrier"
+            ],
+            "weight": 18.0
+        },
+        "soft coated wheaten terrier": {
+            "activity": 0.5,
+            "family": [
+                "terrier"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/f3347c97ffb478f0aa23484fb288dd485c718fd1T.jpg",
+            "weight": 37.5
+        },
+        "spinone italiano": {
+            "activity": 0.5,
+            "family": [
+                "gundog",
+                "pointer"
+            ],
+            "weight": 76.5
+        },
+        "staffordshire bull terrier": {
+            "activity": 0.5,
+            "family": [
+                "terrier",
+                "mastiff"
+            ],
+            "weight": 37.5
+        },
+        "standard schnauzer": {
+            "activity": 0.8,
+            "family": [
+                "schnauzer",
+                "livestock guard",
+                "terrier"
+            ],
+            "weight": 42.5
+        },
+        "sussex spaniel": {
+            "activity": 0.5,
+            "family": [
+                "gundog",
+                "spaniel"
+            ],
+            "weight": 40.0
+        },
+        "tibetan mastiff": {
+            "activity": 0.2,
+            "family": [
+                "mastiff"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/4f4a76e01297548758817ae10156e39523d712c0_4f4a76e01297548758817ae10156e39523d712c0.jpg",
+            "weight": 120.0
+        },
+        "tibetan spaniel": {
+            "activity": 0.5,
+            "family": [
+                "companion",
+                "herding"
+            ],
+            "weight": 12.0
+        },
+        "tibetan terrier": {
+            "activity": 0.5,
+            "family": [
+                "companion",
+                "herding"
+            ],
+            "weight": 22.0
+        },
+        "toy fox terrier": {
+            "activity": 0.8,
+            "family": [
+                "terrier"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/62c3b6ed45a1a05933cd1c0702a2a260f2c6f08fT.jpg",
+            "weight": 5.25
+        },
+        "vizsla": {
+            "activity": 0.5,
+            "family": [
+                "gundog",
+                "pointer"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/a73b428a1c663750650a0fe13f6190e6f7c7d389T.jpg",
+            "weight": 55.0
+        },
+        "weimaraner": {
+            "activity": 0.8,
+            "family": [
+                "gundog",
+                "pointer"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/f7b905470075e9588fa29890f29dfcc20b3fd2d7T.jpg",
+            "weight": 72.5
+        },
+        "welsh springer spaniel": {
+            "activity": 0.5,
+            "family": [
+                "gundog",
+                "spaniel"
+            ],
+            "weight": 42.5
+        },
+        "welsh terrier": {
+            "activity": 0.5,
+            "family": [
+                "terrier"
+            ],
+            "weight": 20.0
+        },
+        "west highland white terrier": {
+            "activity": 0.8,
+            "family": [
+                "terrier"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/eb03653aab42688ccf2227986d0bdcf63064930aT.jpg",
+            "weight": 18.0
+        },
+        "whippet": {
+            "activity": 0.5,
+            "family": [
+                "sighthound",
+                "sighthound"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/f713e0c560eaab2f85d661b0632a2fe1882eeec2T.jpg",
+            "weight": 30.0
+        },
+        "wire fox terrier": {
+            "activity": 0.8,
+            "family": [
+                "terrier"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/b112e278f145e64148bb9b0f44cc9a0f2373159eT.jpg",
+            "weight": 18.0
+        },
+        "wirehaired pointing griffon": {
+            "activity": 0.8,
+            "family": [
+                "gundog",
+                "pointer"
+            ],
+            "weight": 55.0
+        },
+        "yorkshire terrier": {
+            "activity": 0.8,
+            "family": [
+                "terrier"
+            ],
+            "thumbnail_image": "http://netstorage.discovery.com/feeds/brightcove/asset-thumbnails/apl/f02d46bc35c1e127b8e013785b1028a3b0068897T.jpg",
+            "weight": 7.0
+        }
+    }
+}

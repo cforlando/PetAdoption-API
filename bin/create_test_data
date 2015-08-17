@@ -1,0 +1,116 @@
+#!/usr/bin/python3
+
+"""
+Create some sample data for applications to test with, and show what apps need, and create a corpus of breed info that a searcher might start with when looking for an animal.
+
+$ wget -O- http://www.animalplanet.com/breed-selector/dog-breeds/all-breeds-akc-group.html |grep '<dd><a href="' |sed -e 's,.*<dd><a href=",,' -e 's,">, ,' -e 's,</a></dd>,,' > f
+
+$ sort <f |head
+http://animal.discovery.com/breed-selector/dog-breeds/herding/australian-cattle-dog.html Australian Cattle Dog
+http://animal.discovery.com/breed-selector/dog-breeds/herding/australian-shepherd.html Australian Shepherd
+http://animal.discovery.com/breed-selector/dog-breeds/herding/bearded-collie.html Bearded Collie
+http://animal.discovery.com/breed-selector/dog-breeds/herding/beauceron.html Beauceron
+http://animal.discovery.com/breed-selector/dog-breeds/herding/belgian-malinois.html Belgian Malinois
+http://animal.discovery.com/breed-selector/dog-breeds/herding/belgian-sheepdog.html Belgian Sheepdog
+http://animal.discovery.com/breed-selector/dog-breeds/herding/belgian-tervuren.html Belgian Tervuren
+http://animal.discovery.com/breed-selector/dog-breeds/herding/border-collie.html Border Collie
+http://animal.discovery.com/breed-selector/dog-breeds/herding/bouvier-des-flandres.html Bouvier des Flandres
+http://animal.discovery.com/breed-selector/dog-breeds/herding/briard.html Briard
+
+$ mkdir breeddata; cat f |while read url name; do test -f breeddata/"$name" || wget -nv -O "breeddata/$name" "$url"; sleep 10; done
+
+Then run this file to get ephemoral_test_data.json and dog_breed_data.json
+
+"""
+
+__author__ = "Chad Miller <chad@cornsilk.net>"
+
+import json
+import random
+import datetime
+import os
+import re
+
+
+available_shapes = set()
+available_colors = "red black white fawn brown silver golden".split()
+available_shapes = set()
+available_good_with = "kids cats dogs".split()
+available_names = dict(m=('Norman', 'Earl', 'Jose', 'Calvin', 'Ray', 'Clifford', 'Alfred', 'Jerome', 'Bradley', 'Clarence', 'Don', 'Theodore', 'Jon', 'Rickey', 'Joel', 'Jesse', 'Jim', 'Edwin', 'Dan', 'Bernard', 'Chris', 'Jonathan', 'Gordon', 'Glen', 'Jeff', 'Warren', 'Leroy', 'Herbert', 'Duane', 'Bill', 'Benjamin', 'Tom', 'Alvin', 'Nicholas', 'Tim', 'Mitchell', 'Marc', 'Leslie', 'Leon', 'Kim', 'Dwight', 'Bryan', 'Lloyd', 'Vernon', 'Gene', 'Reginald', 'Lonnie', 'Guy', 'Gilbert', 'Garry', 'Juan', 'Karl', 'Kent', 'Kurt', 'Todd', 'Jackie', 'Greg', 'Lewis', 'Wesley', 'Clyde', 'Floyd', 'Neil', 'Allan', 'Donnie', 'Perry', 'Franklin', 'Lester', 'Brad', 'Manuel', 'Kirk', 'Carlos', 'Leo', 'Jimmie', 'Randolph', 'Charlie', 'Robin', 'Dana', 'Darryl', 'Dave', 'Ted', 'Milton', 'Daryl', 'Kerry', 'Freddie', 'Brent', 'Harvey', 'Gerard', 'Stuart', 'Johnnie', 'Herman', 'Lynn', 'Rex', 'Arnold', 'Kelly'), f=('Sarah', 'Sylvia', 'Jill', 'Dawn', 'Sue', 'Evelyn', 'Roberta', 'Jeanne', 'Charlotte', 'Eileen', 'Lois', 'Colleen', 'Stephanie', 'Annette', 'Glenda', 'Yvonne', 'Dianne', 'Tina', 'Beth', 'Lorraine', 'Constance', 'Renee', 'Charlene', 'Joann', 'Julia', 'Gwendolyn', 'Norma', 'Regina', 'Amy', 'Sheryl', 'Loretta', 'Carla', 'Andrea', 'Tammy', 'Irene', 'Jan', 'Louise', 'Juanita', 'Marlene', 'Penny', 'Rosemary', 'Becky', 'Kay', 'Joy', 'Geraldine', 'Jeanette', 'Gayle', 'Annie', 'Vivian', 'Claudia', 'Lynda', 'Melissa', 'Audrey', 'Lynne', 'Patsy', 'Melinda', 'Vicky', 'Toni', 'June', 'Belinda', 'Marjorie', 'Arlene', 'Patti', 'Ruby', 'Sara', 'Yolanda', 'Rosa', 'Christina', 'Melanie', 'Delores', 'Jackie', 'Vanessa', 'Carmen', 'Monica', 'Janis', 'Holly', 'Marianne', 'Dolores', 'Shelley', 'Veronica', 'Mildred', 'Dana', 'Eva', 'Rachel', 'Shelia', 'Roxanne', 'Carole', 'Lillian', 'Josephine', 'Carrie', 'Patty', 'Sherri', 'Doreen', 'Grace'))
+
+
+image_urls = list()
+
+breed_aliases = dict()
+breed_traits = dict()
+for canonical_breed_name in os.listdir("breeddata"):
+    with open(os.path.join("breeddata", canonical_breed_name)) as f:
+        canonical_breed_name = canonical_breed_name.lower()
+        assert canonical_breed_name not in breed_traits
+        breed_traits[canonical_breed_name] = dict()
+
+        contents = f.read()
+
+        m = re.search(r"""<p><span class="left">FAMILY</span>\s+<span class="right">([^<]*)</span></p>""", contents)
+        breed_traits[canonical_breed_name]["family"] = list()
+        for x in m.group(1).lower().split(", "):
+            if x.startswith("northern ("): x = x[10:-1]
+            if x.startswith("southern ("): x = x[10:-1]
+            if x.startswith("southern("): x = x[9:-1]
+            if x.startswith("rerrier"): x = "terrier"  # ugh
+            if x.startswith("mastiff ("): x = "mastiff"
+            if x == "versatile hunting dog":
+                continue
+            available_shapes.add(x)
+            breed_traits[canonical_breed_name]["family"].append(x)
+
+        m = re.search(r"""<p><span class="left">AVERAGE SIZE OF MALE</span>\s+<span class="right">Height: >?<?[-0-9\. ]+\+?\s+Weight: <?>?([-\.0-9 ]*)</span></p>""", contents)
+        if not m:
+            m = re.search(r"""<p><span class="left">AVERAGE SIZE OF MALE</span>\s+<span class="right">Height: >?<?[-0-9\. ]+\+?\s+Weight: <\d+ \(([-\.0-9 ]*)\)</span></p>""", contents)
+        breed_traits[canonical_breed_name]["weight"] = sum(float(i.strip()) for i in m.group(1).split("-")) / len(m.group(1).split("-"))
+
+        m = re.search(r"""<p><span class="left">Energy level</span>\s+<span class="right">(\w+) energy</span></p>""", contents)
+        breed_traits[canonical_breed_name]["activity"] = {"Low": 0.2, "Medium": 0.5, "High": 0.8}[m.group(1)]
+
+        m = re.search(r"""<img class="breed-thumbnail" src="(http://[^"]+\.jpg)" alt=""", contents)
+        if m:
+            breed_traits[canonical_breed_name]["thumbnail_image"] = m.group(1)
+        image_urls.append([["https://s3.amazonaws.com/filestore.rescuegroups.org/2098/pictures/animals/8531/8531755/26029688_500x375.jpg", [213,93], [301,104]]])
+
+        m = re.search(r"""<p><span class="left">OTHER NAME</span>\s+<span class="right">([^<]*)</span></p>""", contents)
+        for name in m.group(1).split(", "):
+            if name == "none": continue
+            if name in breed_aliases: continue  # ugh. I don't care that much.
+            assert name not in breed_aliases, (name, breed_aliases[name])
+            breed_aliases[name.lower()] = canonical_breed_name.lower()
+
+available_shapes = sorted(available_shapes)
+
+animals = list()
+for _ in range(500):
+    animal = dict()
+    animal["species"] = "dog"
+    animal["colors"] = sorted(set(random.choice(available_colors) for _ in range(random.randint(1, 3))))
+    animal["temperament_active_level"] = random.randint(0, 10) / 10.0
+    animal["adult_size_lbs"] = random.randint(1, 10) * 10
+    animal["known_house_trained"] = (random.random() > 0.7)
+    animal["known_good_with"] = sorted(set(random.choice(available_good_with) for _ in range(random.randint(0, 2))))
+    if random.random() > 0.95:  # known to be good with all, sometimes
+        animal["known_good_with"] = available_good_with
+    animal["current_age_years"] = random.randint(1, 10) * 15
+    animal["sex"] = "f" if random.random() > 0.5 else "m"
+    animal["health_requirements"] = [ "medicine" ] if random.random() > 0.9 else  []
+    animal["import_date"] = (datetime.datetime.now().date() - datetime.timedelta(days=random.randint(1, 15))).strftime("%Y-%m-%d")
+    animal["name"] = random.choice(available_names[animal["sex"]])
+    animal["shape"] = random.choice(available_shapes)
+    animal["images_urls"] = [ random.choice(image_urls) ]
+    animals.append(animal)
+
+
+with open("ephemoral_test_data.json", "w") as out:
+    json.dump(dict(animals=animals), out, sort_keys=True, indent=4)
+    print("dumped {0} sample dogs".format(len(animals)))
+
+with open("dog_breed_data.json", "w") as out:
+    json.dump(dict(breed_shorthands=breed_traits, breed_aliases=breed_aliases), out, sort_keys=True, indent=4)
+    print("dumped {0} breeds".format(len(breed_traits)))
