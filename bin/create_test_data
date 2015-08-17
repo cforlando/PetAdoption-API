@@ -38,6 +38,15 @@ available_shapes = set()
 available_good_with = "kids cats dogs".split()
 available_names = dict(m=('Norman', 'Earl', 'Jose', 'Calvin', 'Ray', 'Clifford', 'Alfred', 'Jerome', 'Bradley', 'Clarence', 'Don', 'Theodore', 'Jon', 'Rickey', 'Joel', 'Jesse', 'Jim', 'Edwin', 'Dan', 'Bernard', 'Chris', 'Jonathan', 'Gordon', 'Glen', 'Jeff', 'Warren', 'Leroy', 'Herbert', 'Duane', 'Bill', 'Benjamin', 'Tom', 'Alvin', 'Nicholas', 'Tim', 'Mitchell', 'Marc', 'Leslie', 'Leon', 'Kim', 'Dwight', 'Bryan', 'Lloyd', 'Vernon', 'Gene', 'Reginald', 'Lonnie', 'Guy', 'Gilbert', 'Garry', 'Juan', 'Karl', 'Kent', 'Kurt', 'Todd', 'Jackie', 'Greg', 'Lewis', 'Wesley', 'Clyde', 'Floyd', 'Neil', 'Allan', 'Donnie', 'Perry', 'Franklin', 'Lester', 'Brad', 'Manuel', 'Kirk', 'Carlos', 'Leo', 'Jimmie', 'Randolph', 'Charlie', 'Robin', 'Dana', 'Darryl', 'Dave', 'Ted', 'Milton', 'Daryl', 'Kerry', 'Freddie', 'Brent', 'Harvey', 'Gerard', 'Stuart', 'Johnnie', 'Herman', 'Lynn', 'Rex', 'Arnold', 'Kelly'), f=('Sarah', 'Sylvia', 'Jill', 'Dawn', 'Sue', 'Evelyn', 'Roberta', 'Jeanne', 'Charlotte', 'Eileen', 'Lois', 'Colleen', 'Stephanie', 'Annette', 'Glenda', 'Yvonne', 'Dianne', 'Tina', 'Beth', 'Lorraine', 'Constance', 'Renee', 'Charlene', 'Joann', 'Julia', 'Gwendolyn', 'Norma', 'Regina', 'Amy', 'Sheryl', 'Loretta', 'Carla', 'Andrea', 'Tammy', 'Irene', 'Jan', 'Louise', 'Juanita', 'Marlene', 'Penny', 'Rosemary', 'Becky', 'Kay', 'Joy', 'Geraldine', 'Jeanette', 'Gayle', 'Annie', 'Vivian', 'Claudia', 'Lynda', 'Melissa', 'Audrey', 'Lynne', 'Patsy', 'Melinda', 'Vicky', 'Toni', 'June', 'Belinda', 'Marjorie', 'Arlene', 'Patti', 'Ruby', 'Sara', 'Yolanda', 'Rosa', 'Christina', 'Melanie', 'Delores', 'Jackie', 'Vanessa', 'Carmen', 'Monica', 'Janis', 'Holly', 'Marianne', 'Dolores', 'Shelley', 'Veronica', 'Mildred', 'Dana', 'Eva', 'Rachel', 'Shelia', 'Roxanne', 'Carole', 'Lillian', 'Josephine', 'Carrie', 'Patty', 'Sherri', 'Doreen', 'Grace'))
 
+available_photos =[
+{ "url":"https://s3.amazonaws.com/filestore.rescuegroups.org/2098/pictures/animals/8531/8531755/26029688_500x375.jpg", "eyebox":[213, 93, 301, 104]},
+{ "url":"https://s3.amazonaws.com/filestore.rescuegroups.org/2098/pictures/animals/8587/8587702/26251927_500x375.jpg", "eyebox":[213, 93, 301, 104]},
+{ "url":"https://s3.amazonaws.com/filestore.rescuegroups.org/7663/pictures/animals/9000/9000559/28070074_500x888.jpg", "eyebox":[213, 93, 301, 104]},
+{ "url":"https://s3.amazonaws.com/filestore.rescuegroups.org/7663/pictures/animals/9000/9000558/28070073_500x994.jpg", "eyebox":[213, 93, 301, 104]},
+{ "url":"https://s3.amazonaws.com/filestore.rescuegroups.org/7663/pictures/animals/9000/9000556/28070070_500x789.jpg", "eyebox":[213, 93, 301, 104]},
+{ "url":"https://s3.amazonaws.com/filestore.rescuegroups.org/7663/pictures/animals/9000/9000548/28070060_500x693.jpg", "eyebox":[213, 93, 301, 104]},
+
+]
 
 image_urls = list()
 
@@ -75,7 +84,8 @@ for canonical_breed_name in os.listdir("breeddata"):
         m = re.search(r"""<img class="breed-thumbnail" src="(http://[^"]+\.jpg)" alt=""", contents)
         if m:
             breed_traits[canonical_breed_name]["thumbnail_image"] = m.group(1)
-        image_urls.append([{ "url":"https://s3.amazonaws.com/filestore.rescuegroups.org/2098/pictures/animals/8531/8531755/26029688_500x375.jpg", "eyebox":[213, 93, 301, 104]}])
+
+
 
         m = re.search(r"""<p><span class="left">OTHER NAME</span>\s+<span class="right">([^<]*)</span></p>""", contents)
         for name in m.group(1).split(", "):
@@ -104,7 +114,7 @@ for petid in range(500):
     animal["import_date"] = (datetime.datetime.now().date() - datetime.timedelta(days=random.randint(1, 15))).strftime("%Y-%m-%d")
     animal["name"] = random.choice(available_names[animal["sex"]])
     animal["shape"] = random.choice(available_shapes)
-    animal["images_urls"] = [ random.choice(image_urls) ]
+    animal["images_urls"] = [ random.choice(available_photos) ]
     animal["agency"] = [ "SPCA of Foo", "http://spca.example.com/", "http://spca.example.com/register_interest/{0}".format(animal["id"])]
     animals.append(animal)
 
