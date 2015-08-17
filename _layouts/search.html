@@ -1,0 +1,124 @@
+<html>
+<head>
+<!--- Author: Chad Miller -->
+
+<link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:700' rel='stylesheet' type='text/css'>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+	margin: 3% 10%;
+}
+
+@media (max-width: 500px) {
+	body {
+		margin: 2% 5%;
+	}
+}
+
+label {
+	white-space: nowrap;
+	vertical-align: middle;
+	margin: auto 1ex;
+}
+
+input {
+	vertical-align: middle;
+}
+
+fieldset {
+	padding: 1.2ex;
+	float: left;
+	border: none;
+}
+
+fieldset legend {
+	font-size: larger;
+}
+
+h1, h2 {
+	padding-top: 4ex;
+	padding-bottom: 1ex;
+	clear: both;
+}
+
+ol#petlist {
+	text-align: center;
+	padding: 0px;
+	margin: 0px;
+}
+
+ol#petlist li {
+	vertical-align: top;
+	font-size: larger;
+	text-shadow: 1px 1px 0.6ex black; 
+}
+
+ol#petlist li h3 {
+	background-color: rgba(0, 0, 0, 0.1);
+	text-align: center;
+	margin-bottom: 20ex;
+}
+
+ol#petlist a {
+	color: white;
+}
+
+ol#petlist li div {
+	font-family: 'Roboto Condensed', sans-serif;
+	background-color: rgba(0, 0, 0, 0.1);
+	color: white;
+	font-weight: 700;
+}
+
+ol#petlist li div > * {
+	margin: 0.3ex;
+}
+
+ol#petlist li {
+	display: inline-block;
+	width: 30ex;
+	height: 55ex;
+	border: 2px solid white;
+	margin: 0.7ex;
+	padding: 0.6ex 1ex;
+}
+
+@media (max-width: 700px) {
+
+	ol#petlist div a {
+		color: black;
+	}
+
+	ol#petlist li h3 {
+		background-color: black;
+		margin-bottom: 20ex;
+	}
+
+	ol#petlist li {
+		display: block;
+		height: 55ex;
+		width: auto;
+	}
+
+	ol#petlist li div > p {
+		background: rgba(255, 255, 255, 0.1);
+		text-align: left;
+		text-shadow: none; 
+		color: black;
+		margin: 0.3ex;
+	}
+}
+
+input[type="range"] {
+	width: 20ex;
+}
+
+</style>
+</head>
+<body>
+
+{{ content }}
+
+</body>
+</html>
