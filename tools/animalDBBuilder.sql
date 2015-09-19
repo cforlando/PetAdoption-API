@@ -13,10 +13,13 @@ CREATE TABLE Animals
 	species varchar(255),
 	breed varchar(255),
 	color varchar(255),
-	found_loc varchar(127), -- Can be zip code or coords lat,lon
+	found_zip varchar(64),
+	found_lat varchar(64),
+	found_lon varchar(64),
 	sex char(1), -- M/F/U
 	age int, -- Can split out into human and dog
-	weight_lb float,
+	activity_lvl int, -- 1 - 10 scale
+	max_lb float,
 	fixed bit, -- bit can be 1, 0, or null effectively making it a boolean
 	housebroken bit,
 	declawed bit,
@@ -29,10 +32,6 @@ CREATE TABLE Animals
 	lost smalldatetime,
 	intake smalldatetime,
 	adoptable smalldatetime
-	-- Foreign Keys
-	--   photos_id
-	--   contacts_id
-	--   links_id
 );
 
 CREATE TABLE Photos
@@ -41,6 +40,8 @@ CREATE TABLE Photos
 	photo_link varchar(255),
 	caption varchar(511)
 );
+ALTER TABLE Photos ADD CONSTRAINT fk_animal_id FOREIGN KEY (animal_id) references Animals(id);
+
 
 CREATE TABLE Contacts
 (
@@ -49,6 +50,8 @@ CREATE TABLE Contacts
 	phone varchar(255),
 	email varchar(255)
 );
+ALTER TABLE Contacts ADD CONSTRAINT fk_animal_id FOREIGN KEY (animal_id) references Animals(id);
+
 
 CREATE TABLE Links
 (
@@ -56,8 +59,4 @@ CREATE TABLE Links
 	source_name varchar(255),
 	url varchar(255)
 );
-
--- Link the Tables
-ALTER TABLE Photos ADD CONSTRAINT fk_animal_id FOREIGN KEY (animal_id) references Animals(id);
-ALTER TABLE Contacts ADD CONSTRAINT fk_animal_id FOREIGN KEY (animal_id) references Animals(id);
 ALTER TABLE Links ADD CONSTRAINT fk_animal_id FOREIGN KEY (animal_id) references Animals(id);
