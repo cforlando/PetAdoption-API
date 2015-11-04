@@ -1,26 +1,26 @@
 ## Synopsis
 
-The Pet Adoption API is a project using the ASP.NET WebAPI and MVC stack.  Project is set and built with Visual Studio 2015 Community Edition as it is open-source. Database and API hosted in Azure Platform.
+The Pet Adoption API is a project that will power the various Pet Adoption mobile and web applications, both user and admin. It will be built out to support its own database while also aggregating searches and new posts with existing pet adoption platforms. We are currently using Parse as a stop-gap measure during development.
 
 ## Code Example
 
-Show what the library does as concisely as possible, developers should be able to figure out **how** your project solves their problem by looking at the code example. Make sure the API you are showing off is obvious, and that your code is short and concise.
+(Yet to replace:) Show what the library does as concisely as possible, developers should be able to figure out **how** your project solves their problem by looking at the code example. Make sure the API you are showing off is obvious, and that your code is short and concise.
 
 ## Motivation
 
-Nobody likes to see animals be put down due to overcrowding at animal control centers and shelters.  We would like to see animals at these facilities be adopted at a much higher rate, and for those animals who were lost and found, for their rightful owners to be reunited with them once more.  We would like to thank the City of Lady Lake for their wonderful contribution to the project, as they are the project's pilot city.  For that, we are ever grateful!
+Nobody likes to see animals be put down due to overcrowding at animal control centers and shelters.  We would like to see animals at these facilities be adopted at a much higher rate, and for those animals who were lost and found, for their rightful owners to be reunited with them once more.  We would like to thank the Town of Lady Lake for their wonderful contribution to the project, as they are the project's pilot city.  For that, we are ever grateful!
 
 ## Installation
 
-Provide code examples and explanations of how to get the project.
+(Yet to replace:) Provide code examples and explanations of how to get the project.
 
 ## API Reference
 
-Depending on the size of the project, if it is small and simple enough the reference docs can be added to the README. For medium size to larger projects it is important to at least provide a link to where the API reference docs live.
+There will be documentation listed here on GitHub eventually.
 
 ## Tests
 
-Describe and show how to run the tests with code examples.
+(Yet to replace:) Describe and show how to run the tests with code examples.
 
 ## Contributors
 
