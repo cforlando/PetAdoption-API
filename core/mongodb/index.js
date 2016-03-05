@@ -62,10 +62,14 @@ mongodb.connect = function () {
         console.log('Running in %s mode.', (mongodb.options.isDevelopment) ? 'dev' : 'production');
     });
 };
+
 /**
  *
  * @param animalProps
- * @param options
+ * @param {Object} options
+ * @param {Boolean} options.debug Whether to log debug info
+ * @param {Function} options.complete callback on operation completion
+ * @param {Object} options.context context for complete function callback
  */
 mongodb.findAnimal = function (animalProps, options) {
     if (!mongodb.state.isConnected) {
@@ -106,6 +110,16 @@ mongodb.findAnimal = function (animalProps, options) {
     }
 
 };
+
+
+/**
+ *
+ * @param animalProps
+ * @param {Object} options
+ * @param {Boolean} options.debug Whether to log debug info
+ * @param {Function} options.complete callback on operation completion
+ * @param {Object} options.context context for complete function callback
+ */
 mongodb.findAnimals = function (animalProps, options) {
     if (!mongodb.state.isConnected) {
 
@@ -144,6 +158,15 @@ mongodb.findAnimals = function (animalProps, options) {
             })
     }
 };
+
+/**
+ *
+ * @param animalProps
+ * @param {Object} options
+ * @param {Boolean} options.debug Whether to log debug info
+ * @param {Function} options.complete callback on operation completion
+ * @param {Object} options.context context for complete function callback
+ */
 mongodb.saveAnimal = function (animalProps, options) {
     if (!mongodb.state.isConnected) {
         if (options && options.debug) console.log('MongoDB is not connected...');
@@ -178,7 +201,7 @@ mongodb.saveAnimal = function (animalProps, options) {
                 }
                 if (options && options.debug) console.log('saved and sending animal: ', animal);
                 if (options && options.complete) {
-                    options.complete.apply(null, [err, animal])
+                    options.complete.apply(options.context, [err, animal])
                 } else {
                     throw new Error('mongodb.saveAnimal() - No options.complete callback specified');
                 }
