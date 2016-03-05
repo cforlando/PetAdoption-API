@@ -1,0 +1,40 @@
+,name,type,description,example,note
+,petId,Number,Internal unique identifier.,123456789,Auto generated.
+,petName,String,Friendly name of the dog.,Odie,
+,species,String,,Dog,
+,purebred,Boolean,,No,
+,primaryBreed,String,,Hound (Unknown Type),Reference db_options table.
+,secondaryBreed,String,,"Terrier (Unknown Type, Medium)",Reference db_options table.
+,actQuickly,Boolean,If it is important to adopt this dog soon.,No,
+,adoptable,Boolean,It the dog is available for adoption at this time.,Yes,
+,age,String,,1-2 years,Reference db_options table.
+,activityLevel,String,,Medium,Reference db_options table.
+,color,String,,"White with Tan, Yellow or Fawn",Reference db_options table.
+?,currentHeartwormTest,Boolean,,,
+?,currentShots,Boolean,,,
+,description,String,,"This is Odie. Odie is a 1 year old, neutered male, Hound Terrier mix. He loves to run and play with other dogs and he also enjoys snuggling up and getting his belly rubbed. He has a wire coat and he is crate trained too. He is only 26 lbs. If you have been looking for a dog that is not too big and not too little, Odie might just be the right one for you! If you would like to meet Odie, Please contact your local Lady Lake Animal Control at 352-751-1530.",What is the appropriate text length constraint for this field?
+,goodWithCats,Boolean,,No,
+,goodWithDogs,Boolean,,Yes,
+,goodWithKids,Boolean,,Yes,
+,hairLength,String,,Short,Reference db_options table.
+,houseTrained,Boolean,,Yes,
+?,image,String,,160217_odie.jpg,
+,intakeDate,Date,,2/17/2016,
+,lost,Boolean,,No,
+?,lostGeoLoc,,,,"Example (28.9319050,-81.9296189)"
+,microchip,Boolean,,No,
+,sex,String,,Female,Reference db_options table.
+,shelterName,String,,Lady Lake Animal Control,Can we autofill this field?
+,shelterContact,String,,Denise Williams,Can we autofill this field?
+,shelterAddrLine1,String,,132 Skyline Dr.,Can we autofill this field?
+?,shelterAddrLine2,String,,,
+,shelterAddrCity,String,,Lady Lake,Can we autofill this field?
+,shelterAddrSt,String,,FL,Can we autofill this field?
+,shelterAddrZip,String,,32159,Can we autofill this field?
+,shelterEmail,String,,aco@ladylake.org,Can we autofill this field?
+,shelterId,Number,,90778,Can we autofill this field?
+,shelterPhone,String,,352-751-1530,Can we autofill this field?
+,shelterUrl,String,,https://www.ladylake.org/police-department/animal-control-2,Can we autofill this field?
+,size,String,,Medium (26-45 lbs.),Reference db_options table.
+,spayedNeutered,Boolean,,Yes,
+,specialNeeds,Boolean,,No,
