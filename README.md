@@ -1,6 +1,8 @@
 # cfo-pet-adoption-server
 MongoDB/Express mockup server
 
+Current domain: pet-adoption-server.herokuapp.com
+
 Method  | Endpoint                          | Notes
 --------| --------------------------------- | ----------------------------------------------------------------
 GET     | options/:species                  | JSON of all preselected options for given species
