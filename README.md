@@ -3,6 +3,7 @@ MongoDB/Express mockup server
 
 Current domain: pet-adoption-server.herokuapp.com
 
+### API
 Method  | Endpoint                          | Notes
 --------| --------------------------------- | ----------------------------------------------------------------
 GET     | options/:species                  | JSON of all preselected options for given species
@@ -12,3 +13,7 @@ GET     | schema/                           | returns JSON representation of the
 GET     | list/:species                     | ex: '/list/dog' will show all saved dog species
 POST    | save/                             | fields will be saved as provided. Must match schema definition
 POST    | query/:species                    | (i.e. '/query/dog') will match given parameters (the 'species' path parameter is essentially useless. Providing the 'species' field in the request body yields the same result)
+
+
+###### More Notes
+* the jade/html files are solely for debugging purposes with node-webkit.
