@@ -117,15 +117,13 @@ router.get('/list/:species', function (req, response) {
     };
 
     MongoDB.findAnimals(queryData, {
-        debug: true,
         complete: function (err, animals) {
-            console.log('mongoDB.findAnimal() - found animal:', animals);
             if (err) {
                 response.send(err)
             } else if (_.isArray(animals)) {
                 response.send(animals);
             } else {
-                console.log('mongoDB.findAnimal() - failed to find animal. Will save as new animal');
+                console.warn('mongoDB.findAnimal() - failed to find animal. Will save as new animal');
                 MongoDB.saveAnimal(queryData, {
                     debug: true,
                     complete: function (err, newAnimal) {

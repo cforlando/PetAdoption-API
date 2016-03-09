@@ -34,10 +34,11 @@ var mongoose = require('mongoose'),
             isConnecting: false,
             isConnected: false
         },
-        options: {
+        config: {
             retryTimeout: 2000,
             isDevelopment: require('os').hostname().toLowerCase().indexOf('kah') > -1 // TODO use proper dev flag condition
-        }
+        },
+        queue : []
     };
 
 mongodb.connect = function (callback, options) {
@@ -49,7 +50,10 @@ mongodb.connect = function (callback, options) {
         + '@' + mongodb.identity.domain + ':' + mongodb.identity.port + '/'
         + mongodb.identity.database
     );
-    var db = mongodb.adapter.connection;
+    var db = mongodb.adapter.connection,
+        _options = _.extend({
+            context : null
+        }, options);
 
     db.on('error', console.error.bind(console, 'connection error:'));
 
@@ -59,10 +63,10 @@ mongodb.connect = function (callback, options) {
 
         var AnimalSchema = new mongoose.Schema(schemaGenerator.convert(animalSchemaJSON));
 
-        Animal = mongoose.model('Animal', AnimalSchema, (mongodb.options.isDevelopment) ? 'pets_test' : 'pets_production');
-        console.log('Running in %s mode.', (mongodb.options.isDevelopment) ? 'dev' : 'production');
+        Animal = mongoose.model('Animal', AnimalSchema, (mongodb.config.isDevelopment) ? 'pets_test' : 'pets_production');
+        console.log('Running in %s mode.', (mongodb.config.isDevelopment) ? 'dev' : 'production');
 
-        if(_.isFunction(callback)) callback.apply(options.context, [mongodb]);
+        if(_.isFunction(callback)) callback.apply(_options.context, [mongodb, _options]);
     });
 };
 
@@ -84,26 +88,42 @@ mongodb._buildQuery = function (animalProps) {
     return searchParams;
 };
 
+/**
+ *
+ * @param func
+ * @param options
+ * @param options.context
+ * @private
+ */
 mongodb._exec = function(func, options){
     var _options = _.extend({}, options);
     if(!_.isFunction(func)) {
         console.warn('mongodb._exec() - no function passed');
         return;
     }
-    if (mongodb.state.isConnected) {
-        func.apply(options.context, [mongodb]);
-    } else {
-        if (mongodb.state.isConnecting) {
-            console.log('MongoDB is connecting...');
-            setTimeout(function () {
-                mongodb._exec(func, options);
-            }, mongodb.options.retryTimeout)
-        } else if (_options.debug) {
-            if (_options.debug) console.log('MongoDB is starting up...');
-            mongodb.connect(function(){
-                func.apply(options.context, [mongodb]);
-            }, options);
+    mongodb.queue.push({
+        callback : func,
+        options : _options
+    });
+
+    function onConnected(){
+        var callback,
+            callbackOptions;
+        while(mongodb.queue.length > 0){
+            callback = mongodb.queue[0].callback;
+            callbackOptions = mongodb.queue[0].options;
+            callback.apply(callbackOptions.context, [mongodb, callbackOptions]);
+            mongodb.queue.shift();
         }
+    }
+
+    if (mongodb.state.isConnected) {
+        onConnected();
+    } else if(mongodb.state.isConnecting) {
+        if (_options.debug) console.log('MongoDB is connecting...');
+    } else {
+        if (_options.debug) console.log('MongoDB is starting up...');
+        mongodb.connect(onConnected);
     }
 };
 
@@ -129,7 +149,7 @@ mongodb.findAnimal = function (animalProps, options) {
                 if (err) {
                     console.error(err);
                 }
-                if (_options.debug) console.log('mongodb.findAnimal() - found animals: ', animal);
+                if (_options.debug) console.log('mongodb.findAnimal() - found animal: ', animal);
                 if (typeof _options.complete == 'function') {
                     _options.complete.apply(null, [err, animal || animalProps])
                 } else {
