@@ -1,8 +1,13 @@
-var csv = require('csv'),
-    fs = require('fs'),
+var fs = require('fs'),
     path = require('path'),
-    cwd = path.resolve('./'),
+
+    csv = require('csv'),
     _ = require('lodash'),
+
+    dump = require('../../lib/dump'),
+
+    __dirname = process.cwd(), //__dirname || path.resolve('./'),
+    cwd = __dirname,
     defaults = {
         done: function () {
             console.warn('parse() complete - No callback provided.')
@@ -14,7 +19,7 @@ var csv = require('csv'),
     };
 
 function sanitizeCSV(csvData) {
-    console.log('sanitizing dataset: %O', csvData);
+    console.log('sanitizing dataset: %s', dump(csvData));
 
     // imagesPath could be url such http://server.com/images/ (url must have trailing slash)
     var imagesPath = '',
@@ -57,7 +62,7 @@ function sanitizeCSV(csvData) {
         }
     });
 
-    console.log('sanitized datset: %O', pets);
+    console.log('sanitized datset: %s', dump(pets));
     return pets;
 }
 

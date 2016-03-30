@@ -1,12 +1,16 @@
-var Express = require('express'),
-    fs = require('fs'),
+var fs = require('fs'),
     path = require('path'),
     util = require('util'),
-    router = Express(),
+
     _ = require('lodash'),
     logger = require('morgan'),
     bodyParser = require('body-parser'),
-    MongoDB = require('./mongodb/index'),
+    Express = require('express'),
+
+    MongoDB = require('./mongodb'),
+    Couchbase = require('./couchbase'),
+
+    router = Express(),
     portNumber = normalizePort(process.env.PORT || '5000'),
     _options = {
         pageSize: 10
@@ -16,7 +20,7 @@ router.use(logger('dev'));
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({extended: false}));
 
-// error handlers
+// express error handlers
 router.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.render('error', {
@@ -87,16 +91,27 @@ router.get('/options/:species/:option/:paged', function (req, res) {
 
 router.post('/save', function (req, res) {
 
-    MongoDB.saveAnimal(req.body, {
+    Couchbase.saveAnimal(req.body, {
         debug: true,
-        complete: function (err, newAnimal) {
+        complete: function (err, result, newAnimal) {
             if (err) {
                 res.send(err)
             } else {
                 res.send(newAnimal)
             }
         }
-    })
+    });
+
+    // MongoDB.saveAnimal(req.body, {
+    //     debug: true,
+    //     complete: function (err, newAnimal) {
+    //         if (err) {
+    //             res.send(err)
+    //         } else {
+    //             res.send(newAnimal)
+    //         }
+    //     }
+    // });
 });
 
 router.get('/schema', function (req, res) {
@@ -139,7 +154,7 @@ router.get('/list/:species', function (req, response) {
 
 router.post('/query/:species', function (req, response) {
     var queryData = req.body;
-    MongoDB.findAnimals(queryData, {
+    Couchbase.findAnimals(queryData, {
         debug: true,
         complete: function (err, animals) {
             //console.log('getAnimal().mongoDB.findAnimal() - found animal:', animal);
@@ -154,6 +169,21 @@ router.post('/query/:species', function (req, response) {
             }
         }
     });
+    // MongoDB.findAnimals(queryData, {
+    //     debug: true,
+    //     complete: function (err, animals) {
+    //         //console.log('getAnimal().mongoDB.findAnimal() - found animal:', animal);
+    //         if (err) {
+    //             response.send(err)
+    //         } else if (animals && animals.length > 0) {
+    //             response.send(animals);
+    //         } else {
+    //             //console.log('getAnimal().mongoDB.findAnimal() - failed to find animal. Will save as new animal');
+    //             response.send([]);
+    //
+    //         }
+    //     }
+    // });
 
 });
 
@@ -173,6 +203,6 @@ function normalizePort(val) {
     return false;
 }
 
-console.log('server listening for requests on %d', portNumber);
+console.log('server listening for requests on port: %d', portNumber);
 router.listen(portNumber);
 module.exports = router;

@@ -1,8 +1,13 @@
-var csv = require('csv'),
-    fs = require('fs'),
+var fs = require('fs'),
     path = require('path'),
-    cwd = path.resolve('./'),
+
+    csv = require('csv'),
     _ = require('lodash'),
+
+    dump = require('../../lib/dump'),
+
+    __dirname = process.cwd(), //__dirname || path.resolve('./'),
+    cwd = __dirname,
     defaults = {
         done: function () {
             console.warn('parse() complete - No callback provided.')
@@ -14,7 +19,7 @@ var csv = require('csv'),
     };
 
 function sanitizeCSV(csvData) {
-    console.log('sanitizing options: %O', csvData);
+    console.log('sanitizing options: %s', dump(csvData));
 
     var optionsData = {},
         fields = csvData[0];
@@ -28,7 +33,7 @@ function sanitizeCSV(csvData) {
         }
     });
 
-    console.log('sanitized options: %O', optionsData);
+    console.log('sanitized options: %s', dump(optionsData));
     return optionsData;
 }
 

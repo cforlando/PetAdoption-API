@@ -1,14 +1,14 @@
 var fs = require('fs'),
     path = require('path'),
+
+    dump = require('./lib/dump'),
     csvReader = require('./core/csv-parser');
 
-/*
 csvReader.parseSchema({
     readPath: path.resolve('./', 'tmp/CfO_Animal_Adoption_DB_Model - Dogs.csv'),
     cache: true,
     done: onSchemaParsed
 });
-*/
 
 function onSchemaParsed(formattedSchema, options) {
 
@@ -32,23 +32,24 @@ function onDatasetParsed() {
     console.log('parsed schema');
     fs.readFile(path.resolve('./', 'core/mongodb/cache/dataset.dog.json'), 'utf8', function(err, datasetStr){
         if(err){
-            console.error(err);
+            console.error(dump(err));
         } else {
             var mongodb = require('./core/mongodb'),
+                Couchbase = require('./core/couchbase'),
                 petIndex = 0,
                 petCollection = JSON.parse(datasetStr),
                 numOfPets = petCollection.length;
 
             function savePets(){
-                mongodb.saveAnimal(petCollection[petIndex], {
+                Couchbase.saveAnimal(petCollection[petIndex], {
                     debug: true,
                     complete: function(){
                         petIndex++;
                         if(err){
-                            console.error(err);
+                            console.error(dump(err));
                             require('./core/server');
                         } else if(petIndex < numOfPets){
-                            console.log('Saved pet %d/%d', petIndex, numOfPets);
+                            console.log('Saved pet %s/%s', petIndex+1, numOfPets);
                             savePets()
                         } else {
                             require('./core/server');

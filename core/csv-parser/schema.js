@@ -1,8 +1,13 @@
-var csv = require('csv'),
-    fs = require('fs'),
+var fs = require('fs'),
     path = require('path'),
-    cwd = path.resolve('./'),
+
+    csv = require('csv'),
     _ = require('lodash'),
+
+    dump = require('../../lib/dump'),
+
+    __dirname = process.cwd(), //__dirname || path.resolve('./'),
+    cwd = __dirname,
     defaults = {
         done: function () {
             console.warn('parse() complete - No callback provided.')
@@ -14,7 +19,7 @@ var csv = require('csv'),
     };
 
 function sanitizeSchema(schemaData) {
-    console.log('sanitizing schema: %O', schemaData);
+    console.log('sanitizing schema: %s', dump(schemaData));
 
     var newSchema = {},
         fieldName,
@@ -31,7 +36,7 @@ function sanitizeSchema(schemaData) {
         }
     });
 
-    console.log('sanitized schema: %O', newSchema);
+    console.log('sanitized schema: %j', newSchema);
     return newSchema;
 }
 

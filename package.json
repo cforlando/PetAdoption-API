@@ -1,15 +1,19 @@
 {
   "name": "pet-adoption-server",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "index.html",
   "scripts": {
+    "test:init": "jasmine init",
     "start": "node ./index.js",
+    "test": "jasmine JASMINE_CONFIG_PATH=spec/support/jasmine.json",
+    "test:verbose": "jasmine JASMINE_CONFIG_PATH=spec/support/jasmine.json LCB_OPTIONS=\"detailed_errcodes=1\" LCB_LOGLEVEL=5",
     "windowed": "nw ./",
     "production": "NODE_ENV=production node ./index.js"
   },
   "dependencies": {
     "backbone": "^1.2.3",
     "body-parser": "^1.15.0",
+    "couchbase": "^2.1.4",
     "csv": "^0.4.6",
     "express": "^4.13.4",
     "lodash": "^3.10.1",
@@ -35,6 +39,7 @@
     "node-sass": "^3.4.2",
     "nw": "^0.12.3",
     "request": "^2.69.0",
+    "stylus": "^0.54.2",
     "through2": "^2.0.1",
     "url": "^0.11.0",
     "yargs": "^3.32.0"
