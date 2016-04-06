@@ -141,7 +141,7 @@ var petAdoptionDB = {
             viewName = 'by_species'
         }
 
-        var query = ViewQuery.from('default', viewName).key(queriedKey);
+        var query = ViewQuery.from('v2', viewName).key(queriedKey);
         defaultBucket.query(query, function (err, results) {
             if (_options.complete) _options.complete.apply(_options.context, [null, results]);
         });
