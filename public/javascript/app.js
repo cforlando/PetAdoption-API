@@ -2,7 +2,7 @@ var cfoApp = angular.module('cfo-pet-adoption-data-entry', ['ngMaterial']);
 
 
 cfoApp.controller('petDataController', ['$scope', '$http', function ($scope, $http) {
-    $http.get('./api/v1/model/dog').then(
+    $http.get('/api/v1/model/dog').then(
         function success(response) {
             $scope['petData'] = response.data;
             for(var prop in $scope['petData']){

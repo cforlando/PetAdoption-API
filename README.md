@@ -22,9 +22,9 @@ Additional fields you can set:
 
 Name        | Type            | Description
 ------------| ----------------| ----------------------------------------------------------
-matchStart  | Array <String>  | Requires the fields specified in the array to match the beginning
-matchEnd    | Array <String>  | Requires the fields specified in the array to match the ending
-ignoreCase  | Array <String>  | Allows the fields specified to ignore casing
+matchStart  | (String) Array  | Requires the fields specified in the array to match the beginning
+matchEnd    | (String) Array  | Requires the fields specified in the array to match the ending
+ignoreCase  | (String) Array  | Allows the fields specified to ignore casing
 pageSize    | Number          | (only meaningful when querying by page) Defaults to 10
 
 ###### More Notes

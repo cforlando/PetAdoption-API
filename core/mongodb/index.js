@@ -160,6 +160,21 @@ mongodb._exec = function (func, options) {
     }
 };
 
+mongodb._filterPropsForSave = function(searchQueryProps){
+    var filteredAnimalQueryProps = {};
+
+    if(searchQueryProps['petName']) {
+        filteredAnimalQueryProps['petName'] = searchQueryProps['petName'];
+    }
+    if(searchQueryProps['petId']) {
+        filteredAnimalQueryProps['petId'] = searchQueryProps['petId'];
+    }
+    if(!(filteredAnimalQueryProps['petName'] || filteredAnimalQueryProps['petId'])) {
+        filteredAnimalQueryProps = searchQueryProps;
+    }
+    return filteredAnimalQueryProps;
+};
+
 /**
  *
  * @param animalQueryProps
@@ -239,15 +254,14 @@ mongodb.saveAnimal = function (animalQueryProps, options) {
 
     mongodb._exec(function () {
         if (_options.debug) console.log("mongodb.saveAnimal() - received query for: ", animalQueryProps);
-        var filterAnimalQueryProps = {};
-        if(animalQueryProps['petName']) filterAnimalQueryProps['petName'] = animalQueryProps['petName'];
-        if(animalQueryProps['petId']) filterAnimalQueryProps['petId'] = animalQueryProps['petId'];
-        if(!(filterAnimalQueryProps['petName'] || filterAnimalQueryProps['petId'])) filterAnimalQueryProps = animalQueryProps;
-        var searchParams = mongodb._buildQuery(filterAnimalQueryProps);
+
+        var filteredQueryProps = mongodb._filterPropsForSave(animalQueryProps),
+            searchParams = mongodb._buildQuery(filteredQueryProps);
+
         if (_options.debug) console.log('mongodb.saveAnimal() - searching for: ', searchParams);
         AnimalDocuments[searchParams.species].findOneAndUpdate(
-            filterAnimalQueryProps,
-            searchParams, {
+            searchParams,
+            animalQueryProps, {
                 new: true,
                 upsert: true
             }, function (err, animal) {

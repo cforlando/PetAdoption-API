@@ -11,6 +11,7 @@ var fs = require('fs'),
     MongoDB = require('../mongodb'),
     Couchbase = require('../couchbase'),
     csvReader = require('../csv-parser'),
+    config = require('../config'),
 
     router = Express(),
     database = MongoDB, //  can use MongoDB || Couchbase
@@ -47,7 +48,6 @@ router.get('/options/:species', function (req, res) {
                 res.send(err);
             } else {
                 var options = JSON.parse(str);
-
                 res.send(JSON.stringify(options[species]));
             }
         });
@@ -97,19 +97,6 @@ router.get('/options/:species/:option/:paged', function (req, res) {
                 }
             }
         });
-    fs.readFile(path.resolve('./', util.format('core/mongodb/cache/options.%s.json', species)), 'utf8', function (err, str) {
-        if (err) {
-            res.send(err);
-        } else {
-            var optionsData = JSON.parse(str),
-                option = optionsData[optionName];
-            if (_.isFinite(pageNum) && option.length > _pageSize) {
-                res.send(option.slice(_startIndex, _startIndex + _pageSize));
-            } else {
-                res.send(option);
-            }
-        }
-    });
 });
 
 
@@ -181,13 +168,6 @@ router.get('/list/:species', function (req, response) {
             } else if (_.isArray(animals)) {
                 response.send(animals);
             } else {
-                // console.warn('mongoDB.findAnimal() - failed to find animal. Will save as new animal');
-                // MongoDB.saveAnimal(queryData, {
-                //     debug: true,
-                //     complete: function (err, newAnimal) {
-                //         response.send(newAnimal);
-                //     }
-                // });
                 response.send([])
             }
         }
@@ -198,7 +178,7 @@ router.post('/query', function (req, response) {
     var queryData = req.body;
 
     database.findAnimals(queryData, {
-        debug: true,
+        debug: config.isDevelopment,
         complete: function (err, animals) {
             //console.log('getAnimal().mongoDB.findAnimal() - found animal:', animal);
             if (err) {
@@ -225,7 +205,7 @@ router.post('/query/:paged', function (req, response) {
         _startIndex = pageNum * _pageSize;
 
     database.findAnimals(queryData, {
-        debug: true,
+        debug: config.isDevelopment,
         complete: function (err, animals) {
             //console.log('getAnimal().mongoDB.findAnimal() - found animal:', animal);
             if (err) {
@@ -299,7 +279,7 @@ router.get('/reset', function (req, res, next) {
         async.forEachOfSeries(petCollection,
             function each(petData, petIndex, done) {
                 MongoDB.saveAnimal(petData, {
-                    debug: true,
+                    debug: config.isDevelopment,
                     complete: function (err) {
                         if (err) {
                             console.error(dump(err));
