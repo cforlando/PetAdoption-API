@@ -174,21 +174,21 @@ router.get('/list/:species', function (req, response) {
         _pageSize = (req.query.pageSize || _options.pageSize),
         _startIndex = pageNum * _pageSize;
 
-    MongoDB.findAnimals(queryData, {
+    database.findAnimals(queryData, {
         complete: function (err, animals) {
             if (err) {
                 response.send(err)
             } else if (_.isArray(animals)) {
                 response.send(animals);
             } else {
-                console.warn('mongoDB.findAnimal() - failed to find animal. Will save as new animal');
-                MongoDB.saveAnimal(queryData, {
-                    debug: true,
-                    complete: function (err, newAnimal) {
-                        response.send(newAnimal);
-                    }
-                });
-
+                // console.warn('mongoDB.findAnimal() - failed to find animal. Will save as new animal');
+                // MongoDB.saveAnimal(queryData, {
+                //     debug: true,
+                //     complete: function (err, newAnimal) {
+                //         response.send(newAnimal);
+                //     }
+                // });
+                response.send([])
             }
         }
     });
@@ -205,6 +205,38 @@ router.post('/query', function (req, response) {
                 response.send(err)
             } else if (animals && animals.length > 0) {
                 response.send(animals);
+            } else {
+                //console.log('getAnimal().mongoDB.findAnimal() - failed to find animal. Will save as new animal');
+                response.send([]);
+            }
+        }
+    });
+
+});
+
+router.post('/query/:paged', function (req, response) {
+    var queryData = req.body,
+        pageNum = (function () {
+            var parsedPageNum = parseInt(req.params['paged']) - 1; // page numbers start at 1
+            if (parsedPageNum < 0) return 0;
+            return parsedPageNum;
+        })(),
+        _pageSize = (req.query.pageSize || _options.pageSize),
+        _startIndex = pageNum * _pageSize;
+
+    database.findAnimals(queryData, {
+        debug: true,
+        complete: function (err, animals) {
+            //console.log('getAnimal().mongoDB.findAnimal() - found animal:', animal);
+            if (err) {
+                response.send(err)
+            } else if (animals && animals.length > 0) {
+
+                if (_.isFinite(pageNum) && animals.length > _pageSize) {
+                    response.send(animals.slice(_startIndex, _startIndex + _pageSize));
+                } else {
+                    response.send(animals);
+                }
             } else {
                 //console.log('getAnimal().mongoDB.findAnimal() - failed to find animal. Will save as new animal');
                 response.send([]);

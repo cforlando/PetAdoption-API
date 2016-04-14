@@ -12,16 +12,18 @@ GET     | options/:species/:option/:paged   | JSON of given option for a given s
 GET     | schema/:species                   | returns JSON representation of a schema. Currently includes dog and cat schema
 GET     | list/:species                     | ex: '/list/dog' will show all saved dog species
 POST    | save/                             | fields will be saved as provided. Must match schema definition
-POST    | query/                            | (i.e. '/query/dog') will match given parameters (the 'species' path parameter is essentially useless. Providing the 'species' field in the request body yields the same result)
+POST    | query/                            | will match given parameters 
+POST    | query/:paged                      | will match given parameters with paged results
 
 #### Queries
 You'll need to send the data as an `application/json` and specify so in the header `Content-type` if this isn't set so already.
 
-There are 3 additional fields you can set:
-Type            | Name        | Description
-----------------|-------------|------------------
-Array <String>  | matchStart  | Requires the fields specified in the array to match the beginning
-Array <String>  | matchEnd    | Requires the fields specified in the array to match the ending
-Array <String>  | ignoreCase  | Allows the fields specified to ignore casing
+There are 3 additional Query fields you can set:
+Name        | Type            | Description
+------------|-----------------|----------------------------------------------------------------------------
+matchStart  | Array <String>  | Requires the fields specified in the array to match the beginning
+matchEnd    | Array <String>  | Requires the fields specified in the array to match the ending
+ignoreCase  | Array <String>  | Allows the fields specified to ignore casing
+pageSize    | Number          | (only meaningful when querying by page) Defaults to 10
 
 ###### More Notes

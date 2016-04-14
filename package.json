@@ -1,6 +1,6 @@
 {
   "name": "pet-adoption-server",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "index.html",
   "scripts": {
     "test:init": "jasmine init",
