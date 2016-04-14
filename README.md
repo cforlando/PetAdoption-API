@@ -18,9 +18,10 @@ POST    | query/:paged                      | will match given parameters with p
 #### Queries
 You'll need to send the data as an `application/json` and specify so in the header `Content-type` if this isn't set so already.
 
-There are 3 additional Query fields you can set:
+Additional fields you can set:
+
 Name        | Type            | Description
-------------|-----------------|----------------------------------------------------------------------------
+------------| ----------------| ----------------------------------------------------------
 matchStart  | Array <String>  | Requires the fields specified in the array to match the beginning
 matchEnd    | Array <String>  | Requires the fields specified in the array to match the ending
 ignoreCase  | Array <String>  | Allows the fields specified to ignore casing
