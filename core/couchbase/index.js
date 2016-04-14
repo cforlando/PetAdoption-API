@@ -24,7 +24,8 @@ var fs = require('fs'),
             return "{}";
         }
     })(),
-    jsonMap = JSON.parse(jsonMapStr);
+    jsonMap = JSON.parse(jsonMapStr),
+    activeDesignDocName = "dev_v1";
 
 function buildHash(animalProps) {
     return (require('crypto').createHash('md5').update(JSON.stringify(animalProps)).digest("hex"));
@@ -43,9 +44,10 @@ var petAdoptionDB = {
      */
     saveAnimal: function (animalProps, options) {
         var _options = _.extend({}, options),
-            animalHash = buildHash(animalProps);
+            animalHash = animalProps['hashId']|| buildHash(animalProps);
 
         jsonMap[animalHash] = animalProps;
+        animalProps['hashId'] = animalHash;
 
         /**
          * helper function to handle errors
@@ -94,9 +96,9 @@ var petAdoptionDB = {
                 cacheToJSON(config.designMap.location, designDoc, function () {
 
                     // save newly created design doc
-                    defaultBucketManager.upsertDesignDocument("default", designDoc, function (err) {
+                    defaultBucketManager.upsertDesignDocument(activeDesignDocName, designDoc, function (err) {
                         if (err) return onError(err);
-                        _options.complete.apply(_options.context, [err, result, animalProps]);
+                        _options.complete.apply(_options.context, [err, animalProps]);
                     });
                 });
             })
@@ -141,7 +143,7 @@ var petAdoptionDB = {
             viewName = 'by_species'
         }
 
-        var query = ViewQuery.from('v2', viewName).key(queriedKey);
+        var query = ViewQuery.from(activeDesignDocName, viewName).key(queriedKey);
         defaultBucket.query(query, function (err, results) {
             if (_options.complete) _options.complete.apply(_options.context, [null, results]);
         });

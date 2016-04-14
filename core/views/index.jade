@@ -1,0 +1,23 @@
+extends layout
+
+block content
+    form.pet-form(layout="column", action='/api/v1/save', method='post')
+        each inputProp in inputs
+            div.default-field
+                md-input-container
+                    if inputProp['options'].length > 0
+                        label!=inputProp['fieldLabel']
+                        md-select(ng-model="petData.#{inputProp['key']}.key")
+                            each inputPropOption in inputProp['options']
+                                md-option(value!="#{inputPropOption}")=inputPropOption
+                    else if inputProp['type'] == 'Boolean'
+                        label!=inputProp['fieldLabel']
+                        md-select(ng-model="petData.#{inputProp['key']}.key")
+                            md-option(value=true)!='yes'
+                            md-option(value=false)!='no'
+                    else
+                        label!=inputProp['fieldLabel']
+                        input(placeholder=inputProp['example'], ng-model="petData.#{inputProp['key']}.default")
+        div.default-field
+            md-input-container
+                md-button.input-submit.md-primary.md-raised(ng-click!='this.submit()') Save

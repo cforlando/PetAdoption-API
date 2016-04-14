@@ -1,0 +1,46 @@
+<RestClientRequest>
+  <option name="biscuits">
+    <list />
+  </option>
+  <option name="httpMethod" value="POST" />
+  <option name="urlBase" value="http://localhost:5000" />
+  <option name="urlPath" value="/save" />
+  <option name="headers">
+    <list>
+      <KeyValuePair>
+        <option name="key" value="Accept" />
+        <option name="value" value="*/*" />
+      </KeyValuePair>
+      <KeyValuePair>
+        <option name="key" value="Cache-Control" />
+        <option name="value" value="no-cache" />
+      </KeyValuePair>
+    </list>
+  </option>
+  <option name="parameters">
+    <list>
+      <KeyValuePair>
+        <option name="key" value="petName" />
+        <option name="value" value="Better Dog Model" />
+      </KeyValuePair>
+      <KeyValuePair>
+        <option name="key" value="species" />
+        <option name="value" value="dog" />
+      </KeyValuePair>
+      <KeyValuePair>
+        <option name="key" value="type" />
+        <option name="value" value="dog" />
+      </KeyValuePair>
+      <KeyValuePair>
+        <option name="key" value="description" />
+        <option name="value" value="The API currently acknowledges and uses a 'type', however this is incorrect and will be changed to 'species' in the next revision" />
+      </KeyValuePair>
+    </list>
+  </option>
+  <option name="parametersEnabled" value="true" />
+  <option name="haveTextToSend" value="false" />
+  <option name="haveFileToSend" value="false" />
+  <option name="isFileUpload" value="false" />
+  <option name="textToSend" value="" />
+  <option name="filesToSend" value="" />
+</RestClientRequest>

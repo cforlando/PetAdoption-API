@@ -1,9 +1,11 @@
 var fs = require('fs'),
     path = require('path'),
 
+    async = require('async'),
     csv = require('csv'),
     _ = require('lodash'),
 
+    helperUtils = require('./helper-utils'),
     dump = require('../../lib/dump'),
 
     __dirname = process.cwd(), //__dirname || path.resolve('./'),
@@ -13,23 +15,30 @@ var fs = require('fs'),
             console.warn('parse() complete - No callback provided.')
         },
         context: null,
-        readPath: path.resolve(cwd, 'tmp/CfO_Animal_Adoption_DB_Model - Dogs.csv'),
-        writeDir: path.resolve(cwd, 'core/mongodb/cache/'),
-        cacheName: 'options.dog'
+        readPath: [
+            path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Small Animals.csv'),
+            path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Rabbits.csv'),
+            path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Reptiles.csv'),
+            path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Birds.csv'),
+            path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Dogs.csv'),
+            path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Cats.csv')
+        ],
+        writeDir: path.resolve(cwd, 'core/data/'),
+        cacheName: 'options'
     };
 
-function sanitizeCSV(csvData) {
-    console.log('sanitizing options: %s', dump(csvData));
+function parseOptionsCSV(csvData) {
+    // console.log('sanitizing options: %s', dump(csvData));
 
     var optionsData = {},
-        fields = csvData[0];
-    _.forEachRight(fields, function(field, index, collection){
+        csvLabelsRow = csvData[0];
+    _.forEachRight(csvLabelsRow, function (field, index, collection) {
         optionsData[field] = [];
     });
-    _.forEachRight(csvData, function (option, index, options) {
+    _.forEachRight(csvData, function (csvRow, index, options) {
         if (index == 0) return; //skip the field labels
-        for (var i = 0; i < fields.length; i++){
-            if(option[i]) optionsData[fields[i]].push(option[i]);
+        for (var column = 0; column < csvLabelsRow.length; column++) {
+            if (csvRow[column]) optionsData[csvLabelsRow[column]].push(csvRow[column]);
         }
     });
 
@@ -46,13 +55,28 @@ module.exports = {
      * @param {Object} options.readPath
      * @param {Object} options.writePath
      */
-    parse: function(options) {
+    parse: function (options) {
         var _options = _.extend(defaults, options);
         _options.writePath = path.resolve(_options.writeDir, _options.cacheName + '.json');
-        fs.readFile(_options.readPath, 'utf8', function (err, fileContent) {
-            csv.parse(fileContent, function (err, schemaCSVData) {
-                var optionsData = sanitizeCSV(schemaCSVData);
-                if(_options.cache === true){
+
+        var fileList = _.isArray(_options.readPath) ? _options.readPath : [_options.readPath],
+            optionsData = {};
+        async.each(fileList,
+            function each(filePath, done) {
+                
+                helperUtils.download(filePath, function(err, content){
+                    if(err) throw err;
+                    csv.parse(content, function onParsed(err, csvData) {
+                        var namespace = helperUtils.getTypeFromPath(filePath);
+                        optionsData[namespace] = parseOptionsCSV(csvData);
+                        done();
+                    });
+                });
+                
+            },
+            function complete(error) {
+                if (error) throw error;
+                if (_options.cache === true) {
                     fs.writeFile(_options.writePath, JSON.stringify(optionsData), function (err) {
                         if (err) throw err;
                         _options.done.apply(_options.context, [optionsData, _options]);
@@ -61,7 +85,6 @@ module.exports = {
                     _options.done.apply(_options.context, [optionsData, _options]);
                 }
             });
-        });
 
     }
 };

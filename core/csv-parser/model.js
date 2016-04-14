@@ -1,0 +1,155 @@
+var fs = require('fs'),
+    path = require('path'),
+
+    async = require('async'),
+    csv = require('csv'),
+    _ = require('lodash'),
+
+    helperUtils = require('./helper-utils'),
+    dump = require('../../lib/dump'),
+
+    __dirname = process.cwd(), //__dirname || path.resolve('./'),
+    cwd = __dirname,
+    defaults = {
+        done: function () {
+            console.warn('parse() complete - No callback provided.')
+        },
+        context: null,
+        readPath: [
+            path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Cats.csv'),
+            path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Dogs.csv')
+        ],
+        writeDir: path.resolve(cwd, 'core/data/'),
+        cacheName: 'models'
+    };
+
+function parseModelCSV(csvModelData) {
+    // console.log('sanitizing model: %s', dump(modelData));
+
+    var newModel = {},
+        columnIndices = {
+            name: 1,
+            fieldLabel: 2,
+            type: 3,
+            description: 4,
+            default: 5,
+            required: 6,
+            example: 7,
+            note: 8
+        };
+    _.forEachRight(csvModelData, function (csvRow, rowIndex, arr) {
+        if (rowIndex == 0) return; //skip the field labels
+
+        var _modelPropData = {};
+        if (csvRow[columnIndices['name']] && csvRow[columnIndices['type']]) {
+            _.forEach(columnIndices, function (columnIndex, columnIndexName, indices) {
+                switch (columnIndexName) {
+                    case 'type':
+                        if (csvRow[columnIndex].match(/integer/i)) {
+                            _modelPropData[columnIndexName] = 'Number';
+                        } else {
+                            _modelPropData[columnIndexName] = _.capitalize(csvRow[columnIndex]);
+                        }
+                        break;
+                    case 'name':
+                        _modelPropData['key'] = csvRow[columnIndex];
+                        break;
+                    default:
+                        _modelPropData[columnIndexName] = csvRow[columnIndex];
+                        break;
+                }
+            });
+            newModel[_modelPropData['key']] = _modelPropData;
+        }
+    });
+
+    console.log('sanitized model: %j', newModel);
+    return newModel;
+}
+
+/**
+ *
+ * @param {Object} modelsData
+ * @param {Object} optionsData
+ * @param {Function} callback
+ */
+function _mergeOptionsAndModel(modelsData, optionsData, callback) {
+    var _modelsData = {};
+    _.forEach(modelsData, function (modelData, modelDataType, models) {
+        _modelsData[modelDataType] = _.reverse(
+            _.map(modelData, function (modelPropInfo, modelPropName, props) {
+                return _.extend(modelPropInfo, {
+                    defaultValue: modelPropInfo['default'],
+                    options: _.reverse((function () {
+                        if (optionsData[modelDataType][modelPropName]) {
+                            return optionsData[modelDataType][modelPropName];
+
+                        } else if (optionsData[modelDataType]['breed'] && modelPropInfo['key'].match(/breed/ig)) {
+                            return _.reverse(optionsData[modelDataType]['breed']);
+
+                        } else {
+                            return [];
+                        }
+                    })())
+                });
+            })
+        );
+    });
+    callback.call(null, _modelsData);
+}
+
+module.exports = {
+    /**
+     *
+     * @param options
+     * @param {Function} options.done
+     * @param {Object} options.context
+     * @param {Object} options.readPath
+     * @param {Object} options.writePath
+     */
+    parse: function (options) {
+        var _options = _.extend(defaults, options);
+        _options.writePath = path.resolve(_options.writeDir, _options.cacheName + '.json');
+
+        var fileList = _.isArray(_options.readPath) ? _options.readPath : [_options.readPath],
+            modelsData = {};
+
+        async.each(fileList,
+            function each(filePath, done) {
+
+                function onParsed(err, schemaCSVData) {
+                    var namespace = helperUtils.getTypeFromPath(filePath);
+                    modelsData[namespace] = parseModelCSV(schemaCSVData);
+                    done();
+                }
+
+                helperUtils.download(filePath, function (err, content) {
+                    if (err) throw err;
+                    csv.parse(content, onParsed);
+                });
+            },
+            function complete(error) {
+                if (error) throw error;
+
+                // merge in options
+
+                require('./options').parse({
+                    cache: true,
+                    done: function (optionsData) {
+                        _mergeOptionsAndModel(modelsData, optionsData, function onMergeComplete(mergedModelsData) {
+                            if (_options.cache === true) {
+                                fs.writeFile(_options.writePath, JSON.stringify(mergedModelsData), function (err) {
+                                    if (err) throw err;
+                                    _options.done.apply(_options.context, [mergedModelsData, _options]);
+                                })
+                            } else {
+                                _options.done.apply(_options.context, [mergedModelsData, _options]);
+                            }
+                        });
+                    }
+                });
+
+            });
+
+    }
+};

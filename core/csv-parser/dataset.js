@@ -1,25 +1,24 @@
 var fs = require('fs'),
     path = require('path'),
+    util = require('util'),
 
     csv = require('csv'),
     _ = require('lodash'),
 
     dump = require('../../lib/dump'),
 
-    __dirname = process.cwd(), //__dirname || path.resolve('./'),
-    cwd = __dirname,
     defaults = {
         done: function () {
             console.warn('parse() complete - No callback provided.')
         },
         context: null,
-        readPath: path.resolve(cwd, 'tmp/CfO_Animal_Adoption_Test_Dataset - Sheet1.csv'),
-        writeDir: path.resolve(cwd, 'core/mongodb/cache/'),
+        readPath: path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_Test_Dataset - Sheet1.csv'),
+        writeDir: path.resolve(process.cwd(), 'core/data'),
         cacheName: 'dataset.dog'
     };
 
-function sanitizeCSV(csvData) {
-    console.log('sanitizing dataset: %s', dump(csvData));
+function sanitizeTestDataCSV(csvData) {
+    // console.log('sanitizing dataset: %s', dump(csvData));
 
     // imagesPath could be url such http://server.com/images/ (url must have trailing slash)
     var imagesPath = '',
@@ -62,7 +61,7 @@ function sanitizeCSV(csvData) {
         }
     });
 
-    console.log('sanitized datset: %s', dump(pets));
+    console.log('sanitized dataset: %s', dump(pets));
     return pets;
 }
 
@@ -70,24 +69,24 @@ module.exports = {
     /**
      *
      * @param options
-     * @param {Function} options.done
+     * @param {ParsedCallback} options.done
      * @param {Object} options.context
      * @param {Object} options.readPath
      * @param {Object} options.writePath
      */
     parse: function (options) {
         var _options = _.extend(defaults, options);
-        _options.writePath = path.resolve(_options.writeDir, _options.cacheName + '.json');
-        fs.readFile(_options.readPath, 'utf8', function (err, fileContent) {
-            csv.parse(fileContent, function (err, schemaCSVData) {
-                var optionsData = sanitizeCSV(schemaCSVData);
+        _options.writePath = path.resolve(_options.writeDir, util.format('%s.json', _options.cacheName));
+        fs.readFile(_options.readPath, 'utf8', function (err, petTestDataText) {
+            csv.parse(petTestDataText, function (err, petTestCSVData) {
+                var petTestData = sanitizeTestDataCSV(petTestCSVData);
                 if (_options.cache === true) {
-                    fs.writeFile(_options.writePath, JSON.stringify(optionsData), function (err) {
+                    fs.writeFile(_options.writePath, JSON.stringify(petTestData), function (err) {
                         if (err) throw err;
-                        _options.done.apply(_options.context, [optionsData, _options]);
+                        _options.done.apply(_options.context, [petTestData, _options]);
                     })
                 } else {
-                    _options.done.apply(_options.context, [optionsData, _options]);
+                    _options.done.apply(_options.context, [petTestData, _options]);
                 }
             });
         });

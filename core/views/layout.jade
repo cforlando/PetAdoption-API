@@ -1,0 +1,31 @@
+doctype html
+html
+    head
+        title= title
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        link(rel='stylesheet', href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css")
+        link(href="https://fonts.googleapis.com/icon?family=Material+Icons", rel="stylesheet")
+        meta(name="viewport", content="width=device-width, initial-scale=1")
+    body(ng-app='cfo-pet-adoption-data-entry')
+        div(layout="column", layout-fill, ng-controller='petDataController')
+            md-toolbar
+                .md-toolbar-tools
+                    span.md-title!=title
+            md-content
+                block content
+                .layout.fab-anchor(layout='row')
+                    md-fab-speed-dial.md-fab-bottom-right.md-scale(md-direction="up", md-open="fab.isOpen")
+                        md-fab-trigger
+                            md-button.md-primary.md-fab.fab-toggle(aria-label="Add...")
+                                md-icon.material-icons add
+                        md-fab-actions
+                            md-button.btn-clear-form.md-fab.md-raised.md-mini(aria-label="Add New Pet")
+                                md-icon.material-icons clear
+                            md-button.btn-reuse-form.md-fab.md-raised.md-mini(aria-label="Add New Pet From Existing")
+                                md-icon.material-icons cached
+    script(src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.js")
+    script(src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.js")
+    script(src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.js")
+    script(src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.js")
+    script(src="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.js")
+    script(src="./javascript/app.js")

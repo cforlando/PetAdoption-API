@@ -1,10 +1,13 @@
-var mongoose = require('mongoose'),
-    schemaGenerator = require('mongoose-gen'),
+var util = require('util'),
     path = require('path'),
     fs = require('fs'),
+
+    mongoose = require('mongoose'),
+    schemaGenerator = require('mongoose-gen'),
     _ = require('lodash'),
-    animalSchemaJSON = JSON.parse(fs.readFileSync(path.resolve('./', 'core/mongodb/schemas/animal.json'), 'utf8')),
-    Animal = null,
+
+    animalSchemasJSON = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'core/data/schema.json'), 'utf8')),
+    AnimalDocuments = {},
     localConfig = (function () {
         var config = {
             username: 'username',
@@ -38,7 +41,7 @@ var mongoose = require('mongoose'),
             retryTimeout: 2000,
             isDevelopment: require('os').hostname().toLowerCase().indexOf('kah') > -1 // TODO use proper dev flag condition
         },
-        queue : []
+        queue: []
     };
 
 mongodb.connect = function (callback, options) {
@@ -52,7 +55,7 @@ mongodb.connect = function (callback, options) {
     );
     var db = mongodb.adapter.connection,
         _options = _.extend({
-            context : null
+            context: null
         }, options);
 
     db.on('error', console.error.bind(console, 'connection error:'));
@@ -61,30 +64,60 @@ mongodb.connect = function (callback, options) {
         mongodb.state.isConnected = true;
         mongodb.state.isConnecting = false;
 
-        var AnimalSchema = new mongoose.Schema(schemaGenerator.convert(animalSchemaJSON));
-
-        Animal = mongoose.model('Animal', AnimalSchema, (mongodb.config.isDevelopment) ? 'pets_test' : 'pets_production');
+        var AnimalSchemas = {};
+        _.forEach(animalSchemasJSON, function (animalSchema, animalSchemaName, collection) {
+            AnimalSchemas[animalSchemaName] = new mongoose.Schema(schemaGenerator.convert(animalSchema));
+            AnimalDocuments[animalSchemaName] = mongoose.model(animalSchemaName, AnimalSchemas[animalSchemaName], (mongodb.config.isDevelopment) ? 'pets_test' : 'pets_production');
+        });
         console.log('Running in %s mode.', (mongodb.config.isDevelopment) ? 'dev' : 'production');
 
-        if(_.isFunction(callback)) callback.apply(_options.context, [mongodb, _options]);
+        if (_.isFunction(callback)) callback.apply(_options.context, [mongodb, _options]);
     });
 };
 
 /**
  * Builds search object from provided animalProps object. animalProps is an object of fields corresponding to one of the animal schemas
- * @param animalProps
+ * @param animalQueryProps
  * @returns {Object}
  * @private
  */
-mongodb._buildQuery = function (animalProps) {
-    var searchParams = {};
-    if (animalProps['petName']) searchParams['petName'] = animalProps['petName'];
-    if (animalProps['species']) searchParams['species'] = animalProps['species'];
-    if (animalProps['petId'] && !(animalProps['petId'] == '0' || animalProps['petId'] == 'undefined')) {
-        searchParams = {
-            '_id': animalProps['petId']
-        }
-    }
+mongodb._buildQuery = function (animalQueryProps) {
+    var searchParams = {
+        species: (AnimalDocuments[animalQueryProps['species']]) ? animalQueryProps['species'] : 'dog'  // defaults to dog species
+    };
+
+    if (searchParams['species'])
+        _.forEach(animalQueryProps, function (propVal, propName, collection) {
+            switch (propName) {
+                case 'petId':
+                case 'hashId':
+                case '_id':
+                    // only use given id and quit early
+                    searchParams = {'_id': propVal};
+                    return false;
+                case 'species':
+                    // ignore because species was already set
+                    break;
+                default:
+                    var prefix = '',
+                        suffix = '',
+                        regexArgs = '';
+                    console.log('matchStartFor: %s = %s', typeof animalQueryProps['matchStartFor'], animalQueryProps['matchStartFor']);
+                    if (animalQueryProps['matchStartFor'] && _.indexOf(animalQueryProps['matchStartFor'], propName) >= 0) {
+                        prefix = '^';
+                    }
+                    if (animalQueryProps['matchEndFor'] && _.indexOf(animalQueryProps['matchEndFor'], propName) >= 0) {
+                        suffix = '$';
+                    }
+                    if (animalQueryProps['ignoreCaseFor'] && _.indexOf(animalQueryProps['ignoreCaseFor'], propName) >= 0) {
+                        regexArgs = 'i';
+                    }
+                    if (_.has(animalSchemasJSON[searchParams['species']], propName)) {
+                        searchParams[propName] = new RegExp(util.format('%s%s%s', prefix, propVal, suffix), regexArgs);
+                    }
+                    break;
+            }
+        });
     return searchParams;
 };
 
@@ -95,21 +128,21 @@ mongodb._buildQuery = function (animalProps) {
  * @param options.context
  * @private
  */
-mongodb._exec = function(func, options){
+mongodb._exec = function (func, options) {
     var _options = _.extend({}, options);
-    if(!_.isFunction(func)) {
+    if (!_.isFunction(func)) {
         console.warn('mongodb._exec() - no function passed');
         return;
     }
     mongodb.queue.push({
-        callback : func,
-        options : _options
+        callback: func,
+        options: _options
     });
 
-    function onConnected(){
+    function onConnected() {
         var callback,
             callbackOptions;
-        while(mongodb.queue.length > 0){
+        while (mongodb.queue.length > 0) {
             callback = mongodb.queue[0].callback;
             callbackOptions = mongodb.queue[0].options;
             callback.apply(callbackOptions.context, [mongodb, callbackOptions]);
@@ -119,7 +152,7 @@ mongodb._exec = function(func, options){
 
     if (mongodb.state.isConnected) {
         onConnected();
-    } else if(mongodb.state.isConnecting) {
+    } else if (mongodb.state.isConnecting) {
         if (_options.debug) console.log('MongoDB is connecting...');
     } else {
         if (_options.debug) console.log('MongoDB is starting up...');
@@ -129,21 +162,21 @@ mongodb._exec = function(func, options){
 
 /**
  *
- * @param animalProps
+ * @param animalQueryProps
  * @param {Object} options
  * @param {Boolean} options.debug Whether to log debug info
  * @param {Function} options.complete callback on operation completion
  * @param {Object} options.context context for complete function callback
  */
-mongodb.findAnimal = function (animalProps, options) {
+mongodb.findAnimal = function (animalQueryProps, options) {
     var _options = _.extend({}, options);
 
-    mongodb._exec(function() {
-        if (_options.debug) console.log("mongodb.findAnimal() - received query for: ", animalProps);
-        var searchParams = mongodb._buildQuery(animalProps);
+    mongodb._exec(function () {
+        if (_options.debug) console.log("mongodb.findAnimal() - received query for: ", animalQueryProps);
+        var searchParams = mongodb._buildQuery(animalQueryProps);
 
         if (_options.debug) console.log('mongodb.findAnimal() - searching for: ', searchParams);
-        Animal.findOne(
+        AnimalDocuments[searchParams.species].findOne(
             searchParams,
             function (err, animal) {
                 if (err) {
@@ -151,7 +184,7 @@ mongodb.findAnimal = function (animalProps, options) {
                 }
                 if (_options.debug) console.log('mongodb.findAnimal() - found animal: ', animal);
                 if (typeof _options.complete == 'function') {
-                    _options.complete.apply(null, [err, animal || animalProps])
+                    _options.complete.apply(null, [err, animal])
                 } else {
                     throw new Error('mongodb.findAnimal() - No options.complete callback specified');
                 }
@@ -162,53 +195,55 @@ mongodb.findAnimal = function (animalProps, options) {
 
 /**
  *
- * @param animalProps
+ * @param animalQueryProps
  * @param {Object} options
  * @param {Boolean} options.debug Whether to log debug info
  * @param {Function} options.complete callback on operation completion
  * @param {Object} options.context context for complete function callback
  */
-mongodb.findAnimals = function (animalProps, options) {
+mongodb.findAnimals = function (animalQueryProps, options) {
     var _options = _.extend({}, options);
+    if (_options.debug) console.log("mongodb.findAnimals(%j)", arguments);
 
-    mongodb._exec(function() {
-        if (_options.debug) console.log("mongodb.findAnimals() - received query for: ", animalProps);
-        var searchParams = mongodb._buildQuery(animalProps);
+    var query = function () {
+        if (_options.debug) console.log("mongodb.findAnimals() - received query for: ", animalQueryProps);
+        var searchParams = mongodb._buildQuery(animalQueryProps);
         if (_options.debug) console.log('mongodb.findAnimals() - searching for: ', searchParams);
-        Animal.find(
+        AnimalDocuments[searchParams.species].find(
             searchParams,
             function (err, animals) {
                 if (err) {
                     console.error(err);
                 }
-                if (_options.debug) console.log('mongodb.findAnimals() - found animals: ', animals);
+                // if (_options.debug) console.log('mongodb.findAnimals() - found animals: ', animals);
                 if (_.isFunction(_options.complete)) {
-                    _options.complete.apply(null, [err, animals || animalProps])
+                    _options.complete.apply(null, [err, animals])
                 } else {
                     throw new Error('mongodb.findAnimals() - No options.complete callback specified');
                 }
             })
-    }, options);
+    };
+    mongodb._exec(query, options);
 };
 
 /**
  *
- * @param animalProps
+ * @param animalQueryProps
  * @param {Object} options
  * @param {Boolean} options.debug Whether to log debug info
  * @param {Function} options.complete callback on operation completion
  * @param {Object} options.context context for complete function callback
  */
-mongodb.saveAnimal = function (animalProps, options) {
+mongodb.saveAnimal = function (animalQueryProps, options) {
     var _options = _.extend({}, options);
 
     mongodb._exec(function () {
-        if (_options.debug) console.log("mongodb.saveAnimal() - received query for: ", animalProps);
-        var searchParams = mongodb._buildQuery(animalProps);
+        if (_options.debug) console.log("mongodb.saveAnimal() - received query for: ", animalQueryProps);
+        var searchParams = mongodb._buildQuery(animalQueryProps);
         if (_options.debug) console.log('mongodb.saveAnimal() - searching for: ', searchParams);
-        Animal.findOneAndUpdate(
+        AnimalDocuments[searchParams.species].findOneAndUpdate(
             searchParams,
-            animalProps, {
+            animalQueryProps, {
                 new: true,
                 upsert: true
             }, function (err, animal) {
