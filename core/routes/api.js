@@ -9,7 +9,6 @@ var fs = require('fs'),
     Express = require('express'),
 
     MongoDB = require('../mongodb'),
-    Couchbase = require('../couchbase'),
     csvReader = require('../csv-parser'),
     config = require('../config'),
 
