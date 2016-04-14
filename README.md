@@ -18,7 +18,7 @@ POST    | query/:paged                      | will match given parameters with p
 #### Queries
 You'll need to send the data as an `application/json` and specify so in the header `Content-type` if this isn't set so already.
 
-##### Additinal fields you can set:
+Additional fields you can set:
 
 Name        | Type            | Description
 ------------| ----------------| ----------------------------------------------------------
