@@ -20,11 +20,11 @@ You'll need to send the data as an `application/json` and specify so in the head
 
 Additional fields you can set:
 
-Name        | Type            | Description
-------------| ----------------| ----------------------------------------------------------
-matchStart  | (String) Array  | Requires the fields specified in the array to match the beginning
-matchEnd    | (String) Array  | Requires the fields specified in the array to match the ending
-ignoreCase  | (String) Array  | Allows the fields specified to ignore casing
-pageSize    | Number          | (only meaningful when querying by page) Defaults to 10
+Name           | Type            | Description
+---------------| ----------------| ----------------------------------------------------------
+matchStartFor  | (String) Array  | Requires the fields specified in the array to match the beginning
+matchEndFor    | (String) Array  | Requires the fields specified in the array to match the ending
+ignoreCase     | (String) Array  | Allows the fields specified to ignore casing
+pageSize       | Number          | (only meaningful when querying by page) Defaults to 10
 
 ###### More Notes
