@@ -1,20 +1,36 @@
-var cfoApp = angular.module('cfo-pet-adoption-data-entry', ['ngMaterial']);
 
 
 cfoApp.controller('petDataController', ['$scope', '$http', function ($scope, $http) {
-    $http.get('/api/v1/model/dog').then(
-        function success(response) {
-            $scope['petData'] = response.data;
-            for(var prop in $scope['petData']){
-                if($scope['petData'].hasOwnProperty(prop)){
-                    $scope['petData'][prop].val = $scope['petData'][prop].default || $scope['petData'][prop].example;
+    $scope.visiblePetType = 'dog';
+
+    function updateModel(done){
+        $http.get('/api/v1/model/'+$scope.visiblePetType).then(
+            function success(response) {
+                for(var prop in response.data){
+                    if(response.data.hasOwnProperty(prop)){
+                        $scope['petData'][prop].val = response.data[prop].val || response.data[prop].defaultValue || response.data[prop].example;
+                    }
                 }
+                $mdToast.show($mdToast.simple().textContent("Successfully updated from server."));
+                done($scope['petData']);
+            },
+            function failure() {
+                $mdToast.show($mdToast.simple().textContent("Sorry. Can't get any info from server."));
+                done(null);
+            });
+    }
+
+    function sanitizeModel(){
+        for(var prop in $scope['petData']){
+            if($scope['petData'].hasOwnProperty(prop)){
+                if($scope['petData'][prop].type == 'Date'){
+                    $scope['petData'][prop] = new Date();
+                }
+                $scope['petData'][prop].val = $scope['petData'][prop].val || $scope['petData'][prop].defaultValue || $scope['petData'][prop].example;
             }
-        },
-        function failure() {
-            $scope['petData'] = {};
-            $mdToast.show($mdToast.simple().textContent("Sorry. Can't get any info from server."));
-        });
+        }
+    }
+
     $scope['fab'] = {
         isOpen: false
     }
@@ -77,7 +93,7 @@ cfoApp.directive('petForm', function () {
                 var _data = {};
                 for (var prop in $scope.petData) {
                     if ($scope.petData.hasOwnProperty(prop)) {
-                        _data[prop] = $scope.petData[prop]['example'];
+                        _data[prop] = $scope.petData[prop]['val'] || $scope.petData[prop]['default'] || $scope.petData[prop]['example'];
                     }
                 }
                 $scope.openToast = function ($event) {

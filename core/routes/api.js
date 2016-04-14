@@ -102,7 +102,7 @@ router.get('/options/:species/:option/:paged', function (req, res) {
 router.post('/save', function (req, res, next) {
 
     database.saveAnimal(req.body, {
-        debug: true,
+        debug: config.isDevelopment,
         complete: function (err, newAnimal) {
             if (err) {
                 res.send({result: err})
@@ -226,7 +226,7 @@ router.post('/query/:paged', function (req, response) {
 });
 
 router.get('/reset', function (req, res, next) {
-
+    console.log('/reset');
 
     csvReader.parseSchema({
         readPath: [
@@ -234,21 +234,21 @@ router.get('/reset', function (req, res, next) {
             path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Dogs.csv')
         ],
         cache: true,
-        done: onModelsParsed
+        done: onSchemaParsed
     });
 
-    function onModelsParsed() {
+    function onSchemaParsed() {
         csvReader.parseModel({
             readPath: [
                 path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Cats.csv'),
                 path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Dogs.csv')
             ],
             cache: true,
-            done: onSchemaParsed
+            done: onModelsParsed
         });
     }
 
-    function onSchemaParsed(formattedSchema, options) {
+    function onModelsParsed(formattedSchema, options) {
         console.log('schema parsed');
         csvReader.parseOptions({
             cache: true,

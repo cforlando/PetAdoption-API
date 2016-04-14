@@ -1,23 +1,38 @@
 extends layout
 
 block content
-    form.pet-form(layout="column", action='/api/v1/save', method='post')
-        each inputProp in inputs
-            div.default-field
-                md-input-container
-                    if inputProp['options'].length > 0
-                        label!=inputProp['fieldLabel']
-                        md-select(ng-model="petData.#{inputProp['key']}.key")
-                            each inputPropOption in inputProp['options']
-                                md-option(value!="#{inputPropOption}")=inputPropOption
-                    else if inputProp['type'] == 'Boolean'
-                        label!=inputProp['fieldLabel']
-                        md-select(ng-model="petData.#{inputProp['key']}.key")
-                            md-option(value=true)!='yes'
-                            md-option(value=false)!='no'
-                    else
-                        label!=inputProp['fieldLabel']
-                        input(placeholder=inputProp['example'], ng-model="petData.#{inputProp['key']}.default")
+    md-tabs(md-dynamic-height, md-border-bottom)
+        each model, modelName in inputs
+            md-tab(label=modelName)
+                md-content.md-padding
+                    form.pet-form(layout="column", action='/api/v1/save', method='post')
+                        -
+                            var flags = {
+                                isLocationInputVisible: false
+                            }
+                        each inputProp, inputPropName in model
+                            div.default-field
+                                if inputProp['type'] == 'Date'
+                                    md-datepicker(placeholder=inputProp['fieldLabel'], ng-model="petData.#{inputPropName}.val")
+                                else if inputProp['type'] == 'Location' && !flags.isLocationInputVisible
+                                    #map.google-maps
+                                    -
+                                        flags.isLocationInputVisible = true;
+                                else
+                                    md-input-container
+                                        if inputProp['options'].length > 0
+                                            label!=inputProp['fieldLabel']
+                                            md-select(ng-model="petData.#{inputPropName}.val")
+                                                each inputPropOption in inputProp['options']
+                                                    md-option(value!="#{inputPropOption}")=inputPropOption
+                                        else if inputProp['type'] == 'Boolean'
+                                            label!=inputProp['fieldLabel']
+                                            md-select(ng-model="petData.#{inputPropName}.val")
+                                                md-option(value=true)!='yes'
+                                                md-option(value=false)!='no'
+                                        else
+                                            label!=inputProp['fieldLabel']
+                                            input(placeholder=inputProp['example'], ng-model="petData.#{inputPropName}.val")
         div.default-field
             md-input-container
                 md-button.input-submit.md-primary.md-raised(ng-click!='this.submit()') Save

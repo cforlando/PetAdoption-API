@@ -29,6 +29,7 @@ var fs = require('fs'),
 
 function parseOptionsCSV(csvData) {
     // console.log('sanitizing options: %s', dump(csvData));
+    console.log('sanitizing options');
 
     var optionsData = {},
         csvLabelsRow = csvData[0];
@@ -42,7 +43,8 @@ function parseOptionsCSV(csvData) {
         }
     });
 
-    console.log('sanitized options: %s', dump(optionsData));
+    // console.log('sanitized options: %s', dump(optionsData));
+    console.log('sanitized options');
     return optionsData;
 }
 

@@ -11,7 +11,7 @@ var fs = require('fs'),
     routes = require('./routes/index'),
 
     server = express(),
-    portNumber = normalizePort(process.env.PORT || '3000');
+    portNumber = normalizePort(process.env.PORT || '5000');
 
 server.set('port', portNumber);
 

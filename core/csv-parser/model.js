@@ -4,6 +4,7 @@ var fs = require('fs'),
     async = require('async'),
     csv = require('csv'),
     _ = require('lodash'),
+    moment = require('moment'),
 
     helperUtils = require('./helper-utils'),
     dump = require('../../lib/dump'),
@@ -11,9 +12,6 @@ var fs = require('fs'),
     __dirname = process.cwd(), //__dirname || path.resolve('./'),
     cwd = __dirname,
     defaults = {
-        done: function () {
-            console.warn('parse() complete - No callback provided.')
-        },
         context: null,
         readPath: [
             path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Cats.csv'),
@@ -25,6 +23,7 @@ var fs = require('fs'),
 
 function parseModelCSV(csvModelData) {
     // console.log('sanitizing model: %s', dump(modelData));
+    console.log('sanitizing model');
 
     var newModel = {},
         columnIndices = {
@@ -59,11 +58,20 @@ function parseModelCSV(csvModelData) {
                         break;
                 }
             });
+            if (_modelPropData['key'].match(/lostGeoL/)){
+                _modelPropData['default'] = 'Location';
+            }
+            if (_modelPropData['type'] == 'Date'){
+                if( !moment(_modelPropData['default']).isValid()){
+                    _modelPropData['default'] = null;
+                }
+            }
             newModel[_modelPropData['key']] = _modelPropData;
         }
     });
 
-    console.log('sanitized model: %j', newModel);
+    console.log('sanitized model');
+    // console.log('sanitized model: %j', newModel);
     return newModel;
 }
 
@@ -76,24 +84,23 @@ function parseModelCSV(csvModelData) {
 function _mergeOptionsAndModel(modelsData, optionsData, callback) {
     var _modelsData = {};
     _.forEach(modelsData, function (modelData, modelDataType, models) {
-        _modelsData[modelDataType] = _.reverse(
-            _.map(modelData, function (modelPropInfo, modelPropName, props) {
-                return _.extend(modelPropInfo, {
-                    defaultValue: modelPropInfo['default'],
-                    options: _.reverse((function () {
-                        if (optionsData[modelDataType][modelPropName]) {
-                            return optionsData[modelDataType][modelPropName];
+        _modelsData[modelDataType] = {};
+        _.forEach(modelData, function (modelPropInfo, modelPropName, props) {
+            _modelsData[modelDataType][modelPropName] = _.extend(modelPropInfo, {
+                defaultValue: modelPropInfo['default'],
+                options: _.reverse((function () {
+                    if (optionsData[modelDataType][modelPropName]) {
+                        return optionsData[modelDataType][modelPropName];
 
-                        } else if (optionsData[modelDataType]['breed'] && modelPropInfo['key'].match(/breed/ig)) {
-                            return _.reverse(optionsData[modelDataType]['breed']);
+                    } else if (optionsData[modelDataType]['breed'] && modelPropInfo['key'].match(/breed/ig)) {
+                        return _.reverse(optionsData[modelDataType]['breed']);
 
-                        } else {
-                            return [];
-                        }
-                    })())
-                });
-            })
-        );
+                    } else {
+                        return [];
+                    }
+                })())
+            });
+        })
     });
     callback.call(null, _modelsData);
 }

@@ -3,6 +3,7 @@ tmp/*
 couchbase.config
 mongodb.config
 *.bak
+public/images/pets/*
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Node template

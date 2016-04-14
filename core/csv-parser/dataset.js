@@ -13,15 +13,16 @@ var fs = require('fs'),
         },
         context: null,
         readPath: path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_Test_Dataset - Sheet1.csv'),
-        writeDir: path.resolve(process.cwd(), 'core/data'),
+        writeDir: path.resolve(process.cwd(), 'core/data/'),
         cacheName: 'dataset.dog'
     };
 
 function sanitizeTestDataCSV(csvData) {
     // console.log('sanitizing dataset: %s', dump(csvData));
+    console.log('sanitizing dataset');
 
     // imagesPath could be url such http://server.com/images/ (url must have trailing slash)
-    var imagesPath = '',
+    var imagesPath = '/images/pet',
         animalData,
         fieldName,
         pets = [],
@@ -48,8 +49,8 @@ function sanitizeTestDataCSV(csvData) {
                     animalData['description'] = animal[fieldIndex];
                     break;
                 case 'photo':
-                    animalData['image'] = imagesPath + animal[fieldIndex];
-                    animalData['images'] = [(imagesPath + animal[fieldIndex])];
+                    animalData['image'] = path.join(imagesPath, animal[fieldIndex]);
+                    animalData['images'] = [path.join(imagesPath, animal[fieldIndex]), path.join(imagesPath, animal[fieldIndex])];
                     break;
                 default:
                     animalData[fieldName] = animal[fieldIndex];
@@ -61,7 +62,8 @@ function sanitizeTestDataCSV(csvData) {
         }
     });
 
-    console.log('sanitized dataset: %s', dump(pets));
+    // console.log('sanitized dataset: %s', dump(pets));
+    console.log('sanitized dataset');
     return pets;
 }
 
@@ -75,17 +77,22 @@ module.exports = {
      * @param {Object} options.writePath
      */
     parse: function (options) {
+        console.log('dataset parsing');
         var _options = _.extend(defaults, options);
         _options.writePath = path.resolve(_options.writeDir, util.format('%s.json', _options.cacheName));
-        fs.readFile(_options.readPath, 'utf8', function (err, petTestDataText) {
+        fs.readFile(_options.readPath, {encoding: 'utf8'}, function (readErr, petTestDataText) {
+            if(readErr) throw readErr;
             csv.parse(petTestDataText, function (err, petTestCSVData) {
                 var petTestData = sanitizeTestDataCSV(petTestCSVData);
+                console.log('dataset parsed');
                 if (_options.cache === true) {
                     fs.writeFile(_options.writePath, JSON.stringify(petTestData), function (err) {
                         if (err) throw err;
+                        console.log('dataset saved');
                         _options.done.apply(_options.context, [petTestData, _options]);
                     })
                 } else {
+                    console.log('dataset loaded');
                     _options.done.apply(_options.context, [petTestData, _options]);
                 }
             });

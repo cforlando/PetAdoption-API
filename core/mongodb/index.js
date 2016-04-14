@@ -102,7 +102,6 @@ mongodb._buildQuery = function (animalQueryProps) {
                     var prefix = '',
                         suffix = '',
                         regexArgs = '';
-                    console.log('matchStartFor: %s = %s', typeof animalQueryProps['matchStartFor'], animalQueryProps['matchStartFor']);
                     if (animalQueryProps['matchStartFor'] && _.indexOf(animalQueryProps['matchStartFor'], propName) >= 0) {
                         prefix = '^';
                     }
@@ -245,9 +244,9 @@ mongodb.findAnimals = function (animalQueryProps, options) {
  *
  * @param animalQueryProps
  * @param {Object} options
- * @param {Boolean} options.debug Whether to log debug info
+ * @param {Boolean} [options.debug] Whether to log debug info
  * @param {Function} options.complete callback on operation completion
- * @param {Object} options.context context for complete function callback
+ * @param {Object} [options.context] context for complete function callback
  */
 mongodb.saveAnimal = function (animalQueryProps, options) {
     var _options = _.extend({}, options);

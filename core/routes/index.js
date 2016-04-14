@@ -8,16 +8,16 @@ var path = require('path'),
     dump = require('../../lib/dump'),
 
     router = express.Router(),
-    models = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'core/data/models.json'), {encoding: 'utf8'})),
-    schemaModelArray = _.toArray(models['dog']);
+    models = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'core/data/models.json'), {encoding: 'utf8'}));
 
 
 router.get('/', function (req, res, next) {
     res.render('index', {
         title: 'CFO Pet Adoption Data Entry',
-        inputs: schemaModelArray
+        inputs: _.sortBy(models)
     });
-});
+})
+;
 
 
 module.exports = router;

@@ -10,9 +10,6 @@ var fs = require('fs'),
     dump = require('../../lib/dump'),
 
     defaults = {
-        done: function () {
-            console.warn('parse() complete - No callback provided.')
-        },
         context: null,
         readPath: [
             path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Cats.csv'),
@@ -24,6 +21,7 @@ var fs = require('fs'),
 
 function parseSchemaCSV(csvSchemaData) {
     // console.log('sanitizing schema: %s', dump(csvSchemaData));
+    console.log('sanitizing schema');
     var newSchema = {},
         columnIndices = {
             name: 1,
@@ -55,10 +53,13 @@ function parseSchemaCSV(csvSchemaData) {
                         break;
                 }
             });
+            newSchema['image'] = {type : "String"};
+            newSchema['images'] = {type : ["String"]};
         }
     });
 
-    console.log('sanitized schema: %j', newSchema);
+    // console.log('sanitized schema: %j', newSchema);
+    console.log('sanitized schema');
     return newSchema;
 }
 
