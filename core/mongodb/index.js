@@ -6,8 +6,13 @@ var util = require('util'),
     schemaGenerator = require('mongoose-gen'),
     _ = require('lodash'),
 
-    animalSchemasJSON = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'core/data/schema.json'), 'utf8')),
+    config = require('../config'),
+    dump = require('../../lib/dump'),
+
+    animalSchemas = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'core/data/schema.json'), {encoding: 'utf8'})),
+    animalModels = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'core/data/models.json'), {encoding: 'utf8'})),
     AnimalDocuments = {},
+    defaultSpecies = 'dog',
     localConfig = (function () {
         var config = {
             username: 'username',
@@ -65,7 +70,7 @@ mongodb.connect = function (callback, options) {
         mongodb.state.isConnecting = false;
 
         var AnimalSchemas = {};
-        _.forEach(animalSchemasJSON, function (animalSchema, animalSchemaName, collection) {
+        _.forEach(animalSchemas, function (animalSchema, animalSchemaName, collection) {
             AnimalSchemas[animalSchemaName] = new mongoose.Schema(schemaGenerator.convert(animalSchema));
             AnimalDocuments[animalSchemaName] = mongoose.model(animalSchemaName, AnimalSchemas[animalSchemaName], (mongodb.config.isDevelopment) ? 'pets_test' : 'pets_production');
         });
@@ -83,7 +88,7 @@ mongodb.connect = function (callback, options) {
  */
 mongodb._buildQuery = function (animalQueryProps) {
     var searchParams = {
-        species: (AnimalDocuments[animalQueryProps['species']]) ? animalQueryProps['species'] : 'dog'  // defaults to dog species
+        species: (AnimalDocuments[animalQueryProps['species']]) ? animalQueryProps['species'] : defaultSpecies
     };
 
     if (searchParams['species'])
@@ -111,7 +116,7 @@ mongodb._buildQuery = function (animalQueryProps) {
                     if (animalQueryProps['ignoreCaseFor'] && _.indexOf(animalQueryProps['ignoreCaseFor'], propName) >= 0) {
                         regexArgs = 'i';
                     }
-                    if (_.has(animalSchemasJSON[searchParams['species']], propName)) {
+                    if (_.has(animalSchemas[searchParams['species']], propName)) {
                         searchParams[propName] = new RegExp(util.format('%s%s%s', prefix, propVal, suffix), regexArgs);
                     }
                     break;
@@ -159,19 +164,66 @@ mongodb._exec = function (func, options) {
     }
 };
 
-mongodb._filterPropsForSave = function(searchQueryProps){
+mongodb._filterPropsForSearchMatch = function (searchQueryProps) {
     var filteredAnimalQueryProps = {};
 
-    if(searchQueryProps['petName']) {
+    if (searchQueryProps['petName']) {
         filteredAnimalQueryProps['petName'] = searchQueryProps['petName'];
     }
-    if(searchQueryProps['petId']) {
+    if (searchQueryProps['petId'] && !/\s/.test(searchQueryProps['petId'])) {
         filteredAnimalQueryProps['petId'] = searchQueryProps['petId'];
     }
-    if(!(filteredAnimalQueryProps['petName'] || filteredAnimalQueryProps['petId'])) {
+    if (!(filteredAnimalQueryProps['petName'] || filteredAnimalQueryProps['petId'])) {
         filteredAnimalQueryProps = searchQueryProps;
     }
     return filteredAnimalQueryProps;
+};
+
+mongodb._getSpeciesFromProps = function (animalProps) {
+
+    var _species = (_.isString(animalProps['species'])) ? animalProps['species'].toLowerCase() : defaultSpecies;
+    return (animalSchemas[_species]) ? _species : defaultSpecies;
+};
+
+mongodb._sanitizePropsForSave = function (searchQueryProps) {
+    var sanitizedProps = {},
+        schemaSpecies = mongodb._getSpeciesFromProps(searchQueryProps),
+        schema = animalSchemas[schemaSpecies];
+    if (config.isDevelopment) console.log('using schema for %s', schemaSpecies);
+    _.forEach(searchQueryProps, function (propValue, propName) {
+        if (schema[propName]) {
+            switch (schema[propName].type) {
+                case 'Number':
+                    sanitizedProps[propName] = parseInt(propValue) || -1;
+                    break;
+                case 'Float':
+                    sanitizedProps[propName] = parseFloat(propValue) || -1;
+                    break;
+                case 'Date':
+                    sanitizedProps[propName] = new Date(propValue);
+                    break;
+                default:
+                    sanitizedProps[propName] = propValue;
+            }
+        }
+    });
+    return sanitizedProps;
+};
+
+mongodb._sanitizePropsForSend = function (animalProps) {
+    var _animalProps = {},
+        species = mongodb._getSpeciesFromProps(animalProps),
+        model = animalModels[species];
+    // format to model structure
+    _.forEach(animalProps, function (propVal, propName) {
+        _animalProps[propName] = _.extend({
+            val: propVal
+        }, model[propName]);
+    });
+    _animalProps['petId'] = {
+        val: animalProps['_id']
+    };
+    return _animalProps;
 };
 
 /**
@@ -187,14 +239,18 @@ mongodb.findAnimal = function (animalQueryProps, options) {
 
     mongodb._exec(function () {
         if (_options.debug) console.log("mongodb.findAnimal() - received query for: ", animalQueryProps);
-        var searchParams = mongodb._buildQuery(animalQueryProps);
+        var searchParams = mongodb._buildQuery(animalQueryProps),
+            species = mongodb._getSpeciesFromProps(animalQueryProps);
 
         if (_options.debug) console.log('mongodb.findAnimal() - searching for: ', searchParams);
-        AnimalDocuments[searchParams.species].findOne(
+        AnimalDocuments[species].findOne(
             searchParams,
-            function (err, animal) {
+            function (err, _animal) {
+                var animal = {};
                 if (err) {
                     console.error(err);
+                } else {
+                    animal = mongodb._sanitizePropsForSend(_animal._doc);
                 }
                 if (_options.debug) console.log('mongodb.findAnimal() - found animal: ', animal);
                 if (typeof _options.complete == 'function') {
@@ -221,13 +277,19 @@ mongodb.findAnimals = function (animalQueryProps, options) {
 
     var query = function () {
         if (_options.debug) console.log("mongodb.findAnimals() - received query for: ", animalQueryProps);
-        var searchParams = mongodb._buildQuery(animalQueryProps);
+        var searchParams = mongodb._buildQuery(animalQueryProps),
+            species = mongodb._getSpeciesFromProps(animalQueryProps);
         if (_options.debug) console.log('mongodb.findAnimals() - searching for: ', searchParams);
-        AnimalDocuments[searchParams.species].find(
+        AnimalDocuments[species].find(
             searchParams,
-            function (err, animals) {
+            function (err, _animals) {
+                var animals = [];
                 if (err) {
                     console.error(err);
+                } else {
+                    _.forEach(_animals, function (animal, index) {
+                        animals.push(mongodb._sanitizePropsForSend(animal._doc));
+                    })
                 }
                 // if (_options.debug) console.log('mongodb.findAnimals() - found animals: ', animals);
                 if (_.isFunction(_options.complete)) {
@@ -254,18 +316,23 @@ mongodb.saveAnimal = function (animalQueryProps, options) {
     mongodb._exec(function () {
         if (_options.debug) console.log("mongodb.saveAnimal() - received query for: ", animalQueryProps);
 
-        var filteredQueryProps = mongodb._filterPropsForSave(animalQueryProps),
-            searchParams = mongodb._buildQuery(filteredQueryProps);
+        var filteredQueryProps = mongodb._filterPropsForSearchMatch(animalQueryProps),
+            sanitizedQueryProps = mongodb._sanitizePropsForSave(animalQueryProps),
+            searchParams = mongodb._buildQuery(filteredQueryProps),
+            species = mongodb._getSpeciesFromProps(animalQueryProps);
 
         if (_options.debug) console.log('mongodb.saveAnimal() - searching for: ', searchParams);
-        AnimalDocuments[searchParams.species].findOneAndUpdate(
+        AnimalDocuments[species].findOneAndUpdate(
             searchParams,
-            animalQueryProps, {
+            sanitizedQueryProps, {
                 new: true,
                 upsert: true
-            }, function (err, animal) {
+            }, function (err, _animal) {
+                var animal = {};
                 if (err) {
                     console.error(err);
+                } else {
+                    animal = mongodb._sanitizePropsForSend(_animal._doc);
                 }
                 if (_options.debug) console.log('saved and sending animal: ', animal);
                 if (_options.complete) {

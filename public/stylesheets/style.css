@@ -35,3 +35,7 @@ a {
 /* Support for IE. */
   font-feature-settings: 'liga';
 }
+.google-maps {
+  background-color: #000;
+  height: 7.5em;
+}

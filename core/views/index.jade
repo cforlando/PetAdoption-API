@@ -1,9 +1,9 @@
 extends layout
 
 block content
-    md-tabs(md-dynamic-height, md-border-bottom)
+    md-tabs(md-dynamic-height, md-border-bottom, md-stretch-tabs)
         each model, modelName in inputs
-            md-tab(label=modelName)
+            md-tab(label=modelName, md-on-select="onTabSelected('#{modelName}')")
                 md-content.md-padding
                     form.pet-form(layout="column", action='/api/v1/save', method='post')
                         -
@@ -13,8 +13,8 @@ block content
                         each inputProp, inputPropName in model
                             div.default-field
                                 if inputProp['type'] == 'Date'
-                                    md-datepicker(placeholder=inputProp['fieldLabel'], ng-model="petData.#{inputPropName}.val")
-                                else if inputProp['type'] == 'Location' && !flags.isLocationInputVisible
+                                    md-datepicker(placeholder=inputProp['fieldLabel'], ng-model="petData.#{modelName}.#{inputPropName}.val")
+                                else if ((inputProp['val'] == 'Location' || inputProp['type'] == 'Location') && !flags.isLocationInputVisible)
                                     #map.google-maps
                                     -
                                         flags.isLocationInputVisible = true;
@@ -22,17 +22,17 @@ block content
                                     md-input-container
                                         if inputProp['options'].length > 0
                                             label!=inputProp['fieldLabel']
-                                            md-select(ng-model="petData.#{inputPropName}.val")
+                                            md-select(ng-model="petData.#{modelName}.#{inputPropName}.val")
                                                 each inputPropOption in inputProp['options']
                                                     md-option(value!="#{inputPropOption}")=inputPropOption
                                         else if inputProp['type'] == 'Boolean'
                                             label!=inputProp['fieldLabel']
-                                            md-select(ng-model="petData.#{inputPropName}.val")
+                                            md-select(ng-model="petData.#{modelName}.#{inputPropName}.val")
                                                 md-option(value=true)!='yes'
                                                 md-option(value=false)!='no'
                                         else
                                             label!=inputProp['fieldLabel']
-                                            input(placeholder=inputProp['example'], ng-model="petData.#{inputPropName}.val")
-        div.default-field
-            md-input-container
-                md-button.input-submit.md-primary.md-raised(ng-click!='this.submit()') Save
+                                            input(placeholder=inputProp['example'], ng-model="petData.#{modelName}.#{inputPropName}.val")
+                        div.default-field
+                            md-input-container
+                                md-button.input-submit.md-primary.md-raised(ng-click!='this.submit()') Save

@@ -87,7 +87,6 @@ function _mergeOptionsAndModel(modelsData, optionsData, callback) {
         _modelsData[modelDataType] = {};
         _.forEach(modelData, function (modelPropInfo, modelPropName, props) {
             _modelsData[modelDataType][modelPropName] = _.extend(modelPropInfo, {
-                defaultValue: modelPropInfo['default'],
                 options: _.reverse((function () {
                     if (optionsData[modelDataType][modelPropName]) {
                         return optionsData[modelDataType][modelPropName];

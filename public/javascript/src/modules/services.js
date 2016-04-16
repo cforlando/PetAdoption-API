@@ -11,16 +11,16 @@ define([
             var _data = {};
             _.forEach(responseData, function (propData, propName, props) {
                 if (!_data[propName]) _data[propName] = {};
+                
                 if (propData['type'] == 'Date') {
-                    if (_.isDate(propData['val'])) {
-                        _data[propName].val = propData['val']
-                    } else if (_.isDate(propData['defaultValue'])) {
-                        _data[propName].val = propData['defaultValue']
-                    } else {
+                    // handle special case for date
+                    _data[propName].val = new Date(propData['val']);
+                    if(isNaN( _data[propName].val.getTime() )){
                         _data[propName].val = new Date();
                     }
                 } else {
-                    _data[propName].val = responseData[propName].val || responseData[propName].defaultValue;
+                    // TODO remove autofill with example
+                    _data[propName].val = propData.val || propData.default || propData.example;
                 }
             });
             return _data;

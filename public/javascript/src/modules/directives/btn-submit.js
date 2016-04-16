@@ -4,10 +4,10 @@ define(['ngApp'], function(ngApp){
         return {
             restrict: 'C',
             controller: ['$scope', '$element', function ($scope, $element) {
-                $element.on('click', function () {
-                    console.log('submit');
-                    $scope.$emit('submit');
-                })
+                // $element.on('click', function () {
+                //     console.log('submit');
+                //     $scope.$emit('submit');
+                // })
             }]
         };
     });

@@ -16,8 +16,8 @@ define([
                     function success(response) {
                         $mdToast.show($mdToast.simple().textContent("Successfully updated from server."));
                         var parsedResponseData = dataParserService.parseResponseData(response.data);
-                        _.extend($scope['petData'], parsedResponseData);
-                        if (done) done($scope['petData']);
+                        $scope['petData'][$scope.visiblePetType] = _.extend(parsedResponseData, $scope['petData'][$scope.visiblePetType]);
+                        if (done) done($scope['petData'][$scope.visiblePetType]);
                     },
                     function failure() {
                         $mdToast.show($mdToast.simple().textContent("Sorry. Can't get any info from server."));
@@ -25,8 +25,12 @@ define([
                     });
             }
 
-            updateModel();
-
+            $scope.onTabSelected = function(tab){
+                console.log('tab selected: %s', tab);
+                $scope.visiblePetType = tab;
+                updateModel();
+            };
+            
             $scope['fab'] = {
                 isOpen: false
             }
