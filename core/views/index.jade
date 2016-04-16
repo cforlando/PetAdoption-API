@@ -1,7 +1,7 @@
 extends layout
 
 block content
-    md-tabs(md-dynamic-height, md-border-bottom, md-stretch-tabs)
+    md-tabs(md-dynamic-height, md-border-bottom, md-stretch-tabs='always')
         each model, modelName in inputs
             md-tab(label=modelName, md-on-select="onTabSelected('#{modelName}')")
                 md-content.md-padding
