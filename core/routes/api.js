@@ -47,40 +47,42 @@ router.use(function (err, req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
 });
 
-function onListRequest(req, response, next) {
+function onListRequest(req, res, next) {
     var queryData = {
         species: req.params['species'],
         ignoreCaseFor: ['species']
     };
+    res.locals.pageNumber = req.params['pageNumber'];
 
     database.findAnimals(queryData, {
         debug: config.isDevelopment,
         complete: function (err, animals) {
             if (err) {
-                response.locals.data = err;
+                res.locals.data = err;
             } else if (_.isArray(animals)) {
-                response.locals.data = animals;
+                res.locals.data = animals;
             } else {
-                response.locals.data = [];
+                res.locals.data = [];
             }
             next();
         }
     });
 }
 
-function onQueryRequest(req, response, next) {
+function onQueryRequest(req, res, next) {
     var queryData = req.body;
+    res.locals.pageNumber = req.params['pageNumber'];
 
     database.findAnimals(queryData, {
         debug: config.isDevelopment,
         complete: function (err, animals) {
             //console.log('getAnimal().mongoDB.findAnimal() - found animal:', animal);
             if (err) {
-                response.locals.data = err;
+                res.locals.data = err;
             } else if (animals && animals.length > 0) {
-                response.locals.data = animals;
+                res.locals.data = animals;
             } else {
-                response.locals.data = [];
+                res.locals.data = [];
             }
             next();
         }
@@ -106,6 +108,7 @@ function onOptionsRequest(req, res) {
 function onOptionRequest(req, res) {
     var species = req.params['species'],
         optionName = req.params['option'];
+    res.locals.pageNumber = req.params['pageNumber'];
 
     fs.readFile(path.resolve(process.cwd(), 'core/data/options.json'),
         {encoding: 'utf8'},
@@ -242,30 +245,30 @@ function onResetRequest(req, res, next) {
     }
 }
 
-router.get('/options/:species', onOptionsRequest);
+router.get('/options/:species/', onOptionsRequest);
+router.get('/options/:species/:option/:pageNumber/', onOptionRequest);
 router.get('/options/:species/:option', onOptionRequest);
-router.get('/options/:species/:option/:pageNumber', onOptionRequest);
-router.get('/model/:species', onModelRequest);
-router.get('/schema/:species', onSchemaRequest);
+router.get('/model/:species/', onModelRequest);
+router.get('/schema/:species/', onSchemaRequest);
+router.get('/list/:species/:pageNumber/', onListRequest);
 router.get('/list/:species/', onListRequest);
-router.get('/list/:species/:pageNumber', onListRequest);
 router.post('/save', onSave);
-router.post('/query', onQueryRequest);
 router.post('/query/:pageNumber', onQueryRequest);
+router.post('/query', onQueryRequest);
 
 router.get('/reset', onResetRequest);
 
 // paginate data
 router.use(function (request, response, next) {
     var pageNum = (function () {
-            var parsedPageNum = parseInt(request.params['pageNumber'] || 1) - 1; // page numbers start at 1
+            var parsedPageNum = (parseInt(response.locals.pageNumber) || 1) - 1; // page numbers start at 1
             if (parsedPageNum < 0) return 0;
             return parsedPageNum;
         })(),
-        _pageSize = (request.query.pageSize || _options.pageSize),
+        _pageSize = parseInt(request.query['pageSize'] || request.body['pageSize'] || _options.pageSize),
         _startIndex = pageNum * _pageSize;
 
-    if (_.isArray(response.locals.data) && _.isFinite(pageNum) && response.locals.data.length > _pageSize) {
+    if (_.isFinite(parseInt(response.locals.pageNumber)) && _.isArray(response.locals.data) && response.locals.data.length > _pageSize) {
         response.locals.data = response.locals.data.slice(_startIndex, _startIndex + _pageSize);
     }
     next();
@@ -277,9 +280,9 @@ router.use(function (request, response, next) {
     function simplifyResult(data) {
 
 
-        return data.map(function(animalProps, index) {
+        return data.map(function (animalProps, index) {
             var _animalProps = {};
-            _.forEach(animalProps, function(propData, propName){
+            _.forEach(animalProps, function (propData, propName) {
                 _animalProps[propName] = propData.val;
             });
             return _animalProps;
