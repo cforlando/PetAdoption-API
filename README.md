@@ -2,6 +2,7 @@
 MongoDB/Express mockup server
 
 Current API location: http://pet-adoption-server.herokuapp.com/api/v1/
+
 Current API location: http://pet-adoption-server.herokuapp.com/api/v2/ (for reduced response data)
 
 ### API
@@ -12,7 +13,8 @@ GET     | options/:species/:option               | JSON of given option for a gi
 GET     | options/:species/:option/:pageNumber   | JSON of given option for a given species in pages. Page size defaults to 10. This can be changed via query argument (i.e. "/options/dog/breed/1?pageSize=15")
 GET     | schema/:species                        | returns JSON representation of a schema. Currently includes dog and cat schema
 GET     | list/:species                          | ex: '/list/dog' will show all saved dog species
-POST    | save/                                  | fields will be saved as provided. Must match schema definition
+GET     | list/:species/:pageNumber              | paginated route for list/:species endpoint
+POST    | save/                                  | fields will be saved as provided. Must match schema definition. Responds with saved animal data
 POST    | query/                                 | will match given parameters 
 POST    | query/:pageNumber                      | will match given parameters with paged results
 
