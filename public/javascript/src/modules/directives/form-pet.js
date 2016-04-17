@@ -12,13 +12,7 @@ define(['ngApp'], function (ngApp) {
                     });
                     console.log("listening for click on %O", $submitButton);
                     function submit() {
-                        var _data = {},
-                            _formData = $scope.petData[$scope.visiblePetType];
-                        for (var prop in _formData) {
-                            if (_formData.hasOwnProperty(prop)) {
-                                _data[prop] = _formData[prop]['val'];
-                            }
-                        }
+                        var _data = dataParserService.formatSendData($scope.petData[$scope.visiblePetType]);
 
                         console.log('_data; %o', _data);
                         $http.post($element.attr('action'), _data).then(

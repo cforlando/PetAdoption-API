@@ -60,6 +60,7 @@ function parseModelCSV(csvModelData) {
             });
             if (_modelPropData['key'].match(/lostGeoL/)){
                 _modelPropData['default'] = 'Location';
+                _modelPropData['type'] = 'Location';
             }
             if (_modelPropData['type'] == 'Date'){
                 if( !moment(_modelPropData['default']).isValid()){

@@ -11,11 +11,13 @@ var fs = require('fs'),
     MongoDB = require('../mongodb'),
     csvReader = require('../csv-parser'),
     config = require('../config'),
+    dump = require('../../lib/dump'),
 
     router = Express(),
     database = MongoDB, //  can use MongoDB || Couchbase
     _options = {
-        pageSize: 10
+        pageSize: 10,
+        simplifiedFormat: false
     };
 
 router.use(logger('dev'));
@@ -31,13 +33,62 @@ router.use(function (err, req, res, next) {
     });
 });
 
-//CORS access
+// set simplifiedFormat flag
+router.use(function (req, res, next) {
+    if (/v2$/.test(req.baseUrl) && /^\/(list|query)/.test(req.path)) {
+        _options.simplifiedFormat = true;
+    }
+    next();
+});
+
+//set CORS access
 router.use(function (err, req, res, next) {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header("Access-Control-Allow-Origin", "*");
 });
 
-router.get('/options/:species', function (req, res) {
+function onListRequest(req, response, next) {
+    var queryData = {
+        species: req.params['species'],
+        ignoreCaseFor: ['species']
+    };
+
+    database.findAnimals(queryData, {
+        debug: config.isDevelopment,
+        complete: function (err, animals) {
+            if (err) {
+                response.locals.data = err;
+            } else if (_.isArray(animals)) {
+                response.locals.data = animals;
+            } else {
+                response.locals.data = [];
+            }
+            next();
+        }
+    });
+}
+
+function onQueryRequest(req, response, next) {
+    var queryData = req.body;
+
+    database.findAnimals(queryData, {
+        debug: config.isDevelopment,
+        complete: function (err, animals) {
+            //console.log('getAnimal().mongoDB.findAnimal() - found animal:', animal);
+            if (err) {
+                response.locals.data = err;
+            } else if (animals && animals.length > 0) {
+                response.locals.data = animals;
+            } else {
+                response.locals.data = [];
+            }
+            next();
+        }
+    });
+
+}
+
+function onOptionsRequest(req, res) {
     var species = req.params['species'];
 
     fs.readFile(path.resolve(process.cwd(), 'core/data/options.json'),
@@ -50,12 +101,11 @@ router.get('/options/:species', function (req, res) {
                 res.send(JSON.stringify(options[species]));
             }
         });
-});
+}
 
-router.get('/options/:species/:option', function (req, res) {
+function onOptionRequest(req, res) {
     var species = req.params['species'],
         optionName = req.params['option'];
-
 
     fs.readFile(path.resolve(process.cwd(), 'core/data/options.json'),
         {encoding: 'utf8'},
@@ -64,42 +114,12 @@ router.get('/options/:species/:option', function (req, res) {
                 res.send(err);
             } else {
                 var options = JSON.parse(str);
-
-                res.send(JSON.stringify(options[species][optionName]));
+                res.locals.data = options[species][optionName];
             }
         });
-});
+}
 
-router.get('/options/:species/:option/:paged', function (req, res) {
-    var species = req.params['species'],
-        optionName = req.params['option'],
-        pageNum = (function () {
-            var parsedPageNum = parseInt(req.params['paged']) - 1; // page numbers start at 1
-            if (parsedPageNum < 0) return 0;
-            return parsedPageNum;
-        })(),
-        _pageSize = (req.query.pageSize || _options.pageSize),
-        _startIndex = pageNum * _pageSize;
-
-    fs.readFile(path.resolve(process.cwd(), 'core/data/options.json'),
-        {encoding: 'utf8'},
-        function (err, str) {
-            if (err) {
-                res.send(err);
-            } else {
-                var options = JSON.parse(str),
-                    option = options[species][optionName];
-                if (_.isFinite(pageNum) && option.length > _pageSize) {
-                    res.send(option.slice(_startIndex, _startIndex + _pageSize));
-                } else {
-                    res.send(option);
-                }
-            }
-        });
-});
-
-
-router.post('/save', function (req, res, next) {
+function onSave(req, res, next) {
 
     database.saveAnimal(req.body, {
         debug: config.isDevelopment,
@@ -114,9 +134,9 @@ router.post('/save', function (req, res, next) {
             }
         }
     });
-});
+}
 
-router.get('/model/:species', function (req, res) {
+function onModelRequest(req, res) {
     var species = req.params['species'];
 
     fs.readFile(path.resolve(process.cwd(), 'core/data/models.json'),
@@ -130,9 +150,9 @@ router.get('/model/:species', function (req, res) {
                 res.send(JSON.stringify(models[species]));
             }
         });
-});
+}
 
-router.get('/schema/:species', function (req, res) {
+function onSchemaRequest(req, res) {
     var species = req.params['species'];
 
     fs.readFile(path.resolve(process.cwd(), 'core/data/schema.json'),
@@ -146,86 +166,9 @@ router.get('/schema/:species', function (req, res) {
                 res.send(JSON.stringify(schemas[species]));
             }
         });
-});
+}
 
-router.get('/list/:species', function (req, response) {
-    var queryData = {
-            species: req.params['species']
-        },
-        pageNum = (function () {
-            var parsedPageNum = parseInt(req.params['paged'] || 1) - 1; // page numbers start at 1
-            if (parsedPageNum < 0) return 0;
-            return parsedPageNum;
-        })(),
-        _pageSize = (req.query.pageSize || _options.pageSize),
-        _startIndex = pageNum * _pageSize;
-
-    database.findAnimals(queryData, {
-        complete: function (err, animals) {
-            if (err) {
-                response.send(err)
-            } else if (_.isArray(animals)) {
-                response.send(animals);
-            } else {
-                response.send([])
-            }
-        }
-    });
-});
-
-router.post('/query', function (req, response) {
-    var queryData = req.body;
-
-    database.findAnimals(queryData, {
-        debug: config.isDevelopment,
-        complete: function (err, animals) {
-            //console.log('getAnimal().mongoDB.findAnimal() - found animal:', animal);
-            if (err) {
-                response.send(err)
-            } else if (animals && animals.length > 0) {
-                response.send(animals);
-            } else {
-                //console.log('getAnimal().mongoDB.findAnimal() - failed to find animal. Will save as new animal');
-                response.send([]);
-            }
-        }
-    });
-
-});
-
-router.post('/query/:paged', function (req, response) {
-    var queryData = req.body,
-        pageNum = (function () {
-            var parsedPageNum = parseInt(req.params['paged']) - 1; // page numbers start at 1
-            if (parsedPageNum < 0) return 0;
-            return parsedPageNum;
-        })(),
-        _pageSize = (req.query.pageSize || _options.pageSize),
-        _startIndex = pageNum * _pageSize;
-
-    database.findAnimals(queryData, {
-        debug: config.isDevelopment,
-        complete: function (err, animals) {
-            //console.log('getAnimal().mongoDB.findAnimal() - found animal:', animal);
-            if (err) {
-                response.send(err)
-            } else if (animals && animals.length > 0) {
-
-                if (_.isFinite(pageNum) && animals.length > _pageSize) {
-                    response.send(animals.slice(_startIndex, _startIndex + _pageSize));
-                } else {
-                    response.send(animals);
-                }
-            } else {
-                //console.log('getAnimal().mongoDB.findAnimal() - failed to find animal. Will save as new animal');
-                response.send([]);
-            }
-        }
-    });
-
-});
-
-router.get('/reset', function (req, res, next) {
+function onResetRequest(req, res, next) {
     console.log('/reset');
 
     csvReader.parseSchema({
@@ -296,6 +239,57 @@ router.get('/reset', function (req, res, next) {
                 res.send(err || {result: 'success'});
             }
         );
+    }
+}
+
+router.get('/options/:species', onOptionsRequest);
+router.get('/options/:species/:option', onOptionRequest);
+router.get('/options/:species/:option/:pageNumber', onOptionRequest);
+router.get('/model/:species', onModelRequest);
+router.get('/schema/:species', onSchemaRequest);
+router.get('/list/:species/', onListRequest);
+router.get('/list/:species/:pageNumber', onListRequest);
+router.post('/save', onSave);
+router.post('/query', onQueryRequest);
+router.post('/query/:pageNumber', onQueryRequest);
+
+router.get('/reset', onResetRequest);
+
+// paginate data
+router.use(function (request, response, next) {
+    var pageNum = (function () {
+            var parsedPageNum = parseInt(request.params['pageNumber'] || 1) - 1; // page numbers start at 1
+            if (parsedPageNum < 0) return 0;
+            return parsedPageNum;
+        })(),
+        _pageSize = (request.query.pageSize || _options.pageSize),
+        _startIndex = pageNum * _pageSize;
+
+    if (_.isArray(response.locals.data) && _.isFinite(pageNum) && response.locals.data.length > _pageSize) {
+        response.locals.data = response.locals.data.slice(_startIndex, _startIndex + _pageSize);
+    }
+    next();
+});
+
+// format and send data
+router.use(function (request, response, next) {
+
+    function simplifyResult(data) {
+
+
+        return data.map(function(animalProps, index) {
+            var _animalProps = {};
+            _.forEach(animalProps, function(propData, propName){
+                _animalProps[propName] = propData.val;
+            });
+            return _animalProps;
+        });
+    }
+
+    if (_options.simplifiedFormat) {
+        response.send(simplifyResult(response.locals.data));
+    } else {
+        response.send(response.locals.data);
     }
 });
 

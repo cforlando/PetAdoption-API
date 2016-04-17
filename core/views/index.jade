@@ -13,11 +13,13 @@ block content
                         each inputProp, inputPropName in model
                             div.default-field
                                 if inputProp['type'] == 'Date'
-                                    md-datepicker(placeholder=inputProp['fieldLabel'], ng-model="petData.#{modelName}.#{inputPropName}.val")
-                                else if ((inputProp['val'] == 'Location' || inputProp['type'] == 'Location') && !flags.isLocationInputVisible)
-                                    #map.google-maps
-                                    -
-                                        flags.isLocationInputVisible = true;
+                                    h4.date-label!=inputProp['fieldLabel']
+                                    md-datepicker(ng-model="petData.#{modelName}.#{inputPropName}.val")
+                                else if ((inputProp['val'] == 'Location' || inputProp['default'] == 'Location'))
+                                    if !flags.isLocationInputVisible
+                                        #map.google-maps(ng-if="visiblePetType == '#{modelName}'")
+                                        -
+                                            flags.isLocationInputVisible = true;
                                 else
                                     md-input-container
                                         if inputProp['options'].length > 0
@@ -31,8 +33,12 @@ block content
                                                 md-option(value=true)!='yes'
                                                 md-option(value=false)!='no'
                                         else
-                                            label!=inputProp['fieldLabel']
-                                            input(placeholder=inputProp['example'], ng-model="petData.#{modelName}.#{inputPropName}.val")
+                                            if inputPropName == 'petId'
+                                                label!=inputProp['fieldLabel']
+                                                input(placeholder="Auto Generated", disabled, ng-model="petData.#{modelName}.#{inputPropName}.val")
+                                            else
+                                                label!=inputProp['fieldLabel']
+                                                input(placeholder=inputProp['example'], ng-model="petData.#{modelName}.#{inputPropName}.val")
                         div.default-field
                             md-input-container
                                 md-button.input-submit.md-primary.md-raised(ng-click!='this.submit()') Save

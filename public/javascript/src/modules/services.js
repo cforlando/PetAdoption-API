@@ -7,21 +7,46 @@ define([
         _ = require('underscore');
 
     var dataParserService = ngApp.service('dataParserService', function () {
+        function parsePropData(propData){
+            var _data = {};
+            switch (propData.type) {
+                case 'Date':
+                    // handle special case for date
+                    _data.val = new Date(propData.val);
+                    if (isNaN(_data.val.getTime())) {
+                        _data.val = new Date();
+                    }
+                    break;
+                case 'Number':
+                    if (propData.val && /\./.test(propData.val.toString())) {
+                        // value is float
+                        console.log('parsing float for %O', propData);
+                        _data.val = parseFloat(propData.val);
+                    } else {
+                        // value is integer
+                        _data.val = parseInt(propData.val);
+                    }
+                    break;
+                default:
+                    // TODO remove autofill with example
+                    _data.val = propData.val || propData.default || propData.example;
+            }
+            return _data;
+        }
+
+        this.formatSendData  = function(data){
+            var _data = {};
+            _.forEach(data, function (propData, propName, props) {
+                _data[propName] = parsePropData(propData).val;
+            });
+            return _data;
+        };
+
         this.parseResponseData = function (responseData) {
             var _data = {};
             _.forEach(responseData, function (propData, propName, props) {
-                if (!_data[propName]) _data[propName] = {};
-                
-                if (propData['type'] == 'Date') {
-                    // handle special case for date
-                    _data[propName].val = new Date(propData['val']);
-                    if(isNaN( _data[propName].val.getTime() )){
-                        _data[propName].val = new Date();
-                    }
-                } else {
-                    // TODO remove autofill with example
-                    _data[propName].val = propData.val || propData.default || propData.example;
-                }
+                if(!_data[propName]) _data[propName] = {};
+                _data[propName].val = parsePropData(propData).val;
             });
             return _data;
         };

@@ -11,7 +11,7 @@ var util = require('util'),
 
     animalSchemas = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'core/data/schema.json'), {encoding: 'utf8'})),
     animalModels = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'core/data/models.json'), {encoding: 'utf8'})),
-    AnimalDocuments = {},
+    AnimalDocs = {},
     defaultSpecies = 'dog',
     localConfig = (function () {
         var config = {
@@ -72,7 +72,7 @@ mongodb.connect = function (callback, options) {
         var AnimalSchemas = {};
         _.forEach(animalSchemas, function (animalSchema, animalSchemaName, collection) {
             AnimalSchemas[animalSchemaName] = new mongoose.Schema(schemaGenerator.convert(animalSchema));
-            AnimalDocuments[animalSchemaName] = mongoose.model(animalSchemaName, AnimalSchemas[animalSchemaName], (mongodb.config.isDevelopment) ? 'pets_test' : 'pets_production');
+            AnimalDocs[animalSchemaName] = mongoose.model(animalSchemaName, AnimalSchemas[animalSchemaName], (mongodb.config.isDevelopment) ? 'pets_test' : 'pets_production');
         });
         console.log('Running in %s mode.', (mongodb.config.isDevelopment) ? 'dev' : 'production');
 
@@ -82,23 +82,25 @@ mongodb.connect = function (callback, options) {
 
 /**
  * Builds search object from provided animalProps object. animalProps is an object of fields corresponding to one of the animal schemas
- * @param animalQueryProps
+ * @param {Object} animalProps
  * @returns {Object}
  * @private
  */
-mongodb._buildQuery = function (animalQueryProps) {
+mongodb._buildQuery = function (animalProps) {
     var searchParams = {
-        species: (AnimalDocuments[animalQueryProps['species']]) ? animalQueryProps['species'] : defaultSpecies
-    };
+            species: mongodb._getSpeciesFromProps(animalProps)
+        },
+        propValue;
 
     if (searchParams['species'])
-        _.forEach(animalQueryProps, function (propVal, propName, collection) {
+        _.forEach(animalProps, function (propData, propName, collection) {
+            propValue = propData.val || propData; // check if data has been sent as a model structure
             switch (propName) {
                 case 'petId':
                 case 'hashId':
                 case '_id':
                     // only use given id and quit early
-                    searchParams = {'_id': propVal};
+                    searchParams = {'_id': propValue};
                     return false;
                 case 'species':
                     // ignore because species was already set
@@ -107,17 +109,17 @@ mongodb._buildQuery = function (animalQueryProps) {
                     var prefix = '',
                         suffix = '',
                         regexArgs = '';
-                    if (animalQueryProps['matchStartFor'] && _.indexOf(animalQueryProps['matchStartFor'], propName) >= 0) {
+                    if (animalProps['matchStartFor'] && _.indexOf(animalProps['matchStartFor'], propName) >= 0) {
                         prefix = '^';
                     }
-                    if (animalQueryProps['matchEndFor'] && _.indexOf(animalQueryProps['matchEndFor'], propName) >= 0) {
+                    if (animalProps['matchEndFor'] && _.indexOf(animalProps['matchEndFor'], propName) >= 0) {
                         suffix = '$';
                     }
-                    if (animalQueryProps['ignoreCaseFor'] && _.indexOf(animalQueryProps['ignoreCaseFor'], propName) >= 0) {
+                    if (animalProps['ignoreCaseFor'] && _.indexOf(animalProps['ignoreCaseFor'], propName) >= 0) {
                         regexArgs = 'i';
                     }
                     if (_.has(animalSchemas[searchParams['species']], propName)) {
-                        searchParams[propName] = new RegExp(util.format('%s%s%s', prefix, propVal, suffix), regexArgs);
+                        searchParams[propName] = new RegExp(util.format('%s%s%s', prefix, propValue, suffix), regexArgs);
                     }
                     break;
             }
@@ -128,7 +130,7 @@ mongodb._buildQuery = function (animalQueryProps) {
 /**
  *
  * @param func
- * @param options
+ * @param [options]
  * @param options.context
  * @private
  */
@@ -164,7 +166,7 @@ mongodb._exec = function (func, options) {
     }
 };
 
-mongodb._filterPropsForSearchMatch = function (searchQueryProps) {
+mongodb._sanitizePropsForSearchMatch = function (searchQueryProps) {
     var filteredAnimalQueryProps = {};
 
     if (searchQueryProps['petName']) {
@@ -187,9 +189,9 @@ mongodb._getSpeciesFromProps = function (animalProps) {
 
 mongodb._sanitizePropsForSave = function (searchQueryProps) {
     var sanitizedProps = {},
-        schemaSpecies = mongodb._getSpeciesFromProps(searchQueryProps),
-        schema = animalSchemas[schemaSpecies];
-    if (config.isDevelopment) console.log('using schema for %s', schemaSpecies);
+        animalSpecies = mongodb._getSpeciesFromProps(searchQueryProps),
+        schema = animalSchemas[animalSpecies];
+    if (config.isDevelopment) console.log('using schema for %s', animalSpecies);
     _.forEach(searchQueryProps, function (propValue, propName) {
         if (schema[propName]) {
             switch (schema[propName].type) {
@@ -207,6 +209,7 @@ mongodb._sanitizePropsForSave = function (searchQueryProps) {
             }
         }
     });
+    sanitizedProps['species'] = animalSpecies;
     return sanitizedProps;
 };
 
@@ -228,22 +231,22 @@ mongodb._sanitizePropsForSend = function (animalProps) {
 
 /**
  *
- * @param animalQueryProps
+ * @param animalProps
  * @param {Object} options
- * @param {Boolean} options.debug Whether to log debug info
+ * @param {Boolean} [options.debug] Whether to log debug info
  * @param {Function} options.complete callback on operation completion
- * @param {Object} options.context context for complete function callback
+ * @param {Object} [options.context] context for complete function callback
  */
-mongodb.findAnimal = function (animalQueryProps, options) {
+mongodb.findAnimal = function (animalProps, options) {
     var _options = _.extend({}, options);
 
     mongodb._exec(function () {
-        if (_options.debug) console.log("mongodb.findAnimal() - received query for: ", animalQueryProps);
-        var searchParams = mongodb._buildQuery(animalQueryProps),
-            species = mongodb._getSpeciesFromProps(animalQueryProps);
+        if (_options.debug) console.log("mongodb.findAnimal() - received query for: ", animalProps);
+        var searchParams = mongodb._buildQuery(animalProps),
+            species = mongodb._getSpeciesFromProps(animalProps);
 
         if (_options.debug) console.log('mongodb.findAnimal() - searching for: ', searchParams);
-        AnimalDocuments[species].findOne(
+        AnimalDocs[species].findOne(
             searchParams,
             function (err, _animal) {
                 var animal = {};
@@ -253,11 +256,7 @@ mongodb.findAnimal = function (animalQueryProps, options) {
                     animal = mongodb._sanitizePropsForSend(_animal._doc);
                 }
                 if (_options.debug) console.log('mongodb.findAnimal() - found animal: ', animal);
-                if (typeof _options.complete == 'function') {
-                    _options.complete.apply(null, [err, animal])
-                } else {
-                    throw new Error('mongodb.findAnimal() - No options.complete callback specified');
-                }
+                if (_options.complete) _options.complete.apply(null, [err, animal]);
             })
     }, options);
 };
@@ -265,22 +264,22 @@ mongodb.findAnimal = function (animalQueryProps, options) {
 
 /**
  *
- * @param animalQueryProps
+ * @param animalProps
  * @param {Object} options
- * @param {Boolean} options.debug Whether to log debug info
+ * @param {Boolean} [options.debug] Whether to log debug info
  * @param {Function} options.complete callback on operation completion
- * @param {Object} options.context context for complete function callback
+ * @param {Object} [options.context] context for complete function callback
  */
-mongodb.findAnimals = function (animalQueryProps, options) {
+mongodb.findAnimals = function (animalProps, options) {
     var _options = _.extend({}, options);
     if (_options.debug) console.log("mongodb.findAnimals(%j)", arguments);
 
     var query = function () {
-        if (_options.debug) console.log("mongodb.findAnimals() - received query for: ", animalQueryProps);
-        var searchParams = mongodb._buildQuery(animalQueryProps),
-            species = mongodb._getSpeciesFromProps(animalQueryProps);
+        if (_options.debug) console.log("mongodb.findAnimals() - received query for: ", animalProps);
+        var searchParams = mongodb._buildQuery(animalProps),
+            species = mongodb._getSpeciesFromProps(animalProps);
         if (_options.debug) console.log('mongodb.findAnimals() - searching for: ', searchParams);
-        AnimalDocuments[species].find(
+        AnimalDocs[species].find(
             searchParams,
             function (err, _animals) {
                 var animals = [];
@@ -291,12 +290,8 @@ mongodb.findAnimals = function (animalQueryProps, options) {
                         animals.push(mongodb._sanitizePropsForSend(animal._doc));
                     })
                 }
-                // if (_options.debug) console.log('mongodb.findAnimals() - found animals: ', animals);
-                if (_.isFunction(_options.complete)) {
-                    _options.complete.apply(null, [err, animals])
-                } else {
-                    throw new Error('mongodb.findAnimals() - No options.complete callback specified');
-                }
+                if (_options.debug) console.log('mongodb.findAnimals() - found animals: ', animals);
+                if (_options.complete) _options.complete.apply(_options.context, [err, animals]);
             })
     };
     mongodb._exec(query, options);
@@ -304,27 +299,27 @@ mongodb.findAnimals = function (animalQueryProps, options) {
 
 /**
  *
- * @param animalQueryProps
+ * @param animalProps
  * @param {Object} options
  * @param {Boolean} [options.debug] Whether to log debug info
  * @param {Function} options.complete callback on operation completion
  * @param {Object} [options.context] context for complete function callback
  */
-mongodb.saveAnimal = function (animalQueryProps, options) {
+mongodb.saveAnimal = function (animalProps, options) {
     var _options = _.extend({}, options);
 
     mongodb._exec(function () {
-        if (_options.debug) console.log("mongodb.saveAnimal() - received query for: ", animalQueryProps);
+        if (_options.debug) console.log("mongodb.saveAnimal() - received query for: ", animalProps);
 
-        var filteredQueryProps = mongodb._filterPropsForSearchMatch(animalQueryProps),
-            sanitizedQueryProps = mongodb._sanitizePropsForSave(animalQueryProps),
-            searchParams = mongodb._buildQuery(filteredQueryProps),
-            species = mongodb._getSpeciesFromProps(animalQueryProps);
+        var filteredQueryProps = mongodb._sanitizePropsForSearchMatch(animalProps),
+            sanitizedAnimalProps = mongodb._sanitizePropsForSave(animalProps),
+            queryParams = mongodb._buildQuery(filteredQueryProps),
+            animalSpecies = mongodb._getSpeciesFromProps(animalProps);
 
-        if (_options.debug) console.log('mongodb.saveAnimal() - searching for: ', searchParams);
-        AnimalDocuments[species].findOneAndUpdate(
-            searchParams,
-            sanitizedQueryProps, {
+        if (_options.debug) console.log('mongodb.saveAnimal() - searching for: ', queryParams);
+        AnimalDocs[animalSpecies].findOneAndUpdate(
+            queryParams,
+            sanitizedAnimalProps, {
                 new: true,
                 upsert: true
             }, function (err, _animal) {
@@ -335,11 +330,7 @@ mongodb.saveAnimal = function (animalQueryProps, options) {
                     animal = mongodb._sanitizePropsForSend(_animal._doc);
                 }
                 if (_options.debug) console.log('saved and sending animal: ', animal);
-                if (_options.complete) {
-                    _options.complete.apply(_options.context, [err, animal])
-                } else {
-                    throw new Error('mongodb.saveAnimal() - No options.complete callback specified');
-                }
+                if (_options.complete) _options.complete.apply(_options.context, [err, animal])
             })
     }, options);
 };

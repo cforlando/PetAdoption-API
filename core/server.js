@@ -29,6 +29,7 @@ server.use(express.static(path.join(process.cwd(), 'public')));
 
 server.use('/', routes);
 server.use('/api/v1/', require('./routes/api'));
+server.use('/api/v2/', require('./routes/api'));
 
 
 // express error handlers

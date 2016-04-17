@@ -4,6 +4,7 @@ define([
     'modules/directives/btn-submit',
     'modules/directives/fab',
     'modules/directives/form-pet',
+    'modules/directives/nav-sidebar',
     'modules/directives/map'],function(){
 
     console.log('init directives.');

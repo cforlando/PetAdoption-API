@@ -3,93 +3,158 @@ define(
         'require',
         'domReady!',
         '$elements',
+        'underscore',
         'ngApp'
-    ]
-    ,
+    ],
     function (require) {
         var $window = require('$elements').window,
+            _ = require('underscore'),
             ngApp = require('ngApp');
         return ngApp.directive('googleMaps', function () {
             return {
                 restrict: 'C',
                 controller: ['$scope', '$element', function ($scope, $element) {
-                    $element.on('click', function () {
-                        $scope.fab.isOpen = !$scope.fab.isOpen;
-                    });
-                    $scope.mapOptions = {
+                    $scope.watchRemovers = {};
+
+                    $scope.map = {
                         center: {
-                            lat: 28.513651,
-                            lng: -81.466219
+                            lat: ($scope.petData[$scope.visiblePetType]) ? $scope.petData[$scope.visiblePetType]['lostGeoLat'].val : 28.513651,
+                            lng: ($scope.petData[$scope.visiblePetType]) ? $scope.petData[$scope.visiblePetType]['lostGeoLon'].val : -81.466219
+                        },
+                        marker: {
+                            lat: ($scope.petData[$scope.visiblePetType]) ? $scope.petData[$scope.visiblePetType]['lostGeoLat'].val : 28.513651,
+                            lng: ($scope.petData[$scope.visiblePetType]) ? $scope.petData[$scope.visiblePetType]['lostGeoLon'].val : -81.466219
                         },
                         mapTypeId: google.maps.MapTypeId.ROADMAP,
-                        zoom: 17,
+                        zoom: 8,
                         scrollwheel: false,
-                        zoomControl: false,
+                        zoomControl: true,
                         streetViewControl: false
-
                     };
 
-                    $scope.mapUIConfig = {
-                        addressLine1: '6150 Metrowest Blvd Suite 305B',
-                        addressLine2: 'Orlando, FL 32835',
-                        mapsExternalLink: 'https://www.google.com/maps/place/6150+Metrowest+Blvd+%23305b,+Orlando,+FL+32835/@28.513651,-81.466219,17z/data=!3m1!4b1!4m2!3m1!1s0x88e77924273cccdb:0x38c1cefb00652b3e',
-                        latitude: 28.513651,
-                        longitude: -81.466219
-                    };
-                    if (google.maps) {
-                        this.initializeGoogleMaps();
-                    } else {
-                        this._waitForGoogleMaps();
+                    function getLocation() {
+                        if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(updatePosition);
+                        }
+                    }
+
+                    function updatePosition(position) {
+                        if (position.coords.latitude && position.coords.longitude) {
+                            console.log('updating position (%s,%s)', position.coords.latitude, position.coords.longitude);
+                            setLatLng(position.coords.latitude, position.coords.longitude)
+                        }
+                    }
+
+                    function refreshMapData(){
+                        if ($scope.petData[$scope.visiblePetType]) {
+                            $scope.map.center = {
+                                lat: parseFloat($scope.petData[$scope.visiblePetType]['lostGeoLat'].val),
+                                lng: parseFloat($scope.petData[$scope.visiblePetType]['lostGeoLon'].val)
+                            };
+                            $scope.map.marker = {
+                                lat: $scope.petData[$scope.visiblePetType]['lostGeoLat'].val,
+                                lng: $scope.petData[$scope.visiblePetType]['lostGeoLon'].val
+                            }
+                        }
+                    }
+
+                    function setLatLng(lat, lng) {
+                        var _lat = parseFloat(lat),
+                            _lng = parseFloat(lng);
+                        if ($scope.petData[$scope.visiblePetType]) {
+                            $scope.petData[$scope.visiblePetType]['lostGeoLat'].val = _lat;
+                            $scope.petData[$scope.visiblePetType]['lostGeoLon'].val = _lng;
+                        }
+                        refreshMapData();
+                    }
+
+                    function updateMapView() {
+                        console.log('updating map');
+                        if ($scope.map.center.lat && $scope.map.center.lng) {
+                            var newCenter = new google.maps.LatLng($scope.map.center.lat, $scope.map.center.lng);
+                            if ($scope.markerObj) $scope.markerObj.setPosition(newCenter);
+                            if ($scope.mapObj) $scope.mapObj.panTo(newCenter);
+                        }
                     }
 
                     function initializeGoogleMaps() {
-                        console.log('MapsView.onGoogleMapsInit(%O) | mapUIConfig: %O | mapOptions: %O', arguments, $scope.mapUIConfig, $scope.mapOptions);
-                        var screenWidth = window.innerWidth || $window.width();
-                        if (screenWidth == 320 || screenWidth == 375 || screenWidth == 360) {
-                            // common mobile sizes
-                            $scope.mapOptions.draggable = false;
-                        }
-                        var map = new google.maps.Map($element[0], $scope.mapOptions),
-                            iconBaseURL = 'https://maps.google.com/mapfiles/kml/shapes/',
+                        var map = new google.maps.Map($element[0], $scope.map),
                             marker = new google.maps.Marker({
-                                position: new google.maps.LatLng($scope.mapUIConfig.latitude, $scope.mapUIConfig.longitude),
+                                position: new google.maps.LatLng($scope.map.center.lat, $scope.map.center.lng),
                                 map: map,
-                                title: 'Directions'
+                                title: 'Location'
                             }),
-                            addressHTMLText = '<p>' + this.mapUIConfig.addressLine1 + '<br/>' + $scope.mapUIConfig.addressLine2 + '</p>',
-                            gMapHTMLContent = "<div class='google-map-infowindow'>" +
-                                "<a href='" + $scope.mapUIConfig.mapsExternalLink + "' target='_blank' >" + addressHTMLText + "</a>" +
-                                "<div>",
+                            markerHTMLContent = "",
                             infowindow = new google.maps.InfoWindow({
-                                content: gMapHTMLContent
+                                content: markerHTMLContent
                             });
+                        $scope.markerObj = marker;
+                        $scope.mapObj = map;
 
                         $scope.onMarkerClick = function () {
                             infowindow.open(map, marker);
                         };
-                        $scope.clickListener = google.maps.event.addListener(marker, 'click', $scope.onMarkerClick);
+
+                        // $scope.clickListener = google.maps.event.addListener(marker, 'click', $scope.onMarkerClick);
+                        $scope.clickListener = google.maps.event.addListener(map, "click", function (event) {
+                            // display the lat/lng in your form's lat/lng fields
+                            setLatLng(event.latLng.lat(), event.latLng.lng());
+                        });
+
+                        $scope.watchRemovers.mapCenter = $scope.$watch('map.center', function (newValue, oldValue) {
+                            console.log('updating map');
+                            updateMapView();
+                        });
+
+
+                        $scope.watchRemovers.petDataLat = $scope.$watch('petData.' + $scope.visiblePetType + '.lostGeoLat', function (newValue, oldValue) {
+                            refreshMapData();
+                        });
+
+                        $scope.watchRemovers.petdataLng = $scope.$watch('petData.' + $scope.visiblePetType + '.lostGeoLon', function (newValue, oldValue) {
+                            refreshMapData();
+                        });
+
+                        getLocation();
                     }
 
                     function _waitForGoogleMaps() {
                         $scope.googleCheckInterval = setInterval(function () {
-                            if (google.maps) {
+                            if (google && google.maps) {
                                 clearTimeout($scope.googleCheckTimeout);
                                 clearInterval($scope.googleCheckInterval);
-                                $scope.initializeGoogleMaps();
+                                initializeGoogleMaps();
                             }
                         }, 2000);
 
                         $scope.googleCheckTimeout = setTimeout(function () {
                             clearInterval($scope.googleCheckTimeout);
+                            console.error('Could not load google maps');
                         }, 10000);
                     }
 
-                    function destroy() {
-                        google.maps.event.removeListener(this.clickListener);
+                    $scope.onDestroy = function () {
+                        console.log('destroying map');
+                        if (google && google.maps) google.maps.event.removeListener($scope.clickListener);
+                        _.forEach($scope.watchRemovers, function (removeWatcher, index) {
+                            removeWatcher();
+                        })
+                    };
+
+                    if (google && google.maps) {
+                        initializeGoogleMaps();
+                    } else {
+                        _waitForGoogleMaps();
                     }
-                }]
+                }],
+                link: function (scope, element, attributes) {
+                    // When the destroy event is triggered, check to see if the above
+                    // data is still available.
+                    if (scope.onDestroy) scope.$on("$destroy", scope.onDestroy);
+                }
             }
         });
 
 
-    });
+    })
+;
