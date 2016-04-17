@@ -2,6 +2,7 @@
 MongoDB/Express mockup server
 
 Current API location: http://pet-adoption-server.herokuapp.com/api/v1/
+Current API location: http://pet-adoption-server.herokuapp.com/api/v2/ (for reduced response data)
 
 ### API
 Method  | Endpoint                               | Notes
@@ -28,3 +29,5 @@ ignoreCase     | (String) Array  | Allows the fields specified to ignore casing
 pageSize       | Number          | Defaults to 10 (only meaningful when making paged query) 
 
 ###### More Notes
+
+`api/v2` will only send values for request animals. `api/v1` will send the value for an animal property as well as an example, default value, type, etc. as available. 
