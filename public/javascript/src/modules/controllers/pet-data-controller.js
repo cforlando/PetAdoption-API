@@ -113,10 +113,15 @@ define([
                 $http.post('/api/v1/query', _data).then(
                     function success(response) {
                         console.log(response.data);
-                        if (!(_.isArray(response.data) &&
-                            response.data.length > 0 &&
-                            response.data[0].petId &&
-                            response.data[0].petId.val)) {
+                        if (
+                            $scope.petData[$scope.visiblePetType]
+                            && $scope.petData[$scope.visiblePetType]['petId']
+                            && $scope.petData[$scope.visiblePetType]['petId'].val // only check for validity if we had already had a pet loaded
+                            && !(_.isArray(response.data)
+                            && response.data.length > 0
+                            && response.data[0].petId
+                            && response.data[0].petId.val)
+                        ) {
                             $scope.hideLoading();
                             $scope.showError();
                             return;

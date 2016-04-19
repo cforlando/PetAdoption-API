@@ -9,6 +9,7 @@ define([
     return ngApp.controller('appController', ['$scope', '$http', '$mdToast',
         function ($scope, $http, $mdToast) {
             $scope.isLoading = false;
+            angular.element('.loading-text').remove();
             $scope.sideNav = {
                 isOpen: false
             };

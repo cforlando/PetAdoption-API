@@ -11,9 +11,10 @@ html
         //script(src="./javascript/src/rjs-config.js")
         //script(src="./javascript/src/app.js")
         script(src="./javascript/app.js")
-    body(ng-cloak, ng-controller='appController')
+    body(ng-controller='appController')
+        h1.loading-text(style!='text-align: center;') Loading...
         md-progress-linear.loading-bar(md-mode="indeterminate", ng-show="isLoading")
-        div(layout="column",layout-fill, ng-controller='petDataController')
+        div(ng-cloak, layout="column",layout-fill, ng-controller='petDataController')
             md-toolbar
                 .md-toolbar-tools
                     md-button(class="md-icon-button" aria-label="Side Nav Toggle" ng-click="sideNav.isOpen=!sideNav.isOpen")

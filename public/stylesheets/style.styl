@@ -9,15 +9,24 @@ color-black = #000;
   }
 }
 
+[ng-cloak]{
+  display: none;
+}
+
+.loading-text {
+  position: absolute;
+  left: 0;
+  top: 240px;
+  top: 50vh;
+  top: calc(50vh - .5em);
+  width: 100%;
+}
+
 body {
-  transition: opacity 1000ms ease 2000ms;
-  opacity: 1;
+  animation: fadeIn 600ms ease;
   padding: 50px
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif
 
-  &[ng-cloak]{
-    opacity: 0;
-  }
   > md-progress-linear {
     position: fixed;
     top: 0;

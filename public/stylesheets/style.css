@@ -1,11 +1,18 @@
+[ng-cloak] {
+  display: none;
+}
+.loading-text {
+  position: absolute;
+  left: 0;
+  top: 240px;
+  top: 50vh;
+  top: calc(50vh - 0.5em);
+  width: 100%;
+}
 body {
-  transition: opacity 1000ms ease 2000ms;
-  opacity: 1;
+  animation: fadeIn 600ms ease;
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-}
-body[ng-cloak] {
-  opacity: 0;
 }
 body > md-progress-linear {
   position: fixed;
