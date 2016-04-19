@@ -9,7 +9,7 @@ var fs = require('fs'),
     cookieParser = require('cookie-parser'),
     
     server = express(),
-    ipAddress = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1',
+    ipAddress = (process.env.OPENSHIFT_NODEJS_IP) ? process.env.OPENSHIFT_NODEJS_IP : null,
     portNumber = normalizePort(process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || '8080');
 
 server.set('port', portNumber);
