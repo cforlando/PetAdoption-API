@@ -66,6 +66,7 @@ define([
                 $http.post('/api/v1/save', _data).then(
                     function success(response) {
                         if (response.data.result != 'success') {
+                            $scope.hideLoading();
                             $scope.showError();
                             return;
                         }
@@ -116,6 +117,7 @@ define([
                             response.data.length > 0 &&
                             response.data[0].petId &&
                             response.data[0].petId.val)) {
+                            $scope.hideLoading();
                             $scope.showError();
                             return;
                         }
