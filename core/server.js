@@ -7,11 +7,10 @@ var fs = require('fs'),
     bodyParser = require('body-parser'),
     express = require('express'),
     cookieParser = require('cookie-parser'),
-
-    routes = require('./routes/index'),
-
+    
     server = express(),
-    portNumber = normalizePort(process.env.PORT || '5000');
+    ipAddress = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1',
+    portNumber = normalizePort(process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || '8080');
 
 server.set('port', portNumber);
 
@@ -27,7 +26,7 @@ server.use(cookieParser());
 server.use(require('stylus').middleware(path.join(process.cwd(), 'public')));
 server.use(express.static(path.join(process.cwd(), 'public')));
 
-server.use('/', routes);
+server.use('/', require('./routes/index'));
 server.use('/api/v1/', require('./routes/api'));
 server.use('/api/v2/', require('./routes/api'));
 
@@ -64,5 +63,5 @@ function normalizePort(val) {
 }
 
 console.log('server listening for requests on port: %d', portNumber);
-server.listen(portNumber);
+server.listen(portNumber, ipAddress);
 module.exports = server;
