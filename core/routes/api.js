@@ -171,6 +171,16 @@ function onSchemaRequest(req, res) {
         });
 }
 
+function onDeleteRequest(req, res, next) {
+    database.removeAnimal(req.body, {
+        debug: config.isDevelopment,
+        complete: function (result) {
+            console.log('database.removeAnimal() - results: %j', arguments);
+            res.send(result)
+        }
+    })
+}
+
 function onResetRequest(req, res, next) {
     console.log('/reset');
 
@@ -255,6 +265,7 @@ router.get('/list/:species/', onListRequest);
 router.post('/save', onSave);
 router.post('/query/:pageNumber', onQueryRequest);
 router.post('/query', onQueryRequest);
+router.post('/remove', onDeleteRequest);
 
 router.get('/reset', onResetRequest);
 

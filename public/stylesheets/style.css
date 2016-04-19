@@ -1,6 +1,17 @@
 body {
+  transition: opacity 1000ms ease 2000ms;
+  opacity: 1;
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+body[ng-cloak] {
+  opacity: 0;
+}
+body > md-progress-linear {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 3;
 }
 a {
   color: #00b7ff;
@@ -44,4 +55,36 @@ a {
   font-weight: normal;
   margin: 0 auto;
   width: calc(100% - 3em);
+}
+@-moz-keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@-webkit-keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@-o-keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }

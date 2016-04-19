@@ -2,14 +2,15 @@
     name: 'build-production',
     baseUrl: "./",
     optimize: 'uglify2',
-    context : null, // fix for r.js
-    uglify2 : {
-        compress : {
-            drop_console : true,
-            drop_debugger : true
-        }
+    context: null, // fix for r.js
+    uglify2: {
+        compress: {
+            drop_console: true,
+            drop_debugger: true
+        },
+        mangle: false
     },
-    include : ['require-lib'],
+    include: ['require-lib'],
     mainConfigFile: 'rjs-config.js',
     out: "../app.js"
 });

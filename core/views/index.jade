@@ -6,6 +6,7 @@ block content
             md-tab(label=modelName, md-on-select="onTabSelected('#{modelName}')")
                 md-content.md-padding
                     form.pet-form(layout="column", action='/api/v1/save', method='post')
+
                         -
                             var flags = {
                                 isLocationInputVisible: false
@@ -36,9 +37,13 @@ block content
                                             if inputPropName == 'petId'
                                                 label!=inputProp['fieldLabel']
                                                 input(placeholder="Auto Generated", disabled, ng-model="petData.#{modelName}.#{inputPropName}.val")
+                                            else if inputPropName == 'description'
+                                                label!=inputProp['fieldLabel']
+                                                textarea(placeholder="Auto Generated", ng-model="petData.#{modelName}.#{inputPropName}.val")
                                             else
                                                 label!=inputProp['fieldLabel']
                                                 input(placeholder=inputProp['example'], ng-model="petData.#{modelName}.#{inputPropName}.val")
                         div.default-field
                             md-input-container
-                                md-button.input-submit.md-primary.md-raised(ng-click!='this.submit()') Save
+                                md-button.btn-submit.md-primary.md-raised Save
+                                md-button.btn-remove.md-warn.md-raised() Delete

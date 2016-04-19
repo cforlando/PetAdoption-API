@@ -11,7 +11,6 @@ var require = require.config({
         "moment": "vendors/moment",
         'ngApp': 'modules/ngApp',
         "jquery": "vendors/jquery",
-        "$elements": "modules/jquery-elements",
         "angular": "vendors/angular",
         'ng-animate': 'vendors/angular-animate',
         'ng-aria': 'vendors/angular-aria',

@@ -2,13 +2,11 @@ define(
     [
         'require',
         'domReady!',
-        '$elements',
         'underscore',
         'ngApp'
     ],
     function (require) {
-        var $window = require('$elements').window,
-            _ = require('underscore'),
+        var _ = require('underscore'),
             ngApp = require('ngApp');
         return ngApp.directive('googleMaps', function () {
             return {
@@ -32,20 +30,20 @@ define(
                         streetViewControl: false
                     };
 
-                    function getLocation() {
+                    $scope.getLocation = function() {
                         if (navigator.geolocation) {
-                            navigator.geolocation.getCurrentPosition(updatePosition);
+                            navigator.geolocation.getCurrentPosition($scope.updatePosition);
                         }
-                    }
+                    };
 
-                    function updatePosition(position) {
+                    $scope.updatePosition = function(position) {
                         if (position.coords.latitude && position.coords.longitude) {
                             console.log('updating position (%s,%s)', position.coords.latitude, position.coords.longitude);
-                            setLatLng(position.coords.latitude, position.coords.longitude)
+                            $scope.setLatLng(position.coords.latitude, position.coords.longitude)
                         }
-                    }
+                    };
 
-                    function refreshMapData(){
+                    $scope.refreshMapData = function() {
                         if ($scope.petData[$scope.visiblePetType]) {
                             $scope.map.center = {
                                 lat: parseFloat($scope.petData[$scope.visiblePetType]['lostGeoLat'].val),
@@ -56,26 +54,34 @@ define(
                                 lng: $scope.petData[$scope.visiblePetType]['lostGeoLon'].val
                             }
                         }
-                    }
+                    };
 
-                    function setLatLng(lat, lng) {
+                    $scope.setLatLng = function(lat, lng) {
                         var _lat = parseFloat(lat),
                             _lng = parseFloat(lng);
                         if ($scope.petData[$scope.visiblePetType]) {
                             $scope.petData[$scope.visiblePetType]['lostGeoLat'].val = _lat;
                             $scope.petData[$scope.visiblePetType]['lostGeoLon'].val = _lng;
                         }
-                        refreshMapData();
-                    }
+                        $scope.refreshMapData();
+                    };
 
-                    function updateMapView() {
+                    $scope.updateMapView = function() {
                         console.log('updating map');
                         if ($scope.map.center.lat && $scope.map.center.lng) {
                             var newCenter = new google.maps.LatLng($scope.map.center.lat, $scope.map.center.lng);
                             if ($scope.markerObj) $scope.markerObj.setPosition(newCenter);
                             if ($scope.mapObj) $scope.mapObj.panTo(newCenter);
                         }
-                    }
+                    };
+
+                    $scope.onDestroy = function () {
+                        console.log('destroying map');
+                        if (google && google.maps) google.maps.event.removeListener($scope.clickListener);
+                        _.forEach($scope.watchRemovers, function (removeWatcher, index) {
+                            removeWatcher();
+                        })
+                    };
 
                     function initializeGoogleMaps() {
                         var map = new google.maps.Map($element[0], $scope.map),
@@ -98,24 +104,24 @@ define(
                         // $scope.clickListener = google.maps.event.addListener(marker, 'click', $scope.onMarkerClick);
                         $scope.clickListener = google.maps.event.addListener(map, "click", function (event) {
                             // display the lat/lng in your form's lat/lng fields
-                            setLatLng(event.latLng.lat(), event.latLng.lng());
+                            $scope.setLatLng(event.latLng.lat(), event.latLng.lng());
                         });
 
                         $scope.watchRemovers.mapCenter = $scope.$watch('map.center', function (newValue, oldValue) {
                             console.log('updating map');
-                            updateMapView();
+                            $scope.updateMapView();
                         });
 
 
-                        $scope.watchRemovers.petDataLat = $scope.$watch('petData.' + $scope.visiblePetType + '.lostGeoLat', function (newValue, oldValue) {
-                            refreshMapData();
+                        $scope.watchRemovers.petDataLat = $scope.$watch('petData.' + $scope.visiblePetType + '.lostGeoLat.val', function (lat) {
+                            if(lat) $scope.refreshMapData();
                         });
 
-                        $scope.watchRemovers.petdataLng = $scope.$watch('petData.' + $scope.visiblePetType + '.lostGeoLon', function (newValue, oldValue) {
-                            refreshMapData();
+                        $scope.watchRemovers.petdataLng = $scope.$watch('petData.' + $scope.visiblePetType + '.lostGeoLon.val', function (lng) {
+                            if(lng) $scope.refreshMapData();
                         });
 
-                        getLocation();
+                        $scope.getLocation();
                     }
 
                     function _waitForGoogleMaps() {
@@ -132,14 +138,6 @@ define(
                             console.error('Could not load google maps');
                         }, 10000);
                     }
-
-                    $scope.onDestroy = function () {
-                        console.log('destroying map');
-                        if (google && google.maps) google.maps.event.removeListener($scope.clickListener);
-                        _.forEach($scope.watchRemovers, function (removeWatcher, index) {
-                            removeWatcher();
-                        })
-                    };
 
                     if (google && google.maps) {
                         initializeGoogleMaps();

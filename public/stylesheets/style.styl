@@ -1,8 +1,29 @@
 color-black = #000;
 
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 body {
+  transition: opacity 1000ms ease 2000ms;
+  opacity: 1;
   padding: 50px
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif
+
+  &[ng-cloak]{
+    opacity: 0;
+  }
+  > md-progress-linear {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 3;
+  }
 }
 
 a {

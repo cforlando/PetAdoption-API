@@ -1,3 +1,5 @@
+gulp-utils/
+/gulpfile.js
 tmp/*
 !tmp/*.csv
 couchbase.config

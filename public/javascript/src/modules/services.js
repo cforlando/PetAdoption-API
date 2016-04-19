@@ -17,12 +17,14 @@ define([
                         _data.val = new Date();
                     }
                     break;
+                case 'Location':
                 case 'Number':
                     if (propData.val && /\./.test(propData.val.toString())) {
                         // value is float
                         console.log('parsing float for %O', propData);
                         _data.val = parseFloat(propData.val);
                     } else {
+                        console.log('parsing int for %O', propData);
                         // value is integer
                         _data.val = parseInt(propData.val);
                     }

@@ -173,7 +173,7 @@ mongodb._sanitizePropsForSearchMatch = function (searchQueryProps) {
         filteredAnimalQueryProps['petName'] = searchQueryProps['petName'];
     }
     if (searchQueryProps['petId'] && !/\s/.test(searchQueryProps['petId'])) {
-        filteredAnimalQueryProps['petId'] = searchQueryProps['petId'];
+        filteredAnimalQueryProps['_id'] = searchQueryProps['petId'];
     }
     if (!(filteredAnimalQueryProps['petName'] || filteredAnimalQueryProps['petId'])) {
         filteredAnimalQueryProps = searchQueryProps;
@@ -195,10 +195,8 @@ mongodb._sanitizePropsForSave = function (searchQueryProps) {
     _.forEach(searchQueryProps, function (propValue, propName) {
         if (schema[propName]) {
             switch (schema[propName].type) {
+                case 'Location':
                 case 'Number':
-                    sanitizedProps[propName] = parseInt(propValue) || -1;
-                    break;
-                case 'Float':
                     sanitizedProps[propName] = parseFloat(propValue) || -1;
                     break;
                 case 'Date':
@@ -227,6 +225,31 @@ mongodb._sanitizePropsForSend = function (animalProps) {
         val: animalProps['_id']
     };
     return _animalProps;
+};
+
+/**
+ *
+ * @param animalProps
+ * @param {Object} options
+ * @param {Boolean} [options.debug] Whether to log debug info
+ * @param {Function} options.complete callback on operation completion
+ * @param {Object} [options.context] context for complete function callback
+ */
+mongodb.removeAnimal = function (animalProps, options) {
+    var _options = _.extend({}, options);
+
+    mongodb._exec(function () {
+        if (_options.debug) console.log("mongodb.removeAnimal() - received query for: ", animalProps);
+
+        var filteredQueryProps = mongodb._sanitizePropsForSearchMatch(animalProps),
+            animalSpecies = mongodb._getSpeciesFromProps(animalProps);
+
+        if (_options.debug) console.log('mongodb.removeAnimal() - searching for: ', filteredQueryProps);
+        AnimalDocs[animalSpecies].remove(filteredQueryProps, function (err) {
+            if (_options.debug) console.log('mongodb.removeAnimal() - args: %j', arguments);
+            if (_options.complete) _options.complete.apply(null, [{result: err ||'success'}]);
+        })
+    }, options);
 };
 
 /**

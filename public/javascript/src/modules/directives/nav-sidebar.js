@@ -4,8 +4,8 @@ define(['ngApp'], function (ngApp) {
             restrict: 'C',
             controller: ['$scope', '$element', '$http',
                 function ($scope, $element, $http) {
-                    $scope.$watch('visiblePetType', function () {
-                        $scope.getPetList();
+                    $scope.$watch('visiblePetType', function (petType) {
+                        if(petType) $scope.getPetList();
                     })
                 }]
         }
