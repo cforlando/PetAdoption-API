@@ -1,3 +1,3 @@
 module.exports = {
-    isDevelopment : true
+    isDevelopment : false
 };
