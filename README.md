@@ -1,9 +1,9 @@
 # cfo-pet-adoption-server
 MongoDB/Express mockup server
 
-Current API location: http://pet-adoption-server.herokuapp.com/api/v1/
+Current API location: http://cfo-pet-adoption-server.eastus.cloudapp.azure.com/api/v1/
 
-Current API location: http://pet-adoption-server.herokuapp.com/api/v2/ (for reduced response data)
+Current API location: http://cfo-pet-adoption-server.eastus.cloudapp.azure.com/api/v2/ (for reduced response data)
 
 ### API
 Method  | Endpoint                               | Notes
