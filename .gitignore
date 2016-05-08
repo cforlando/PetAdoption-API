@@ -2,6 +2,7 @@ gulp-utils/
 /gulpfile.js
 tmp/*
 !tmp/*.csv
+public/images/
 couchbase.config
 ### Windows template
 # Windows image file caches
