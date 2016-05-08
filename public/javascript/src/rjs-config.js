@@ -9,6 +9,7 @@ var require = require.config({
         "text": "vendors/text",
         "underscore": "vendors/lodash",
         "moment": "vendors/moment",
+        "jquery-slick" : "vendors/slick/slick/slick",
         'ngApp': 'modules/ngApp',
         "jquery": "vendors/jquery",
         "angular": "vendors/angular",
@@ -24,6 +25,7 @@ var require = require.config({
         'ng-router': 'modules/router',
     },
     shim: {
+        "jquery-slick" : ["jquery"],
         "angular" : ["jquery"],
         "ng-animate": ["angular"],
         "ng-aria": ["angular"],

@@ -44,20 +44,20 @@ var util = require('util'),
         },
         config: {
             retryTimeout: 2000,
-            isDevelopment: require('os').hostname().toLowerCase().indexOf('kah') > -1 // TODO use proper dev flag condition
+            isDevelopment: config.isDevelopment
         },
         queue: []
     };
 
 mongodb.connect = function (callback, options) {
     mongodb.state.isConnecting = true;
-    mongodb.adapter.connect(
-        'mongodb://'
+    mongodbURL = 'mongodb://'
         + mongodb.identity.username + ':'
         + mongodb.identity.password
         + '@' + mongodb.identity.domain + ':' + mongodb.identity.port + '/'
-        + mongodb.identity.database
-    );
+        + mongodb.identity.database;
+    console.log('mongodb is connecting to %s', mongodbURL);
+    mongodb.adapter.connect(mongodbURL);
     var db = mongodb.adapter.connection,
         _options = _.extend({
             context: null
@@ -169,13 +169,13 @@ mongodb._exec = function (func, options) {
 mongodb._sanitizePropsForSearchMatch = function (searchQueryProps) {
     var filteredAnimalQueryProps = {};
 
-    if (searchQueryProps['petName']) {
-        filteredAnimalQueryProps['petName'] = searchQueryProps['petName'];
-    }
-    if (searchQueryProps['petId'] && !/\s/.test(searchQueryProps['petId'])) {
-        filteredAnimalQueryProps['_id'] = searchQueryProps['petId'];
-    }
-    if (!(filteredAnimalQueryProps['petName'] || filteredAnimalQueryProps['petId'])) {
+    if (searchQueryProps['petName'] || searchQueryProps['petId']) {
+        if (searchQueryProps['petId'] && /^\w+$/.test(searchQueryProps['petId'])) {
+            filteredAnimalQueryProps['_id'] = searchQueryProps['petId'];
+        } else {
+            filteredAnimalQueryProps['petName'] = searchQueryProps['petName'];
+        }
+    } else {
         filteredAnimalQueryProps = searchQueryProps;
     }
     return filteredAnimalQueryProps;
@@ -195,6 +195,7 @@ mongodb._sanitizePropsForSave = function (searchQueryProps) {
     _.forEach(searchQueryProps, function (propValue, propName) {
         if (schema[propName]) {
             switch (schema[propName].type) {
+                case 'Float':
                 case 'Location':
                 case 'Number':
                     sanitizedProps[propName] = parseFloat(propValue) || -1;
@@ -247,7 +248,7 @@ mongodb.removeAnimal = function (animalProps, options) {
         if (_options.debug) console.log('mongodb.removeAnimal() - searching for: ', filteredQueryProps);
         AnimalDocs[animalSpecies].remove(filteredQueryProps, function (err) {
             if (_options.debug) console.log('mongodb.removeAnimal() - args: %j', arguments);
-            if (_options.complete) _options.complete.apply(null, [{result: err ||'success'}]);
+            if (_options.complete) _options.complete.apply(null, [{result: err || 'success'}]);
         })
     }, options);
 };
@@ -298,10 +299,10 @@ mongodb.findAnimals = function (animalProps, options) {
     if (_options.debug) console.log("mongodb.findAnimals(%j)", arguments);
 
     var query = function () {
-        if (_options.debug) console.log("mongodb.findAnimals() - received query for: ", animalProps);
+        // if (_options.debug) console.log("mongodb.findAnimals() - received query for: ", animalProps);
         var searchParams = mongodb._buildQuery(animalProps),
             species = mongodb._getSpeciesFromProps(animalProps);
-        if (_options.debug) console.log('mongodb.findAnimals() - searching for: ', searchParams);
+        // if (_options.debug) console.log('mongodb.findAnimals() - searching for: ', searchParams);
         AnimalDocs[species].find(
             searchParams,
             function (err, _animals) {
@@ -313,7 +314,7 @@ mongodb.findAnimals = function (animalProps, options) {
                         animals.push(mongodb._sanitizePropsForSend(animal._doc));
                     })
                 }
-                if (_options.debug) console.log('mongodb.findAnimals() - found animals: ', animals);
+                // if (_options.debug) console.log('mongodb.findAnimals() - found animals: ', animals);
                 if (_options.complete) _options.complete.apply(_options.context, [err, animals]);
             })
     };
@@ -332,14 +333,14 @@ mongodb.saveAnimal = function (animalProps, options) {
     var _options = _.extend({}, options);
 
     mongodb._exec(function () {
-        if (_options.debug) console.log("mongodb.saveAnimal() - received query for: ", animalProps);
+        // if (_options.debug) console.log("mongodb.saveAnimal() - received post for: ", animalProps);
 
         var filteredQueryProps = mongodb._sanitizePropsForSearchMatch(animalProps),
             sanitizedAnimalProps = mongodb._sanitizePropsForSave(animalProps),
             queryParams = mongodb._buildQuery(filteredQueryProps),
             animalSpecies = mongodb._getSpeciesFromProps(animalProps);
 
-        if (_options.debug) console.log('mongodb.saveAnimal() - searching for: ', queryParams);
+        // if (_options.debug) console.log('mongodb.saveAnimal() - searching for: ', queryParams);
         AnimalDocs[animalSpecies].findOneAndUpdate(
             queryParams,
             sanitizedAnimalProps, {
@@ -352,7 +353,7 @@ mongodb.saveAnimal = function (animalProps, options) {
                 } else {
                     animal = mongodb._sanitizePropsForSend(_animal._doc);
                 }
-                if (_options.debug) console.log('saved and sending animal: ', animal);
+                // if (_options.debug) console.log('saved and sending animal: ', animal);
                 if (_options.complete) _options.complete.apply(_options.context, [err, animal])
             })
     }, options);

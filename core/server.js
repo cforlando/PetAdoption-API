@@ -7,10 +7,11 @@ var fs = require('fs'),
     bodyParser = require('body-parser'),
     express = require('express'),
     cookieParser = require('cookie-parser'),
-    
+    config = require('./config'),
+
     server = express(),
     ipAddress = (process.env.OPENSHIFT_NODEJS_IP) ? process.env.OPENSHIFT_NODEJS_IP : null,
-    portNumber = normalizePort(process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || '8080');
+    portNumber = normalizePort(process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || process.env.port || config.defaultPort);
 
 server.set('port', portNumber);
 

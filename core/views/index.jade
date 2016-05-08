@@ -4,15 +4,17 @@ block content
     md-tabs(md-dynamic-height, md-border-bottom, md-stretch-tabs='always')
         each model, modelName in inputs
             md-tab(label=modelName, md-on-select="onTabSelected('#{modelName}')")
-                md-content.md-padding
+                md-content.md-padding(ng-if="visiblePetType == '#{modelName}'")
+                    form.pet-photos-form(action='/api/v1/save/media', method='post')
+                        .file-upload
+                            input.file-upload__input(name='uploads', type='file', multiple)
                     form.pet-form(layout="column", action='/api/v1/save', method='post')
-
                         -
                             var flags = {
                                 isLocationInputVisible: false
                             }
                         each inputProp, inputPropName in model
-                            div.default-field
+                            .default-field
                                 if inputProp['type'] == 'Date'
                                     h4.date-label!=inputProp['fieldLabel']
                                     md-datepicker(ng-model="petData.#{modelName}.#{inputPropName}.val")
@@ -21,29 +23,50 @@ block content
                                         #map.google-maps(ng-if="visiblePetType == '#{modelName}'")
                                         -
                                             flags.isLocationInputVisible = true;
+                                else if inputPropName == 'images'
+                                    .pet-photos
+                                        .images-slider
+                                        md-input-container
+                                            md-button.btn-upload-photo.md-secondary.md-raised(ng-click='uploadPhoto()') Upload
+                                            md-button.btn-remove-photo.md-warn.md-raised(ng-click='removePhoto()') Delete
                                 else
-                                    md-input-container
-                                        if inputProp['options'].length > 0
-                                            label!=inputProp['fieldLabel']
-                                            md-select(ng-model="petData.#{modelName}.#{inputPropName}.val")
-                                                each inputPropOption in inputProp['options']
-                                                    md-option(value!="#{inputPropOption}")=inputPropOption
-                                        else if inputProp['type'] == 'Boolean'
+                                    if inputProp['type'] == 'Boolean'
+                                        md-input-container
                                             label!=inputProp['fieldLabel']
                                             md-select(ng-model="petData.#{modelName}.#{inputPropName}.val")
                                                 md-option(value=true)!='yes'
                                                 md-option(value=false)!='no'
-                                        else
-                                            if inputPropName == 'petId'
+                                    else
+                                        if inputPropName == 'petId'
+                                            md-input-container
                                                 label!=inputProp['fieldLabel']
                                                 input(placeholder="Auto Generated", disabled, ng-model="petData.#{modelName}.#{inputPropName}.val")
-                                            else if inputPropName == 'description'
+                                        else if inputPropName == 'description'
+                                            md-input-container
                                                 label!=inputProp['fieldLabel']
                                                 textarea(placeholder="Auto Generated", ng-model="petData.#{modelName}.#{inputPropName}.val")
-                                            else
-                                                label!=inputProp['fieldLabel']
-                                                input(placeholder=inputProp['example'], ng-model="petData.#{modelName}.#{inputPropName}.val")
+                                        else
+                                            .input-section
+                                                -
+                                                    var attrs = {
+                                                        "md-search-text": "petData."+modelName+"."+inputPropName+".val",
+                                                        "md-items": "option in petData."+modelName+"."+inputPropName+".options | filter:petData."+modelName+"."+inputPropName+".val",
+                                                        "placeholder": inputProp['example'],
+                                                        "md-min-length" : 0,
+                                                        "md-delay" : 400,
+                                                        "md-floating-label": inputProp['fieldLabel']
+                                                    }
+                                                md-autocomplete.input-options&attributes(attrs)
+                                                    md-item-template
+                                                        span {{option}}
+                                                    md-not-found
+                                                        |No options matching "{{petData.#{modelName}.#{inputPropName}.val}}" were found.&nbsp;
+                                                        a(ng-click="createOption('#{modelName}', '#{inputPropName}', petData.#{modelName}.#{inputPropName}.val)") Create a new one!
                         div.default-field
                             md-input-container
-                                md-button.btn-submit.md-primary.md-raised Save
-                                md-button.btn-remove.md-warn.md-raised() Delete
+                                md-button.btn-submit.md-primary.md-raised(ng-click='savePet()') Save
+                                md-button.btn-remove.md-warn.md-raised(ng-click='deletePet()') Delete
+
+    form.image-upload-form-stub(ng-hide='true')
+        input(type='file')
+        input(placeholder="Auto Generated", disabled, ng-model="petData.#{modelName}.petId.val")

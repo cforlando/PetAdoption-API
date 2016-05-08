@@ -71,6 +71,11 @@ function parseModelCSV(csvModelData) {
         }
     });
 
+    newModel['images'] = {
+        name : 'images',
+        type : '[Image]',
+        default : ['http://placehold.it/500x500', 'http://placehold.it/720x480', 'http://placehold.it/480x480']
+    };
     console.log('sanitized model');
     // console.log('sanitized model: %j', newModel);
     return newModel;
@@ -92,7 +97,7 @@ function _mergeOptionsAndModel(modelsData, optionsData, callback) {
                     if (optionsData[modelDataType][modelPropName]) {
                         return optionsData[modelDataType][modelPropName];
 
-                    } else if (optionsData[modelDataType]['breed'] && modelPropInfo['key'].match(/breed/ig)) {
+                    } else if (optionsData[modelDataType]['breed'] && modelPropInfo['key'] && modelPropInfo['key'].match(/breed/ig)) {
                         return _.reverse(optionsData[modelDataType]['breed']);
 
                     } else {

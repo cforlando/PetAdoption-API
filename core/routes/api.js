@@ -7,6 +7,7 @@ var fs = require('fs'),
     async = require('async'),
     bodyParser = require('body-parser'),
     Express = require('express'),
+    multer  = require('multer'),
 
     MongoDB = require('../mongodb'),
     csvReader = require('../csv-parser'),
@@ -17,8 +18,21 @@ var fs = require('fs'),
     database = MongoDB, //  can use MongoDB || Couchbase
     _options = {
         pageSize: 10,
-        simplifiedFormat: false
-    };
+        paths : {
+            root : path.resolve(process.cwd(), 'public/'),
+            images : '/images/pet/'
+        }
+    },
+    storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, path.join(_options.paths.root, _options.paths.images))
+        },
+        filename: function (req, file, cb) {
+            console.log('new file: %s', dump(file));
+            cb(null, file.originalname)
+        }
+    }),
+    upload = multer({storage: storage});
 
 router.use(logger('dev'));
 router.use(bodyParser.json());
@@ -35,9 +49,7 @@ router.use(function (err, req, res, next) {
 
 // set simplifiedFormat flag
 router.use(function (req, res, next) {
-    if (/v2$/.test(req.baseUrl) && /^\/(list|query)/.test(req.path)) {
-        _options.simplifiedFormat = true;
-    }
+    res.locals.simplifiedFormat = (/v2$/.test(req.baseUrl) && /^\/(list|query)/.test(req.path));
     next();
 });
 
@@ -122,7 +134,7 @@ function onOptionRequest(req, res) {
         });
 }
 
-function onSave(req, res, next) {
+function onSaveJSON(req, res, next) {
 
     database.saveAnimal(req.body, {
         debug: config.isDevelopment,
@@ -137,6 +149,69 @@ function onSave(req, res, next) {
             }
         }
     });
+}
+function onSaveMedia(req, res, next) {
+    console.log('onSaveMedia: %s-\n%s', dump(req.files),  dump(req.body));
+    var _body = req.body;
+    _body.images = _body.images.split(',');
+    _.forEach(req.files, function(fileMeta, index){
+        _body.images.push(path.join(_options.paths.images, fileMeta.filename));
+    });
+    database.saveAnimal(_body, {
+        debug: config.isDevelopment,
+        complete: function (err, newAnimal) {
+            if (err) {
+                res.send({result: err})
+            } else {
+                res.send({
+                    result: 'success',
+                    data: newAnimal
+                })
+            }
+        }
+    });
+}
+
+function onSaveModel(req, res, next) {
+
+
+    var writeDir = path.resolve(process.cwd(), 'core/data/'),
+        writePath = path.resolve(writeDir, 'options.json');
+
+    fs.readFile(writePath, {encoding: 'utf8'}, function(err, optionsStr){
+        if(err){
+            res.send({result: err})
+        } else {
+            var species = database._getSpeciesFromProps(req.body),
+                optionsData = JSON.parse(optionsStr);
+
+            _.forEach(req.body, function(propData, propName){
+                if(propData && _.isArray(propData.options) && optionsData[species][propName]){
+                    optionsData[species][propName].options = optionsData[species][propName].options || [];
+                    optionsData[species][propName].options = _.concat(optionsData[species][propName].options, propData.options);
+                }
+            });
+            fs.writeFile(writePath, JSON.stringify(optionsData), function(){
+
+                database.saveAnimal(req.body, {
+                    debug: config.isDevelopment,
+                    complete: function (err, newAnimal) {
+                        if (err) {
+                            res.send({result: err})
+                        } else {
+                            res.send({
+                                result: 'success',
+                                data: newAnimal
+                            })
+                        }
+                    }
+                });
+            });
+        }
+    });
+
+
+
 }
 
 function onModelRequest(req, res) {
@@ -256,13 +331,15 @@ function onResetRequest(req, res, next) {
 }
 
 router.get('/options/:species/', onOptionsRequest);
-router.get('/options/:species/:option/:pageNumber/', onOptionRequest);
 router.get('/options/:species/:option', onOptionRequest);
+router.get('/options/:species/:option/:pageNumber/', onOptionRequest);
 router.get('/model/:species/', onModelRequest);
 router.get('/schema/:species/', onSchemaRequest);
-router.get('/list/:species/:pageNumber/', onListRequest);
 router.get('/list/:species/', onListRequest);
-router.post('/save', onSave);
+router.get('/list/:species/:pageNumber/', onListRequest);
+router.post('/save/json', onSaveJSON);
+router.post('/save',upload.array('uploads'),  onSaveMedia);
+router.post('/save/model', onSaveModel);
 router.post('/query/:pageNumber', onQueryRequest);
 router.post('/query', onQueryRequest);
 router.post('/remove', onDeleteRequest);
@@ -300,7 +377,7 @@ router.use(function (request, response, next) {
         });
     }
 
-    if (_options.simplifiedFormat) {
+    if (response.locals.simplifiedFormat) {
         response.send(simplifyResult(response.locals.data));
     } else {
         response.send(response.locals.data);

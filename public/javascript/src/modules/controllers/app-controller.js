@@ -8,7 +8,9 @@ define([
 
     return ngApp.controller('appController', ['$scope', '$http', '$mdToast',
         function ($scope, $http, $mdToast) {
-            $scope.isLoading = false;
+            $scope.loadingQueue = {
+                length : 0
+            };
             angular.element('.loading-text').remove();
             $scope.sideNav = {
                 isOpen: false
@@ -16,23 +18,22 @@ define([
             $scope.fab = {
                 isOpen: false
             };
-
             $scope.showError = function () {
                 $mdToast.show($mdToast.simple().textContent('Sorry. Try Again :-('));
             };
 
             $scope.showLoading = function () {
-                $scope.isLoading = true;
+                $scope.loadingQueue.length++;
             };
 
             $scope.hideLoading = function () {
-                $scope.isLoading = false;
+                if($scope.loadingQueue.length > 0) $scope.loadingQueue.length--;
             };
 
 
             $scope.onTabSelected = function (tab) {
                 console.log('tab selected: %s', tab);
-                $scope.$broadcast('tabSelected', tab);
+                $scope.$broadcast('change:tab', tab);
             };
 
             $scope.toggleMenu = function ($mdOpenMenu, ev) {
@@ -40,7 +41,7 @@ define([
             };
 
             $scope.refreshApp = function () {
-                $scope.$broadcast('refreshApp');
+                $scope.$broadcast('reload:app');
             };
         }])
 });

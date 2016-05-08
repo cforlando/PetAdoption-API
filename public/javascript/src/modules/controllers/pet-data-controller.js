@@ -9,19 +9,20 @@ define([
     return ngApp.controller('petDataController', ['$scope', '$http', '$mdToast', 'dataParserService',
         function ($scope, $http, $mdToast, dataParserService) {
             $scope.petData = {};
+            $scope.mediaInputEl = {files: []}; // stub in case el is never defined
             $scope.visiblePetType = angular.element('md-tab').first().attr('label');
 
             /**
              *
              * @param {Function} [done]
              */
-            function updateModel(done) {
+            function updateModelFromServer(done) {
                 $scope.showLoading();
                 $http.get('/api/v1/model/' + $scope.visiblePetType).then(
                     function success(response) {
                         $mdToast.show($mdToast.simple().textContent("Successfully updated from server."));
                         var parsedResponseData = dataParserService.parseResponseData(response.data);
-                        $scope.petData[$scope.visiblePetType] = _.extend(parsedResponseData, $scope.petData[$scope.visiblePetType]);
+                        $scope.petData[$scope.visiblePetType] = _.extend($scope.petData[$scope.visiblePetType], parsedResponseData);
                         $scope.hideLoading();
                         if (done) done($scope.petData[$scope.visiblePetType]);
                     },
@@ -34,7 +35,7 @@ define([
 
             $scope.deletePet = function () {
                 $scope.showLoading();
-                var _data = dataParserService.formatSendData($scope.petData[$scope.visiblePetType]);
+                var _data = dataParserService.convertDataToSaveFormat($scope.petData[$scope.visiblePetType]);
                 console.log('_data; %o', _data);
 
                 $http.post('/api/v1/remove', _data).then(
@@ -58,11 +59,11 @@ define([
                 );
             };
 
-            $scope.savePet = function () {
-                var _data = dataParserService.formatSendData($scope.petData[$scope.visiblePetType]);
-
+            $scope.savePetJSON = function () {
+                var _data = dataParserService.convertDataToSaveFormat($scope.petData[$scope.visiblePetType]);
                 console.log('_data; %o', _data);
                 $scope.showLoading();
+
                 $http.post('/api/v1/save', _data).then(
                     function success(response) {
                         if (response.data.result != 'success') {
@@ -75,12 +76,55 @@ define([
                         $scope.petData[$scope.visiblePetType] = dataParserService.parseResponseData(_persistedData);
                         $scope.getPetList(function () {
                             $scope.hideLoading();
-                            $mdToast.show($mdToast.simple().textContent('Saved!'));
+                            $mdToast.show($mdToast.simple().textContent('Saved data!'));
                         });
                     },
                     function failure() {
                         $scope.hideLoading();
                         $scope.showError();
+                    }
+                );
+                $scope.$broadcast('save:petData');
+            };
+
+            $scope.savePet = function (done) {
+                var _data = new FormData();
+                console.log('sending photos %o', $scope.mediaInputEl.files);
+                _.forEach($scope.mediaInputEl.files, function (file, index) {
+                    _data.append("uploads", file);
+                });
+                var _petData = dataParserService.convertDataToSaveFormat($scope.petData[$scope.visiblePetType]);
+                _.forEach(_petData, function (propValue, propName) {
+                    if (propValue) _data.append(propName, propValue)
+                });
+                $scope.showLoading();
+
+                $http.post('/api/v1/save', _data, {
+                    headers: {
+                        "Content-Type": undefined
+                    }
+                }).then(
+                    function success(response) {
+                        if (response.data.result != 'success') {
+                            $scope.hideLoading();
+                            $scope.showError();
+                            if (_.isFunction(done)) done.apply(null, arguments);
+                            return;
+                        }
+                        var _persistedData = response.data['data'];
+                        console.log('_persistedData: %o', _persistedData);
+                        $scope.petData[$scope.visiblePetType] = dataParserService.parseResponseData(_persistedData);
+                        $scope.getPetList(function () {
+                            $scope.hideLoading();
+                            $mdToast.show($mdToast.simple().textContent('Saved data!'));
+                            if (_.isFunction(done)) done.apply(null, arguments);
+                        });
+                    },
+                    function failure() {
+                        $scope.hideLoading();
+                        $mdToast.show($mdToast.simple().textContent('Failed to save.'));
+                        console.log('failed to save formData');
+                        if (_.isFunction(done)) done.apply(null, arguments);
                     }
                 );
             };
@@ -106,7 +150,7 @@ define([
 
             $scope.refreshPetData = function () {
                 var searchProps = _.pick($scope.petData[$scope.visiblePetType], ['petId', 'petName']),
-                    _data = dataParserService.formatSendData(searchProps);
+                    _data = dataParserService.convertDataToSaveFormat(searchProps);
 
                 console.log('_data; %o', _data);
                 $scope.showLoading();
@@ -163,18 +207,48 @@ define([
             $scope.setPet = function (petModel) {
                 var _petData = dataParserService.parseResponseData(petModel);
                 _.forEach(_petData, function (petPropData, petPropName) {
-                    if ($scope.petData[$scope.visiblePetType][petPropName] && petPropData.val) {
-                        $scope.petData[$scope.visiblePetType][petPropName].val = petPropData.val;
+                    if ($scope.petData[$scope.visiblePetType][petPropName]) {
+                        if(petPropData.val) $scope.petData[$scope.visiblePetType][petPropName].val = petPropData.val;
+                        if(petPropData.options) $scope.petData[$scope.visiblePetType][petPropName].options = petPropData.options;
                     }
                 });
             };
 
-            $scope.$on('tabSelected', function (event, tab) {
+            $scope.createOption = function(petType, fieldName, val){
+                console.log(arguments);
+                $scope.petData[$scope.visiblePetType][fieldName].options.push(val);
+                var _data = dataParserService.convertDataToModelFormat($scope.petData[$scope.visiblePetType]);
+                console.log('_data; %o', _data);
+                $scope.showLoading();
+                $http.post('/api/v1/save/model/', _data).then(
+                    function success(response) {
+                        if (response.data.result != 'success') {
+                            $scope.hideLoading();
+                            $scope.showError();
+                            return;
+                        }
+                        var _persistedData = response.data['data'];
+                        console.log('_persistedData: %o', _persistedData);
+                        $scope.petData[$scope.visiblePetType] = dataParserService.parseResponseData(_persistedData);
+                        $scope.getPetList(function () {
+                            $scope.hideLoading();
+                            $mdToast.show($mdToast.simple().textContent('Saved!'));
+                        });
+                    },
+                    function failure() {
+                        $scope.hideLoading();
+                        $scope.showError();
+                    }
+                );
+
+            };
+
+            $scope.$on('change:tab', function (event, tab) {
                 $scope.visiblePetType = tab;
-                updateModel();
+                updateModelFromServer();
             });
 
-            $scope.$on('refreshApp', function () {
+            $scope.$on('reload:app', function () {
                 $scope.getPetList(function () {
                     $scope.refreshPetData();
                 });

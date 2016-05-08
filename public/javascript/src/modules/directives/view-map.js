@@ -13,17 +13,18 @@ define(
                 restrict: 'C',
                 controller: ['$scope', '$element', function ($scope, $element) {
                     $scope.watchRemovers = {};
+                    var _initialData = $scope.petData[$scope.visiblePetType];
 
                     $scope.map = {
                         center: {
-                            lat: ($scope.petData[$scope.visiblePetType]) ? $scope.petData[$scope.visiblePetType]['lostGeoLat'].val : 28.513651,
-                            lng: ($scope.petData[$scope.visiblePetType]) ? $scope.petData[$scope.visiblePetType]['lostGeoLon'].val : -81.466219
+                            lat: (_initialData && _initialData['lostGeoLat']) ? _initialData['lostGeoLat'].val : 28.513651,
+                            lng: (_initialData && _initialData['lostGeoLon']) ? _initialData['lostGeoLon'].val : -81.466219
                         },
                         marker: {
-                            lat: ($scope.petData[$scope.visiblePetType]) ? $scope.petData[$scope.visiblePetType]['lostGeoLat'].val : 28.513651,
-                            lng: ($scope.petData[$scope.visiblePetType]) ? $scope.petData[$scope.visiblePetType]['lostGeoLon'].val : -81.466219
+                            lat: (_initialData && _initialData['lostGeoLat']) ? _initialData['lostGeoLat'].val : 28.513651,
+                            lng: (_initialData && _initialData['lostGeoLon']) ? _initialData['lostGeoLon'].val : -81.466219
                         },
-                        mapTypeId: google.maps.MapTypeId.ROADMAP,
+                        mapTypeId: (window.google) ? google.maps.MapTypeId.ROADMAP : null,
                         zoom: 8,
                         scrollwheel: false,
                         zoomControl: true,
@@ -59,7 +60,8 @@ define(
                     $scope.setLatLng = function(lat, lng) {
                         var _lat = parseFloat(lat),
                             _lng = parseFloat(lng);
-                        if ($scope.petData[$scope.visiblePetType]) {
+                        // check to see if lostGeoLat has loaded in case of no mongodb connection
+                        if ($scope.petData[$scope.visiblePetType] && $scope.petData[$scope.visiblePetType]['lostGeoLat']) {
                             $scope.petData[$scope.visiblePetType]['lostGeoLat'].val = _lat;
                             $scope.petData[$scope.visiblePetType]['lostGeoLon'].val = _lng;
                         }
@@ -126,7 +128,7 @@ define(
 
                     function _waitForGoogleMaps() {
                         $scope.googleCheckInterval = setInterval(function () {
-                            if (google && google.maps) {
+                            if (window.google && google.maps) {
                                 clearTimeout($scope.googleCheckTimeout);
                                 clearInterval($scope.googleCheckInterval);
                                 initializeGoogleMaps();
@@ -139,7 +141,7 @@ define(
                         }, 10000);
                     }
 
-                    if (google && google.maps) {
+                    if (window.google && google.maps) {
                         initializeGoogleMaps();
                     } else {
                         _waitForGoogleMaps();

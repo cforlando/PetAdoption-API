@@ -1,4 +1,7 @@
+@charset "UTF-8";
 color-black = #000;
+@import "slick"
+@import "slick-theme"
 
 @keyframes fadeIn {
   0% {
@@ -9,7 +12,7 @@ color-black = #000;
   }
 }
 
-[ng-cloak]{
+[ng-cloak] {
   display: none;
 }
 
@@ -41,6 +44,7 @@ a {
 
 .default-field {
 
+  .input-section,
   md-input-container {
     display: block;
     margin-left: auto;
@@ -88,4 +92,26 @@ a {
   font-weight: normal;
   margin: 0 auto;
   width: calc(100% - 3em);
+}
+
+.file-upload {
+  display none
+}
+
+.slick-slide{
+  img {
+    max-height 320px
+    max-width 100%
+    width auto
+    height auto
+  }
+}
+
+.slide-img-placeholder {
+  background-position center
+  background-size cover
+  background-repeat no-repeat
+  height 320px
+  height 50vh
+  width 100%
 }

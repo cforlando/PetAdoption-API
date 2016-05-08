@@ -1,3 +1,4 @@
 module.exports = {
-    isDevelopment : false
+    isDevelopment : true,
+    defaultPort : '80'
 };

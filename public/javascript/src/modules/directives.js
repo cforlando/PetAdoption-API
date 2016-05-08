@@ -4,7 +4,8 @@ define([
     'modules/directives/btn-reuse',
     'modules/directives/btn-submit',
     'modules/directives/fab',
-    'modules/directives/map',
+    'modules/directives/view-map',
+    'modules/directives/view-photos',
     'modules/directives/nav-sidebar'
 ], function () {
 
