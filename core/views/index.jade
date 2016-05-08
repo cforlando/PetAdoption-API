@@ -5,7 +5,7 @@ block content
         each model, modelName in inputs
             md-tab(label=modelName, md-on-select="onTabSelected('#{modelName}')")
                 md-content.md-padding(ng-if="visiblePetType == '#{modelName}'")
-                    form.pet-photos-form(action='/api/v1/save/media', method='post')
+                    form.pet-photos-form(action='/api/v1/save', method='post')
                         .file-upload
                             input.file-upload__input(name='uploads', type='file', multiple)
                     form.pet-form(layout="column", action='/api/v1/save', method='post')

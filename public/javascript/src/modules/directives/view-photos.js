@@ -26,7 +26,7 @@ define([
 
                     console.log('init photos view w/ $scope', $scope);
 
-                    function readURL(input) {
+                    function readMediaInput(input) {
                         var numOfFiles = input.files.length,
                             _previewPhotos = [];
 
@@ -54,6 +54,43 @@ define([
                         }
                     }
 
+                    /**
+                     *
+                     * @param imageURL
+                     */
+                    function addImageSlide(imageURL) {
+                        if($scope.$slider) $scope.$slider.slick('slickAdd', "<div class='slide-img-placeholder' data-src='" + imageURL + "' style=\"background-image:url('" + imageURL + "')\"></div>");
+                    }
+
+                    function onFileInputChange(){
+                        readMediaInput(this);
+                    }
+
+                    function initSlider() {
+                        console.log('creating slider w/ %o', $scope.slickOptions);
+                        $scope.$slider = $element.find('.images-slider').slick($scope.slickOptions);
+                        if($scope.petData[$scope.visiblePetType] && $scope.petData[$scope.visiblePetType].images) {
+                            $scope.sliderImages.saved = $scope.petData[$scope.visiblePetType].images.val;
+                        } else {
+                            $scope.sliderImages.saved = [];
+                        }
+                        _.forEach($scope.sliderImages.saved.concat($scope.sliderImages.preview), function (imageURL, index) {
+                            console.log('adding slider image %s', imageURL);
+                            addImageSlide(imageURL);
+                        });
+
+                        watcherHandlers.previewImages = $scope.$watch('sliderImages.preview', reloadSlider);
+                        watcherHandlers.savedImages = $scope.$watch('sliderImages.saved', reloadSlider);
+
+                        watcherHandlers.petData = $scope.$watch('petData.' + $scope.visiblePetType + '.images.val', function () {
+                            if($scope.petData[$scope.visiblePetType] && $scope.petData[$scope.visiblePetType].images){
+                                $scope.sliderImages.saved = $scope.petData[$scope.visiblePetType].images.val;
+                            } else {
+                                $scope.sliderImages.saved = [];
+                            }
+                        });
+                    }
+
                     function destroySlider() {
                         if ($scope.$slider) {
                             console.log('destroying slider');
@@ -65,71 +102,16 @@ define([
                         }
                     }
 
-                    /**
-                     *
-                     * @param imageURL
-                     */
-                    function addImageSlide(imageURL) {
-                        $scope.$slider.slick('slickAdd', "<div class='slide-img-placeholder' data-src='" + imageURL + "' style=\"background-image:url('" + imageURL + "')\"></div>");
-                    }
-
-                    function onFileInputChange(){
-                        readURL(this);
-                    }
-
-                    function loadSlider() {
-                        console.log('loading slider w/ %o', $scope.slickOptions);
-                        $scope.$slider = angular.element('.images-slider').slick($scope.slickOptions);
-                        if($scope.petData[$scope.visiblePetType] && $scope.petData[$scope.visiblePetType].images) {
-                            $scope.sliderImages.saved = $scope.petData[$scope.visiblePetType].images.val;
-                        } else {
-                            $scope.sliderImages.saved = [];
-                        }
-                        _.forEach($scope.sliderImages.saved.concat($scope.sliderImages.preview), function (imageURL, index) {
-                            console.log('adding slider image %s', imageURL);
-                            addImageSlide(imageURL);
-                        });
-                    }
-                    function onPhotosChange() {
+                    function reloadSlider() {
                         console.log('reloading slider');
                         destroySlider();
-                        $scope.$slider = angular.element('.images-slider').slick($scope.slickOptions);
+                        $scope.$slider = $element.find('.images-slider').slick($scope.slickOptions);
                         _.forEach($scope.sliderImages.saved.concat($scope.sliderImages.preview), function (imageURL, index) {
                             console.log('adding slider image %s', imageURL);
                             addImageSlide(imageURL);
                         });
                         console.log('reloaded slider');
                     }
-
-                    watcherHandlers.previewImages = $scope.$watch('sliderImages.preview', onPhotosChange);
-                    watcherHandlers.savedImages = $scope.$watch('sliderImages.saved', onPhotosChange);
-
-                    watcherHandlers.petData = $scope.$watch('petData.' + $scope.visiblePetType + '.images.val', function () {
-                        if($scope.petData[$scope.visiblePetType] && $scope.petData[$scope.visiblePetType].images){
-                            $scope.sliderImages.saved = $scope.petData[$scope.visiblePetType].images.val;
-                        } else {
-                            $scope.sliderImages.saved = [];
-                        }
-                    });
-
-                    $scope.$on('$destroy', function(){
-                        console.log('destroying photos view');
-
-                        // watcherHandlers is an object of removal functions.
-                        // we remove the listeners before making further changes
-                        _.forEach(watcherHandlers, function(endWatcher, index){
-                            endWatcher();
-                        });
-                        destroySlider();
-                        $fileInput.off('change', null, onFileInputChange);
-                    });
-
-                    $scope.$on('save:petData', function(){
-                        $scope.sliderImages.preview = [];
-                    });
-
-                    $fileInput.on('change', onFileInputChange);
-
 
                     $scope.uploadPhoto = function () {
                         $fileInput.click();
@@ -142,7 +124,26 @@ define([
                         $scope.petData[$scope.visiblePetType].images.val = _images;
                     };
 
-                    loadSlider();
+                    $scope.$on('$destroy', function(){
+                        console.log('destroying photos view');
+
+                        // watcherHandlers is an object of removal functions.
+                        // we remove the listeners before making further changes
+                        _.forEach(watcherHandlers, function(endWatcher, index){
+                            console.log('destroying watcher: %s', index);
+                            endWatcher();
+                        });
+                        destroySlider();
+                        $fileInput.off('change', null, onFileInputChange);
+                    });
+
+                    $scope.$on('save:petData', function(){
+                        $scope.sliderImages.preview = [];
+                    });
+
+                    $fileInput.on('change', onFileInputChange);
+
+                    initSlider();
 
                 }],
             link: function postLink(scope) {
