@@ -7,7 +7,7 @@ var fs = require('fs'),
     async = require('async'),
     bodyParser = require('body-parser'),
     Express = require('express'),
-    multer  = require('multer'),
+    multer = require('multer'),
 
     MongoDB = require('../mongodb'),
     csvReader = require('../csv-parser'),
@@ -18,9 +18,9 @@ var fs = require('fs'),
     database = MongoDB, //  can use MongoDB || Couchbase
     _options = {
         pageSize: 10,
-        paths : {
-            root : path.resolve(process.cwd(), 'public/'),
-            images : '/images/pet/'
+        paths: {
+            root: path.resolve(process.cwd(), 'public/'),
+            images: '/images/pet/'
         }
     },
     storage = multer.diskStorage({
@@ -150,11 +150,12 @@ function onSaveJSON(req, res, next) {
         }
     });
 }
+
 function onSaveMedia(req, res, next) {
-    console.log('onSaveMedia: %s-\n%s', dump(req.files),  dump(req.body));
+    console.log('onSaveMedia: %s-\n%s', dump(req.files), dump(req.body));
     var _body = req.body;
     _body.images = _body.images.split(',');
-    _.forEach(req.files, function(fileMeta, index){
+    _.forEach(req.files, function (fileMeta, index) {
         _body.images.push(path.join(_options.paths.images, fileMeta.filename));
     });
     database.saveAnimal(_body, {
@@ -174,60 +175,34 @@ function onSaveMedia(req, res, next) {
 
 function onSaveModel(req, res, next) {
 
-
-    var writeDir = path.resolve(process.cwd(), 'core/data/'),
-        writePath = path.resolve(writeDir, 'options.json');
-
-    fs.readFile(writePath, {encoding: 'utf8'}, function(err, optionsStr){
-        if(err){
-            res.send({result: err})
-        } else {
-            var species = database._getSpeciesFromProps(req.body),
-                optionsData = JSON.parse(optionsStr);
-
-            _.forEach(req.body, function(propData, propName){
-                if(propData && _.isArray(propData.options) && optionsData[species][propName]){
-                    optionsData[species][propName].options = optionsData[species][propName].options || [];
-                    optionsData[species][propName].options = _.concat(optionsData[species][propName].options, propData.options);
-                }
-            });
-            fs.writeFile(writePath, JSON.stringify(optionsData), function(){
-
-                database.saveAnimal(req.body, {
-                    debug: config.isDevelopment,
-                    complete: function (err, newAnimal) {
-                        if (err) {
-                            res.send({result: err})
-                        } else {
-                            res.send({
-                                result: 'success',
-                                data: newAnimal
-                            })
-                        }
-                    }
-                });
-            });
+    database.saveAnimal(req.body, {
+        debug: config.isDevelopment,
+        complete: function (err, newAnimal) {
+            if (err) {
+                res.send({result: err})
+            } else {
+                res.send({
+                    result: 'success',
+                    data: newAnimal
+                })
+            }
         }
     });
-
 
 
 }
 
 function onModelRequest(req, res) {
     var species = req.params['species'];
-
-    fs.readFile(path.resolve(process.cwd(), 'core/data/models.json'),
-        {encoding: 'utf8'},
-        function (err, str) {
-            if (err) {
-                res.send(err);
-            } else {
-                var models = JSON.parse(str);
-
-                res.send(JSON.stringify(models[species]));
-            }
-        });
+    
+    database.findModel({
+        species: species
+    }, {
+        debug: true,
+        complete: function (err, animalModel) {
+            res.send(err || animalModel);
+        }
+    })
 }
 
 function onSchemaRequest(req, res) {
@@ -338,7 +313,7 @@ router.get('/schema/:species/', onSchemaRequest);
 router.get('/list/:species/', onListRequest);
 router.get('/list/:species/:pageNumber/', onListRequest);
 router.post('/save/json', onSaveJSON);
-router.post('/save',upload.array('uploads'),  onSaveMedia);
+router.post('/save', upload.array('uploads'), onSaveMedia);
 router.post('/save/model', onSaveModel);
 router.post('/query/:pageNumber', onQueryRequest);
 router.post('/query', onQueryRequest);
