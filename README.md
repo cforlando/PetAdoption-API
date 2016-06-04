@@ -2,25 +2,55 @@
 
 The Pet Adoption API is a project using the ASP.NET WebAPI and MVC stack.  Project is set and built with Visual Studio 2015 Community Edition as it is open-source. Database and API hosted in Azure Platform.
 
-## Code Example
-
-Show what the library does as concisely as possible, developers should be able to figure out **how** your project solves their problem by looking at the code example. Make sure the API you are showing off is obvious, and that your code is short and concise.
-
 ## Motivation
 
 Nobody likes to see animals be put down due to overcrowding at animal control centers and shelters.  We would like to see animals at these facilities be adopted at a much higher rate, and for those animals who were lost and found, for their rightful owners to be reunited with them once more.  We would like to thank the City of Lady Lake for their wonderful contribution to the project, as they are the project's pilot city.  For that, we are ever grateful!
 
 ## Installation
 
-Provide code examples and explanations of how to get the project.
+run `npm install`. Sudo privileges may be necessary.
 
 ## API Reference
 
-Depending on the size of the project, if it is small and simple enough the reference docs can be added to the README. For medium size to larger projects it is important to at least provide a link to where the API reference docs live.
+Current API location: http://cfo-pet-adoption-server.eastus.cloudapp.azure.com/api/v1/
+
+Current API location: http://cfo-pet-adoption-server.eastus.cloudapp.azure.com/api/v2/ (for reduced response data)
+
+:xxxxx = dynamic field that must be specified within the endpoint itself
+
+Method  | Endpoint                               | Notes
+--------| -------------------------------------- | ----------------------------------------------------------------
+GET     | options/:species                       | JSON of all preselected options for given species
+GET     | options/:species/:option               | JSON of given option for a given species
+GET     | options/:species/:option/:pageNumber   | JSON of given option for a given species in pages. Page size defaults to 10. This can be changed via query argument (i.e. "/options/dog/breed/1?pageSize=15")
+GET     | schema/:species                        | returns JSON representation of a schema. Currently includes dog and cat schema
+GET     | list/:species                          | ex: '/list/dog' will show all saved dog species
+GET     | list/:species/:pageNumber              | paginated route for list/:species endpoint
+POST    | save/                                  | fields will be saved as provided. Must match schema definition and should be of `multipart/form-data`. Responds with saved animal data
+POST    | save/json                              | fields will be saved as provided. Must match schema definition and should be of `application/json` Content-Type. Responds with saved animal data
+POST    | save/model                             | updates global model of pet in addition to saving data. Must match model format and should be of `application/json` Content-Type. Responds with saved animal data
+POST    | query/                                 | will match given parameters 
+POST    | query/:pageNumber                      | will match given parameters with paged results
+POST    | remove/                                | deletes pet as specified by `petId` or `petName`
+
+#### Queries
+
+Additional fields you can set:
+
+Name           | Type            | Description
+---------------| ----------------| ----------------------------------------------------------
+matchStartFor  | (String) Array  | Requires the fields specified in the array to match starting from the beginning (prepends a '^' line start regex meta-character)
+matchEndFor    | (String) Array  | Requires the fields specified in the array to match from the ending (appends a '$' line end regex meta-character)
+ignoreCase     | (String) Array  | Allows the fields specified to ignore casing
+pageSize       | Number          | Defaults to 10 (only meaningful when making paged query) 
+
+###### More Notes
+
+`api/v2` will only send values for request animals. `api/v1` will send the value for an animal property as well as an example, default value, type, etc. as available. 
 
 ## Tests
 
-Describe and show how to run the tests with code examples.
+TODO: test needed
 
 ## Contributors
 
