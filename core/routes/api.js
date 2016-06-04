@@ -3,7 +3,6 @@ var fs = require('fs'),
     util = require('util'),
 
     _ = require('lodash'),
-    logger = require('morgan'),
     async = require('async'),
     bodyParser = require('body-parser'),
     Express = require('express'),
@@ -34,7 +33,6 @@ var fs = require('fs'),
     }),
     upload = multer({storage: storage});
 
-router.use(logger('dev'));
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({extended: false}));
 
@@ -175,7 +173,7 @@ function onSaveMedia(req, res, next) {
 
 function onSaveModel(req, res, next) {
 
-    database.saveAnimal(req.body, {
+    database.saveModel(req.body, {
         debug: config.isDevelopment,
         complete: function (err, newAnimal) {
             if (err) {
@@ -194,11 +192,13 @@ function onSaveModel(req, res, next) {
 
 function onModelRequest(req, res) {
     var species = req.params['species'];
-    
+
     database.findModel({
-        species: species
+        species: {
+            defaultVal: species
+        }
     }, {
-        debug: true,
+        debug: config.isDevelopment,
         complete: function (err, animalModel) {
             res.send(err || animalModel);
         }
@@ -283,6 +283,7 @@ function onResetRequest(req, res, next) {
         var numOfPets = petCollection.length;
         async.forEachOfSeries(petCollection,
             function each(petData, petIndex, done) {
+                console.log('saving pet %j', petData);
                 MongoDB.saveAnimal(petData, {
                     debug: config.isDevelopment,
                     complete: function (err) {
@@ -296,7 +297,8 @@ function onResetRequest(req, res, next) {
                             done();
                         }
                     }
-                })
+                });
+                // done();
             },
             function done(err) {
                 res.send(err || {result: 'success'});

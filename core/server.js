@@ -2,7 +2,6 @@ var fs = require('fs'),
     path = require('path'),
     util = require('util'),
 
-    _ = require('lodash'),
     logger = require('morgan'),
     bodyParser = require('body-parser'),
     express = require('express'),

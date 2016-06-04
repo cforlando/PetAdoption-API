@@ -1,5 +1,5 @@
 ,name,fieldLabel,type,description,default,required,example,note
-,petId,Pet ID,integer,Internal unique identifier.,Auto generated,Yes,123456789,
+,petId,Pet ID,string,Internal unique identifier.,Auto generated,Yes,123456789,
 ,intakeDate,Intake Date?,date,,Current Date,Yes,1/4/2016,
 ,adoptable,Available for adoption at this time?,boolean,It the cat is available for adoption at this time.,No,Yes,No,
 ,lost,Possibly a lost or stray cat?,boolean,,,Yes,No,

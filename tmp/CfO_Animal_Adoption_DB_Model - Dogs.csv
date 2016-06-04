@@ -1,5 +1,5 @@
 ,name,fieldLabel,type,description,default,required,example,note
-,petId,Pet ID,integer,Internal unique identifier.,Auto generated,Yes,123456789,
+,petId,Pet ID,string,Internal unique identifier.,Auto generated,Yes,123456789,
 ,intakeDate,Intake Date?,date,,Current Date,Yes,2/17/2016,
 ,adoptable,Available for adoption at this time?,boolean,It the dog is available for adoption at this time.,No,Yes,No,
 ,lost,Possibly a lost or stray dog?,boolean,,,Yes,No,

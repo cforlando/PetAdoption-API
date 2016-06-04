@@ -9,7 +9,8 @@ define([
     var dataParserService = ngApp.service('dataParserService', function () {
         function parsePropValue(propData) {
             var _data = {};
-            switch (propData.type) {
+            console.log('parsing %o (key: %s - type; %s)', propData, propData.key, propData.valType);
+            switch (propData.valType) {
                 case 'Date':
                     // handle special case for date
                     _data.val = new Date(propData.val);
@@ -33,7 +34,7 @@ define([
                     break;
                 default:
                     // TODO remove autofill with example
-                    _data.val = propData.val || propData.default || propData.example;
+                    _data.val = propData.val || propData.defaultVal || propData.example;
             }
             return _data;
         }
@@ -41,7 +42,7 @@ define([
         function parsePropOptions(propData) {
             if (propData) {
                 if (propData.options) {
-                    return propData;
+                    propData.options = _.uniq(propData.options);
                 } else {
                     console.log('propData (%s) does not have options', propData.key);
                     propData.options = [];
@@ -62,10 +63,9 @@ define([
         this.convertDataToModelFormat = function (data) {
             var _data = {};
             _.forEach(data, function (propData, propName, props) {
-                if(_data[propName]){
-                    _data[propName].val = parsePropValue(propData).val;
-                    _data[propName].options = parsePropValue(propData).options;
-                }
+                _data[propName] = _.extend({}, propData, {
+                    options: parsePropOptions(propData).options
+                });
             });
             return _data;
         };
@@ -73,9 +73,10 @@ define([
         this.parseResponseData = function (responseData) {
             var _data = {};
             _.forEach(responseData, function (propData, propName, props) {
-                if (!_data[propName]) _data[propName] = {};
-                _data[propName].val = parsePropValue(propData).val;
-                _data[propName].options = parsePropOptions(propData).options;
+                _data[propName] = _.extend({}, propData, {
+                    val: parsePropValue(propData).val,
+                    options: parsePropOptions(propData).options
+                });
             });
             return _data;
         };

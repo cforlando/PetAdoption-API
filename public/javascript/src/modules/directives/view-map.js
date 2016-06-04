@@ -12,7 +12,7 @@ define(
             return {
                 restrict: 'C',
                 controller: ['$scope', '$element', function ($scope, $element) {
-                    $scope.watchRemovers = {};
+                    $scope.watchHandlers = {};
                     var _initialData = $scope.petData[$scope.visiblePetType];
 
                     $scope.map = {
@@ -28,6 +28,8 @@ define(
                         zoom: 8,
                         scrollwheel: false,
                         zoomControl: true,
+                        mapTypeControl: true,
+                        disableDoubleClickZoom : true,
                         streetViewControl: false
                     };
 
@@ -38,26 +40,31 @@ define(
                     };
 
                     $scope.updatePosition = function(position) {
+                        console.log('$scope.updatePosition()');
                         if (position.coords.latitude && position.coords.longitude) {
-                            console.log('updating position (%s,%s)', position.coords.latitude, position.coords.longitude);
+                            console.log('$scope.updatePosition() @ %s,%s', position.coords.latitude, position.coords.longitude);
                             $scope.setLatLng(position.coords.latitude, position.coords.longitude)
                         }
                     };
 
                     $scope.refreshMapData = function() {
+                        console.log('$scope.refreshMapData()');
                         if ($scope.petData[$scope.visiblePetType]) {
+                            var _lat = parseFloat($scope.petData[$scope.visiblePetType]['lostGeoLat'].val),
+                                _lng = parseFloat($scope.petData[$scope.visiblePetType]['lostGeoLon'].val);
                             $scope.map.center = {
-                                lat: parseFloat($scope.petData[$scope.visiblePetType]['lostGeoLat'].val),
-                                lng: parseFloat($scope.petData[$scope.visiblePetType]['lostGeoLon'].val)
+                                lat: _lat,
+                                lng: _lng
                             };
                             $scope.map.marker = {
-                                lat: $scope.petData[$scope.visiblePetType]['lostGeoLat'].val,
-                                lng: $scope.petData[$scope.visiblePetType]['lostGeoLon'].val
+                                lat: _lat,
+                                lng: _lng
                             }
                         }
                     };
 
                     $scope.setLatLng = function(lat, lng) {
+                        console.log('$scope.setLatLng()');
                         var _lat = parseFloat(lat),
                             _lng = parseFloat(lng);
                         // check to see if lostGeoLat has loaded in case of no mongodb connection
@@ -69,7 +76,7 @@ define(
                     };
 
                     $scope.updateMapView = function() {
-                        console.log('updating map');
+                        console.log('$scope.updateMapView()');
                         if ($scope.map.center.lat && $scope.map.center.lng) {
                             var newCenter = new google.maps.LatLng($scope.map.center.lat, $scope.map.center.lng);
                             if ($scope.markerObj) $scope.markerObj.setPosition(newCenter);
@@ -78,9 +85,9 @@ define(
                     };
 
                     $scope.onDestroy = function () {
-                        console.log('destroying map');
+                        console.log('$scope.onDestroy()');
                         if (google && google.maps) google.maps.event.removeListener($scope.clickListener);
-                        _.forEach($scope.watchRemovers, function (removeWatcher, index) {
+                        _.forEach($scope.watchHandlers, function (removeWatcher, index) {
                             removeWatcher();
                         })
                     };
@@ -104,22 +111,28 @@ define(
                         };
 
                         // $scope.clickListener = google.maps.event.addListener(marker, 'click', $scope.onMarkerClick);
-                        $scope.clickListener = google.maps.event.addListener(map, "click", function (event) {
+                        $scope.clickListener = google.maps.event.addListener(map, "dblclick", function (event) {
+                            console.log('dblclick triggered.');
+
                             // display the lat/lng in your form's lat/lng fields
                             $scope.setLatLng(event.latLng.lat(), event.latLng.lng());
+                            $scope.refreshMapData();
+                            $scope.updateMapView();
                         });
 
-                        $scope.watchRemovers.mapCenter = $scope.$watch('map.center', function (newValue, oldValue) {
-                            console.log('updating map');
+                        $scope.watchHandlers.mapCenter = $scope.$watch('map.center', function (newValue, oldValue) {
+                            console.log('mapCenter changed.');
                             $scope.updateMapView();
                         });
 
 
-                        $scope.watchRemovers.petDataLat = $scope.$watch('petData.' + $scope.visiblePetType + '.lostGeoLat.val', function (lat) {
+                        $scope.watchHandlers.petDataLat = $scope.$watch('petData.' + $scope.visiblePetType + '.lostGeoLat.val', function (lat) {
+                            console.log('lostGeoLat.val changed.');
                             if(lat) $scope.refreshMapData();
                         });
 
-                        $scope.watchRemovers.petdataLng = $scope.$watch('petData.' + $scope.visiblePetType + '.lostGeoLon.val', function (lng) {
+                        $scope.watchHandlers.petdataLng = $scope.$watch('petData.' + $scope.visiblePetType + '.lostGeoLon.val', function (lng) {
+                            console.log('lostGeoLon.val changed.');
                             if(lng) $scope.refreshMapData();
                         });
 

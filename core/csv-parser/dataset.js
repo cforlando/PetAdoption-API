@@ -49,7 +49,7 @@ function sanitizeTestDataCSV(csvData) {
                     animalData['description'] = animal[fieldIndex];
                     break;
                 case 'photo':
-                    animalData['image'] = path.join(imagesPath, animal[fieldIndex]);
+                    // animalData['image'] = path.join(imagesPath, animal[fieldIndex]);
                     animalData['images'] = [path.join(imagesPath, animal[fieldIndex]), path.join(imagesPath, animal[fieldIndex])];
                     break;
                 default:

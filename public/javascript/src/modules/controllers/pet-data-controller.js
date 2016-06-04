@@ -88,16 +88,17 @@ define([
             };
 
             $scope.savePet = function (done) {
+                $scope.showLoading();
                 var _data = new FormData();
                 console.log('sending photos %o', $scope.mediaInputEl.files);
                 _.forEach($scope.mediaInputEl.files, function (file, index) {
                     _data.append("uploads", file);
                 });
                 var _petData = dataParserService.convertDataToSaveFormat($scope.petData[$scope.visiblePetType]);
+                console.log('saving petData %o', _petData);
                 _.forEach(_petData, function (propValue, propName) {
                     if (propValue) _data.append(propName, propValue)
                 });
-                $scope.showLoading();
 
                 $http.post('/api/v1/save', _data, {
                     headers: {
@@ -205,10 +206,14 @@ define([
              * @param {Object} petModel
              */
             $scope.setPet = function (petModel) {
+                console.log('setting data to %O', petModel);
                 var _petData = dataParserService.parseResponseData(petModel);
                 _.forEach(_petData, function (petPropData, petPropName) {
                     if ($scope.petData[$scope.visiblePetType][petPropName]) {
                         if(petPropData.val) $scope.petData[$scope.visiblePetType][petPropName].val = petPropData.val;
+                        if(petPropData.key) $scope.petData[$scope.visiblePetType][petPropName].key = petPropData.key;
+                        if(petPropData.defaultVal) $scope.petData[$scope.visiblePetType][petPropName].defaultVal = petPropData.defaultVal;
+                        if(petPropData.valType) $scope.petData[$scope.visiblePetType][petPropName].valType = petPropData.valType;
                         if(petPropData.options) $scope.petData[$scope.visiblePetType][petPropName].options = petPropData.options;
                     }
                 });
@@ -227,9 +232,12 @@ define([
                             $scope.showError();
                             return;
                         }
-                        var _persistedData = response.data['data'];
-                        console.log('_persistedData: %o', _persistedData);
-                        $scope.petData[$scope.visiblePetType] = dataParserService.parseResponseData(_persistedData);
+                        var _persistedData = response.data['data'],
+                            _sanitizedData = dataParserService.parseResponseData(_persistedData);
+                        console.log('persisted data: %o', _sanitizedData);
+                        _.forEach(_sanitizedData, function(propData, propName){
+                            $scope.petData[$scope.visiblePetType][propName].options = propData.options;
+                        });
                         $scope.getPetList(function () {
                             $scope.hideLoading();
                             $mdToast.show($mdToast.simple().textContent('Saved!'));

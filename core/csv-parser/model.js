@@ -45,10 +45,13 @@ function parseModelCSV(csvModelData) {
                 switch (columnIndexName) {
                     case 'type':
                         if (csvRow[columnIndex].match(/integer/i)) {
-                            _modelPropData[columnIndexName] = 'Number';
+                            _modelPropData['valType'] = 'Number';
                         } else {
-                            _modelPropData[columnIndexName] = _.capitalize(csvRow[columnIndex]);
+                            _modelPropData['valType'] = _.capitalize(csvRow[columnIndex]);
                         }
+                        break;
+                    case 'default':
+                        _modelPropData['defaultVal'] = csvRow[columnIndex];
                         break;
                     case 'name':
                         _modelPropData['key'] = csvRow[columnIndex];
@@ -59,12 +62,12 @@ function parseModelCSV(csvModelData) {
                 }
             });
             if (_modelPropData['key'].match(/lostGeoL/)){
-                _modelPropData['default'] = 'Location';
-                _modelPropData['type'] = 'Location';
+                _modelPropData['defaultVal'] = 'Location';
+                _modelPropData['valType'] = 'Location';
             }
-            if (_modelPropData['type'] == 'Date'){
-                if( !moment(_modelPropData['default']).isValid()){
-                    _modelPropData['default'] = null;
+            if (_modelPropData['valType'] == 'Date'){
+                if( !moment(_modelPropData['defaultVal']).isValid()){
+                    _modelPropData['defaultVal'] = null;
                 }
             }
             newModel[_modelPropData['key']] = _modelPropData;
@@ -72,9 +75,10 @@ function parseModelCSV(csvModelData) {
     });
 
     newModel['images'] = {
-        name : 'images',
-        type : '[Image]',
-        default : ['http://placehold.it/500x500', 'http://placehold.it/720x480', 'http://placehold.it/480x480']
+        key : 'images',
+        valType : '[Image]',
+        defaultVal : ['http://placehold.it/500x500', 'http://placehold.it/720x480', 'http://placehold.it/480x480'],
+        example : ['http://placehold.it/500x500', 'http://placehold.it/720x480', 'http://placehold.it/480x480']
     };
     console.log('sanitized model');
     // console.log('sanitized model: %j', newModel);

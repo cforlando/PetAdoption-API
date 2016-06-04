@@ -53,7 +53,6 @@ function parseSchemaCSV(csvSchemaData) {
                         break;
                 }
             });
-            newSchema['image'] = {type : "String"};
             newSchema['images'] = {type : ["String"]};
         }
     });

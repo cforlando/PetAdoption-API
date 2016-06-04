@@ -6,24 +6,30 @@ var path = require('path'),
     _ = require('lodash'),
 
     dump = require('../../lib/dump'),
+    async = require('async'),
 
     router = express.Router(),
-    models = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'core/data/models.json'), {encoding: 'utf8'}));
+    mongodb = require('../mongodb'),
+    petTypes = ['cat', 'dog'],
+    models = {};
 
-var _reversedModels = {};
-for(var modelTypeName in models){
-    if(models.hasOwnProperty(modelTypeName)){
-        _reversedModels[modelTypeName] = {};
-        _.forEachRight(models[modelTypeName], function(modelPropData, modelPropName, collection){
-            _reversedModels[modelTypeName][modelPropName] = modelPropData;
-        });
-    }
-}
+
 router.get('/', function (req, res, next) {
-    res.render('index', {
-        title: 'CFO Pet Adoption Data Entry',
-        inputs: _reversedModels
-    });
+    async.each(petTypes,
+        function each(petType, done) {
+            mongodb.findModel({species: {defaultVal: petType}}, {
+                complete: function (err, animalModel) {
+                    models[petType] = animalModel;
+                    done(err)
+                }
+            })
+        }, function complete() {
+            // console.log('rendering %s', dump(models));
+            res.render('index', {
+                title: 'CFO Pet Adoption Data Entry',
+                inputs: models
+            });
+        });
 })
 ;
 
