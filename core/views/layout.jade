@@ -1,0 +1,45 @@
+doctype html
+html
+    head
+        title= title
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        link(rel='stylesheet', href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css")
+        link(href="https://fonts.googleapis.com/icon?family=Material+Icons", rel="stylesheet")
+        meta(name="viewport", content="width=device-width, initial-scale=1")
+        //script(src="./javascript/src/vendors/require.js")
+        //script(src="./javascript/src/rjs-config.js")
+        //script(src="./javascript/src/app.js")
+        script(src="//maps.googleapis.com/maps/api/js")
+        script(src="./javascript/app.js")
+    body(ng-controller='appController')
+        md-progress-linear.loading-bar(md-mode="indeterminate", ng-show="loadingQueue.length > 0")
+        div(ng-cloak, layout="column",layout-fill, ng-controller='petDataController')
+            md-toolbar
+                .md-toolbar-tools
+                    md-button(class="md-icon-button" aria-label="Side Nav Toggle" ng-click="sideNav.isOpen=!sideNav.isOpen")
+                        md-icon.material-icons menu
+                    span.md-title!=title
+                    md-menu(md-offset="0 -5")
+                        md-button(aria-label="Open menu", ng-click="toggleMenu($mdOpenMenu, $event)")
+                            md-icon.material-icons more_vert
+                        md-menu-content()
+                            md-menu-item
+                                md-button(ng-click='refreshApp()') Refresh
+            md-sidenav(md-component-id="sidenav", data-animal-type="{{visiblePetType}}", md-is-open="sideNav.isOpen", class="list-side-nav md-sidenav-right")
+                md-list
+                    md-list-item.md-2-line(ng-repeat="pet in petList", ng-click='setPet(pet); sideNav.isOpen=!sideNav.isOpen;')
+                        .md-list-item-text
+                            h3!="{{pet.petName.val || pet.petId.val || 'n/a'}}"
+            md-content
+                block content
+                .layout.fab-anchor(layout='row')
+                    md-fab-speed-dial.md-fab-bottom-right.md-scale(md-direction="up", md-open="fab.isOpen")
+                        md-fab-trigger
+                            md-button.md-primary.md-fab.fab-toggle(aria-label="Add...")
+                                md-icon.material-icons add
+                        md-fab-actions
+                            md-button.btn-clear-form.md-fab.md-raised.md-mini(aria-label="Add New Pet")
+                                md-icon.material-icons clear
+                            md-button.btn-reuse-form.md-fab.md-raised.md-mini(aria-label="Add New Pet From Existing")
+                                md-icon.material-icons cached
+        h1.loading-text(style!='text-align: center;') Loading...

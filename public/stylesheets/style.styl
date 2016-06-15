@@ -1,0 +1,117 @@
+@charset "UTF-8";
+color-black = #000;
+@import "slick"
+@import "slick-theme"
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+[ng-cloak] {
+  display: none;
+}
+
+.loading-text {
+  position: absolute;
+  left: 0;
+  top: 240px;
+  top: 50vh;
+  top: calc(50vh - .5em);
+  width: 100%;
+}
+
+body {
+  animation: fadeIn 600ms ease;
+  padding: 50px
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif
+
+  > md-progress-linear {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 3;
+  }
+}
+
+a {
+  color: #00B7FF
+}
+
+.default-field {
+
+  .input-section,
+  md-input-container {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: calc(100% - 3em);
+  }
+}
+
+.fab-anchor {
+  position: relative;
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px; /* Preferred icon size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+
+  /* Support for all WebKit browsers. */
+  -webkit-font-smoothing: antialiased;
+  /* Support for Safari and Chrome. */
+  text-rendering: optimizeLegibility;
+
+  /* Support for Firefox. */
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Support for IE. */
+  font-feature-settings: 'liga';
+}
+
+.google-maps {
+  background-color: color-black;
+  height: 10em;
+}
+
+.date-label {
+  color: rgba(0, 0, 0, 0.54);
+  font-weight: normal;
+  margin: 0 auto;
+  width: calc(100% - 3em);
+}
+
+.file-upload {
+  display none
+}
+
+.slick-slide{
+  img {
+    max-height 320px
+    max-width 100%
+    width auto
+    height auto
+  }
+}
+
+.slide-img-placeholder {
+  background-position center
+  background-size cover
+  background-repeat no-repeat
+  height 320px
+  height 50vh
+  width 100%
+}
