@@ -1,6 +1,6 @@
 module.exports = {
     isDevelopment : false,
-    debugLevel : 4,
+    debugLevel : 0,
     defaultPort : '8080',
     DEBUG_LEVEL_LOW : 0,
     DEBUG_LEVEL_MED : 1,
