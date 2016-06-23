@@ -65,7 +65,7 @@ function onListRequest(req, res, next) {
     res.locals.pageNumber = req.params['pageNumber'];
 
     database.findAnimals(queryData, {
-        debug: config.isDevelopment,
+        debug: config.debugLevel,
         complete: function (err, animals) {
             if (err) {
                 res.locals.data = err;
@@ -84,7 +84,7 @@ function onQueryRequest(req, res, next) {
     res.locals.pageNumber = req.params['pageNumber'];
 
     database.findAnimals(queryData, {
-        debug: config.isDevelopment,
+        debug: config.debugLevel,
         complete: function (err, animals) {
             //console.log('getAnimal().mongoDB.findAnimal() - found animal:', animal);
             if (err) {
@@ -135,7 +135,7 @@ function onOptionRequest(req, res) {
 function onSaveJSON(req, res, next) {
 
     database.saveAnimal(req.body, {
-        debug: config.isDevelopment,
+        debug: config.debugLevel,
         complete: function (err, newAnimal) {
             if (err) {
                 res.send({result: err})
@@ -157,7 +157,7 @@ function onSaveMedia(req, res, next) {
         _body.images.push(path.join(_options.paths.images, fileMeta.filename));
     });
     database.saveAnimal(_body, {
-        debug: config.isDevelopment,
+        debug: config.debugLevel,
         complete: function (err, newAnimal) {
             if (err) {
                 res.send({result: err})
@@ -174,7 +174,7 @@ function onSaveMedia(req, res, next) {
 function onSaveModel(req, res, next) {
 
     database.saveModel(req.body, {
-        debug: config.isDevelopment,
+        debug: config.debugLevel,
         complete: function (err, newAnimal) {
             if (err) {
                 res.send({result: err})
@@ -198,7 +198,7 @@ function onModelRequest(req, res) {
             defaultVal: species
         }
     }, {
-        debug: config.isDevelopment,
+        debug: config.debugLevel,
         complete: function (err, animalModel) {
             res.send(err || animalModel);
         }
@@ -223,7 +223,7 @@ function onSchemaRequest(req, res) {
 
 function onDeleteRequest(req, res, next) {
     database.removeAnimal(req.body, {
-        debug: config.isDevelopment,
+        debug: config.debugLevel,
         complete: function (result) {
             console.log('database.removeAnimal() - results: %j', arguments);
             res.send(result)
@@ -285,7 +285,7 @@ function onResetRequest(req, res, next) {
             function each(petData, petIndex, done) {
                 console.log('saving pet %j', petData);
                 MongoDB.saveAnimal(petData, {
-                    debug: config.isDevelopment,
+                    debug: config.debugLevel,
                     complete: function (err) {
                         if (err) {
                             console.error(dump(err));
