@@ -26,6 +26,7 @@ GET     | options/:species/:option/:pageNumber   | JSON of given option for a gi
 GET     | schema/:species                        | returns JSON representation of a schema. Currently includes dog and cat schema
 GET     | list/:species                          | ex: '/list/dog' will show all saved dog species
 GET     | list/:species/:pageNumber              | paginated route for list/:species endpoint
+GET     | model/:species                         | provides JSON of model layout and meta data for species
 POST    | save/                                  | fields will be saved as provided. Must match schema definition and should be of `multipart/form-data`. Responds with saved animal data
 POST    | save/json                              | fields will be saved as provided. Must match schema definition and should be of `application/json` Content-Type. Responds with saved animal data
 POST    | save/model                             | updates global model of pet in addition to saving data. Must match model format and should be of `application/json` Content-Type. Responds with saved animal data

@@ -1,11 +1,13 @@
-var _ = require('lodash');
+var _ = require('lodash'),
+    
+    config = require('../config');
 
 module.exports = {
     buildModelSchema : function(schema){
         var _animalModel = {},
             _schemaPropType,
             _isArray;
-        console.log('creating model from schema');
+        if(config.debugLevel > config.DEBUG_LEVEL_LOW) console.log('building model from schema');
         _.forEach(schema, function (schemaPropVal, schemaPropName) {
             _schemaPropType = schemaPropVal.type;
             _isArray = false;

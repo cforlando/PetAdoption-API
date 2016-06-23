@@ -61,8 +61,7 @@ block content
                                                     md-item-template
                                                         span {{option}}
                                                     md-not-found
-                                                        |No options matching "{{petData.#{modelName}.#{inputPropName}.val}}" were found.&nbsp;
-                                                        a(ng-click="createOption('#{modelName}', '#{inputPropName}', petData.#{modelName}.#{inputPropName}.val)") Create a new one!
+                                                        a(ng-click="createOption('#{modelName}', '#{inputPropName}', petData.#{modelName}.#{inputPropName}.val)") Create option "{{petData.#{modelName}.#{inputPropName}.val}}"!
                         div.default-field
                             md-input-container
                                 md-button.btn-submit.md-primary.md-raised(ng-click='savePet()') Save
