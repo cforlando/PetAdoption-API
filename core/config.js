@@ -1,4 +1,5 @@
 module.exports = {
+    domain : 'http://cfo-pet-adoption-server.eastus.cloudapp.azure.com',
     isDevelopment : false,
     debugLevel : 0,
     defaultPort : '8080',

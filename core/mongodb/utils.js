@@ -56,5 +56,8 @@ module.exports = {
         });
         _animalModel['timestamp'] = Number;
         return _animalModel;
+    },
+    escapeRegExp: function (str) {
+      return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
     }
 };

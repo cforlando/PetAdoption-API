@@ -206,7 +206,7 @@ function MongoDB() {
                             regexArgs = 'i';
                         }
                         if (_.has(animalSchemas[searchParams['species']], propName)) {
-                            searchParams[propName] = new RegExp(util.format('%s%s%s', prefix, propValue, suffix), regexArgs);
+                            searchParams[propName] = new RegExp(util.format('%s%s%s', prefix, dbUtils.escapeRegExp(propValue), suffix), regexArgs);
                         }
                         break;
                 }

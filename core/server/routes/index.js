@@ -2,14 +2,13 @@ var path = require('path'),
     fs = require('fs'),
     util = require('util'),
 
-    express = require('express'),
-    _ = require('lodash'),
-
-    dump = require('../../lib/dump'),
     async = require('async'),
+    Express = require('express'),
 
-    router = express.Router(),
-    mongodb = require('../mongodb'),
+    dump = require('../../../lib/dump'),
+    router = Express.Router(),
+
+    mongodb = require('../../mongodb'),
     petTypes = ['cat', 'dog'],
     models = {};
 
