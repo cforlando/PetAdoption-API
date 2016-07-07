@@ -9,7 +9,6 @@ var path = require('path'),
     router = Express.Router(),
 
     _options = {
-        pageSize: 10,
         paths: {
             root: path.resolve(process.cwd(), 'public/'),
             images: '/images/pet/'

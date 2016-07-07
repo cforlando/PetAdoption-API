@@ -9,7 +9,6 @@ var fs = require('fs'),
     config = require('../config'),
     _ = require('lodash'),
     async = require('async'),
-    multer = require('multer'),
 
     dump = require('../../lib/dump'),
 
@@ -17,11 +16,7 @@ var fs = require('fs'),
         app : Express()
     },
     _options = {
-        pageSize: 10,
-        paths: {
-            root: path.resolve(process.cwd(), 'public/'),
-            images: '/images/pet/'
-        }
+        pageSize: 10
     }; //  can use MongoDB || Couchbase;
 
 
@@ -36,47 +31,29 @@ server.app.use(cookieParser());
 server.app.use(require('stylus').middleware(path.join(process.cwd(), 'public')));
 server.app.use(Express.static(path.join(process.cwd(), 'public')));
 
-// express error handlers
-server.app.use(function (err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-        message: err.message,
-        error: (server.app.get('env') === 'development') ? err : {}
-    });
-});
 
 // set simplifiedFormat flag
 server.app.use(function (req, res, next) {
-    res.locals.simplifiedFormat = (/v2$/.test(req.baseUrl) && /^\/(list|query)/.test(req.path));
+    res.locals.simplifiedFormat = /^\/api\/v2\/(list|query)/.test(req.path); 
     next();
 });
 
-//set CORS access
-server.app.use(function (err, req, res, next) {
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.header("Access-Control-Allow-Origin", "*");
-});
-
-
-// express error handlers
-server.app.use(function (err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-        message: err.message,
-        error: (server.app.get('env') === 'development') ? err : {}
-    });
-});
-
 //CORS access
-server.app.use(function (err, req, res, next) {
+server.app.use(function (req, res, next) {
+    console.log('settings cors');
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header("Access-Control-Allow-Origin", "*");
+    next();
 });
+
 
 server.app.use('/', require('./routes/index'));
 server.app.use('/api/v1/', require('./routes/api'));
 server.app.use('/api/v2/', require('./routes/api'));
-
+server.app.use(function(req, res, next){
+    res.status(500);
+    next();
+});
 
 // paginate data
 server.app.use(function (request, response, next) {
@@ -96,7 +73,6 @@ server.app.use(function (request, response, next) {
 
 // format and send data
 server.app.use(function (request, response, next) {
-
     function simplifyResult(data) {
 
 
@@ -115,6 +91,17 @@ server.app.use(function (request, response, next) {
         response.send(response.locals.data);
     }
 });
+
+// express error handlers
+server.app.use(function (err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+        message: err.message,
+        error: (server.app.get('env') === 'development') ? err : {}
+    });
+});
+
+
 
 
 module.exports = server;
