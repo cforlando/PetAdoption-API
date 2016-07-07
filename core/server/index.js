@@ -50,10 +50,6 @@ server.app.use(function (req, res, next) {
 server.app.use('/', require('./routes/index'));
 server.app.use('/api/v1/', require('./routes/api'));
 server.app.use('/api/v2/', require('./routes/api'));
-server.app.use(function(req, res, next){
-    res.status(500);
-    next();
-});
 
 // paginate data
 server.app.use(function (request, response, next) {
@@ -87,10 +83,13 @@ server.app.use(function (request, response, next) {
 
     if (response.locals.simplifiedFormat) {
         response.send(simplifyResult(response.locals.data));
-    } else {
+    } else if(response.locals.data) {
         response.send(response.locals.data);
+    } else {
+        next()
     }
 });
+
 
 // express error handlers
 server.app.use(function (err, req, res, next) {
