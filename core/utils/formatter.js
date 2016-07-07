@@ -23,7 +23,6 @@ function ModelFormatter(){
             debug: config.debugLevel,
             complete: function (err, animals) {
                 async.each(animals, function each (animal, done){
-                    console.log('formatting %s', animal);
                     updatedAnimal = self.formatAnimal(animal);
                     self.saveAnimal(updatedAnimal, {
                         complete : function(){
@@ -53,7 +52,6 @@ function ModelFormatter(){
     this.formatImagesArray = function(imagesArr){
 
         function formatImgURL(imageURL){
-            console.log('formatting %s', imageURL);
             return (/^http:/.test(imageURL)) ? imageURL : util.format("%s%s", config.domain, imageURL);
         }
         return imagesArr.map(formatImgURL);
@@ -70,7 +68,6 @@ function ModelFormatter(){
         MongoDB.saveAnimal(reducedModel, {
             debug: config.debugLevel,
             complete: function (err, newAnimal) {
-                console.log('saved %j', newAnimal);
                 if (_options.complete) _options.complete.apply(_options.context, [null, newAnimal])
             }
         });
