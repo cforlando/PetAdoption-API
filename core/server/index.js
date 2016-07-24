@@ -16,8 +16,10 @@ var fs = require('fs'),
         app : Express()
     },
     _options = {
-        pageSize: 10
-    }; //  can use MongoDB || Couchbase;
+        pageSize: 10,
+        publicDir : path.resolve(process.cwd(), 'public/'),
+        placeholderImg : path.resolve(process.cwd(), 'public/images/placeholder.jpg')
+    };
 
 
 // view engine setup
@@ -28,7 +30,7 @@ server.app.use(logger('dev'));
 server.app.use(bodyParser.json());
 server.app.use(bodyParser.urlencoded({extended: false}));
 server.app.use(cookieParser());
-server.app.use(require('stylus').middleware(path.join(process.cwd(), 'public')));
+
 server.app.use(Express.static(path.join(process.cwd(), 'public')));
 
 
@@ -70,6 +72,7 @@ server.app.use(function (request, response, next) {
 // format and send data
 server.app.use(function (request, response, next) {
     function simplifyResult(data) {
+        console.log('simplifying data');
 
 
         return data.map(function (animalProps, index) {
@@ -90,6 +93,16 @@ server.app.use(function (request, response, next) {
     }
 });
 
+// send placeholder 404 images
+server.app.use(function (req, res, next) {
+    fs.access(path.resolve(_options.publicDir, req.path), function(err){
+        if(err){
+            res.sendFile(_options.placeholderImg);
+        } else {
+            next();
+        }
+    });
+});
 
 // express error handlers
 server.app.use(function (err, req, res, next) {

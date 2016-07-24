@@ -8,7 +8,7 @@ function ServerHandler() {
         async = require('async'),
         multer = require('multer'),
 
-        MongoDB = require('../mongodb'),
+        database = require('../database'),
         csvReader = require('../csv-parser'),
         dump = require('../../lib/dump'),
 
@@ -18,8 +18,7 @@ function ServerHandler() {
                 root: path.resolve(process.cwd(), 'public/'),
                 images: '/images/pet/'
             }
-        },
-        database = MongoDB; //  can use MongoDB || Couchbase;
+        };
 
     this.onListRequest = function (req, res, next) {
         var queryData = {
@@ -247,7 +246,7 @@ function ServerHandler() {
             async.forEachOfSeries(petCollection,
                 function each(petData, petIndex, done) {
                     console.log('saving pet %j', petData);
-                    MongoDB.saveAnimal(petData, {
+                    database.saveAnimal(petData, {
                         debug: config.debugLevel,
                         complete: function (err) {
                             if (err) {
@@ -272,7 +271,7 @@ function ServerHandler() {
     
     
     this.onFormatDBRequest = function(req, res, next){
-        require('../utils/formatter').formatDB({
+        require('./utils/formatter').formatDB({
             complete : function(err){
                 res.send({result: err || 'success'})
             }

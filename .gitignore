@@ -1,5 +1,6 @@
 gulp-utils/
 /gulpfile.js
+dp-project-config.json
 tmp/*
 !tmp/*.csv
 public/images/*

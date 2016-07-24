@@ -31,7 +31,7 @@ function buildHash(animalProps) {
     return (require('crypto').createHash('md5').update(JSON.stringify(animalProps)).digest("hex"));
 }
 
-var petAdoptionDB = {
+var CouchbaseDB = {
 
     _buildHash: buildHash,
     /**
@@ -151,4 +151,4 @@ var petAdoptionDB = {
 };
 
 
-module.exports = petAdoptionDB;
+module.exports = CouchbaseDB;

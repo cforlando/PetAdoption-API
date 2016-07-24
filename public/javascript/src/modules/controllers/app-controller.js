@@ -18,8 +18,8 @@ define([
             $scope.fab = {
                 isOpen: false
             };
-            $scope.showError = function () {
-                $mdToast.show($mdToast.simple().textContent('Sorry. Try Again :-('));
+            $scope.showError = function (errorMessage) {
+                $mdToast.show($mdToast.simple().textContent(errorMessage || 'Sorry. Try Again :-('));
             };
 
             $scope.showLoading = function () {

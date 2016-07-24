@@ -3,8 +3,8 @@ var util = require('util'),
     async = require('async'),
     _ = require('lodash'),
 
-    config = require('../config'),
-    MongoDB = require('../mongodb');
+    config = require('../../config'),
+    database = require('../../database');
 
 function ModelFormatter(){
     var self = this;
@@ -19,7 +19,7 @@ function ModelFormatter(){
             queryData = {species : 'dog'},
             updatedAnimal;
 
-        MongoDB.findAnimals(queryData, {
+        database.findAnimals(queryData, {
             debug: config.debugLevel,
             complete: function (err, animals) {
                 async.each(animals, function each (animal, done){
@@ -65,7 +65,7 @@ function ModelFormatter(){
             reducedModel[propName] = propData.val;
         });
         
-        MongoDB.saveAnimal(reducedModel, {
+        database.saveAnimal(reducedModel, {
             debug: config.debugLevel,
             complete: function (err, newAnimal) {
                 if (_options.complete) _options.complete.apply(_options.context, [null, newAnimal])

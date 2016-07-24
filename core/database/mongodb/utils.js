@@ -1,6 +1,6 @@
 var _ = require('lodash'),
     
-    config = require('../config');
+    config = require('../../config');
 
 module.exports = {
     buildModelSchema : function(schema){
