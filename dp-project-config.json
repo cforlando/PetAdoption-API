@@ -1,0 +1,29 @@
+{
+  "name": "petadoption-api",
+  "basePath": "default",
+  "tasks": [
+    {
+      "name": "pug",
+      "input": "pug/",
+      "output": "./"
+    },
+    {
+      "name": "js",
+      "input": "./"
+    },
+    {
+      "name": "js-bundle",
+      "input": "public/javascript/src/build.js",
+      "output": "public/javascript/"
+    },
+    {
+      "name": "jsx",
+      "input": "js/src/"
+    },
+    {
+      "name": "stylus",
+      "input": "public/stylesheets/",
+      "output": "public/stylesheets/"
+    }
+  ]
+}

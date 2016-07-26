@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node ./index.js",
     "dev": "nodemon ./index.js",
+    "setup:dev": "dp-setup",
     "test:init": "jasmine init",
     "generate-ssl": "mkdir ssl; openssl genrsa 1024 > ./ssl/server.key; chmod 400 ./ssl/server.key; openssl req -new -x509 -nodes -sha1 -days 365 -key ./ssl/server.key -out ./ssl/server.crt",
     "test": "node test.js",
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "gulp": "^3.9.1",
+    "gulp-utils": "git://github.com/khalidhoffman/gulp-utils.git",
     "jasmine": "^2.4.1",
     "jasmine-spec-reporter": "^2.5.0",
     "request": "^2.73.0",

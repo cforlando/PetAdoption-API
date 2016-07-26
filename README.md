@@ -51,7 +51,13 @@ pageSize       | Number          | Defaults to 10 (only meaningful when making p
 
 ## Tests
 
-TODO: test needed
+***TODO** More tests needed
+
+
+## Developer Notes
+- `gulp-utils` provides easy compilation of javascript, stylus, and pug/jade files.
+    + you can can read more about how it works on its [github repo](https://github.com/khalidhoffman/gulp-utils.git)
+    + `gulp --tasks` shows a list of all possible tasks, but you'll probably only want to use `gulp build-js`
 
 ## Contributors
 
