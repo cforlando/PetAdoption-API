@@ -5,6 +5,7 @@ var path = require('path'),
     _ = require('lodash'),
     async = require('async'),
     Express = require('express'),
+    passport = require('passport'),
 
     dump = require('../../../lib/dump'),
     router = Express.Router(),
@@ -14,6 +15,7 @@ var path = require('path'),
     models = {};
 
 
+//router.get('/', passport.authenticate('basic'), function (req, res, next) {
 router.get('/', function (req, res, next) {
     async.each(petTypes,
         function each(petType, done) {

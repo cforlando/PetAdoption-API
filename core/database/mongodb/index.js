@@ -44,7 +44,6 @@ function MongoDB() {
         isConnecting: false,
         isConnected: false
     };
-
     this.config = {
         retryTimeout: 2000,
         isDevelopment: config.isDevelopment,
@@ -53,16 +52,15 @@ function MongoDB() {
     };
 
     this.metaInfo = {
-        docNames: (function () {
-            var dbDocumentNames = {};
-            _.forEach(self.config.petTypes, function (petType, index) {
-                dbDocumentNames[petType] = util.format('pets_model_%s_%s', petType, (self.config.isDevelopment) ? 'test' : 'production')
-            });
-            return dbDocumentNames;
-        })(),
-        dbName: (self.config.isDevelopment) ? 'pets_test' : 'pets_production'
+            docNames: (function () {
+                var dbDocumentNames = {};
+                _.forEach(self.config.petTypes, function (petType, index) {
+                    dbDocumentNames[petType] = util.format('pets_model_%s_%s', petType, (self.config.isDevelopment) ? 'test' : 'production')
+                });
+                return dbDocumentNames;
+            })(),
+            dbName: (self.config.isDevelopment) ? 'pets_test' : 'pets_production'
     };
-
     this.queue = [];
 
 
@@ -106,7 +104,8 @@ function MongoDB() {
         this.adapter.connect(mongodbURL);
         var db = this.adapter.connection,
             _options = _.extend({
-                context: null
+                context: null,
+                loadFromLocalFile : false
             }, options);
 
         db.on('error', console.error.bind(console, 'connection error:'));
@@ -129,7 +128,7 @@ function MongoDB() {
                         .sort({timestamp: -1})
                         .limit(1)
                         .exec(function (err, foundAnimalModels) {
-                            if (err || foundAnimalModels.length == 0) {
+                            if (err || foundAnimalModels.length == 0 || _options.loadFromLocalFile) {
                                 // use local hardcoded version on failure to find model in db
                                 console.error(err || new Error('No models found'));
                                 console.warn('creating new %s model', petType);
@@ -195,9 +194,9 @@ function MongoDB() {
         if (this.state.isConnected) {
             onConnected();
         } else if (this.state.isConnecting) {
-            if (_options.debug > config.DEBUG_LEVEL_LOW) console.log('MongoDB is connecting...');
+            if (_options.debug >= config.DEBUG_LEVEL_LOW) console.log('MongoDB is connecting...');
         } else {
-            if (_options.debug > config.DEBUG_LEVEL_LOW) console.log('MongoDB is starting up...');
+            if (_options.debug >= config.DEBUG_LEVEL_LOW) console.log('MongoDB is starting up...');
             this._connect(onConnected);
         }
     };
@@ -252,26 +251,26 @@ function MongoDB() {
 
     this._getSpeciesFromProps = function (animalProps) {
 
-        var _species = self.config.defaultSpecies;
+        var species = self.config.defaultSpecies;
         if (_.isString(animalProps['species'])) {
             // check v2 format
-            _species = animalProps['species'].toLowerCase()
+            species = animalProps['species'].toLowerCase()
         } else if (animalProps['species'] && animalProps['species'].val) {
             // check v1 format
-            _species = animalProps['species'].val.toLowerCase()
+            species = animalProps['species'].val.toLowerCase()
         }
-        return (self.schemasCollection[_species]) ? _species : self.config.defaultSpecies;
+        return (self.schemasCollection[species]) ? species : self.config.defaultSpecies;
     };
 
     this._getSpeciesFromModel = function (animalModelProps) {
 
-        var _species = self.config.defaultSpecies;
+        var species = self.config.defaultSpecies;
         if (_.isString(animalModelProps['species'].val)) {
-            _species = animalModelProps['species'].val.toLowerCase()
+            species = animalModelProps['species'].val.toLowerCase()
         } else if (_.isString(animalModelProps['species'].defaultVal)) {
-            _species = animalModelProps['species'].defaultVal.toLowerCase()
+            species = animalModelProps['species'].defaultVal.toLowerCase()
         }
-        return (self.modelsCollection[_species]) ? _species : self.config.defaultSpecies;
+        return (self.modelsCollection[species]) ? species : self.config.defaultSpecies;
     };
 
     this._sanitizeSearchParams = function (searchQueryProps) {
@@ -358,14 +357,14 @@ function MongoDB() {
         var _options = _.extend({}, options);
 
         this._exec(function () {
-            if (_options.debug > config.DEBUG_LEVEL_MED) console.log("mongodb.removeAnimal() - received query for: ", animalProps);
+            if (_options.debug >= config.DEBUG_LEVEL_MED) console.log("mongodb.removeAnimal() - received query for: ", animalProps);
 
             var searchableProps = this._sanitizeSearchParams(animalProps),
                 animalSpecies = this._getSpeciesFromProps(animalProps);
 
-            if (_options.debug > config.DEBUG_LEVEL_HIGH) console.log('mongodb.removeAnimal() - searching for: ', searchableProps);
+            if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongodb.removeAnimal() - searching for: ', searchableProps);
             self.AnimalDatabases[animalSpecies].remove(searchableProps, function (err) {
-                if (_options.debug > config.DEBUG_LEVEL_MED) console.log('mongodb.removeAnimal() - args: %j', arguments);
+                if (_options.debug >= config.DEBUG_LEVEL_MED) console.log('mongodb.removeAnimal() - args: %j', arguments);
                 if (_options.complete) _options.complete.apply(null, [{result: err || 'success'}]);
             })
         }, options);
@@ -389,11 +388,11 @@ function MongoDB() {
         var _options = _.extend({}, options);
 
         this._exec(function () {
-            if (_options.debug > config.DEBUG_LEVEL_MED) console.log("mongodb.findAnimal() - received query for: ", animalProps);
+            if (_options.debug >= config.DEBUG_LEVEL_MED) console.log("mongodb.findAnimal() - received query for: ", animalProps);
             var searchParams = this._buildQuery(animalProps),
                 species = this._getSpeciesFromProps(animalProps);
 
-            if (_options.debug > config.DEBUG_LEVEL_HIGH) console.log('mongodb.findAnimal() - searching for: ', searchParams);
+            if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongodb.findAnimal() - searching for: ', searchParams);
             self.AnimalDatabases[species].findOne(
                 searchParams,
                 function (err, _animal) {
@@ -403,7 +402,7 @@ function MongoDB() {
                     } else {
                         animal = self._sanitizePetOutput(_animal._doc);
                     }
-                    if (_options.debug > config.DEBUG_LEVEL_MED) console.log('mongodb.findAnimal() - found animal: ', animal);
+                    if (_options.debug >= config.DEBUG_LEVEL_MED) console.log('mongodb.findAnimal() - found animal: ', animal);
                     if (_options.complete) _options.complete.apply(null, [err, animal]);
                 })
         }, options);
@@ -420,15 +419,15 @@ function MongoDB() {
      */
     this.findAnimals = function (animalProps, options) {
         var _options = _.extend({}, options);
-        if (_options.debug > config.DEBUG_LEVEL_HIGH) console.log("mongodb.findAnimals(%j)", arguments);
+        if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log("mongodb.findAnimals(%j)", arguments);
 
         var query = function () {
-            if (_options.debug > config.DEBUG_LEVEL_MED) console.log("mongodb.findAnimals() - received query for: ", animalProps);
+            if (_options.debug >= config.DEBUG_LEVEL_MED) console.log("mongodb.findAnimals() - received query for: ", animalProps);
 
             var searchParams = self._buildQuery(animalProps),
                 species = self._getSpeciesFromProps(animalProps);
 
-            if (_options.debug > config.DEBUG_LEVEL_HIGH) console.log("mongodb['%s'].findAnimals() - searching for: ", species, searchParams);
+            if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log("mongodb['%s'].findAnimals() - searching for: ", species, searchParams);
 
             self.AnimalDatabases[species].find(
                 searchParams,
@@ -437,12 +436,12 @@ function MongoDB() {
                     if (err) {
                         console.error(err);
                     } else {
-                        if (_options.debug > config.DEBUG_LEVEL_WAY_TMI) console.log('mongodb.findAnimals() - found animals (preformatted): ', _animals);
+                        if (_options.debug >= config.DEBUG_LEVEL_WAY_TMI) console.log('mongodb.findAnimals() - found animals (preformatted): ', _animals);
                         _.forEach(_animals, function (animal, index) {
                             animals.push(self._sanitizePetOutput(animal));
                         })
                     }
-                    if (_options.debug > config.DEBUG_LEVEL_TMI) console.log('mongodb.findAnimals() - found animals: ', animals);
+                    if (_options.debug >= config.DEBUG_LEVEL_TMI) console.log('mongodb.findAnimals() - found animals: ', animals);
                     if (_options.complete) _options.complete.apply(_options.context, [err, animals]);
                 })
         };
@@ -461,14 +460,14 @@ function MongoDB() {
         var _options = _.extend({}, options);
 
         this._exec(function () {
-            if (_options.debug > config.DEBUG_LEVEL_MED) console.log("mongodb.saveAnimal() - received post for: ", animalProps);
+            if (_options.debug >= config.DEBUG_LEVEL_MED) console.log("mongodb.saveAnimal() - received post for: ", animalProps);
 
             var animalSpecies = this._getSpeciesFromProps(animalProps),
                 searchableAnimalProps = this._sanitizeSearchParams(animalProps),
                 savableAnimalProps = this._sanitizeInput(animalProps),
                 queryParams = this._buildQuery(searchableAnimalProps);
 
-            if (_options.debug > config.DEBUG_LEVEL_HIGH) console.log('mongodb.saveAnimal() - searching for: ', queryParams);
+            if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongodb.saveAnimal() - searching for: ', queryParams);
 
             self.AnimalDatabases[animalSpecies].findOneAndUpdate(
                 queryParams,
@@ -482,7 +481,7 @@ function MongoDB() {
                     } else {
                         animal = self._sanitizePetOutput(_animal._doc);
                     }
-                    if (_options.debug > config.DEBUG_LEVEL_HIGH) console.log('saved and sending animal: ', animal);
+                    if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('saved and sending animal: ', animal);
                     if (_options.complete) _options.complete.apply(_options.context, [err, animal])
                 })
         }, options);
@@ -506,11 +505,11 @@ function MongoDB() {
         var _options = _.extend({}, options);
 
         this._exec(function () {
-            if (_options.debug > config.DEBUG_LEVEL_MED) console.log("mongodb.findModel() - received request for: ", animalModelProps);
+            if (_options.debug >= config.DEBUG_LEVEL_MED) console.log("mongodb.findModel() - received request for: ", animalModelProps);
 
             var animalSpecies = this._getSpeciesFromModel(animalModelProps);
 
-            if (_options.debug > config.DEBUG_LEVEL_HIGH) console.log('searching for %s model', animalSpecies);
+            if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('searching for %s model', animalSpecies);
 
             self.ModelDatabases[animalSpecies].find({})
                 .sort({timestamp: -1})
@@ -522,7 +521,7 @@ function MongoDB() {
                         // update active model instance
                         self.modelsCollection[animalSpecies] = self._sanitizeModelOutput(foundAnimalModels[0]);
                     }
-                    if (_options.debug > config.DEBUG_LEVEL_HIGH) console.log('mongoDb.findModel() - sending animal model: ', self.modelsCollection[animalSpecies]);
+                    if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongoDb.findModel() - sending animal model: ', self.modelsCollection[animalSpecies]);
                     if (_options.complete) _options.complete.apply(_options.context, [null, err || self.modelsCollection[animalSpecies]]);
                 });
 
@@ -547,7 +546,7 @@ function MongoDB() {
             var animalSpecies = this._getSpeciesFromModel(animalModelProps),
                 newModel = {};
 
-            if (_options.debug > config.DEBUG_LEVEL_HIGH) console.log('mongodb.saveAnimalModel() - searching for %s model', animalSpecies);
+            if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongodb.saveAnimalModel() - searching for %s model', animalSpecies);
 
             // merge newly received model with current model
             _.forEach(self.modelsCollection[animalSpecies], function (currentPropData, propName) {
@@ -565,11 +564,11 @@ function MongoDB() {
 
                 // update active model instance
                 self.modelsCollection[animalSpecies] = self._sanitizeModelOutput(_animalModel);
-                if (_options.debug > config.DEBUG_LEVEL_HIGH) console.log('saved and sending animal model: %j', self.modelsCollection[animalSpecies]);
+                if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('saved and sending animal model: %j', self.modelsCollection[animalSpecies]);
 
 
                 fs.writeFile(path.resolve(process.cwd(), 'core/data/models.json'), JSON.stringify(self.modelsCollection), function () {
-                    if (_options.debug > config.DEBUG_LEVEL_LOW) console.log('updated cached animal model');
+                    if (_options.debug >= config.DEBUG_LEVEL_LOW) console.log('updated cached animal model');
                     if (_options.complete) _options.complete.apply(_options.context, [err, self.modelsCollection[animalSpecies]]);
                 });
             });

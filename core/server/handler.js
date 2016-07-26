@@ -271,12 +271,13 @@ function ServerHandler() {
     
     
     this.onFormatDBRequest = function(req, res, next){
-        require('./utils/formatter').formatDB({
+        require('./utils').formatter.formatDB({
             complete : function(err){
                 res.send({result: err || 'success'})
             }
         })
-    }
+    };
+
 }
 
 
