@@ -11,35 +11,37 @@ define(
         return ngApp.directive('googleMaps', function () {
             return {
                 restrict: 'C',
-                controller: ['$scope', '$element', function ($scope, $element) {
+                controller: ['$scope', '$element', 'googleService', function ($scope, $element, googleService) {
                     $scope.watchHandlers = {};
-                    var _initialData = $scope.petData[$scope.visiblePetType];
+                    var _initialData = $scope.petData[$scope.visiblePetType],
+                        lonFieldName = $element.attr('data-lon-field-name'),
+                        latFieldName = $element.attr('data-lat-field-name');
 
                     $scope.map = {
                         center: {
-                            lat: (_initialData && _initialData['lostGeoLat']) ? _initialData['lostGeoLat'].val : 28.513651,
-                            lng: (_initialData && _initialData['lostGeoLon']) ? _initialData['lostGeoLon'].val : -81.466219
+                            lat: (_initialData && _initialData[latFieldName] && _initialData[latFieldName].val) ? _initialData[latFieldName].val : 28.513651,
+                            lng: (_initialData && _initialData[lonFieldName] && _initialData[lonFieldName].val) ? _initialData[lonFieldName].val : -81.466219
                         },
                         marker: {
-                            lat: (_initialData && _initialData['lostGeoLat']) ? _initialData['lostGeoLat'].val : 28.513651,
-                            lng: (_initialData && _initialData['lostGeoLon']) ? _initialData['lostGeoLon'].val : -81.466219
+                            lat: (_initialData && _initialData[latFieldName] && _initialData[latFieldName].val) ? _initialData[latFieldName].val : 28.513651,
+                            lng: (_initialData && _initialData[lonFieldName] && _initialData[lonFieldName].val) ? _initialData[lonFieldName].val : -81.466219
                         },
                         mapTypeId: (window.google) ? google.maps.MapTypeId.ROADMAP : null,
                         zoom: 8,
                         scrollwheel: false,
                         zoomControl: true,
                         mapTypeControl: true,
-                        disableDoubleClickZoom : true,
+                        disableDoubleClickZoom: true,
                         streetViewControl: false
                     };
 
-                    $scope.getLocation = function() {
+                    $scope.getLocation = function () {
                         if (navigator.geolocation) {
                             navigator.geolocation.getCurrentPosition($scope.updatePosition);
                         }
                     };
 
-                    $scope.updatePosition = function(position) {
+                    $scope.updatePosition = function (position) {
                         console.log('$scope.updatePosition()');
                         if (position.coords.latitude && position.coords.longitude) {
                             console.log('$scope.updatePosition() @ %s,%s', position.coords.latitude, position.coords.longitude);
@@ -47,11 +49,11 @@ define(
                         }
                     };
 
-                    $scope.refreshMapData = function() {
+                    $scope.refreshMapData = function () {
                         console.log('$scope.refreshMapData()');
                         if ($scope.petData[$scope.visiblePetType]) {
-                            var _lat = parseFloat($scope.petData[$scope.visiblePetType]['lostGeoLat'].val),
-                                _lng = parseFloat($scope.petData[$scope.visiblePetType]['lostGeoLon'].val);
+                            var _lat = parseFloat($scope.petData[$scope.visiblePetType][latFieldName].val),
+                                _lng = parseFloat($scope.petData[$scope.visiblePetType][lonFieldName].val);
                             $scope.map.center = {
                                 lat: _lat,
                                 lng: _lng
@@ -63,19 +65,19 @@ define(
                         }
                     };
 
-                    $scope.setLatLng = function(lat, lng) {
+                    $scope.setLatLng = function (lat, lng) {
                         console.log('$scope.setLatLng()');
                         var _lat = parseFloat(lat),
                             _lng = parseFloat(lng);
-                        // check to see if lostGeoLat has loaded in case of no mongodb connection
-                        if ($scope.petData[$scope.visiblePetType] && $scope.petData[$scope.visiblePetType]['lostGeoLat']) {
-                            $scope.petData[$scope.visiblePetType]['lostGeoLat'].val = _lat;
-                            $scope.petData[$scope.visiblePetType]['lostGeoLon'].val = _lng;
+                        // check to see if lat/lng values have loaded in case of no connection
+                        if ($scope.petData[$scope.visiblePetType][latFieldName] && $scope.petData[$scope.visiblePetType][lonFieldName]) {
+                            $scope.petData[$scope.visiblePetType][latFieldName].val = _lat;
+                            $scope.petData[$scope.visiblePetType][lonFieldName].val = _lng;
                         }
                         $scope.refreshMapData();
                     };
 
-                    $scope.updateMapView = function() {
+                    $scope.updateMapView = function () {
                         console.log('$scope.updateMapView()');
                         if ($scope.map.center.lat && $scope.map.center.lng) {
                             var newCenter = new google.maps.LatLng($scope.map.center.lat, $scope.map.center.lng);
@@ -86,10 +88,8 @@ define(
 
                     $scope.onDestroy = function () {
                         console.log('$scope.onDestroy()');
-                        if (google && google.maps) google.maps.event.removeListener($scope.clickListener);
-                        _.forEach($scope.watchHandlers, function (removeWatcher, index) {
-                            removeWatcher();
-                        })
+                        if (googleService.isGoogleReady()) google.maps.event.removeListener($scope.clickListener);
+                        $scope.updateWatchHandler()
                     };
 
                     function initializeGoogleMaps() {
@@ -120,45 +120,33 @@ define(
                             $scope.updateMapView();
                         });
 
-                        $scope.watchHandlers.mapCenter = $scope.$watch('map.center', function (newValue, oldValue) {
-                            console.log('mapCenter changed.');
-                            $scope.updateMapView();
-                        });
-
-
-                        $scope.watchHandlers.petDataLat = $scope.$watch('petData.' + $scope.visiblePetType + '.lostGeoLat.val', function (lat) {
-                            console.log('lostGeoLat.val changed.');
-                            if(lat) $scope.refreshMapData();
-                        });
-
-                        $scope.watchHandlers.petdataLng = $scope.$watch('petData.' + $scope.visiblePetType + '.lostGeoLon.val', function (lng) {
-                            console.log('lostGeoLon.val changed.');
-                            if(lng) $scope.refreshMapData();
+                        $scope.updateWatchHandler = $scope.$watch(function () {
+                            return (
+                                $scope.map.center.lat &&
+                                $scope.map.center.lng &&
+                                $scope.petData[$scope.visiblePetType][latFieldName] &&
+                                $scope.petData[$scope.visiblePetType][lonFieldName]
+                            ) ?
+                            ''+
+                            $scope.map.center.lat +
+                            $scope.map.center.lng +
+                            $scope.petData[$scope.visiblePetType][latFieldName].val +
+                            $scope.petData[$scope.visiblePetType][lonFieldName].val
+                            :
+                            false
+                        }, function (newValue, oldValue) {
+                            console.log('map changed: %o', arguments);
+                            if (newValue) {
+                                console.log("mapData: %o", newValue);
+                                $scope.refreshMapData();
+                                $scope.updateMapView();
+                            }
                         });
 
                         $scope.getLocation();
                     }
 
-                    function _waitForGoogleMaps() {
-                        $scope.googleCheckInterval = setInterval(function () {
-                            if (window.google && google.maps) {
-                                clearTimeout($scope.googleCheckTimeout);
-                                clearInterval($scope.googleCheckInterval);
-                                initializeGoogleMaps();
-                            }
-                        }, 2000);
-
-                        $scope.googleCheckTimeout = setTimeout(function () {
-                            clearInterval($scope.googleCheckTimeout);
-                            console.error('Could not load google maps');
-                        }, 10000);
-                    }
-
-                    if (window.google && google.maps) {
-                        initializeGoogleMaps();
-                    } else {
-                        _waitForGoogleMaps();
-                    }
+                    googleService.onGoogleReady(initializeGoogleMaps);
                 }],
                 link: function (scope, element, attributes) {
                     // When the destroy event is triggered, check to see if the above

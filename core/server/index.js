@@ -9,15 +9,19 @@ var fs = require('fs'),
     config = require('../config'),
     _ = require('lodash'),
     async = require('async'),
+    passport = require('passport'),
+    BasicStrategy = require('passport-http').BasicStrategy,
 
     dump = require('../../lib/dump'),
 
     server = {
-        app : Express()
+        app: Express()
     },
     _options = {
-        pageSize: 10
-    }; //  can use MongoDB || Couchbase;
+        pageSize: 10,
+        publicDir: path.resolve(process.cwd(), 'public/'),
+        placeholderImg: path.resolve(process.cwd(), 'public/images/placeholder.jpg')
+    };
 
 
 // view engine setup
@@ -28,19 +32,43 @@ server.app.use(logger('dev'));
 server.app.use(bodyParser.json());
 server.app.use(bodyParser.urlencoded({extended: false}));
 server.app.use(cookieParser());
-server.app.use(require('stylus').middleware(path.join(process.cwd(), 'public')));
+
 server.app.use(Express.static(path.join(process.cwd(), 'public')));
 
 
 // set simplifiedFormat flag
 server.app.use(function (req, res, next) {
-    res.locals.simplifiedFormat = /^\/api\/v2\/(list|query)/.test(req.path); 
+    res.locals.simplifiedFormat = /^\/api\/v2\/(list|query)/.test(req.path);
     next();
 });
 
+passport.use(new BasicStrategy(function (username, password, done) {
+        var credentials = {
+            username: username,
+            password: password
+        };
+        console.log('credentials: %s', dump(credentials));
+        if (username && password) {
+            return done(null, credentials);
+        } else {
+            return done(null, false);
+        }
+
+    }
+));
+
+passport.serializeUser(function(user, done) {
+    done(null, user);
+});
+
+passport.deserializeUser(function(user, done) {
+    done(null, user);
+});
+
+server.app.use(passport.initialize());
+
 //CORS access
 server.app.use(function (req, res, next) {
-    console.log('settings cors');
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header("Access-Control-Allow-Origin", "*");
     next();
@@ -71,7 +99,6 @@ server.app.use(function (request, response, next) {
 server.app.use(function (request, response, next) {
     function simplifyResult(data) {
 
-
         return data.map(function (animalProps, index) {
             var _animalProps = {};
             _.forEach(animalProps, function (propData, propName) {
@@ -83,13 +110,27 @@ server.app.use(function (request, response, next) {
 
     if (response.locals.simplifiedFormat) {
         response.send(simplifyResult(response.locals.data));
-    } else if(response.locals.data) {
+    } else if (response.locals.data) {
         response.send(response.locals.data);
     } else {
         next()
     }
 });
 
+// send placeholder 404 images
+server.app.use(function (req, res, next) {
+    if (/.(jpg|png)/i.test(req.path)) {
+        fs.access(path.resolve(_options.publicDir, req.path), function (err) {
+            if (err) {
+                res.sendFile(_options.placeholderImg);
+            } else {
+                next();
+            }
+        });
+    } else {
+        next();
+    }
+});
 
 // express error handlers
 server.app.use(function (err, req, res, next) {
@@ -99,8 +140,6 @@ server.app.use(function (err, req, res, next) {
         error: (server.app.get('env') === 'development') ? err : {}
     });
 });
-
-
 
 
 module.exports = server;

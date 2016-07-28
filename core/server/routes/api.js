@@ -2,6 +2,7 @@ var path = require('path'),
 
     Express = require('express'),
     multer = require('multer'),
+    passport = require('passport'),
 
     config = require('../../config'),
     dump = require('../../../lib/dump'),
@@ -33,7 +34,6 @@ router.get('/model/:species/', handler.onModelRequest);
 router.get('/schema/:species/', handler.onSchemaRequest);
 router.get('/list/:species/', handler.onListRequest);
 router.get('/list/:species/:pageNumber/', handler.onListRequest);
-router.get('/cleandb/', handler.onFormatDBRequest);
 router.post('/save/json', handler.onSaveJSON);
 router.post('/save', upload.array('uploads'), handler.onSaveMedia);
 router.post('/save/model', handler.onSaveModel);
@@ -41,6 +41,7 @@ router.post('/query/:pageNumber', handler.onQueryRequest);
 router.post('/query', handler.onQueryRequest);
 router.post('/remove', handler.onDeleteRequest);
 
+router.get('/cleandb/', handler.onFormatDBRequest);
 router.get('/reset', handler.onResetRequest);
 
 

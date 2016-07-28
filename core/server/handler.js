@@ -8,7 +8,7 @@ function ServerHandler() {
         async = require('async'),
         multer = require('multer'),
 
-        MongoDB = require('../mongodb'),
+        database = require('../database'),
         csvReader = require('../csv-parser'),
         dump = require('../../lib/dump'),
 
@@ -18,8 +18,7 @@ function ServerHandler() {
                 root: path.resolve(process.cwd(), 'public/'),
                 images: '/images/pet/'
             }
-        },
-        database = MongoDB; //  can use MongoDB || Couchbase;
+        };
 
     this.onListRequest = function (req, res, next) {
         var queryData = {
@@ -67,7 +66,7 @@ function ServerHandler() {
     this.onOptionsRequest = function (req, res) {
         var species = req.params['species'];
 
-        fs.readFile(path.resolve(process.cwd(), 'core/data/options.json'),
+        fs.readFile(path.resolve(process.cwd(), 'data/options.json'),
             {encoding: 'utf8'},
             function (err, str) {
                 if (err) {
@@ -84,7 +83,7 @@ function ServerHandler() {
             optionName = req.params['option'];
         res.locals.pageNumber = req.params['pageNumber'];
 
-        fs.readFile(path.resolve(process.cwd(), 'core/data/options.json'),
+        fs.readFile(path.resolve(process.cwd(), 'data/options.json'),
             {encoding: 'utf8'},
             function (err, str) {
                 if (err) {
@@ -171,7 +170,7 @@ function ServerHandler() {
     this.onSchemaRequest = function (req, res) {
         var species = req.params['species'];
 
-        fs.readFile(path.resolve(process.cwd(), 'core/data/schema.json'),
+        fs.readFile(path.resolve(process.cwd(), 'data/schema.json'),
             {encoding: 'utf8'},
             function (err, str) {
                 if (err) {
@@ -247,7 +246,7 @@ function ServerHandler() {
             async.forEachOfSeries(petCollection,
                 function each(petData, petIndex, done) {
                     console.log('saving pet %j', petData);
-                    MongoDB.saveAnimal(petData, {
+                    database.saveAnimal(petData, {
                         debug: config.debugLevel,
                         complete: function (err) {
                             if (err) {
@@ -272,12 +271,13 @@ function ServerHandler() {
     
     
     this.onFormatDBRequest = function(req, res, next){
-        require('../utils/formatter').formatDB({
+        require('./utils').formatter.formatDB({
             complete : function(err){
                 res.send({result: err || 'success'})
             }
         })
-    }
+    };
+
 }
 
 

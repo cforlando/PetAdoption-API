@@ -13,7 +13,7 @@ var fs = require('fs'),
         },
         context: null,
         readPath: path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_Test_Dataset - Sheet1.csv'),
-        writeDir: path.resolve(process.cwd(), 'core/data/'),
+        writeDir: path.resolve(process.cwd(), 'data/'),
         cacheName: 'dataset.dog'
     };
 

@@ -1,25 +1,48 @@
-var config = require('./core/config'),
+var http = require('http'),
+    https = require('https'),
+    path = require('path'),
+    fs = require('fs'),
+
+    config = require('./core/config'),
+    server = require('./core/server'),
+    serverUtils = require('./core/server/utils'),
+
     ipAddress = (process.env.OPENSHIFT_NODEJS_IP) ? process.env.OPENSHIFT_NODEJS_IP : null,
-    portNumber = normalizePort(process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || process.env.port || config.defaultPort),
-    server = require('./core/server');
+    httpPortNumber = serverUtils.normalizePort(process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || process.env.port || config.defaultPort),
+    httpsPortNumber = serverUtils.normalizePort(config.defaultHTTPSPort),
+    privateKey  = (function(){
+        try {
+            return fs.readFileSync(path.resolve(__dirname, 'ssl/server.key'), 'utf8');
+        } catch (err){
+            console.error(err);
+            return false;
+        }
+    })(),
+    certificate = (function(){
+        try {
+            return fs.readFileSync(path.resolve(__dirname, 'ssl/server.crt'), 'utf8');
+        } catch (err){
+            console.error(err);
+            return false
+        }
+    })(),
+    credentials = {key: privateKey, cert: certificate},
 
-server.app.set('port', portNumber);
+    httpServer = http.createServer(server.app),
+    httpsServer = https.createServer(credentials, server.app);
 
-function normalizePort(val) {
-    var port = parseInt(val, 10);
 
-    if (isNaN(port)) {
-        // named pipe
-        return val;
+module.exports = {
+    startHTTP : function(){
+        httpServer.listen(httpPortNumber);
+        console.log('http server listening for requests on http://%s:%d', ipAddress || 'localhost', httpPortNumber);
+    },
+    startHTTPS : function(){
+        if (privateKey && certificate){
+            httpsServer.listen(httpsPortNumber);
+            console.log('https server listening for requests on https://%s:%d', ipAddress || 'localhost', httpsPortNumber);
+        } else {
+            console.error('No ssl certificates found. Cannot start https server.')
+        }
     }
-
-    if (port >= 0) {
-        // port number
-        return port;
-    }
-
-    return false;
-}
-
-console.log('server listening for requests on port: %s:%d', ipAddress, portNumber);
-server.app.listen(portNumber, ipAddress);
+};
