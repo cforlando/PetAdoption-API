@@ -17,7 +17,7 @@ var fs = require('fs'),
             path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Cats.csv'),
             path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Dogs.csv')
         ],
-        writeDir: path.resolve(cwd, 'core/data/'),
+        writeDir: path.resolve(cwd, 'data/'),
         cacheName: 'models'
     };
 

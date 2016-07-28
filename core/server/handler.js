@@ -66,7 +66,7 @@ function ServerHandler() {
     this.onOptionsRequest = function (req, res) {
         var species = req.params['species'];
 
-        fs.readFile(path.resolve(process.cwd(), 'core/data/options.json'),
+        fs.readFile(path.resolve(process.cwd(), 'data/options.json'),
             {encoding: 'utf8'},
             function (err, str) {
                 if (err) {
@@ -83,7 +83,7 @@ function ServerHandler() {
             optionName = req.params['option'];
         res.locals.pageNumber = req.params['pageNumber'];
 
-        fs.readFile(path.resolve(process.cwd(), 'core/data/options.json'),
+        fs.readFile(path.resolve(process.cwd(), 'data/options.json'),
             {encoding: 'utf8'},
             function (err, str) {
                 if (err) {
@@ -170,7 +170,7 @@ function ServerHandler() {
     this.onSchemaRequest = function (req, res) {
         var species = req.params['species'];
 
-        fs.readFile(path.resolve(process.cwd(), 'core/data/schema.json'),
+        fs.readFile(path.resolve(process.cwd(), 'data/schema.json'),
             {encoding: 'utf8'},
             function (err, str) {
                 if (err) {

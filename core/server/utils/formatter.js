@@ -13,7 +13,7 @@ function ModelFormatter(){
     var self = this,
         cachedModels = (function(){
             try {
-                return JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'core/data/models.json'), {encoding: 'utf8'}));
+                return JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'data/models.json'), {encoding: 'utf8'}));
             } catch(err){
                 console.log(err);
                 return {};

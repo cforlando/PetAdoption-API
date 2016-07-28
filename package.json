@@ -1,7 +1,6 @@
 {
   "name": "pet-adoption-server",
-  "version": "0.0.4",
-  "main": "index.html",
+  "version": "0.0.5",
   "scripts": {
     "start": "node ./index.js",
     "dev": "nodemon ./index.js",

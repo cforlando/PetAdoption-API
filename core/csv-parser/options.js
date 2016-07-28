@@ -23,7 +23,7 @@ var fs = require('fs'),
             path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Dogs.csv'),
             path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Cats.csv')
         ],
-        writeDir: path.resolve(cwd, 'core/data/'),
+        writeDir: path.resolve(cwd, 'data/'),
         cacheName: 'options'
     };
 

@@ -67,7 +67,7 @@ function MongoDB() {
     this.localData = {
         models: (function () {
             try {
-                return JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'core/data/models.json'), {encoding: 'utf8'}))
+                return JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'data/models.json'), {encoding: 'utf8'}))
             } catch (e) {
                 console.error(e);
                 return {};
@@ -75,7 +75,7 @@ function MongoDB() {
         })(),
         schemas: (function () {
             try {
-                return JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'core/data/schema.json'), {encoding: 'utf8'}))
+                return JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'data/schema.json'), {encoding: 'utf8'}))
             } catch (e) {
                 console.error(e);
                 return {};
@@ -151,7 +151,7 @@ function MongoDB() {
                     if (err) throw err;
                     self.state.isConnected = true;
                     self.state.isConnecting = false;
-                    fs.writeFile(path.resolve(process.cwd(), 'core/data/models.json'), JSON.stringify(self.modelsCollection), function (localWriteErr) {
+                    fs.writeFile(path.resolve(process.cwd(), 'data/models.json'), JSON.stringify(self.modelsCollection), function (localWriteErr) {
                         if (localWriteErr) console.error(localWriteErr);
                         if (config.debugLevel > config.DEBUG_LEVEL_LOW) console.log('models initialization complete');
                         if (_.isFunction(callback)) callback.apply(_options.context, [self, _options]);
@@ -567,7 +567,7 @@ function MongoDB() {
                 if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('saved and sending animal model: %j', self.modelsCollection[animalSpecies]);
 
 
-                fs.writeFile(path.resolve(process.cwd(), 'core/data/models.json'), JSON.stringify(self.modelsCollection), function () {
+                fs.writeFile(path.resolve(process.cwd(), 'data/models.json'), JSON.stringify(self.modelsCollection), function () {
                     if (_options.debug >= config.DEBUG_LEVEL_LOW) console.log('updated cached animal model');
                     if (_options.complete) _options.complete.apply(_options.context, [err, self.modelsCollection[animalSpecies]]);
                 });
