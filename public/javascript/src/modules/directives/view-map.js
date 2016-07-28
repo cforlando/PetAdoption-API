@@ -19,12 +19,12 @@ define(
 
                     $scope.map = {
                         center: {
-                            lat: (_initialData && _initialData[latFieldName]) ? _initialData[latFieldName].val : 28.513651,
-                            lng: (_initialData && _initialData[lonFieldName]) ? _initialData[lonFieldName].val : -81.466219
+                            lat: (_initialData && _initialData[latFieldName] && _initialData[latFieldName].val) ? _initialData[latFieldName].val : 28.513651,
+                            lng: (_initialData && _initialData[lonFieldName] && _initialData[lonFieldName].val) ? _initialData[lonFieldName].val : -81.466219
                         },
                         marker: {
-                            lat: (_initialData && _initialData[latFieldName]) ? _initialData[latFieldName].val : 28.513651,
-                            lng: (_initialData && _initialData[lonFieldName]) ? _initialData[lonFieldName].val : -81.466219
+                            lat: (_initialData && _initialData[latFieldName] && _initialData[latFieldName].val) ? _initialData[latFieldName].val : 28.513651,
+                            lng: (_initialData && _initialData[lonFieldName] && _initialData[lonFieldName].val) ? _initialData[lonFieldName].val : -81.466219
                         },
                         mapTypeId: (window.google) ? google.maps.MapTypeId.ROADMAP : null,
                         zoom: 8,
