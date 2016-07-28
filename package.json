@@ -1,9 +1,12 @@
 {
   "name": "pet-adoption-server",
-  "version": "0.0.5",
+  "version": "0.0.6",
+  "bin": {
+    "pet-adoption-api-server": "bin/start-server.js"
+  },
   "scripts": {
-    "start": "node ./index.js",
-    "dev": "nodemon ./index.js",
+    "start": "node bin/start-server.js",
+    "dev": "nodemon bin/start-server.js",
     "setup:dev": "dp-setup",
     "test:init": "jasmine init",
     "generate-ssl": "mkdir ssl; openssl genrsa 1024 > ./ssl/server.key; chmod 400 ./ssl/server.key; openssl req -new -x509 -nodes -sha1 -days 365 -key ./ssl/server.key -out ./ssl/server.crt",
@@ -40,5 +43,24 @@
     "jasmine-spec-reporter": "^2.5.0",
     "request": "^2.73.0",
     "supertest": "^1.2.0"
-  }
+  },
+  "description": "The Pet Adoption API is a project using the ASP.NET WebAPI and MVC stack.  Project is set and built with Visual Studio 2015 Community Edition as it is open-source. Database and API hosted in Azure Platform.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khalidhoffman/PetAdoption-API.git"
+  },
+  "keywords": [
+    "codefororlando",
+    "orlando",
+    "api",
+    "pet",
+    "adoption"
+  ],
+  "author": "Code For Orlando",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/khalidhoffman/PetAdoption-API/issues"
+  },
+  "homepage": "https://github.com/khalidhoffman/PetAdoption-API#readme"
 }

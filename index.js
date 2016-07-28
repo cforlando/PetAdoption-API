@@ -31,9 +31,18 @@ var http = require('http'),
     httpServer = http.createServer(server.app),
     httpsServer = https.createServer(credentials, server.app);
 
-httpServer.listen(httpPortNumber);
-console.log('http server listening for requests on http://%s:%d', ipAddress || 'localhost', httpPortNumber);
-if (privateKey && certificate){
-    httpsServer.listen(httpsPortNumber);
-    console.log('https server listening for requests on https://%s:%d', ipAddress || 'localhost', httpsPortNumber);
-}
+
+module.exports = {
+    startHTTP : function(){
+        httpServer.listen(httpPortNumber);
+        console.log('http server listening for requests on http://%s:%d', ipAddress || 'localhost', httpPortNumber);
+    },
+    startHTTPS : function(){
+        if (privateKey && certificate){
+            httpsServer.listen(httpsPortNumber);
+            console.log('https server listening for requests on https://%s:%d', ipAddress || 'localhost', httpsPortNumber);
+        } else {
+            console.error('No ssl certificates found. Cannot start https server.')
+        }
+    }
+};
