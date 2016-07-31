@@ -102,7 +102,7 @@ server.app.use(function (request, response, next) {
         return data.map(function (animalProps, index) {
             var _animalProps = {};
             _.forEach(animalProps, function (propData, propName) {
-                _animalProps[propName] = propData.val || propData;
+                _animalProps[propName] = propData.val;
             });
             return _animalProps;
         });
@@ -137,7 +137,8 @@ server.app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.render('error', {
         message: err.message,
-        error: (server.app.get('env') === 'development') ? err : {}
+        error: (server.app.get('env') === 'development') ? err : {},
+        isDevelopment : config.isDevelopment
     });
 });
 

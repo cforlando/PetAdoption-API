@@ -251,26 +251,28 @@ function MongoDB() {
 
     this._getSpeciesFromProps = function (animalProps) {
 
-        var species = self.config.defaultSpecies;
+        var species;
         if (_.isString(animalProps['species'])) {
             // check v2 format
             species = animalProps['species'].toLowerCase()
         } else if (animalProps['species'] && animalProps['species'].val) {
             // check v1 format
             species = animalProps['species'].val.toLowerCase()
+        } else {
+            return false;
         }
-        return (self.schemasCollection[species]) ? species : self.config.defaultSpecies;
+        return (self.schemasCollection[species]) ? species : false;
     };
 
     this._getSpeciesFromModel = function (animalModelProps) {
 
-        var species = self.config.defaultSpecies;
+        var species = '';
         if (_.isString(animalModelProps['species'].val)) {
             species = animalModelProps['species'].val.toLowerCase()
         } else if (_.isString(animalModelProps['species'].defaultVal)) {
             species = animalModelProps['species'].defaultVal.toLowerCase()
         }
-        return (self.modelsCollection[species]) ? species : self.config.defaultSpecies;
+        return (self.modelsCollection[species]) ? species : false;
     };
 
     this._sanitizeSearchParams = function (searchQueryProps) {
@@ -360,12 +362,16 @@ function MongoDB() {
             if (_options.debug >= config.DEBUG_LEVEL_MED) console.log("mongodb.removeAnimal() - received query for: ", animalProps);
 
             var searchableProps = this._sanitizeSearchParams(animalProps),
-                animalSpecies = this._getSpeciesFromProps(animalProps);
+                species = this._getSpeciesFromProps(animalProps);
 
+            if(!(species)){
+                if (_options.complete) _options.complete.call(null, new Error("Cannot find species"));
+                return;
+            }
             if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongodb.removeAnimal() - searching for: ', searchableProps);
-            self.AnimalDatabases[animalSpecies].remove(searchableProps, function (err) {
+            self.AnimalDatabases[species].remove(searchableProps, function (err) {
                 if (_options.debug >= config.DEBUG_LEVEL_MED) console.log('mongodb.removeAnimal() - args: %j', arguments);
-                if (_options.complete) _options.complete.apply(null, [{result: err || 'success'}]);
+                if (_options.complete) _options.complete.apply(null, [err, {result: (err) ? 'failure' : 'success'}]);
             })
         }, options);
     };
@@ -392,6 +398,11 @@ function MongoDB() {
             var searchParams = this._buildQuery(animalProps),
                 species = this._getSpeciesFromProps(animalProps);
 
+
+            if(!(species)){
+                if (_options.complete) _options.complete.call(null, new Error("Cannot find species"));
+                return;
+            }
             if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongodb.findAnimal() - searching for: ', searchParams);
             self.AnimalDatabases[species].findOne(
                 searchParams,
@@ -427,6 +438,10 @@ function MongoDB() {
             var searchParams = self._buildQuery(animalProps),
                 species = self._getSpeciesFromProps(animalProps);
 
+            if(!(species)){
+                if (_options.complete) _options.complete.call(null, new Error("Cannot find species"));
+                return;
+            }
             if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log("mongodb['%s'].findAnimals() - searching for: ", species, searchParams);
 
             self.AnimalDatabases[species].find(
@@ -462,14 +477,18 @@ function MongoDB() {
         this._exec(function () {
             if (_options.debug >= config.DEBUG_LEVEL_MED) console.log("mongodb.saveAnimal() - received post for: ", animalProps);
 
-            var animalSpecies = this._getSpeciesFromProps(animalProps),
+            var species = this._getSpeciesFromProps(animalProps),
                 searchableAnimalProps = this._sanitizeSearchParams(animalProps),
                 savableAnimalProps = this._sanitizeInput(animalProps),
                 queryParams = this._buildQuery(searchableAnimalProps);
 
+            if(!(species)){
+                if (_options.complete) _options.complete.call(null, new Error("Cannot find species"));
+                return;
+            }
             if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongodb.saveAnimal() - searching for: ', queryParams);
 
-            self.AnimalDatabases[animalSpecies].findOneAndUpdate(
+            self.AnimalDatabases[species].findOneAndUpdate(
                 queryParams,
                 savableAnimalProps, {
                     new: true,
@@ -507,11 +526,14 @@ function MongoDB() {
         this._exec(function () {
             if (_options.debug >= config.DEBUG_LEVEL_MED) console.log("mongodb.findModel() - received request for: ", animalModelProps);
 
-            var animalSpecies = this._getSpeciesFromModel(animalModelProps);
+            var species = this._getSpeciesFromModel(animalModelProps);
+            if(!(species)){
+                if (_options.complete) _options.complete.call(null, new Error("Cannot find species"));
+                return;
+            }
+            if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('searching for %s model', species);
 
-            if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('searching for %s model', animalSpecies);
-
-            self.ModelDatabases[animalSpecies].find({})
+            self.ModelDatabases[species].find({})
                 .sort({timestamp: -1})
                 .limit(1)
                 .exec(function (err, foundAnimalModels) {
@@ -519,10 +541,10 @@ function MongoDB() {
                         console.error(err || new Error("No models found"));
                     } else {
                         // update active model instance
-                        self.modelsCollection[animalSpecies] = self._sanitizeModelOutput(foundAnimalModels[0]);
+                        self.modelsCollection[species] = self._sanitizeModelOutput(foundAnimalModels[0]);
                     }
-                    if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongoDb.findModel() - sending animal model: ', self.modelsCollection[animalSpecies]);
-                    if (_options.complete) _options.complete.apply(_options.context, [null, err || self.modelsCollection[animalSpecies]]);
+                    if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongoDb.findModel() - sending animal model: ', self.modelsCollection[species]);
+                    if (_options.complete) _options.complete.apply(_options.context, [null, err || self.modelsCollection[species]]);
                 });
 
         }, options);
@@ -543,13 +565,16 @@ function MongoDB() {
             if (_options.debug == config.DEBUG_LEVEL_MED) console.log("mongodb.saveAnimalModel() - received model update ");
             if (_options.debug == config.DEBUG_LEVEL_HIGH) console.log("mongodb.saveAnimalModel() - received model update for w/ %s", dump(animalModelProps));
 
-            var animalSpecies = this._getSpeciesFromModel(animalModelProps),
+            var species = this._getSpeciesFromModel(animalModelProps),
                 newModel = {};
-
-            if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongodb.saveAnimalModel() - searching for %s model', animalSpecies);
+            if(!(species)){
+                if (_options.complete) _options.complete.call(null, new Error("Cannot find species"));
+                return;
+            }
+            if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongodb.saveAnimalModel() - searching for %s model', species);
 
             // merge newly received model with current model
-            _.forEach(self.modelsCollection[animalSpecies], function (currentPropData, propName) {
+            _.forEach(self.modelsCollection[species], function (currentPropData, propName) {
                 if (animalModelProps[propName] && animalModelProps[propName].val) {
                     delete animalModelProps[propName].val;
                 }
@@ -557,19 +582,19 @@ function MongoDB() {
             });
             newModel.timestamp = Date.now();
 
-            self.ModelDatabases[animalSpecies].create(newModel, function (err, _animalModel) {
+            self.ModelDatabases[species].create(newModel, function (err, _animalModel) {
                 if (err) {
                     console.error(err);
                 }
 
                 // update active model instance
-                self.modelsCollection[animalSpecies] = self._sanitizeModelOutput(_animalModel);
-                if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('saved and sending animal model: %j', self.modelsCollection[animalSpecies]);
+                self.modelsCollection[species] = self._sanitizeModelOutput(_animalModel);
+                if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('saved and sending animal model: %j', self.modelsCollection[species]);
 
 
                 fs.writeFile(path.resolve(process.cwd(), 'data/models.json'), JSON.stringify(self.modelsCollection), function () {
                     if (_options.debug >= config.DEBUG_LEVEL_LOW) console.log('updated cached animal model');
-                    if (_options.complete) _options.complete.apply(_options.context, [err, self.modelsCollection[animalSpecies]]);
+                    if (_options.complete) _options.complete.apply(_options.context, [err, self.modelsCollection[species]]);
                 });
             });
         }, options);
