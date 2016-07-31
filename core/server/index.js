@@ -102,16 +102,16 @@ server.app.use(function (request, response, next) {
         return data.map(function (animalProps, index) {
             var _animalProps = {};
             _.forEach(animalProps, function (propData, propName) {
-                _animalProps[propName] = propData.val;
+                _animalProps[propName] = propData.val || propData;
             });
             return _animalProps;
         });
     }
 
     if (response.locals.simplifiedFormat) {
-        response.send(simplifyResult(response.locals.data));
+        response.json(simplifyResult(response.locals.data));
     } else if (response.locals.data) {
-        response.send(response.locals.data);
+        response.json(response.locals.data);
     } else {
         next()
     }

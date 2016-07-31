@@ -63,22 +63,23 @@ function ServerHandler() {
 
     };
 
-    this.onOptionsRequest = function (req, res) {
+    this.onOptionsRequest = function (req, res, next) {
         var species = req.params['species'];
 
         fs.readFile(path.resolve(process.cwd(), 'data/options.json'),
             {encoding: 'utf8'},
             function (err, str) {
                 if (err) {
-                    res.send(err);
+                    next(err);
                 } else {
                     var options = JSON.parse(str);
-                    res.send(JSON.stringify(options[species]));
+                    res.locals.data = options[species];
+                    next();
                 }
             });
     };
 
-    this.onOptionRequest = function (req, res) {
+    this.onSingleOptionRequest = function (req, res, next) {
         var species = req.params['species'],
             optionName = req.params['option'];
         res.locals.pageNumber = req.params['pageNumber'];
@@ -87,10 +88,11 @@ function ServerHandler() {
             {encoding: 'utf8'},
             function (err, str) {
                 if (err) {
-                    res.send(err);
+                    next (err);
                 } else {
                     var options = JSON.parse(str);
                     res.locals.data = options[species][optionName];
+                    next();
                 }
             });
     };

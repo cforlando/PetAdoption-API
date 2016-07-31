@@ -28,8 +28,8 @@ var path = require('path'),
 
 
 router.get('/options/:species/', handler.onOptionsRequest);
-router.get('/options/:species/:option', handler.onOptionRequest);
-router.get('/options/:species/:option/:pageNumber/', handler.onOptionRequest);
+router.get('/options/:species/:option', handler.onSingleOptionRequest);
+router.get('/options/:species/:option/:pageNumber/', handler.onSingleOptionRequest);
 router.get('/model/:species/', handler.onModelRequest);
 router.get('/schema/:species/', handler.onSchemaRequest);
 router.get('/list/:species/', handler.onListRequest);
