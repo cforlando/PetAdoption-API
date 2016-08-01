@@ -20,6 +20,7 @@ Current API location: http://cfo-pet-adoption-server.eastus.cloudapp.azure.com/a
 
 Method  | Endpoint                               | Notes
 --------| -------------------------------------- | ----------------------------------------------------------------
+GET     | species/                               | JSON array of possible species
 GET     | options/:species                       | JSON of all preselected options for given species
 GET     | options/:species/:option               | JSON of given option for a given species
 GET     | options/:species/:option/:pageNumber   | JSON of given option for a given species in pages. Page size defaults to 10. This can be changed via query argument (i.e. "/options/dog/breed/1?pageSize=15")
