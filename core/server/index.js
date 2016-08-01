@@ -26,7 +26,7 @@ var fs = require('fs'),
 
 // view engine setup
 server.app.set('views', path.resolve(__dirname, 'views'));
-server.app.set('view engine', 'jade');
+server.app.set('view engine', 'pug');
 
 server.app.use(logger('dev'));
 server.app.use(bodyParser.json());

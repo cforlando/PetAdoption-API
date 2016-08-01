@@ -1,7 +1,7 @@
 @charset "UTF-8";
 color-black = #000;
-@import "slick"
-@import "slick-theme"
+@import "_slick"
+@import "_slick-theme"
 
 @keyframes fadeIn {
   0% {
@@ -27,7 +27,7 @@ color-black = #000;
 
 body {
   animation: fadeIn 600ms ease;
-  padding: 50px
+  overflow hidden;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif
 
   > md-progress-linear {
@@ -38,18 +38,37 @@ body {
   }
 }
 
+.main-layout {
+
+  > md-content {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
 a {
   color: #00B7FF
 }
 
-.default-field {
+.nav-menus {
+  text-align right
+  align-self center
+  flex-grow 1
+  white-space no-wrap
+}
 
-  .input-section,
-  md-input-container {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: calc(100% - 3em);
+.input--map {
+  margin: 18px auto;
+}
+
+.input {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: calc(100% - 3em);
+
+  &--date {
+    width: "calc(100% - %s)" % em-auto(12);
   }
 }
 
@@ -83,7 +102,7 @@ a {
 }
 
 .google-maps {
-  background-color: color-black;
+  background-color: lighten(color-black, 25%);
   height: 10em;
 }
 
@@ -94,7 +113,41 @@ a {
   width: calc(100% - 3em);
 }
 
-.file-upload {
+
+.gallery {
+  background lighten(#000, 25%)
+  height 320px
+  height 50vh
+  overflow hidden;
+  position relative
+  box-shadow inset 0px -2px 16px -2px #000
+
+  .slide {
+    background-position center
+    background-size cover
+    background-repeat no-repeat
+    height 320px
+    height 50vh
+    position relative
+    width 100%
+  }
+
+  .btn-remove {
+    position absolute
+    left em-auto(12)
+    bottom em-auto(12)
+    z-index 1
+  }
+
+  .btn-add {
+    position absolute
+    right em-auto(12)
+    bottom em-auto(12)
+    z-index 1
+  }
+}
+
+.slider-upload-form {
   display none
 }
 
@@ -107,11 +160,7 @@ a {
   }
 }
 
-.slide-img-placeholder {
-  background-position center
-  background-size cover
-  background-repeat no-repeat
-  height 320px
-  height 50vh
-  width 100%
+.slick-dots {
+  bottom auto
+  top: em-auto(12);
 }

@@ -8,6 +8,11 @@
       "output": "./"
     },
     {
+      "name": "pug-html",
+      "input": "public/javascript/src/modules/directives/views/",
+      "output": "public/javascript/src/modules/directives/views/"
+    },
+    {
       "name": "js",
       "input": "./"
     },

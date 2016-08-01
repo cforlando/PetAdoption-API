@@ -276,7 +276,7 @@ function MongoDB() {
     };
 
     this._sanitizeSearchParams = function (searchQueryProps) {
-        var filteredAnimalQueryProps = {};
+        var filteredAnimalQueryProps = _.extend({}, {species : searchQueryProps['species']});
 
         if (searchQueryProps['petName'] || searchQueryProps['petId']) {
             if (searchQueryProps['petId'] && /^\w+$/.test(searchQueryProps['petId'])) {
@@ -335,9 +335,9 @@ function MongoDB() {
                 val: animalProps[propName]
             }) : animalProps[propName];
         });
-        sanitizedAnimalProps['petId'] = {
+        sanitizedAnimalProps['petId'] = _.extend({}, model['petId'], {
             val: animalProps['_id']
-        };
+        });
 
         return sanitizedAnimalProps;
     };
@@ -475,7 +475,7 @@ function MongoDB() {
         var _options = _.extend({}, options);
 
         this._exec(function () {
-            if (_options.debug >= config.DEBUG_LEVEL_MED) console.log("mongodb.saveAnimal() - received post for: ", animalProps);
+            if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log("mongodb.saveAnimal() - received post for: ", animalProps);
 
             var species = this._getSpeciesFromProps(animalProps),
                 searchableAnimalProps = this._sanitizeSearchParams(animalProps),
@@ -486,7 +486,7 @@ function MongoDB() {
                 if (_options.complete) _options.complete.call(null, new Error("Cannot find species"));
                 return;
             }
-            if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongodb.saveAnimal() - searching for: ', queryParams);
+            if (_options.debug >= config.DEBUG_LEVEL_MED) console.log('mongodb.saveAnimal() - searching for: ', queryParams);
 
             self.AnimalDatabases[species].findOneAndUpdate(
                 queryParams,

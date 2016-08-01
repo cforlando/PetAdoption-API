@@ -20,6 +20,19 @@ function ServerHandler() {
             }
         };
 
+    this.onSpeciesListRequest = function(req, res, next){
+        fs.readFile(path.resolve(process.cwd(), 'data/models.json'),
+            {encoding: 'utf8'},
+            function (err, str) {
+                if (err) {
+                    next(err);
+                } else {
+                    var models = JSON.parse(str);
+                    res.send(Object.keys(models));
+                }
+            });
+    }
+
     this.onListRequest = function (req, res, next) {
         var queryData = {
             species: req.params['species'],
