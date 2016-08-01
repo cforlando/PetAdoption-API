@@ -1,6 +1,6 @@
 {
   "name": "pet-adoption-server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "bin": {
     "pet-adoption-api-server": "bin/start-server.js"
   },
@@ -25,7 +25,7 @@
     "jade": "^1.11.0",
     "lodash": "^4.13.1",
     "moment": "^2.12.0",
-    "mongoose": "^4.4.5",
+    "mongoose": "^4.5.8",
     "morgan": "^1.6.1",
     "multer": "^1.1.0",
     "passport": "^0.3.2",
@@ -37,7 +37,6 @@
     "url": "^0.11.0"
   },
   "devDependencies": {
-    "gulp": "^3.9.1",
     "gulp-utils": "git://github.com/khalidhoffman/gulp-utils.git",
     "jasmine": "^2.4.1",
     "jasmine-spec-reporter": "^2.5.0",
