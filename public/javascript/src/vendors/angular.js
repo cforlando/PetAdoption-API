@@ -18863,7 +18863,7 @@ function $$TestabilityProvider() {
      * Shortcut for getting the location in a browser agnostic way. Returns
      *     the path, search, and hash. (e.g. /path?a=b#hash)
      */
-    testability.getLocation = function() {
+    testability.askForLocation = function() {
       return $location.url();
     };
 

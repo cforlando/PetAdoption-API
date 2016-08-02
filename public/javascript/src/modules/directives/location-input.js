@@ -12,16 +12,14 @@ define([
                 function ($scope, $element, googleService) {
                     console.log('map.$scope: %o', $scope);
 
-                    $scope.getLocation = function () {
+                    $scope.askForLocation = function () {
                         if (navigator.geolocation) {
                             navigator.geolocation.getCurrentPosition(function (position) {
                                 console.log('$scope.getLocation()');
                                 if (position.coords.latitude &&
-                                    position.coords.longitude &&
-                                    !$scope['propData']['Lat'].val &&
-                                    !$scope['propData']['Lon'].val ) {
+                                    position.coords.longitude && !$scope['propData']['Lat'].val && !$scope['propData']['Lon'].val) {
                                     console.log('$scope.getLocation() @ %s,%s', position.coords.latitude, position.coords.longitude);
-                                    $scope.$apply(function(){
+                                    $scope.$apply(function () {
                                         $scope.setLatLng(position.coords.latitude, position.coords.longitude)
                                     })
                                 }
@@ -37,6 +35,13 @@ define([
                         $scope['propData']['Lon'].val = parseFloat(lng);
                         $scope.setField(latKey, $scope['propData']['Lat']);
                         $scope.setField(lngKey, $scope['propData']['Lon']);
+                    };
+
+                    $scope.generateLocation = function () {
+                        return {
+                            lat: parseFloat($scope['propData']['Lat'].val || $scope['propData']['Lat'].example || $scope['propData']['Lat'].defaultVal),
+                            lng: parseFloat($scope['propData']['Lon'].val || $scope['propData']['Lon'].example || $scope['propData']['Lon'].defaultVal)
+                        }
                     };
 
                     $scope.onDestroy = function () {
@@ -64,10 +69,9 @@ define([
 
                     function initializeGoogleMaps() {
                         var map = new google.maps.Map($element.find('.google-maps')[0], $scope.map),
-                            lat = parseFloat($scope['propData']['Lat'].val || $scope['propData']['Lat'].defaultVal || $scope['propData']['Lat'].example),
-                            lng = parseFloat($scope['propData']['Lon'].val || $scope['propData']['Lon'].defaultVal || $scope['propData']['Lon'].example),
+                            loc = $scope.generateLocation(),
                             marker = new google.maps.Marker({
-                                position: new google.maps.LatLng(lat, lng),
+                                position: new google.maps.LatLng(loc.lat, loc.lng),
                                 map: map,
                                 title: 'Location'
                             }),
@@ -75,13 +79,14 @@ define([
                             infowindow = new google.maps.InfoWindow({
                                 content: markerHTMLContent
                             });
-                        console.log('initializing map to (%s, %s)', lat, lng);
+                        console.log('initializing map to (%o, %o)', loc.lat, loc.lng);
                         $scope.markerObj = marker;
                         $scope.mapObj = map;
 
                         $scope.updateMapView = function () {
-                            console.log('$scope.updateMapView(%s, %s)');
-                            var newCenter = new google.maps.LatLng($scope['propData']['Lat'].val, $scope['propData']['Lon'].val);
+                            var loc = $scope.generateLocation();
+                            console.log('$scope.updateMapView(%o, %o)', loc.lat, loc.lng);
+                            var newCenter = new google.maps.LatLng(loc.lat, loc.lng);
                             $scope.markerObj.setPosition(newCenter);
                             $scope.mapObj.panTo(newCenter);
                         };
@@ -116,7 +121,9 @@ define([
                             });
                         });
 
-                        $scope.getLocation();
+                        $scope['propData']['Lat'].val = $scope['propData']['Lat'].val || loc.lat;
+                        $scope['propData']['Lon'].val = $scope['propData']['Lon'].val || loc.lng;
+                        $scope.askForLocation();
                     }
 
                     googleService.onGoogleReady(init);
