@@ -1,0 +1,12 @@
+include helpers/_-all
+.gallery
+    form.slider-upload-form(method='post')
+        .image-upload
+            input.image-upload__input(name='uploads', type='file', multiple)
+    .images-nav
+        .md-button.md-primary.md-fab.md-mini.btn-add(ng-click="uploadPhoto()")
+            md-icon.material-icons add
+    .slides()
+        .slide(ng-repeat="slide in slider.images.visible track by $index", image-placeholder="{{slide}}")
+            .md-button.md-primary.md-fab.md-mini.btn-remove(ng-click="removePhoto($index)")
+                md-icon.material-icons clear

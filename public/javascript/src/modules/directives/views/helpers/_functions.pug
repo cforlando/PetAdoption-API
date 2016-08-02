@@ -1,0 +1,138 @@
+-
+    var namespace = 'petadoption-api';
+    var util={format: function (f) {
+      if (typeof f !== 'string') {
+        const objects = new Array(arguments.length);
+        for (var index = 0; index < arguments.length; index++) {
+          objects[index] = inspect(arguments[index]);
+        }
+        return objects.join(' ');
+      }
+    
+      var argLen = arguments.length;
+    
+      if (argLen === 1) return f;
+    
+      var str = '';
+      var a = 1;
+      var lastPos = 0;
+      for (var i = 0; i < f.length;) {
+        if (f.charCodeAt(i) === 37/*'%'*/ && i + 1 < f.length) {
+          switch (f.charCodeAt(i + 1)) {
+            case 100: // 'd'
+              if (a >= argLen)
+                break;
+              if (lastPos < i)
+                str += f.slice(lastPos, i);
+              str += Number(arguments[a++]);
+              lastPos = i = i + 2;
+              continue;
+            case 106: // 'j'
+              if (a >= argLen)
+                break;
+              if (lastPos < i)
+                str += f.slice(lastPos, i);
+              str += tryStringify(arguments[a++]);
+              lastPos = i = i + 2;
+              continue;
+            case 115: // 's'
+              if (a >= argLen)
+                break;
+              if (lastPos < i)
+                str += f.slice(lastPos, i);
+              str += String(arguments[a++]);
+              lastPos = i = i + 2;
+              continue;
+            case 37: // '%'
+              if (lastPos < i)
+                str += f.slice(lastPos, i);
+              str += '%';
+              lastPos = i = i + 2;
+              continue;
+          }
+        }
+        ++i;
+      }
+      if (lastPos === 0)
+        str = f;
+      else if (lastPos < f.length)
+        str += f.slice(lastPos);
+      while (a < argLen) {
+        const x = arguments[a++];
+        if (x === null || (typeof x !== 'object' && typeof x !== 'symbol')) {
+          str += ' ' + x;
+        } else {
+          str += ' ' + inspect(x);
+        }
+      }
+      return str;
+    }}
+-
+    function openPopup() {
+        return "javascript:window.open(this.href,'', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;";
+    }
+
+    function bg(text) {
+        return util.format("background-image: url('%s');", text);
+    }
+
+    function bgFromPHP(text) {
+        return bg(php(text));
+    }
+
+    function bgFromURL(text) {
+        return bg(echo(text));
+    }
+
+    function echoImgURLFromField(field, size, id) {
+        var _size = size ? "'" + size + "'": 'null',
+            _id = id || 'null';
+        return echo(util.format("get_image_field_url('%s', %s, %s);",field, _id, _size))
+    }
+
+    function bgFromField(field, id, size) {
+        return bg(echoImgURLFromField(field, id, size));
+    }
+
+    function echoFeaturedImage(size, isIcon, id){
+        var _size = size ? "'" + size + "'": 'null',
+            _isIcon = !!isIcon,
+            _id = id || 'null';
+        return echo(util.format("get_post_featured_img(%s, %s, %s)" ,_size , _isIcon, _id))
+    }
+
+    function bgFromFeaturedImage(size, isIcon, id) {
+        return bg(echoFeaturedImage(size, isIcon, id));
+    }
+
+    function echoField(fieldName, id) {
+        if(id){
+            return echo(util.format('get_field("%s", %s);', fieldName, id));
+        } else {
+            return echo(util.format('get_field("%s");', fieldName));
+        }
+    }
+
+    function echoSubField(fieldName) {
+        return echo(util.format('get_sub_field("%s");', fieldName));
+    }
+
+    function _e(str) {
+        return php(util.format('_e("%s", "%s");', str, namespace));
+    }
+
+    function _x(str) {
+        return php(util.format('_x("%s", "%s");', str, namespace));
+    }
+
+    function echo(str) {
+        return php(util.format('echo %s;', str));
+    }
+
+    function echoThemeMod(str) {
+        return echo(util.format("get_theme_mod(\"%s\")", str));
+    }
+
+    function php(str) {
+        return util.format('<?php %s ?>', str);
+    }

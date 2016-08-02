@@ -1,0 +1,17 @@
+include helpers/_-all
+.input.input--text
+    -
+        var attrs = {
+            "md-search-text": "propData.val",
+            "md-search-text-change" : "saveValue()",
+            "md-items": "option in propData.options | filter:propData.val",
+            "placeholder": "propData.example",
+            "md-min-length" : 0,
+            "md-delay" : 200,
+            "md-floating-label":"{{propData.fieldLabel}}"
+        }
+    md-autocomplete.input-options&attributes(attrs)
+        md-item-template
+            span(ng-bind="option")
+        md-not-found
+            a(ng-click="createOption(propData.key, propData.val)") Create option "{{propData.val}}"
