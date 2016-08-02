@@ -1,11 +1,13 @@
 define([
-    'modules/directives/form-pet',
-    'modules/directives/btn-clear',
-    'modules/directives/btn-reuse',
-    'modules/directives/btn-submit',
-    'modules/directives/fab',
-    'modules/directives/view-map',
-    'modules/directives/view-photos',
+    'modules/directives/pet-data-form',
+    'modules/directives/autocomplete-input',
+    'modules/directives/date-input',
+    'modules/directives/images-input',
+    'modules/directives/image-placeholder',
+    'modules/directives/location-input',
+    'modules/directives/select-input',
+    'modules/directives/textarea-input',
+    'modules/directives/slide',
     'modules/directives/nav-sidebar'
 ], function () {
 

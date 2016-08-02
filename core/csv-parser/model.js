@@ -61,7 +61,7 @@ function parseModelCSV(csvModelData) {
                         break;
                 }
             });
-            if (_modelPropData['key'].match(/lostGeoL/)){
+            if (_modelPropData['key'].match(/(lostGeoL|shelterGeoL)/)){
                 _modelPropData['defaultVal'] = 'Location';
                 _modelPropData['valType'] = 'Location';
             }

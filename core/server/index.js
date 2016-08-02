@@ -26,7 +26,7 @@ var fs = require('fs'),
 
 // view engine setup
 server.app.set('views', path.resolve(__dirname, 'views'));
-server.app.set('view engine', 'jade');
+server.app.set('view engine', 'pug');
 
 server.app.use(logger('dev'));
 server.app.use(bodyParser.json());
@@ -109,9 +109,9 @@ server.app.use(function (request, response, next) {
     }
 
     if (response.locals.simplifiedFormat) {
-        response.send(simplifyResult(response.locals.data));
+        response.json(simplifyResult(response.locals.data));
     } else if (response.locals.data) {
-        response.send(response.locals.data);
+        response.json(response.locals.data);
     } else {
         next()
     }
@@ -137,7 +137,8 @@ server.app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.render('error', {
         message: err.message,
-        error: (server.app.get('env') === 'development') ? err : {}
+        error: (server.app.get('env') === 'development') ? err : {},
+        isDevelopment : config.isDevelopment
     });
 });
 

@@ -1,0 +1,8 @@
+doctype html
+head
+  title=error.status
+body
+  h1= message
+  h2= error.status
+  if (isDevelopment)
+    pre #{error.stack}

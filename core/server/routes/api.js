@@ -28,15 +28,16 @@ var path = require('path'),
 
 
 router.get('/options/:species/', handler.onOptionsRequest);
-router.get('/options/:species/:option', handler.onOptionRequest);
-router.get('/options/:species/:option/:pageNumber/', handler.onOptionRequest);
+router.get('/options/:species/:option', handler.onSingleOptionRequest);
+router.get('/options/:species/:option/:pageNumber/', handler.onSingleOptionRequest);
 router.get('/model/:species/', handler.onModelRequest);
 router.get('/schema/:species/', handler.onSchemaRequest);
 router.get('/list/:species/', handler.onListRequest);
 router.get('/list/:species/:pageNumber/', handler.onListRequest);
-router.post('/save/json', handler.onSaveJSON);
-router.post('/save', upload.array('uploads'), handler.onSaveMedia);
-router.post('/save/model', handler.onSaveModel);
+router.get('/species/', handler.onSpeciesListRequest);
+router.post('/save/json', handler.onJSONSave);
+router.post('/save', upload.array('uploads'), handler.onMediaSave);
+router.post('/save/model', handler.onModelSave);
 router.post('/query/:pageNumber', handler.onQueryRequest);
 router.post('/query', handler.onQueryRequest);
 router.post('/remove', handler.onDeleteRequest);

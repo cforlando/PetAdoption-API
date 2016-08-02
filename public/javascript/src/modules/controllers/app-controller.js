@@ -18,6 +18,10 @@ define([
             $scope.fab = {
                 isOpen: false
             };
+            /**
+             *
+             * @param {String} errorMessage
+             */
             $scope.showError = function (errorMessage) {
                 $mdToast.show($mdToast.simple().textContent(errorMessage || 'Sorry. Try Again :-('));
             };
@@ -38,6 +42,14 @@ define([
 
             $scope.toggleMenu = function ($mdOpenMenu, ev) {
                 $mdOpenMenu(ev);
+            };
+
+            $scope.toggleFAB = function(){
+                $scope.fab.isOpen = !$scope.fab.isOpen;
+            };
+
+            $scope.toggleSidebar = function(){
+                $scope.sideNav.isOpen = !$scope.sideNav.isOpen;
             };
 
             $scope.refreshApp = function () {

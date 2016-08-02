@@ -20,6 +20,19 @@ function ServerHandler() {
             }
         };
 
+    this.onSpeciesListRequest = function(req, res, next){
+        fs.readFile(path.resolve(process.cwd(), 'data/models.json'),
+            {encoding: 'utf8'},
+            function (err, str) {
+                if (err) {
+                    next(err);
+                } else {
+                    var models = JSON.parse(str);
+                    res.send(Object.keys(models));
+                }
+            });
+    }
+
     this.onListRequest = function (req, res, next) {
         var queryData = {
             species: req.params['species'],
@@ -31,13 +44,14 @@ function ServerHandler() {
             debug: config.debugLevel,
             complete: function (err, animals) {
                 if (err) {
-                    res.locals.data = err;
+                    next(err);
                 } else if (_.isArray(animals)) {
                     res.locals.data = animals;
+                    next();
                 } else {
                     res.locals.data = [];
+                    next();
                 }
-                next();
             }
         });
     };
@@ -51,108 +65,64 @@ function ServerHandler() {
             complete: function (err, animals) {
                 //console.log('getAnimal().mongoDB.findAnimal() - found animal:', animal);
                 if (err) {
-                    res.locals.data = err;
+                    next(err);
                 } else if (animals && animals.length > 0) {
                     res.locals.data = animals;
+                    next();
                 } else {
                     res.locals.data = [];
+                    next();
                 }
-                next();
             }
         });
 
     };
 
-    this.onOptionsRequest = function (req, res) {
+    this.onOptionsRequest = function (req, res, next) {
         var species = req.params['species'];
 
         fs.readFile(path.resolve(process.cwd(), 'data/options.json'),
             {encoding: 'utf8'},
             function (err, str) {
                 if (err) {
-                    res.send(err);
+                    next(err);
                 } else {
                     var options = JSON.parse(str);
-                    res.send(JSON.stringify(options[species]));
+                    if(options[species]){
+                        res.locals.simplifiedFormat = false;
+                        res.locals.data = options[species];
+                        next();
+                    } else {
+                        next(new Error("Options for requested species does not exist."));
+                    }
                 }
             });
     };
 
-    this.onOptionRequest = function (req, res) {
+    this.onSingleOptionRequest = function (req, res, next) {
         var species = req.params['species'],
             optionName = req.params['option'];
-        res.locals.pageNumber = req.params['pageNumber'];
+
 
         fs.readFile(path.resolve(process.cwd(), 'data/options.json'),
             {encoding: 'utf8'},
             function (err, str) {
                 if (err) {
-                    res.send(err);
+                    next(err);
                 } else {
                     var options = JSON.parse(str);
-                    res.locals.data = options[species][optionName];
+                    if(options[species]){
+                        res.locals.simplifiedFormat = false;
+                        res.locals.data = options[species][optionName];
+                        next();
+                    } else {
+                        next(new Error("Option for requested species does not exist."));
+                    }
                 }
             });
     };
 
-    this.onSaveJSON = function (req, res, next) {
-
-        database.saveAnimal(req.body, {
-            debug: config.debugLevel,
-            complete: function (err, newAnimal) {
-                if (err) {
-                    res.send({result: err})
-                } else {
-                    res.send({
-                        result: 'success',
-                        data: newAnimal
-                    })
-                }
-            }
-        });
-    };
-
-    this.onSaveMedia = function (req, res, next) {
-        console.log('onSaveMedia: %s-\n%s', dump(req.files), dump(req.body));
-        var _body = req.body;
-        _body.images = _body.images.split(',');
-        _.forEach(req.files, function (fileMeta, index) {
-            _body.images.push(path.join(_options.paths.images, fileMeta.filename));
-        });
-        database.saveAnimal(_body, {
-            debug: config.debugLevel,
-            complete: function (err, newAnimal) {
-                if (err) {
-                    res.send({result: err})
-                } else {
-                    res.send({
-                        result: 'success',
-                        data: newAnimal
-                    })
-                }
-            }
-        });
-    };
-
-    this.onSaveModel = function (req, res, next) {
-
-        database.saveModel(req.body, {
-            debug: config.debugLevel,
-            complete: function (err, newAnimal) {
-                if (err) {
-                    res.send({result: err})
-                } else {
-                    res.send({
-                        result: 'success',
-                        data: newAnimal
-                    })
-                }
-            }
-        });
-
-    };
-
-    this.onModelRequest = function (req, res) {
+    this.onModelRequest = function (req, res, next) {
         var species = req.params['species'];
 
         database.findModel({
@@ -162,23 +132,33 @@ function ServerHandler() {
         }, {
             debug: config.debugLevel,
             complete: function (err, animalModel) {
-                res.send(err || animalModel);
+                if(err){
+                    next(err)
+                } else {
+                    res.locals.simplifiedFormat = false;
+                    res.locals.data = animalModel
+                    next();
+                }
             }
         })
     };
 
-    this.onSchemaRequest = function (req, res) {
+    this.onSchemaRequest = function (req, res, next) {
         var species = req.params['species'];
 
         fs.readFile(path.resolve(process.cwd(), 'data/schema.json'),
             {encoding: 'utf8'},
             function (err, str) {
                 if (err) {
-                    res.send(err);
+                    next(err);
                 } else {
                     var schemas = JSON.parse(str);
-
-                    res.send(JSON.stringify(schemas[species]));
+                    if(schemas[species]){
+                        res.locals.simplifiedFormat = false;
+                        res.locals.data = schemas[species];
+                    } else {
+                        next(new Error("Schema for requested species does not exist."));
+                    }
                 }
             });
     };
@@ -186,9 +166,13 @@ function ServerHandler() {
     this.onDeleteRequest = function (req, res, next) {
         database.removeAnimal(req.body, {
             debug: config.debugLevel,
-            complete: function (result) {
+            complete: function (err, result) {
                 console.log('database.removeAnimal() - results: %j', arguments);
-                res.send(result)
+                if(err){
+                    next(err);
+                } else {
+                    res.send({result: result})
+                }
             }
         })
     };
@@ -263,20 +247,82 @@ function ServerHandler() {
                     // done();
                 },
                 function done(err) {
-                    res.send(err || {result: 'success'});
+                    if(err){
+                        next(err);
+                    } else {
+                        res.send({result: 'success'});
+                    }
                 }
             );
         }
     };
-    
-    
+
     this.onFormatDBRequest = function(req, res, next){
         require('./utils').formatter.formatDB({
             complete : function(err){
-                res.send({result: err || 'success'})
+                if(err) {
+                    next(err);
+                } else {
+                    res.send({result: 'success'})
+                }
             }
         })
     };
+
+    this.onJSONSave = function (req, res, next) {
+
+        database.saveAnimal(req.body, {
+            debug: config.debugLevel,
+            complete: function (err, newAnimal) {
+                if (err) {
+                    next(err);
+                } else {
+                    res.locals.simplifiedFormat = false;
+                    res.locals.data = newAnimal;
+                    next();
+                }
+            }
+        });
+    };
+
+    this.onMediaSave = function (req, res, next) {
+        console.log('onSaveMedia: %s-\n%s', dump(req.files), dump(req.body));
+        var _body = req.body;
+        _body.images = _body.images.split(',');
+        _.forEach(req.files, function (fileMeta, index) {
+            _body.images.push(path.join(_options.paths.images, fileMeta.filename));
+        });
+        database.saveAnimal(_body, {
+            debug: config.debugLevel,
+            complete: function (err, newAnimal) {
+                if (err) {
+                    next(err);
+                } else {
+                    res.locals.simplifiedFormat = false;
+                    res.locals.data = newAnimal;
+                    next()
+                }
+            }
+        });
+    };
+
+    this.onModelSave = function (req, res, next) {
+
+        database.saveModel(req.body, {
+            debug: config.debugLevel,
+            complete: function (err, newAnimal) {
+                if (err) {
+                    next(err);
+                } else {
+                    res.locals.simplifiedFormat = false;
+                    res.locals.data = newAnimal
+                    next();
+                }
+            }
+        });
+
+    };
+
 
 }
 

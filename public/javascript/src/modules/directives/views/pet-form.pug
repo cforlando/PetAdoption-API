@@ -1,0 +1,14 @@
+include helpers/_-all
+.form
+    .fields
+        .field(ng-class="propData.key", ng-repeat="propData in properties")
+            .slider(ng-if="isImagesField(propData)")
+            .date-input(ng-if="isDateField(propData)")
+            .location-input(ng-if="isLocationField(propData)")
+            .textarea-input(ng-if="isParagraphField(propData)")
+            .autocomplete-input(ng-if="isAutocompleteField(propData)")
+            .select-input(ng-if="isSelectInput(propData)")
+    .nav
+        md-input-container
+            md-button.btn-submit.md-primary.md-raised(ng-click='savePet()') Save
+            md-button.btn-remove.md-warn.md-raised(ng-click='deletePet()') Delete
