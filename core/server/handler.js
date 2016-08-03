@@ -20,7 +20,7 @@ function ServerHandler() {
             }
         };
 
-    this.onSpeciesListRequest = function(req, res, next){
+    this.onSpeciesListRequest = function (req, res, next) {
         fs.readFile(path.resolve(process.cwd(), 'data/models.json'),
             {encoding: 'utf8'},
             function (err, str) {
@@ -56,6 +56,56 @@ function ServerHandler() {
         });
     };
 
+    this.onListAllRequest = function (req, res, next) {
+        var queryData = {
+                ignoreCaseFor: ['species']
+            },
+            responseData = [];
+        res.locals.pageNumber = req.params['pageNumber'];
+
+        fs.readFile(path.resolve(process.cwd(), 'data/models.json'),
+            {encoding: 'utf8'},
+            function (err, str) {
+                if (err) {
+                    next(err);
+                } else {
+                    var models;
+                    try {
+                        models = JSON.parse(str);
+                    } catch (err) {
+                        return next(err);
+                    }
+                    async.each(Object.keys(models), function each(species, done) {
+                        var speciesQueryData = _.extend({}, queryData, {species: species});
+                        database.findAnimals(speciesQueryData, {
+                            debug: config.debugLevel,
+                            complete: function (err, animals) {
+                                if (err) {
+                                    done(err);
+                                } else if (_.isArray(animals)) {
+                                    responseData = responseData.concat(animals);
+                                    done();
+                                } else {
+                                    done();
+                                }
+                            }
+                        });
+                    }, function complete(err) {
+                        if (err) {
+                            next(err);
+                        } else if (_.isArray(responseData)) {
+                            res.locals.data = responseData;
+                            next();
+                        } else {
+                            res.locals.data = [];
+                            next();
+                        }
+
+                    })
+                }
+            });
+    };
+
     this.onQueryRequest = function (req, res, next) {
         var queryData = req.body;
         res.locals.pageNumber = req.params['pageNumber'];
@@ -88,7 +138,7 @@ function ServerHandler() {
                     next(err);
                 } else {
                     var options = JSON.parse(str);
-                    if(options[species]){
+                    if (options[species]) {
                         res.locals.simplifiedFormat = false;
                         res.locals.data = options[species];
                         next();
@@ -111,7 +161,7 @@ function ServerHandler() {
                     next(err);
                 } else {
                     var options = JSON.parse(str);
-                    if(options[species]){
+                    if (options[species]) {
                         res.locals.simplifiedFormat = false;
                         res.locals.data = options[species][optionName];
                         next();
@@ -132,7 +182,7 @@ function ServerHandler() {
         }, {
             debug: config.debugLevel,
             complete: function (err, animalModel) {
-                if(err){
+                if (err) {
                     next(err)
                 } else {
                     res.locals.simplifiedFormat = false;
@@ -153,7 +203,7 @@ function ServerHandler() {
                     next(err);
                 } else {
                     var schemas = JSON.parse(str);
-                    if(schemas[species]){
+                    if (schemas[species]) {
                         res.locals.simplifiedFormat = false;
                         res.locals.data = schemas[species];
                     } else {
@@ -168,7 +218,7 @@ function ServerHandler() {
             debug: config.debugLevel,
             complete: function (err, result) {
                 console.log('database.removeAnimal() - results: %j', arguments);
-                if(err){
+                if (err) {
                     next(err);
                 } else {
                     res.send({result: result})
@@ -247,7 +297,7 @@ function ServerHandler() {
                     // done();
                 },
                 function done(err) {
-                    if(err){
+                    if (err) {
                         next(err);
                     } else {
                         res.send({result: 'success'});
@@ -257,10 +307,10 @@ function ServerHandler() {
         }
     };
 
-    this.onFormatDBRequest = function(req, res, next){
+    this.onFormatDBRequest = function (req, res, next) {
         require('./utils').formatter.formatDB({
-            complete : function(err){
-                if(err) {
+            complete: function (err) {
+                if (err) {
                     next(err);
                 } else {
                     res.send({result: 'success'})

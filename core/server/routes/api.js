@@ -32,6 +32,7 @@ router.get('/options/:species/:option', handler.onSingleOptionRequest);
 router.get('/options/:species/:option/:pageNumber/', handler.onSingleOptionRequest);
 router.get('/model/:species/', handler.onModelRequest);
 router.get('/schema/:species/', handler.onSchemaRequest);
+router.get('/list/', handler.onListAllRequest);
 router.get('/list/:species/', handler.onListRequest);
 router.get('/list/:species/:pageNumber/', handler.onListRequest);
 router.get('/species/', handler.onSpeciesListRequest);

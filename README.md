@@ -25,6 +25,7 @@ GET     | options/:species                       | JSON of all preselected optio
 GET     | options/:species/:option               | JSON of given option for a given species
 GET     | options/:species/:option/:pageNumber   | JSON of given option for a given species in pages. Page size defaults to 10. This can be changed via query argument (i.e. "/options/dog/breed/1?pageSize=15")
 GET     | schema/:species                        | returns JSON representation of a schema. Currently includes dog and cat schema
+GET     | list/                                  | will show all saved species
 GET     | list/:species                          | ex: '/list/dog' will show all saved dog species
 GET     | list/:species/:pageNumber              | paginated route for list/:species endpoint
 GET     | model/:species                         | provides JSON of model layout and meta data for species
