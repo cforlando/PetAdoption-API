@@ -78,7 +78,7 @@ module.exports = {
      */
     parse: function (options) {
         console.log('dataset parsing');
-        var _options = _.extend(defaults, options);
+        var _options = _.defaults(options, defaults);
         _options.writePath = path.resolve(_options.writeDir, util.format('%s.json', _options.cacheName));
         fs.readFile(_options.readPath, {encoding: 'utf8'}, function (readErr, petTestDataText) {
             if(readErr) throw readErr;

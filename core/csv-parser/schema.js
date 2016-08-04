@@ -73,7 +73,7 @@ module.exports = {
      */
     parse: function (options) {
 
-        var _options = _.extend(defaults, options);
+        var _options = _.defaults(options, defaults);
 
         var fileList = _.isArray(_options.readPath) ? _options.readPath : [_options.readPath],
             schemaData = {};

@@ -12,7 +12,7 @@ module.exports = {
      * @param {Object} [options.context]
      */
     download : function(filePath, callback, options){
-        var _options = _.extend({}, options);
+        var _options = _.defaults(options, {});
         if (filePath.match(/^http/)) {
             request({
                 method: 'GET',

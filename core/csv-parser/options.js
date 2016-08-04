@@ -58,7 +58,7 @@ module.exports = {
      * @param {Object} options.writePath
      */
     parse: function (options) {
-        var _options = _.extend(defaults, options);
+        var _options = _.defaults(options, defaults);
         _options.writePath = path.resolve(_options.writeDir, _options.cacheName + '.json');
 
         var fileList = _.isArray(_options.readPath) ? _options.readPath : [_options.readPath],
