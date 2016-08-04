@@ -26,8 +26,8 @@ function ModelFormatter(){
      * @param options.complete
      */
     this.formatDB = function(options){
-        var _options = _.extend({}, options),
-            queryData = {species : 'cat'},
+        var _options = _.defaults(options, {species : 'cat'}),
+            queryData = _options.species,
             updatedAnimal;
 
         database.findAnimals(queryData, {

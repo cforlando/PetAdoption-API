@@ -12,7 +12,7 @@ var fs = require('fs'),
     passport = require('passport'),
     BasicStrategy = require('passport-http').BasicStrategy,
 
-    dump = require('../../lib/dump'),
+    serverUtils = require('./utils'),
 
     server = {
         app: Express()
@@ -42,12 +42,27 @@ server.app.use(function (req, res, next) {
     next();
 });
 
+// set reduceOutput flag
+server.app.use(function (req, res, next) {
+    switch (req.method){
+        case 'GET':
+            res.locals.reducedOuput = (req.query.properties) ? serverUtils.parseArrayStr(req.query.properties) : false;
+            break;
+        case 'POST':
+            res.locals.reducedOuput = (_.isArray(req.body.properties)) ? req.body.properties : false;
+            break;
+        default:
+            break;
+    }
+    next();
+});
+
 passport.use(new BasicStrategy(function (username, password, done) {
         var credentials = {
             username: username,
             password: password
         };
-        console.log('credentials: %s', dump(credentials));
+        console.log('credentials: %s', serverUtils.dump(credentials));
         if (username && password) {
             return done(null, credentials);
         } else {
@@ -97,22 +112,25 @@ server.app.use(function (request, response, next) {
 
 // format and send data
 server.app.use(function (request, response, next) {
-    function simplifyResult(data) {
+    function formatResult(data) {
 
         return data.map(function (animalProps, index) {
             var _animalProps = {};
             _.forEach(animalProps, function (propData, propName) {
-                _animalProps[propName] = propData.val;
+                if (response.locals.reducedOuput && response.locals.reducedOuput.indexOf(propName) < 0) return;
+                _animalProps[propName] = (response.locals.simplifiedFormat) ? propData.val : propData;
             });
             return _animalProps;
         });
     }
 
-    if (response.locals.simplifiedFormat) {
-        response.json(simplifyResult(response.locals.data));
-    } else if (response.locals.data) {
-        response.json(response.locals.data);
-    } else {
+    if (response.locals.data) {
+        if (response.locals.simplifiedFormat || response.locals.reducedOuput) {
+            response.json(formatResult(response.locals.data));
+        } else {
+            response.json(response.locals.data);
+        }
+    }else {
         next()
     }
 });
@@ -134,10 +152,11 @@ server.app.use(function (req, res, next) {
 
 // express error handlers
 server.app.use(function (err, req, res, next) {
+    console.log('error: %s', serverUtils.dump(err));
     res.status(err.status || 500);
     res.render('error', {
         message: err.message,
-        error: (server.app.get('env') === 'development') ? err : {},
+        error: config.isDevelopment ? err : {},
         isDevelopment : config.isDevelopment
     });
 });

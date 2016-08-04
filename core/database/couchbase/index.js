@@ -43,7 +43,7 @@ var CouchbaseDB = {
      * @param {Object} options.context context for complete function callback
      */
     saveAnimal: function (animalProps, options) {
-        var _options = _.extend({}, options),
+        var _options = _.defaults(options, {}),
             animalHash = animalProps['hashId']|| buildHash(animalProps);
 
         jsonMap[animalHash] = animalProps;
@@ -114,7 +114,7 @@ var CouchbaseDB = {
      * @param {Object} options.context context for complete function callback
      */
     findAnimals: function (animalProps, options) {
-        var _options = _.extend({}, options),
+        var _options = _.defaults(options, {}),
             ViewQuery = couchbase.ViewQuery,
             viewName,
             queriedKey;

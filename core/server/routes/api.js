@@ -43,7 +43,8 @@ router.post('/query/:pageNumber', handler.onQueryRequest);
 router.post('/query', handler.onQueryRequest);
 router.post('/remove', handler.onDeleteRequest);
 
-router.get('/cleandb/', handler.onFormatDBRequest);
+router.get('/cleandb/', handler.onFormatDBRequestAll);
+router.get('/cleandb/:species/', handler.onFormatDBRequestSpecies);
 router.get('/reset', handler.onResetRequest);
 
 

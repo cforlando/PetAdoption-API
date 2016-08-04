@@ -38,14 +38,24 @@ POST    | remove/                                | deletes pet as specified by `
 
 #### Queries
 
-Additional fields you can set:
+
+##### Additional POST fields you can set:
 
 Name           | Type            | Description
 ---------------| ----------------| ----------------------------------------------------------
+ignoreCase     | (String) Array  | Allows the fields specified to ignore casing
 matchStartFor  | (String) Array  | Requires the fields specified in the array to match starting from the beginning (prepends a '^' line start regex meta-character)
 matchEndFor    | (String) Array  | Requires the fields specified in the array to match from the ending (appends a '$' line end regex meta-character)
-ignoreCase     | (String) Array  | Allows the fields specified to ignore casing
+properties     | (String) Array  | Will only supply fields specified in array
 pageSize       | Number          | Defaults to 10 (only meaningful when making paged query) 
+
+##### Additional GET request parameters you can set:
+
+Name           | Type            | Description
+---------------| ----------------| ----------------------------------------------------------
+pageSize       | Number          | Defaults to 10 (only meaningful when making paged query) 
+properties     | (String) Array  | Will only supply fields specified in array. ex: `?properties=['species','petName','sex']`
+
 
 ###### More Notes
 

@@ -11,7 +11,16 @@ function ServerHandler() {
         database = require('../database'),
         csvReader = require('../csv-parser'),
         dump = require('../../lib/dump'),
-
+        cachedSpeciesList = (function(){
+            try {
+                var modelsDataStr = fs.readFileSync(path.resolve(process.cwd(), 'data/models.json')),
+                    modelsData = JSON.parse(modelsDataStr);
+                return Object.keys(modelsData);
+            } catch(err){
+                console.warn(err);
+            }
+            return ['cat', 'dog'];
+        })(),
         _options = {
             pageSize: 10,
             paths: {
@@ -31,7 +40,7 @@ function ServerHandler() {
                     res.send(Object.keys(models));
                 }
             });
-    }
+    };
 
     this.onListRequest = function (req, res, next) {
         var queryData = {
@@ -186,7 +195,7 @@ function ServerHandler() {
                     next(err)
                 } else {
                     res.locals.simplifiedFormat = false;
-                    res.locals.data = animalModel
+                    res.locals.data = animalModel;
                     next();
                 }
             }
@@ -221,7 +230,7 @@ function ServerHandler() {
                 if (err) {
                     next(err);
                 } else {
-                    res.send({result: result})
+                    res.json(result)
                 }
             }
         })
@@ -307,14 +316,35 @@ function ServerHandler() {
         }
     };
 
-    this.onFormatDBRequest = function (req, res, next) {
+    this.onFormatDBRequestSpecies = function (req, res, next) {
+        var species = req.params.species;
         require('./utils').formatter.formatDB({
+            species : species,
             complete: function (err) {
                 if (err) {
                     next(err);
                 } else {
                     res.send({result: 'success'})
                 }
+            }
+        })
+    };
+
+    this.onFormatDBRequestAll = function (req, res, next) {
+
+        async.each(cachedSpeciesList, function each (species, done){
+            require('./utils').formatter.formatDB({
+                species : species,
+                complete: function (err) {
+                    done(err);
+                }
+            })
+        }, function complete(err){
+
+            if (err) {
+                next(err);
+            } else {
+                res.send({result: 'success'})
             }
         })
     };
