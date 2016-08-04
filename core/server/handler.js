@@ -72,47 +72,33 @@ function ServerHandler() {
             responseData = [];
         res.locals.pageNumber = req.params['pageNumber'];
 
-        fs.readFile(path.resolve(process.cwd(), 'data/models.json'),
-            {encoding: 'utf8'},
-            function (err, str) {
-                if (err) {
-                    next(err);
-                } else {
-                    var models;
-                    try {
-                        models = JSON.parse(str);
-                    } catch (err) {
-                        return next(err);
+        async.each(cachedSpeciesList, function each(species, done) {
+            var speciesQueryData = _.extend({}, queryData, {species: species});
+            database.findAnimals(speciesQueryData, {
+                debug: config.debugLevel,
+                complete: function (err, animals) {
+                    if (err) {
+                        done(err);
+                    } else if (_.isArray(animals)) {
+                        responseData = responseData.concat(animals);
+                        done();
+                    } else {
+                        done();
                     }
-                    async.each(Object.keys(models), function each(species, done) {
-                        var speciesQueryData = _.extend({}, queryData, {species: species});
-                        database.findAnimals(speciesQueryData, {
-                            debug: config.debugLevel,
-                            complete: function (err, animals) {
-                                if (err) {
-                                    done(err);
-                                } else if (_.isArray(animals)) {
-                                    responseData = responseData.concat(animals);
-                                    done();
-                                } else {
-                                    done();
-                                }
-                            }
-                        });
-                    }, function complete(err) {
-                        if (err) {
-                            next(err);
-                        } else if (_.isArray(responseData)) {
-                            res.locals.data = responseData;
-                            next();
-                        } else {
-                            res.locals.data = [];
-                            next();
-                        }
-
-                    })
                 }
             });
+        }, function complete(err) {
+            if (err) {
+                next(err);
+            } else if (_.isArray(responseData)) {
+                res.locals.data = responseData;
+                next();
+            } else {
+                res.locals.data = [];
+                next();
+            }
+
+        })
     };
 
     this.onQueryRequest = function (req, res, next) {

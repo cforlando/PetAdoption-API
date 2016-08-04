@@ -184,9 +184,7 @@ function MongoDB(instanceOptions) {
      * @private
      */
     this._exec = function (func, options) {
-        var _options = _.defaults(options, {
-            context: self
-        });
+        var _options = _.defaults(options, {});
         if (!_.isFunction(func)) {
             console.warn('mongodb._exec() - no function passed');
             return;
@@ -345,9 +343,9 @@ function MongoDB(instanceOptions) {
     };
 
     this._formatOutput = function (animalProps, options) {
-        var _options = _.extend(options, {
+        var _options = _.defaults({
                 isV1Format: true
-            }),
+            }, options),
             sanitizedAnimalProps = {},
             species = this._getSpeciesFromProps(animalProps),
             model = self.modelsCollection[species];
@@ -415,7 +413,7 @@ function MongoDB(instanceOptions) {
      * @param {Object} [options.context] context for complete function callback
      */
     this.findAnimals = function (animalProps, options) {
-        var _options = _.extend(self.config.queryOptions, options);
+        var _options = _.defaults(options, self.config.queryOptions);
         if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log("mongodb.findAnimals(%j)", arguments);
 
         var query = function () {
@@ -426,7 +424,6 @@ function MongoDB(instanceOptions) {
             if (!searchParams.species) return _options.complete.call(null, self.errors.species);
 
             if (_options.debug >= config.DEBUG_LEVEL_MED) console.log("mongodb.AnimalDatabases['%s'].findAnimals(%j)", searchParams.species, searchParams);
-
             self.AnimalDatabases[searchParams.species].find(
                 searchParams,
                 function (err, _animals) {
@@ -456,7 +453,7 @@ function MongoDB(instanceOptions) {
      * @param {Object} [options.context] context for complete function callback
      */
     this.saveAnimal = function (animalProps, options) {
-        var _options = _.extend(self.config.queryOptions, options);
+        var _options = _.defaults(options, self.config.queryOptions);
 
         this._exec(function () {
             if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log("mongodb.saveAnimal() - received post for: ", animalProps);
