@@ -11,12 +11,12 @@ function ServerHandler() {
         database = require('../database'),
         csvReader = require('../csv-parser'),
         dump = require('../../lib/dump'),
-        cachedSpeciesList = (function(){
+        cachedSpeciesList = (function () {
             try {
                 var modelsDataStr = fs.readFileSync(path.resolve(process.cwd(), 'data/models.json')),
                     modelsData = JSON.parse(modelsDataStr);
                 return Object.keys(modelsData);
-            } catch(err){
+            } catch (err) {
                 console.warn(err);
             }
             return ['cat', 'dog'];
@@ -43,38 +43,32 @@ function ServerHandler() {
     };
 
     this.onListRequest = function (req, res, next) {
-        var queryData = {
-            species: req.params['species'],
-            ignoreCaseFor: ['species']
-        };
+
         res.locals.pageNumber = req.params['pageNumber'];
 
-        database.findAnimals(queryData, {
-            debug: config.debugLevel,
-            complete: function (err, animals) {
-                if (err) {
-                    next(err);
-                } else if (_.isArray(animals)) {
-                    res.locals.data = animals;
-                    next();
-                } else {
-                    res.locals.data = [];
-                    next();
+        database.findAnimals({species: req.params.species},
+            {
+                debug: config.debugLevel,
+                complete: function (err, animals) {
+                    if (err) {
+                        next(err);
+                    } else if (_.isArray(animals)) {
+                        res.locals.data = animals;
+                        next();
+                    } else {
+                        res.locals.data = [];
+                        next();
+                    }
                 }
-            }
-        });
+            });
     };
 
     this.onListAllRequest = function (req, res, next) {
-        var queryData = {
-                ignoreCaseFor: ['species']
-            },
-            responseData = [];
+        var responseData = [];
         res.locals.pageNumber = req.params['pageNumber'];
 
         async.each(cachedSpeciesList, function each(species, done) {
-            var speciesQueryData = _.extend({}, queryData, {species: species});
-            database.findAnimals(speciesQueryData, {
+            database.findAnimals({species: species}, {
                 debug: config.debugLevel,
                 complete: function (err, animals) {
                     if (err) {
@@ -168,13 +162,8 @@ function ServerHandler() {
     };
 
     this.onModelRequest = function (req, res, next) {
-        var species = req.params['species'];
 
-        database.findModel({
-            species: {
-                defaultVal: species
-            }
-        }, {
+        database.findModel(req.params.species, {
             debug: config.debugLevel,
             complete: function (err, animalModel) {
                 if (err) {
@@ -189,7 +178,7 @@ function ServerHandler() {
     };
 
     this.onSchemaRequest = function (req, res, next) {
-        var species = req.params['species'];
+        var species = req.params.species;
 
         fs.readFile(path.resolve(process.cwd(), 'data/schema.json'),
             {encoding: 'utf8'},
@@ -209,21 +198,23 @@ function ServerHandler() {
     };
 
     this.onDeleteRequest = function (req, res, next) {
-        database.removeAnimal(req.body, {
-            debug: config.debugLevel,
-            complete: function (err, result) {
-                console.log('database.removeAnimal() - results: %j', arguments);
-                if (err) {
-                    next(err);
-                } else {
-                    res.json(result)
+
+        database.removeAnimal(
+            req.params.species,
+            req.body, {
+                debug: config.debugLevel,
+                complete: function (err, result) {
+                    console.log('database.removeAnimal() - results: %j', arguments);
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.json(result)
+                    }
                 }
-            }
-        })
+            })
     };
 
     this.onResetRequest = function (req, res, next) {
-        console.log('/reset');
 
         csvReader.parseSchema({
             readPath: [
@@ -275,20 +266,22 @@ function ServerHandler() {
             async.forEachOfSeries(petCollection,
                 function each(petData, petIndex, done) {
                     console.log('saving pet %j', petData);
-                    database.saveAnimal(petData, {
-                        debug: config.debugLevel,
-                        complete: function (err) {
-                            if (err) {
-                                console.error(dump(err));
-                                done(err);
-                            } else if (petIndex < numOfPets) {
-                                console.log('Saved pet %s/%s', petIndex + 1, numOfPets);
-                                done();
-                            } else {
-                                done();
+                    database.saveAnimal(
+                        petData.species || 'dog',
+                        petData, {
+                            debug: config.debugLevel,
+                            complete: function (err) {
+                                if (err) {
+                                    console.error(dump(err));
+                                    done(err);
+                                } else if (petIndex < numOfPets) {
+                                    console.log('Saved pet %s/%s', petIndex + 1, numOfPets);
+                                    done();
+                                } else {
+                                    done();
+                                }
                             }
-                        }
-                    });
+                        });
                     // done();
                 },
                 function done(err) {
@@ -303,9 +296,9 @@ function ServerHandler() {
     };
 
     this.onFormatDBRequestSpecies = function (req, res, next) {
-        var species = req.params.species;
+
         require('./utils').formatter.formatDB({
-            species : species,
+            species: req.params.species,
             complete: function (err) {
                 if (err) {
                     next(err);
@@ -318,14 +311,14 @@ function ServerHandler() {
 
     this.onFormatDBRequestAll = function (req, res, next) {
 
-        async.each(cachedSpeciesList, function each (species, done){
+        async.each(cachedSpeciesList, function each(species, done) {
             require('./utils').formatter.formatDB({
-                species : species,
+                species: species,
                 complete: function (err) {
                     done(err);
                 }
             })
-        }, function complete(err){
+        }, function complete(err) {
 
             if (err) {
                 next(err);
@@ -337,55 +330,60 @@ function ServerHandler() {
 
     this.onJSONSave = function (req, res, next) {
 
-        database.saveAnimal(req.body, {
-            debug: config.debugLevel,
-            complete: function (err, newAnimal) {
-                if (err) {
-                    next(err);
-                } else {
-                    res.locals.simplifiedFormat = false;
-                    res.locals.data = newAnimal;
-                    next();
+        database.saveAnimal(
+            req.params.species,
+            req.body, {
+                debug: config.debugLevel,
+                complete: function (err, newAnimal) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.locals.simplifiedFormat = false;
+                        res.locals.data = newAnimal;
+                        next();
+                    }
                 }
-            }
-        });
+            });
     };
 
     this.onMediaSave = function (req, res, next) {
         console.log('onSaveMedia: %s-\n%s', dump(req.files), dump(req.body));
-        var _body = req.body;
-        _body.images = _body.images.split(',');
+        var props = req.body;
+        props.images = props.images.split(',');
         _.forEach(req.files, function (fileMeta, index) {
-            _body.images.push(path.join(_options.paths.images, fileMeta.filename));
+            props.images.push(path.join(_options.paths.images, fileMeta.filename));
         });
-        database.saveAnimal(_body, {
-            debug: config.debugLevel,
-            complete: function (err, newAnimal) {
-                if (err) {
-                    next(err);
-                } else {
-                    res.locals.simplifiedFormat = false;
-                    res.locals.data = newAnimal;
-                    next()
+        database.saveAnimal(
+            req.params.species,
+            props, {
+                debug: config.debugLevel,
+                complete: function (err, newAnimal) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.locals.simplifiedFormat = false;
+                        res.locals.data = newAnimal;
+                        next()
+                    }
                 }
-            }
-        });
+            });
     };
 
     this.onModelSave = function (req, res, next) {
-
-        database.saveModel(req.body, {
-            debug: config.debugLevel,
-            complete: function (err, newAnimal) {
-                if (err) {
-                    next(err);
-                } else {
-                    res.locals.simplifiedFormat = false;
-                    res.locals.data = newAnimal
-                    next();
+        database.saveModel(
+            req.params.species,
+            req.body, {
+                debug: config.debugLevel,
+                complete: function (err, newAnimal) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.locals.simplifiedFormat = false;
+                        res.locals.data = newAnimal;
+                        next();
+                    }
                 }
-            }
-        });
+            });
 
     };
 

@@ -27,21 +27,21 @@ var path = require('path'),
     upload = multer({storage: storage});
 
 
-router.get('/options/:species/', handler.onOptionsRequest);
+router.get('/options/:species', handler.onOptionsRequest);
 router.get('/options/:species/:option', handler.onSingleOptionRequest);
-router.get('/options/:species/:option/:pageNumber/', handler.onSingleOptionRequest);
-router.get('/model/:species/', handler.onModelRequest);
-router.get('/schema/:species/', handler.onSchemaRequest);
-router.get('/list/', handler.onListAllRequest);
-router.get('/list/:species/', handler.onListRequest);
-router.get('/list/:species/:pageNumber/', handler.onListRequest);
+router.get('/options/:species/:option/:pageNumber', handler.onSingleOptionRequest);
+router.get('/model/:species', handler.onModelRequest);
+router.get('/schema/:species', handler.onSchemaRequest);
+router.get('/list', handler.onListAllRequest);
+router.get('/list/:species', handler.onListRequest);
+router.get('/list/:species/:pageNumber', handler.onListRequest);
 router.get('/species/', handler.onSpeciesListRequest);
-router.post('/save/json', handler.onJSONSave);
-router.post('/save', upload.array('uploads'), handler.onMediaSave);
-router.post('/save/model', handler.onModelSave);
+router.post('/save/:species/json', handler.onJSONSave);
+router.post('/save/:species', upload.array('uploads'), handler.onMediaSave);
+router.post('/save/:species/model', handler.onModelSave);
+router.post('/remove/:species', handler.onDeleteRequest);
 router.post('/query/:pageNumber', handler.onQueryRequest);
 router.post('/query', handler.onQueryRequest);
-router.post('/remove', handler.onDeleteRequest);
 
 router.get('/cleandb/', handler.onFormatDBRequestAll);
 router.get('/cleandb/:species/', handler.onFormatDBRequestSpecies);

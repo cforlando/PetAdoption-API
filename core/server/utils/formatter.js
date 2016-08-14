@@ -9,45 +9,56 @@ var util = require('util'),
     config = require('../../config'),
     database = require('../../database');
 
-function ModelFormatter(){
+/**
+ *
+ * @param {Object} [options]
+ * @param {Boolean} [options.createMissingFields=false]
+ * @param {Boolean} [options.populateEmptyFields=false]
+ * @constructor
+ */
+function ModelFormatter(options) {
     var self = this,
-        cachedModels = (function(){
+        cachedModels = (function () {
             try {
                 return JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'data/models.json'), {encoding: 'utf8'}));
-            } catch(err){
+            } catch (err) {
                 console.log(err);
                 return {};
             }
-        })();
-    
+        })(),
+        formatterOptions = _.defaults(options, {
+            createMissingFields : false,
+            populateEmptyFields : false
+        });
+
     /**
-     * 
+     *
      * @param options
      * @param options.complete
      */
-    this.formatDB = function(options){
-        var _options = _.defaults(options, {species : 'cat'}),
-            queryData = _options.species,
+    this.formatDB = function (options) {
+        var _options = _.defaults(options, {species: 'cat'}),
+            queryData = {species: _options.species},
             updatedAnimal;
 
         database.findAnimals(queryData, {
             debug: config.debugLevel,
             complete: function (err, animals) {
-                async.each(animals, function each (animal, done){
+                async.each(animals, function each(animal, done) {
                     updatedAnimal = self.formatAnimal(animal);
                     self._saveAnimal(updatedAnimal, {
-                        complete : function(){
+                        complete: function () {
                             done();
                         }
                     });
-                }, function complete(){
+                }, function complete() {
                     if (_options.complete) _options.complete.apply(_options.context);
                 });
             }
         });
     };
 
-    this._pickRandomOption = function(options){
+    this._pickRandomOption = function (options) {
         if (options && options.length > 0) {
             var randOptionIndex = Math.floor(Math.random() * options.length);
             return options[randOptionIndex]
@@ -55,15 +66,17 @@ function ModelFormatter(){
         return false;
     };
 
-    this._saveAnimal = function(animalProps, options){
+    this._saveAnimal = function (animalProps, options) {
         var _options = _.extend({}, options),
             reducedModel = {};
 
-        _.forEach(animalProps, function(propData, propName){
+        _.forEach(animalProps, function (propData, propName) {
             reducedModel[propName] = propData.val;
         });
 
-        database.saveAnimal(reducedModel, {
+        console.log('saving %j', reducedModel);
+
+        database.saveAnimal(reducedModel.species, reducedModel, {
             debug: config.debugLevel,
             complete: function (err, newAnimal) {
                 if (_options.complete) _options.complete.apply(_options.context, [null, newAnimal])
@@ -71,12 +84,12 @@ function ModelFormatter(){
         });
     };
 
-    this.formatAnimal = function(animalProps){
+    this.formatAnimal = function (animalProps) {
         var self = this,
             species = animalProps.species.val || self._pickRandomOption(['dog', 'cat']);
         console.log('formatting a %s', species);
-        _.forEach(cachedModels[species], function(propData, propName){
-            switch(propName){
+        _.forEach(cachedModels[species], function (propData, propName) {
+            switch (propName) {
                 case 'images':
                     var images = (animalProps[propName] && _.isArray(animalProps[propName].val)) ? animalProps[propName].val : (propData.defaultVal || propData.example);
                     propData.val = self.formatImagesArray(images);
@@ -86,23 +99,31 @@ function ModelFormatter(){
                     animalProps[propName] = _.extend({}, animalProps[propName] || propData, {val: species});
                     break;
                 default:
-                    animalProps[propName] = _.extend({}, propData, animalProps[propName]);
-                    animalProps[propName].val = self._pickRandomOption(propData.options) || animalProps[propName].val || propData.example || propData.defaultVal;
+                    if (formatterOptions.createMissingFields){
+                        // assign values for all possible fields
+                        animalProps[propName] = _.extend({}, propData, animalProps[propName]);
+                    } else if (animalProps[propName]) {
+                        // assign values for only currently assigned fields
+                        _.extend({}, propData, animalProps[propName])
+                    }
+                    if (formatterOptions.populateEmptyFields && _.isUndefined(animalProps[propName].val)) {
+                        // chose a random value for a field
+                        animalProps[propName].val = self._pickRandomOption(propData.options) || animalProps[propName].val || propData.example || propData.defaultVal;
+                    }
             }
         });
         return animalProps;
     };
 
-    this.formatImagesArray = function(imagesArr){
+    this.formatImagesArray = function (imagesArr) {
         console.log("formatting %s images", imagesArr.length);
-        function formatImgURL(imageURL){
+        function formatImgURL(imageURL) {
             return (/^http:/.test(imageURL)) ? imageURL : url.resolve(config.domain, imageURL);
         }
+
         return imagesArr.map(formatImgURL);
     };
 };
 
 
-
-
-module.exports= new ModelFormatter();
+module.exports = new ModelFormatter();

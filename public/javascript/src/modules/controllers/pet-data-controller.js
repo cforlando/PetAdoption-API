@@ -117,7 +117,7 @@ define([
                 var _data = dataParserService.convertDataToSaveFormat($scope.petData);
                 console.log('_data; %o', _data);
 
-                $http.post('/api/v1/remove', _data).then(
+                $http.post('/api/v1/remove/'+$scope.petData.species.val, _data).then(
                     function success(response) {
                         $scope.clearPetData();
                         $scope.getPetList(function () {
@@ -138,7 +138,7 @@ define([
                 console.log('_data; %o', _data);
                 $scope.showLoading();
 
-                $http.post('/api/v1/save', _data).then(
+                $http.post('/api/v1/save/'+$scope.petData.species.val, _data).then(
                     function success(response) {
                         var _persistedData = response.data;
                         console.log('_persistedData: %o', _persistedData);
@@ -169,7 +169,7 @@ define([
                     _data.append(propName, propValue);
                 });
                 $scope.syncShelterAddressMap(function(){
-                    $http.post('/api/v1/save', _data, {
+                    $http.post('/api/v1/save/'+$scope.petData.species.val, _data, {
                         headers: {
                             "Content-Type": undefined
                         }
@@ -310,7 +310,7 @@ define([
                 var _data = dataParserService.convertDataToModelFormat($scope.petData);
                 console.log('_modelData; %o', _data);
                 $scope.showLoading();
-                $http.post('/api/v1/save/model/', _data).then(
+                $http.post('/api/v1/save/'+$scope.petData.species.val+'/model/', _data).then(
                     function success(response) {
                         var _persistedData = response.data,
                             _sanitizedData = dataParserService.convertToPetData(_persistedData);
