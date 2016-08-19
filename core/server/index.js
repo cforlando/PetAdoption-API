@@ -139,7 +139,7 @@ server.app.use(function (request, response, next) {
 
 // send placeholder 404 images
 server.app.use(function (req, res, next) {
-    if (/.(jpg|png)/i.test(req.path)) {
+    if (/.(jpg|png)$/i.test(req.path)) {
         fs.access(path.resolve(_options.publicDir, req.path), function (err) {
             if (err) {
                 if (req.path.match(/dog/i)){
