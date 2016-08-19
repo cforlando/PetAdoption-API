@@ -121,7 +121,7 @@ function ModelFormatter(options) {
         function formatImgURL(imageURL) {
             var fileBaseName = path.basename(imageURL),
                 relativeImagePath = util.format('/images/pet/%s/', _options.species);
-            return path.join(config.domain, relativeImagePath, fileBaseName);
+            return url.resolve(config.domain, path.join(relativeImagePath, fileBaseName));
         }
 
         return imagesArr.map(formatImgURL);
