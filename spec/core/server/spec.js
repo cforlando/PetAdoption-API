@@ -212,33 +212,38 @@ _.forEach(speciesList, function (species) {
             var pageSize = 3;
 
             request(server.app)
-                .get(buildEndpoint('list', species, {value: 1, pageSize: pageSize}))
+                .get(buildEndpoint('list', species))
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
-                .expect(function (res) {
-                    if (!_.isArray(res.body)) throw new Error(sprintf("list/%s did not return array", species));
-                    if (res.body.length != pageSize) throw new Error(sprintf("list/%s return %s instead of %s pets", species, res.body.length, pageSize));
-                    if (res.body.length > 0) {
-                        _.forEach(res.body, function (petData, index) {
-                            if (petData['species'].val != species) throw new Error(sprintf("list/%s return a pet with incorrect species at index %s", species, index))
+                .end(function(err, fullListResponse){
+                    request(server.app)
+                        .get(buildEndpoint('list', species, {value: 1, pageSize: pageSize}))
+                        .set('Accept', 'application/json')
+                        .expect('Content-Type', /json/)
+                        .expect(function (paramedListResponse) {
+                            if (!_.isArray(paramedListResponse.body)) throw new Error(sprintf("list/%s did not return array", species));
+                            if (fullListResponse.body.length > pageSize && paramedListResponse.body.length != pageSize) throw new Error(sprintf("list/%s return %s instead of %s pets", species, paramedListResponse.body.length, pageSize));
+                            if (paramedListResponse.body.length > 0) {
+                                _.forEach(paramedListResponse.body, function (petData, index) {
+                                    if (petData['species'].val != species) throw new Error(sprintf("list/%s return a pet with incorrect species at index %s", species, index))
+                                })
+                            }
+                            if (species == 'dog') {
+                                if (!(paramedListResponse.body.length > 0)) throw new Error("list/dog/ did not return any results")
+                            }
                         })
-                    }
-                    if (species == 'dog') {
-                        if (!(res.body.length > 0)) throw new Error("list/dog/ did not return any results")
-                    }
+                        .expect(200, buildJasmineCallback(done))
                 })
-                .expect(200, buildJasmineCallback(done))
-        })
+        });
 
         it("returns only request parameters when 'properties' key provided", function(done){
-            var properties = ['species','petName', 'sex', 'age'];
+            var properties = ['species','petName', 'intakeDate'];
             request(server.app)
                 .get(buildEndpoint('list', species, {properties: properties}))
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
                 .expect(function (res) {
                     if (!_.isArray(res.body)) throw new Error(sprintf("list/%s did not return array", species));
-                    // if (res.body.length != pageSize) throw new Error(sprintf("list/%s return %s instead of %s pets", species, res.body.length, pageSize));
                     if (res.body.length > 0) {
                         var expectedNumOfProperties = properties.length;
                         _.forEach(res.body, function (petData, index) {
@@ -295,7 +300,7 @@ _.forEach(speciesList, function (species) {
             queryProps[propName] = getRandomOption(propData);
 
             it("returns only request parameters when 'properties' key provided", function(done){
-                var properties = ['species','petName', 'sex', 'age'],
+                var properties = ['species','petName'],
                     queryWithProperties = _.extend({}, queryProps, {properties: properties});
                 request(server.app)
                     .post(buildEndpoint('query'))
@@ -311,8 +316,9 @@ _.forEach(speciesList, function (species) {
                             _.forEach(res.body, function (petData, index) {
                                 var speciesRegex = new RegExp(escapeRegExp(petData['species'].val), 'i');
                                 if (!speciesRegex.test(species)) throw new Error(sprintf("query w/ properties return a pet with incorrect species (%s != %s) at index %s",petData['species'].val, species, index));
-                                var numOfProperties = Object.keys(petData).length;
-                                if (numOfProperties != expectedNumOfProperties) throw new Error(sprintf("Received incorrect number of properties %s != %s", numOfProperties, expectedNumOfProperties))
+                                var keys = Object.keys(petData),
+                                    numOfProperties = keys.length;
+                                if (numOfProperties != expectedNumOfProperties) throw new Error(sprintf("Received incorrect number of properties %s != %s (%s)", numOfProperties, expectedNumOfProperties, keys))
                             })
                         }
                     })

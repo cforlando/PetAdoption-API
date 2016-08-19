@@ -22,7 +22,7 @@ function sanitizeTestDataCSV(csvData) {
     console.log('sanitizing dataset');
 
     // imagesPath could be url such http://server.com/images/ (url must have trailing slash)
-    var imagesPath = '/images/pet',
+    var imagesPath = '/images/pet/dog/',
         animalData,
         fieldName,
         pets = [],

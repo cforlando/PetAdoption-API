@@ -18,13 +18,10 @@ module.exports = {
     },
     parseArrayStr : function(str){
         try {
-            // var _result = JSON.parse(str);
-            // console.log('result', _result);
             var _result = str
                 .substr(1, (str.length - 2))
                 .replace(/[\'\"]/g, '')
                 .split(',');
-            // console.log('parsing array %s', str);
             return (_.isArray(_result)) ? _result : false;
         } catch (err){
 

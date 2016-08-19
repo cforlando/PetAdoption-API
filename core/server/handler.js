@@ -216,14 +216,36 @@ function ServerHandler() {
 
     this.onResetRequest = function (req, res, next) {
 
-        csvReader.parseSchema({
-            readPath: [
-                path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Cats.csv'),
-                path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Dogs.csv')
-            ],
-            cache: true,
-            done: onSchemaParsed
+        async.each(cachedSpeciesList, function each(species, onSpeciesDeleted) {
+
+            database.findAnimals({species: species}, {
+                complete: function (err, pets) {
+                    async.each(pets, function each(pet, onPetDeleted) {
+                        database.removeAnimal(pet.species.val, {
+                            petId: pet.petId.val
+                        }, {
+                            complete: function (err) {
+                                onPetDeleted(err);
+                            }
+                        })
+                    }, function complete(err) {
+                        onSpeciesDeleted(err);
+                    })
+
+                }
+            });
+        }, function complete(err) {
+            if (err) return next(err);
+            csvReader.parseSchema({
+                readPath: [
+                    path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Cats.csv'),
+                    path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Dogs.csv')
+                ],
+                cache: true,
+                done: onSchemaParsed
+            });
         });
+
 
         function onSchemaParsed() {
             csvReader.parseModel({

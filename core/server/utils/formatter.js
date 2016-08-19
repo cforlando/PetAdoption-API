@@ -67,7 +67,7 @@ function ModelFormatter(options) {
     };
 
     this._saveAnimal = function (animalProps, options) {
-        var _options = _.extend({}, options),
+        var _options = _.defaults(options, {}),
             reducedModel = {};
 
         _.forEach(animalProps, function (propData, propName) {
@@ -92,19 +92,19 @@ function ModelFormatter(options) {
             switch (propName) {
                 case 'images':
                     var images = (animalProps[propName] && _.isArray(animalProps[propName].val)) ? animalProps[propName].val : (propData.defaultVal || propData.example);
-                    propData.val = self.formatImagesArray(images);
+                    propData.val = self.formatImagesArray(images, {species: species});
                     animalProps[propName] = propData;
                     break;
                 case 'species':
-                    animalProps[propName] = _.extend({}, animalProps[propName] || propData, {val: species});
+                    animalProps[propName] = _.defaults( {val: species}, animalProps[propName] || propData);
                     break;
                 default:
                     if (formatterOptions.createMissingFields){
                         // assign values for all possible fields
-                        animalProps[propName] = _.extend({}, propData, animalProps[propName]);
+                        animalProps[propName] = _.defaults(animalProps[propName], propData);
                     } else if (animalProps[propName]) {
                         // assign values for only currently assigned fields
-                        _.extend({}, propData, animalProps[propName])
+                        _.defaults(animalProps[propName], propData)
                     }
                     if (formatterOptions.populateEmptyFields && _.isUndefined(animalProps[propName].val)) {
                         // chose a random value for a field
@@ -115,10 +115,13 @@ function ModelFormatter(options) {
         return animalProps;
     };
 
-    this.formatImagesArray = function (imagesArr) {
+    this.formatImagesArray = function (imagesArr, options) {
+        var _options = _.defaults({species : 'dog'}, options);
         console.log("formatting %s images", imagesArr.length);
         function formatImgURL(imageURL) {
-            return (/^http:/.test(imageURL)) ? imageURL : url.resolve(config.domain, imageURL);
+            var fileBaseName = path.basename(imageURL),
+                relativeImagePath = util.format('/images/pet/%s/', _options.species);
+            return path.join(config.domain, relativeImagePath, fileBaseName);
         }
 
         return imagesArr.map(formatImgURL);

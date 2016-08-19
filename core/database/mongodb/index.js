@@ -289,6 +289,7 @@ function MongoDB(instanceOptions) {
                 })(queryProps)
             },
             schema = self.schemasCollection[sanitizedQueryProps.species];
+        console.log('using species: %s', sanitizedQueryProps.species);
         if (queryProps['petId']) {
             sanitizedQueryProps['_id'] = "000000000000000000000000";
             if (/^[0-9a-fA-F]{24}$/.test(queryProps['petId'])) {

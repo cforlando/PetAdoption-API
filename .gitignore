@@ -1,7 +1,13 @@
 TODO
 tmp/*
 !tmp/*.csv
-public/images/*
+public/images/*.*
+!public/images/placeholder.jpg
+public/images/pet/cat/*.*
+!public/images/pet/cat/placeholder.png
+public/images/pet/dog/*.*
+!public/images/pet/dog/placeholder.png
+public/images/pet/*.*
 !public/images/ajax-loader.gif
 ssl/*.crt
 ssl/*.key

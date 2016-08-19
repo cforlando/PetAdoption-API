@@ -20,6 +20,8 @@ var fs = require('fs'),
     _options = {
         pageSize: 10,
         publicDir: path.resolve(process.cwd(), 'public/'),
+        placeholderCatImg: path.resolve(process.cwd(), 'public/images/pet/cat/placeholder.png'),
+        placeholderDogImg: path.resolve(process.cwd(), 'public/images/pet/dog/placeholder.png'),
         placeholderImg: path.resolve(process.cwd(), 'public/images/placeholder.jpg')
     };
 
@@ -140,7 +142,13 @@ server.app.use(function (req, res, next) {
     if (/.(jpg|png)/i.test(req.path)) {
         fs.access(path.resolve(_options.publicDir, req.path), function (err) {
             if (err) {
-                res.sendFile(_options.placeholderImg);
+                if (req.path.match(/dog/i)){
+                    res.sendFile(_options.placeholderDogImg);
+                } else if(req.path.match(/cat/i)){
+                    res.sendFile(_options.placeholderCatImg);
+                } else {
+                    res.sendFile(_options.placeholderImg);
+                }
             } else {
                 next();
             }
