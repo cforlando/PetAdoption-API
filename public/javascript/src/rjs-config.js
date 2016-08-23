@@ -10,6 +10,7 @@ var require = require.config({
         "underscore": "vendors/lodash",
         "moment": "vendors/moment",
         "jquery-slick" : "vendors/slick/slick/slick",
+        "async" : "vendors/async/dist/async",
         'ngApp': 'modules/ngApp',
         "jquery": "vendors/jquery",
         "angular": "vendors/angular",

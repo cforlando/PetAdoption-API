@@ -40,7 +40,7 @@ body {
 
 .main-layout {
 
-  > md-content {
+  > .main-content {
     overflow-y: auto;
     overflow-x: hidden;
   }
@@ -48,6 +48,28 @@ body {
 
 a {
   color: #00B7FF
+}
+
+.pet-list {
+  .checkbox{
+    position absolute
+    left 1em
+    top 1em
+    z-index 1
+  }
+
+  .tile-footer{
+    cursor pointer
+  }
+  //.pet-list-menu {
+  //  position absolute
+  //  bottom 1em
+  //  right 1em
+  //}
+}
+
+.invisible-container {
+  visibility hidden
 }
 
 .nav-menus {

@@ -1,0 +1,304 @@
+
+block($selector)
+  $block-selector = $selector
+  unless typeof($selector) == 'string'
+    $block-selector = "%s" % $selector;
+  unless match('^\.', $block-selector)
+    $block-selector = '.' + $block-selector
+  {$block-selector}
+    {block}
+
+
+modifier($modifier)
+  $modifier-selector-part = $modifier
+  unless typeof($modifier) == 'string'
+    $modifier-selector-part = s('%s',$modifier);
+  &--{$modifier-selector-part}
+    {block}
+
+element($element, $depth=-2)
+  $element-selector-part = $element
+  unless typeof($element) == 'string'
+    $element-selector-part = "%s" % $element
+  $parent = s("& ^[%s..%s]", $depth, $depth)
+  {$parent}
+    &__{$element-selector-part}
+      {block}
+
+overlay-before($bg-property = rgba(0, 0, 0, 0.5), $has-content = true) {
+  $bg-property-type = typeof($bg-property);
+  position: relative;
+  &:before {
+    content: ""
+    position: absolute;
+    if ($bg-property-type == "color") {
+      background-color: $bg-property;
+    }
+    else if ($bg-property-type == "literal") {
+      background-image($bg-property);
+    }
+    else {
+      background($bg-property);
+    }
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: block;
+    background-position center;
+  }
+
+  {block}
+
+  if ($has-content == true) {
+    > * {
+      position: relative;
+    }
+  }
+}
+
+overlay-after($bg-property = rgba(0, 0, 0, 0.5), $has-content = true) {
+  $bg-property-type = type_of($bg-property)
+  position: relative;
+
+  &:after {
+    content: ""
+    position: absolute;
+    if ($bg-property-type == "color") {
+      background-color: $bg-property;
+    } else {
+      background($bg-property)
+      //TODO clean up fallback method for when background is not a gradient/image
+      background-image-support($bg-property);
+      background-position center;
+      bottom: 0;
+      display: block;
+      left: 0;
+      right: 0;
+      top: 0;
+    }
+
+    {block}
+
+    if ($has-content == true) {
+      > * {
+        position: relative;
+        z-index: 1;
+      }
+    }
+
+  }
+}
+
+cut-outer-paragraph-margin() {
+  p {
+    &:first-child {
+      margin-top: 0;
+    }
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+cut-outer-margin($direction = vertical) {
+  if $direction == vertical {
+    &:first-child {
+      margin-top: 0;
+    }
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  else {
+    &:first-child {
+      margin-left: 0;
+    }
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+cut-outer-type-margin($direction = vertical) {
+  if $direction == vertical {
+    &:first-of-type {
+      margin-top: 0;
+    }
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+  } else {
+    &:first-of-type {
+      margin-left: 0;
+    }
+    &:last-of-type {
+      margin-right: 0;
+    }
+  }
+}
+
+cut-outer-padding($direction = vertical) {
+  if $direction == vertical {
+    &:first-child {
+      padding-top: 0;
+    }
+    &:last-child {
+      padding-bottom: 0;
+    }
+  } else {
+    &:first-child {
+      padding-left: 0;
+    }
+    &:last-child {
+      padding-right: 0;
+    }
+  }
+}
+
+cut-outer-type-padding($direction = vertical) {
+  if ($direction == vertical) {
+    &:last-of-type {
+      padding-bottom: 0;
+    }
+    &:first-of-type {
+      padding-top: 0;
+    }
+  } else {
+
+    &:first-of-type {
+      padding-top: 0;
+    }
+    &:last-of-type {
+      padding-bottom: 0;
+    }
+  }
+}
+
+image-placeholder-support($size = 'cover', $background-image = false) {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: $size;
+  if ($background-image) {
+    background-image: $background-image;
+  }
+  {block}
+}
+
+image-placeholder($size= cover, $background-image= false) {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: unquote($size);
+  if ($background-image) {
+    background-image: $background-image;
+  }
+  {block}
+}
+
+align-child($selector = ".hero-content", $valign = middle) {
+  display: table;
+  width: 100%;
+  {selector($selector)} {
+    display: table-cell;
+    vertical-align: $valign;
+  }
+}
+
+centered-block($max-width = auto) {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  if ($max-width != auto) {
+    max-width: $max-width;
+    width: 100%;
+  }
+}
+
+centered-spaced-block($margin-vertical = 0, $max-width = 960px) {
+  display: block;
+  margin: $margin-vertical auto;
+  max-width: $max-width;
+}
+
+
+inline-block-img-parent($max-width, $height) {
+  display: inline-block;
+  if(unit($max-width) == 'em'){
+    max-width: $max-width;
+  } else {
+    max-width: em-auto($max-width);
+  }
+  width: 100%;
+}
+
+inline-block-img-child($width, $height, $src) {
+  display: block;
+  height: 0;
+  margin: 0 auto;
+  $height-percentage = (100% * remove-unit($height)/remove-unit($width))
+  padding-bottom: $height-percentage;
+  position: relative;
+  width: 100%;
+  background $src center no-repeat;
+  background-size: 100% 100%;
+}
+
+
+default-transition() {
+  if ( length(arguments) > 1) {
+    transition-property:  unquote(join(', ', arguments));
+  } else {
+    transition-property: arguments;
+  }
+  transition-duration: $duration-transition-default-ms;
+  transition-timing-function: $timing-transition-default;
+}
+
+short-transition() {
+  if ( length(arguments) > 1) {
+    transition-property:  unquote(join(', ', arguments));
+  } else {
+    transition-property: arguments;
+  }
+  transition-duration: $duration-transition-short-ms;
+  transition-timing-function: $timing-transition-default;
+}
+
+long-transition() {
+  if ( length(arguments) > 1) {
+    transition-property: unquote(join(', ', arguments));
+  } else {
+    transition-property: arguments;
+  }
+  transition-duration: $duration-transition-long-ms;
+  transition-timing-function: $timing-transition-default;
+}
+
+custom-heading-size($base-heading = h3, $adjusted-font-size = 40) {
+  $heading_ratios = { 'h1' : 2, 'h2' : 1.5, 'h3' : 1.17, 'h4' : 1.12, 'h5' : .83, 'h6' : .75 };
+  $adjustment = (em-auto(px($adjusted-font-size)) / $heading_ratios[$base-heading] * 1em);
+  for $heading-size, $font-ratio in $heading_ratios {
+    & {$heading-size} {
+      font-size: 1em * $adjustment *  $font-ratio;
+    }
+  }
+}
+
+placeholder() {
+  &::-webkit-input-placeholder {
+    {block}
+  }
+
+  &:-moz-placeholder { /* Firefox 18- */
+    {block}
+  }
+
+  &::-moz-placeholder { /* Firefox 19+ */
+    {block}
+  }
+
+  &:-ms-input-placeholder {
+    {block}
+  }
+}
+

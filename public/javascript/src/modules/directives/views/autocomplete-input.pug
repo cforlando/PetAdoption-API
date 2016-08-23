@@ -1,9 +1,10 @@
-include helpers/_-all
+include _auto-generated/_-all
 .input.input--text
     -
         var attrs = {
             "md-search-text": "propData.val",
             "md-search-text-change" : "saveValue()",
+            "md-selected-item-change" : "saveValue()",
             "md-items": "option in propData.options | filter:propData.val",
             "placeholder": "propData.example",
             "md-min-length" : 0,

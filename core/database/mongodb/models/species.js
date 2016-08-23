@@ -12,7 +12,7 @@ function Species(modelName, propsSchema, options) {
         schemaNamespace: 'dog'
     });
 
-    this.modelName = modelName || 'cat';
+    this.modelName = modelName || 'dog';
 
     this.propsSchema = propsSchema || (function () {
             try {
@@ -69,7 +69,7 @@ Species.prototype.buildPropSchema = function (propData, propName) {
         isArrayProp = false;
 
     if (!propType) {
-        console.log(" can't parse %s", propName);
+        console.warn(" can't parse %s", propName);
         return false; // ignore invalid props
     }
     if (_.isArray(propType)) {
@@ -86,9 +86,6 @@ Species.prototype.buildPropSchema = function (propData, propName) {
             if (propName == 'petId') {
                 propType = String;
             } else if (/(Lat|Lon)$/.test(propName)) {
-                isArrayProp = true;
-                propType = Number;
-            } else {
                 propType = Number;
             }
             break;
@@ -151,7 +148,6 @@ Species.prototype.initSchema = function () {
 
 Species.prototype.build = function () {
     if (!this.schema) this.buildSchema();
-    console.log('building schema - %s', this.modelName);
     return mongoose.model(this.modelName, this.schema)
 };
 

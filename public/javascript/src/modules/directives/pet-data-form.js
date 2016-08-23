@@ -12,53 +12,9 @@ define([
             restrict: 'C',
             template : require('text!./views/pet-form.html'),
             replace : true,
-            controller: ['$scope', '$element', '$http', 'dataParserService',
-                function ($scope, $element, $http, dataParserService) {
-                    console.log("$scope: %o", $scope);
-
-
-                    
-                    $scope.getSpeciesList(function(){
-                        $scope.setField('species', _.extend({}, $scope.petData.species, {val : $scope.speciesList[0]}))
-                    });
-
-                    $scope.isSelectInput = function(propData){
-                        switch(propData.key){
-                            case 'species':
-                                return true;
-                                break;
-                            default:
-                                return (propData.valType == "Boolean")
-                        }
-                    };
-
-                    $scope.isDateField = function(propData){
-                        return (propData.valType == "Date")
-                    };
-
-                    $scope.isImagesField = function(propData){
-                        return (propData.valType == "[Image]")
-                    };
-
-                    $scope.isLocationField = function(propData){
-                        return (propData.valType == "Location")
-                    };
-
-                    $scope.isParagraphField = function(propData){
-                        return (propData.key == "description")
-                    };
-
-                    $scope.isAutocompleteField = function(propData){
-                        switch(propData.key){
-                            case 'petId':
-                            case 'description':
-                            case 'species':
-                                return false;
-                                break;
-                            default:
-                                return (propData.valType == "String")
-                        }
-                    };
+            controller: ['$scope', '$element', '$http', '$timeout', 'dataParserService',
+                function ($scope, $element, $http, $timeout, dataParserService) {
+                    console.log("petDataForm.$scope: %o", $scope);
 
                     /**
                      *
@@ -70,9 +26,11 @@ define([
                         $scope.properties = renderData;
                     }
 
-                    $scope.$on('update:petData', _.debounce(function(){
-                        updateProperties($scope.petData);
-                    }, 500));
+                    $scope.$on('update:petData', function(){
+                        $timeout(function(){
+                            updateProperties($scope.petData);
+                        });
+                    });
                 }]
         };
     });

@@ -20,21 +20,21 @@ Current API location: http://cfo-pet-adoption-server.eastus.cloudapp.azure.com/a
 
 Method  | Endpoint                               | Notes
 --------| -------------------------------------- | ----------------------------------------------------------------
-GET     | species/                               | JSON array of possible species
-GET     | options/:species                       | JSON of all preselected options for given species
-GET     | options/:species/:option               | JSON of given option for a given species
-GET     | options/:species/:option/:pageNumber   | JSON of given option for a given species in pages. Page size defaults to 10. This can be changed via query argument (i.e. "/options/dog/breed/1?pageSize=15")
-GET     | schema/:species                        | returns JSON representation of a schema. Currently includes dog and cat schema
 GET     | list/                                  | will show all saved species
 GET     | list/:species                          | ex: '/list/dog' will show all saved dog species
 GET     | list/:species/:pageNumber              | paginated route for list/:species endpoint
 GET     | model/:species                         | provides JSON of model layout and meta data for species
-POST    | save/                                  | fields will be saved as provided. Must match schema definition and should be of `multipart/form-data`. Responds with saved animal data
-POST    | save/json                              | fields will be saved as provided. Must match schema definition and should be of `application/json` Content-Type. Responds with saved animal data
-POST    | save/model                             | updates global model of pet in addition to saving data. Must match model format and should be of `application/json` Content-Type. Responds with saved animal data
+GET     | options/:species                       | JSON of all preselected options for given species
+GET     | options/:species/:option               | JSON of given option for a given species
+GET     | options/:species/:option/:pageNumber   | JSON of given option for a given species in pages. Page size defaults to 10. This can be changed via query argument (i.e. "/options/dog/breed/1?pageSize=15")
+GET     | schema/:species                        | returns JSON representation of a schema. Currently includes dog and cat schema
+GET     | species/                               | JSON array of possible species
 POST    | query/                                 | will match given parameters 
 POST    | query/:pageNumber                      | will match given parameters with paged results
-POST    | remove/                                | deletes pet as specified by `petId` or `petName`
+POST    | remove/:species                        | deletes pet as specified by `petId` or `petName`
+POST    | save/:species                          | fields will be saved as provided. Must match schema definition and should be of `multipart/form-data`. Responds with saved animal data
+POST    | save/:species/model                    | updates global model of pet in addition to saving data. Must match model format and should be of `application/json` Content-Type. Responds with saved animal data
+POST    | save/:species/json                     | fields will be saved as provided. Must match schema definition and should be of `application/json` Content-Type. Responds with saved animal data
 
 #### Queries
 
@@ -54,7 +54,7 @@ pageSize       | Number          | Defaults to 10 (only meaningful when making p
 Name           | Type            | Description
 ---------------| ----------------| ----------------------------------------------------------
 pageSize       | Number          | Defaults to 10 (only meaningful when making paged query) 
-properties     | (String) Array  | Will only supply fields specified in array. ex: `?properties=['species','petName','sex']`
+properties     | (String) Array  | Will only supply fields specified in array. ex: `?properties=['species','petName','sex']` (Must not include spaces between field names)
 
 
 ###### More Notes
@@ -63,7 +63,11 @@ properties     | (String) Array  | Will only supply fields specified in array. e
 
 ## Tests
 
-***TODO** More tests needed
+Execute `npm run test`
+
+#####TODO*
+- [ ] More tests needed
+- [ ] stub database should be used
 
 
 ## Developer Notes

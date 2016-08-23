@@ -3,6 +3,7 @@ var util = require('util'),
     _ = require('lodash'),
 
     config = require('../../../config'),
+    dbUtils = require('../utils'),
 
     Species = require('./species');
 
@@ -11,13 +12,13 @@ function Animal() {
 }
 Animal.prototype = Object.create(Species.prototype);
 
-Animal.prototype.formatPropType = function (propType, metaData){
-    if (metaData.isArray){
-        return  [propType];
-    } else if(metaData.isLoc){
+Animal.prototype.formatPropType = function (propType, metaData) {
+    if (metaData.isArray) {
+        return [propType];
+    } else if (metaData.isLoc) {
         return {
-            type : [Number],
-            index : '2dsphere'
+            type: [Number],
+            index: '2dsphere'
         }
     } else {
         return propType;
@@ -25,15 +26,21 @@ Animal.prototype.formatPropType = function (propType, metaData){
 };
 
 Animal.prototype.middleware = {
-    post : {
-        findOneAndUpdate : function(doc, next){
+    post: {
+        findOneAndUpdate: function (doc, next) {
             doc.petId = doc._id;
-            doc.save(function(err, savedDoc){
-                if(err) console.error(err);
-                next(err)
-            });
+            doc.update({
+                    _id: doc._id
+                },
+                doc,
+                function (err, savedDoc) {
+                    if (err) console.error(err);
+                    next(err)
+                }
+            );
         }
     }
-};
+}
+;
 
 module.exports = Animal;

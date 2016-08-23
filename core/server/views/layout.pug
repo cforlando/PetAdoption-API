@@ -3,8 +3,8 @@ html
     head
         title= title
         link(rel='stylesheet', href='/stylesheets/style.css')
-        link(rel='stylesheet', href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css")
-        link(href="https://fonts.googleapis.com/icon?family=Material+Icons", rel="stylesheet")
+        link(rel='stylesheet', href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css")
+        link(href="//fonts.googleapis.com/icon?family=Material+Icons", rel="stylesheet")
         meta(name="viewport", content="width=device-width, initial-scale=1")
         script(src="//maps.googleapis.com/maps/api/js")
         //script(src="./javascript/src/vendors/require.js")
@@ -34,12 +34,31 @@ html
                                     md-button(ng-click='refreshApp()') Refresh
                                 md-menu-item
                                     md-button(ng-click='syncShelterAddressMap()') Sync Shelter Address Map
-            md-sidenav(md-component-id="sidenav", data-animal-type="{{visiblePetType}}", md-is-open="sideNav.isOpen", class="list-side-nav md-sidenav-right")
-                md-list
-                    md-list-item.md-2-line(ng-repeat="pet in petList", ng-click='setPet(pet); sideNav.isOpen=!sideNav.isOpen;')
-                        .md-list-item-text
-                            h3!="{{pet.petName.val || pet.petId.val || 'n/a'}}"
-            md-content
+            md-sidenav(md-component-id="sidenav", md-is-open="sideNav.isOpen", class="list-side-nav md-sidenav-right")
+                .pet-list(ng-controller="petBatchDataController")
+                    md-tabs(md-selected="petList.currentSpeciesIndex", md-dynamic-height, md-border-bottom, md-autoselect, md-stretch-tabs)
+                        md-tab(ng-repeat="species in speciesList", label="{{species}}")
+                            md-grid-list(md-row-height="1:1", md-cols!="2")
+                                md-grid-tile(ng-repeat="pet in petList[species]", ng-style="{ 'background': 'url('+pet.images.val[0]+')', 'background-size': 'cover' }")
+                                    md-checkbox.checkbox(ng-model!="selectedPetsIndexCollection[species+$index]", ng-change="updatePetSelection(species+$index, pet)", aria-label="selected?")
+                                    md-grid-tile-footer.tile-footer(ng-click='loadPet(pet); sideNav.isOpen=!sideNav.isOpen;')
+                                        h3!="{{pet.petName.val || pet.petId.val || 'n/a'}}"
+                            md-fab-speed-dial.md-fab-bottom-right.md-scale.pet-list-menu(ng-show="isBatchEditActive()", md-direction="up", md-open="isPetListMenuOpen", ng-click="togglePetListMenu()")
+                                md-fab-trigger
+                                    md-button.md-fab
+                                        md-icon.material-icons menu
+                                md-fab-actions
+                                    md-button.md-fab.md-mini.md-raised(ng-click="batchEdit($event)")
+                                        md-icon.material-icons edit
+                    .invisible-container
+                        #batch-edit-dialog.md-dialog-container()
+                            md-dialog(aria-label="Batch Edit dialog")
+                                md-toolbar
+                                    .md-toolbar-tools
+                                        h2 Batch Edit
+                                md-dialog-content(layout-padding)
+                                    .pet-data-form(ng-if="isBatchEditActive()")
+            md-content.main-content
                 block content
                 .layout.fab-anchor(layout='row')
                     md-fab-speed-dial.md-fab-bottom-right.md-scale(md-direction="up", md-open="fab.isOpen", ng-click="toggleFAB()")

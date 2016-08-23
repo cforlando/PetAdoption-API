@@ -17,11 +17,15 @@ var domain = require('../../../core/config').domain,
     sprintf = util.format,
     speciesList = ['dog', 'cat'];
 
+function isValidID(petId) {
+    return /^[0-9a-fA-F]{24}$/.test(petId)
+}
+
 function escapeRegExp(str) {
     return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
 
-function getRandomOption(propData) {
+function getRandomOptionValue(propData) {
     var options = propData.options,
         result;
     if (options && options.length > 0) {
@@ -30,6 +34,16 @@ function getRandomOption(propData) {
         return result;
     }
     result = propData.example || propData.defaultVal;
+    switch (propData.valType) {
+        case 'Location':
+        case 'Number':
+            result = parseFloat(result);
+            break;
+        case 'Date':
+            result = new Date(result);
+            break;
+        default:
+    }
     if (result === null || result === undefined) throw new Error(sprintf("Cannot generate test option for '%s'", propData.key));
     return result;
 }
@@ -61,6 +75,8 @@ function buildEndpoint(operation, species, options) {
         case 'list':
         case 'query':
         case 'model':
+        case 'save':
+        case 'remove':
         case 'options':
             endpoint = path.join(base, '/' + operation);
             break;
@@ -102,8 +118,10 @@ describe("Test functions", function () {
     describe("buildEndpoint", function () {
 
         it("returns correct values", function () {
-            expect(buildEndpoint('model', 'dog')).toMatch("/api/v1/model/dog");
-            expect(buildEndpoint('options', 'dog')).toMatch("/api/v1/options/dog");
+            expect(buildEndpoint('save', 'cat')).toMatch(/^\/api\/v1\/save\/cat\/?$/);
+            expect(buildEndpoint('remove', 'cat')).toMatch(/^\/api\/v1\/remove\/cat\/?$/);
+            expect(buildEndpoint('model', 'dog')).toMatch(/^\/api\/v1\/model\/dog\/?$/);
+            expect(buildEndpoint('options', 'dog')).toMatch(/\/api\/v1\/options\/dog\/?$/);
             expect(buildEndpoint('query')).toMatch(/^\/api\/v1\/query\/?$/);
             expect(buildEndpoint('list', 'dog')).toMatch(/^\/api\/v1\/list\/dog\/?$/);
             expect(buildEndpoint('list', 'dog', {pageSize: 5})).toMatch(/^\/api\/v1\/list\/dog\?pageSize=5$/);
@@ -113,46 +131,45 @@ describe("Test functions", function () {
             })).toMatch(/^\/api\/v1\/list\/dog\/2\?pageSize=5$/);
             expect(buildEndpoint('list', 'dog', {
                 properties: ['species', 'propName']
-            })).toEqual(sprintf('/api/v1/list/dog?properties=%s',encodeURIComponent("['species','propName']")));
+            })).toEqual(sprintf('/api/v1/list/dog?properties=%s', encodeURIComponent("['species','propName']")));
         })
     })
 });
 
 
-
 _.forEach(speciesList, function (species) {
 
-    describe("V1 format", function(){
+    describe("V1 format", function () {
         var speciesTestModel = modelsData[species];
-        it(sprintf("returns metaData for %s property values", species), function(done){
+        it(sprintf("returns metaData for %s property values", species), function (done) {
             request(server.app)
                 .get(buildEndpoint('list', species), {base: '/api/v2/'})
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
-                .expect(function(res){
-                    _.forEach(res.body, function(animalProps){
-                        _.forEach(animalProps, function(propData, propName){
+                .expect(function (res) {
+                    _.forEach(res.body, function (animalProps) {
+                        _.forEach(animalProps, function (propData, propName) {
                             var expectedNumOfKeys = _.keys(speciesTestModel[propName]).length,
                                 numOfKeys = _.keys(propData).length;
-                           if(!_.isPlainObject(propData)) throw new Error("a %s did not return an object for %s", species, propName);
-                            if(numOfKeys  <= expectedNumOfKeys) throw new Error(sprintf("a %s didn't return all meta info keys for %s (%s != %s)", species, propName, numOfKeys, expectedNumOfKeys))
+                            if (!_.isPlainObject(propData)) throw new Error("a %s did not return an object for %s", species, propName);
+                            if (numOfKeys <= expectedNumOfKeys) throw new Error(sprintf("a %s didn't return all meta info keys for %s (%s != %s)", species, propName, numOfKeys, expectedNumOfKeys))
                         });
                     })
                 })
                 .expect(200, buildJasmineCallback(done))
         })
     });
-    describe("V2 format", function(){
-        it(sprintf("only returns actual values for %s properties", species), function(done){
+    describe("V2 format", function () {
+        it(sprintf("only returns actual values for %s properties", species), function (done) {
             request(server.app)
                 .get(buildEndpoint('list', species, {base: '/api/v2/'}))
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
-                .expect(function(res){
+                .expect(function (res) {
                     var expectedNumOfKeys = 0;
-                    _.forEach(res.body, function(animalProps){
-                        _.forEach(animalProps, function(propData, propName){
-                            if(_.isPlainObject(propData))  throw new Error(sprintf("a %s returned an object for %s", species, propName))
+                    _.forEach(res.body, function (animalProps) {
+                        _.forEach(animalProps, function (propData, propName) {
+                            if (_.isPlainObject(propData))  throw new Error(sprintf("a %s returned an object for %s", species, propName))
                         });
                     })
                 })
@@ -215,7 +232,7 @@ _.forEach(speciesList, function (species) {
                 .get(buildEndpoint('list', species))
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
-                .end(function(err, fullListResponse){
+                .end(function (err, fullListResponse) {
                     request(server.app)
                         .get(buildEndpoint('list', species, {value: 1, pageSize: pageSize}))
                         .set('Accept', 'application/json')
@@ -236,8 +253,8 @@ _.forEach(speciesList, function (species) {
                 })
         });
 
-        it("returns only request parameters when 'properties' key provided", function(done){
-            var properties = ['species','petName', 'intakeDate'];
+        it("returns only request parameters when 'properties' key provided", function (done) {
+            var properties = ['species', 'petName'];
             request(server.app)
                 .get(buildEndpoint('list', species, {properties: properties}))
                 .set('Accept', 'application/json')
@@ -260,6 +277,76 @@ _.forEach(speciesList, function (species) {
         })
     });
 
+    var testPetDataWithIDSansSpecies = {
+            petName: 'erred pet',
+            age: '10 years',
+            petId: 'daskljfasdkljfasdasdf'
+        },
+        testPetData = {
+            petName: 'success pet',
+            species: species,
+            age: '10 years'
+        };
+
+    describe(sprintf("POST save/%s", species), function () {
+
+        it("returns an error when invalid petId provided", function (done) {
+
+            request(server.app)
+                .post(buildEndpoint('save', species))
+                .type('form')
+                .set('Accept', 'application/json')
+                .send(testPetDataWithIDSansSpecies)
+                .expect(404, buildJasmineCallback(done))
+        });
+    });
+
+    fdescribe(sprintf("POST save/%s/ and POST remove/%s/", species, species), function () {
+
+        it(sprintf("can save and delete a %s", species), function (done) {
+            request(server.app)
+                .post(buildEndpoint('save', species))
+                .type('form')
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .send(testPetData)
+                .expect(function (response) {
+                    var petId = response.body.petId.val;
+                    if (!isValidID(petId)) throw new Error(sprintf("Save %s produced an invalid id", species, petId));
+                    _.forEach(testPetData, function (propVal, propName) {
+                        var savedValue = response.body[propName].val;
+                        if (propVal != savedValue) throw new Error(sprintf("Pet data was incorrectly saved: %s(saved) != %s", savedValue, propVal))
+                    });
+                })
+                .end(function (err, savedPet) {
+
+                    request(server.app)
+                        .post(buildEndpoint('remove', species))
+                        .set('Accept', 'application/json')
+                        .expect('Content-Type', /json/)
+                        .send({
+                            species: species,
+                            petId: savedPet.body.petId.val
+                        })
+                        .expect(200, buildJasmineCallback(done))
+                })
+        })
+    });
+
+    describe(sprintf("POST remove/%s/", species), function () {
+
+        it(sprintf("returns error on invalid request to delete a %s", species), function (done) {
+            request(server.app)
+                .post(buildEndpoint('remove', species))
+                .send({
+                    species: species,
+                    petId: 'asdfa90sdfdsfajsdl'
+                })
+                .expect(404, buildJasmineCallback(done))
+        });
+
+    });
+
     describe("POST query/", function () {
         var speciesTestModel = _.omit(modelsData[species], ['petId', 'description', 'images']);
 
@@ -272,23 +359,27 @@ _.forEach(speciesList, function (species) {
                     _.forEach(queryProps, function (expectedValue, propName) {
 
                         // check if property exists
-                        if (_.isUndefined(animalProps[propName])) throw new Error(sprintf('(%s/%s) Received undefined value for "%s" (should be %s)', index, numOfPets, propName, expectedValue));
+                        if (_.isUndefined(animalProps[propName])) throw new Error(sprintf('(%s/%s) Received undefined actualValue for "%s" (should be %s)', index, numOfPets, propName, expectedValue));
 
-                        var value = animalProps[propName].val;
-                        // check if they are equal
-                        if (value == expectedValue) return;
+                        var actualValue = animalProps[propName].val;
 
-                        if (speciesTestModel[propName].valType == 'String') {
+                        if (speciesTestModel[propName].valType === 'String') {
                             // if a string check if they match regardless of case, (ie case of species)
                             var testRegex = new RegExp(escapeRegExp(expectedValue), 'i');
-                            if (testRegex.test(value)) return;
-                        } else if(speciesTestModel[propName].valType == 'Date'){
+                            if (testRegex.test(actualValue)) return;
+                        } else if (speciesTestModel[propName].valType === 'Date') {
                             var testDate = new Date(expectedValue),
-                                actualDate = new Date(value);
+                                actualDate = new Date(actualValue);
 
-                            if (actualDate.toISOString() == testDate.toISOString()) return;
-                        };
-                        throw new Error(sprintf('(%s/%s) Received incorrect match for "%s": %s != %s', index, numOfPets, propName, value, expectedValue));
+                            if (actualDate.toISOString() === testDate.toISOString()) return;
+                        } else if (actualValue == expectedValue) {
+                            // actualValues are equal
+                            return;
+                        } else if (actualValue.length && actualValue[0] == expectedValue[0]) {
+                            // actualValues are equal
+                            return;
+                        }
+                        throw new Error(sprintf('(%s/%s) Received incorrect match for "%s": %s(%s) != %s(%s)', index, numOfPets, propName, actualValue, util.inspect(actualValue, {colors: true}), expectedValue, util.inspect(expectedValue, {colors: true})));
                     });
                 })
             }
@@ -297,11 +388,11 @@ _.forEach(speciesList, function (species) {
         _.forEach(speciesTestModel, function (propData, propName) {
             var queryProps = {species: species};
 
-            queryProps[propName] = getRandomOption(propData);
+            queryProps[propName] = getRandomOptionValue(propData);
 
-            it("returns only request parameters when 'properties' key provided", function(done){
-                var properties = ['species','petName'],
-                    queryWithProperties = _.extend({}, queryProps, {properties: properties});
+            it("returns only request parameters when 'properties' key provided", function (done) {
+                var properties = ['species', 'petName'],
+                    queryWithProperties = _.defaults({properties: properties}, queryProps);
                 request(server.app)
                     .post(buildEndpoint('query'))
                     .set('Accept', 'application/json')
@@ -315,7 +406,7 @@ _.forEach(speciesList, function (species) {
                             var expectedNumOfProperties = properties.length;
                             _.forEach(res.body, function (petData, index) {
                                 var speciesRegex = new RegExp(escapeRegExp(petData['species'].val), 'i');
-                                if (!speciesRegex.test(species)) throw new Error(sprintf("query w/ properties return a pet with incorrect species (%s != %s) at index %s",petData['species'].val, species, index));
+                                if (!speciesRegex.test(queryProps['species'])) throw new Error(sprintf("query w/ properties return a pet with incorrect species (%s != %s) at index %s", petData['species'].val, queryProps['species'], index));
                                 var keys = Object.keys(petData),
                                     numOfProperties = keys.length;
                                 if (numOfProperties != expectedNumOfProperties) throw new Error(sprintf("Received incorrect number of properties %s != %s (%s)", numOfProperties, expectedNumOfProperties, keys))
@@ -341,7 +432,7 @@ _.forEach(speciesList, function (species) {
                 testProps = [];
 
             _.forEach(speciesTestModel, function (propData, propName) {
-                queryProps[propName] = getRandomOption(propData);
+                queryProps[propName] = getRandomOptionValue(propData);
                 testProps.push(_.extend({}, queryProps));
             });
 
@@ -363,7 +454,7 @@ _.forEach(speciesList, function (species) {
         describe("when ignoreCase flag is set", function () {
             _.forEach(speciesTestModel, function (propData, propName) {
                 var queryProps = {species: species, ignoreCase: [propName]},
-                    randOption = getRandomOption(propData);
+                    randOption = getRandomOptionValue(propData);
 
                 //skip non-string values
                 if (!_.isString(randOption)) return;

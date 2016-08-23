@@ -1,3 +1,6 @@
 [submodule "public/javascript/src/vendors/slick"]
 	path = public/javascript/src/vendors/slick
 	url = https://github.com/kenwheeler/slick.git
+[submodule "public/javascript/src/vendors/async"]
+	path = public/javascript/src/vendors/async
+	url = https://github.com/caolan/async.git

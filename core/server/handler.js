@@ -288,9 +288,9 @@ function ServerHandler() {
             async.forEachOfSeries(petCollection,
                 function each(petData, petIndex, done) {
                     console.log('saving pet %j', petData);
-                    database.saveAnimal(
-                        petData.species || 'dog',
-                        petData, {
+                    database.saveAnimal(petData.species || 'dog',
+                        petData,
+                        {
                             debug: config.debugLevel,
                             complete: function (err) {
                                 if (err) {
@@ -371,6 +371,7 @@ function ServerHandler() {
     this.onMediaSave = function (req, res, next) {
         console.log('onSaveMedia: %s-\n%s', dump(req.files), dump(req.body));
         var props = req.body;
+        props.images = props.images || '';
         props.images = props.images.split(',');
         _.forEach(req.files, function (fileMeta, index) {
             props.images.push(path.join(_options.paths.images, fileMeta.filename));

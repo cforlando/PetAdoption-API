@@ -97,7 +97,7 @@ function MongoDB(instanceOptions) {
     };
 
     this.schemasCollection = this.localData.schemas;
-
+    this.schemasCollection.user = require('./schemas/user');
 
     this.modelsCollection = {
         // init without any species models
@@ -109,6 +109,8 @@ function MongoDB(instanceOptions) {
     this.ModelDoc = {
         // init without any databases to search from
     };
+
+    this.UserDoc = {};
 
     this._connect = function (callback, options) {
         this.state.isConnecting = true;
@@ -127,52 +129,13 @@ function MongoDB(instanceOptions) {
 
             if (config.debugLevel > config.DEBUG_LEVEL_LOW) console.log('Running in %s mode.', (self.config.isDevelopment) ? 'dev' : 'production');
 
+            self._initUserDoc();
+
             async.each(self.config.petTypes,
                 function each(petType, done) {
-                    // init animals db document for given petType
-                    /*
-                     self.AnimalDatabases[petType] = mongoose.model(petType, new mongoose.Schema(self.schemasCollection[petType]), self.metaInfo.dbName);
-                     */
-                    var Animal = require('./models/animal');
-                    self.AnimalDoc[petType] = new Animal(petType, self.schemasCollection[petType]);
-
-                    // init given petType's model db document
-                    /*
-                     var animalModelSchema = dbUtils.buildModelSchema(self.schemasCollection[petType]);
-                     self.ModelDatabases[petType] = mongoose.model(util.format('%s-model', petType), new mongoose.Schema(animalModelSchema), self.metaInfo.docNames[petType]);
-                     */
-                    var Species = require('./models/species');
-                    self.ModelDoc[petType] = new Species(util.format('%s-species', petType), self.schemasCollection[petType]);
-
-                    // find last saved model
-                    self.ModelDoc[petType].find({})
-                        .sort({timestamp: -1})
-                        .limit(1)
-                        .exec(function (err, foundAnimalModels) {
-                            if (err || foundAnimalModels.length == 0 || _options.loadFromLocalFile) {
-                                // use local hardcoded version
-                                console.warn('creating new %s model', petType);
-
-                                var hardcodedAnimalModel = self.localData.models;
-                                self.modelsCollection[petType] = hardcodedAnimalModel[petType];
-                                self.modelsCollection[petType]['timestamp'] = new Date();
-
-                                self.ModelDoc[petType].create(self.modelsCollection[petType], function (createError, newlySavedAnimalModel) {
-                                    if (createError) {
-                                        console.log('%s', util.inspect(createError, {depth: null}));
-                                        done(createError);
-                                    } else {
-                                        self.modelsCollection[petType] = self._formatModelOutput(newlySavedAnimalModel);
-                                        done();
-                                    }
-                                });
-                            } else {
-                                self.modelsCollection[petType] = self._formatModelOutput(foundAnimalModels[0]); // foundAnimalModels is an array of 1 model due to the limit set in the query
-                                if (config.debugLevel >= config.DEBUG_LEVEL_MED) console.log('%s model initialization complete', petType);
-                                done();
-                            }
-                        });
-
+                    self._initSpeciesDocs(petType, {
+                        onInitializationComplete: done
+                    });
                 }, function complete(err) {
                     if (err) throw err;
                     self.state.isConnected = true;
@@ -223,6 +186,57 @@ function MongoDB(instanceOptions) {
         }
     };
 
+    /*
+     *
+     * @param {String} species
+     * @param {Object} [options]
+     * @param {Function} [options.onInitializationComplete]
+     */
+    this._initSpeciesDocs = function (species, options) {
+        var _options = _.defaults(options, {});
+        // init animals db document for given species
+        var Animal = require('./models/animal');
+        this.AnimalDoc[species] = new Animal(species, this.schemasCollection[species]);
+
+        // init given species's model db document
+        var Species = require('./models/species');
+        this.ModelDoc[species] = new Species(util.format('%s-species', species), this.schemasCollection[species]);
+
+        // find last saved model
+        this.ModelDoc[species].find({})
+            .sort({timestamp: -1})
+            .limit(1)
+            .exec(function (err, foundAnimalModels) {
+                if (err || foundAnimalModels.length == 0 || _options.loadFromLocalFile) {
+                    // use local hardcoded version
+                    console.warn('creating new %s model', species);
+
+                    var hardcodedAnimalModel = self.localData.models;
+                    self.modelsCollection[species] = hardcodedAnimalModel[species];
+                    self.modelsCollection[species]['timestamp'] = new Date();
+
+                    self.ModelDoc[species].create(self.modelsCollection[species], function (createError, newlySavedAnimalModel) {
+                        if (createError) {
+                            console.log('%s', util.inspect(createError, {depth: null}));
+                            _options.onInitializationComplete(createError);
+                        } else {
+                            self.modelsCollection[species] = self._formatModelOutput(newlySavedAnimalModel);
+                            _options.onInitializationComplete();
+                        }
+                    });
+                } else {
+                    self.modelsCollection[species] = self._formatModelOutput(foundAnimalModels[0]); // foundAnimalModels is an array of 1 model due to the limit set in the query
+                    if (config.debugLevel >= config.DEBUG_LEVEL_MED) console.log('%s model initialization complete', species);
+                    _options.onInitializationComplete();
+                }
+            });
+    };
+
+    this._initUserDoc = function () {
+        var User = require('./models/user');
+        this.UserDoc = new User('users', this.schemasCollection.user);
+    };
+
     /**
      * Builds search object from provided animalProps object. animalProps is an object of fields corresponding to one of the animal schemas
      * @param {Object} searchProps
@@ -241,8 +255,11 @@ function MongoDB(instanceOptions) {
                 case 'hashId':
                 case '_id':
                     // only use given id and quit early
-                    query = {'_id': propValue};
-                    console.log('searching by id: %s', propValue);
+                    query = {
+                        '_id': propValue,
+                        'species': query['species']
+                    };
+                    if (config.debugLevel >= config.DEBUG_LEVEL_LOW) console.log('searching by id: %s', propValue);
                     return false;
                 case 'species':
                     query[propName] = propValue;
@@ -289,10 +306,10 @@ function MongoDB(instanceOptions) {
                 })(queryProps)
             },
             schema = self.schemasCollection[sanitizedQueryProps.species];
-        console.log('using species: %s', sanitizedQueryProps.species);
+        if (!schema) return {};
         if (queryProps['petId']) {
             sanitizedQueryProps['_id'] = "000000000000000000000000";
-            if (/^[0-9a-fA-F]{24}$/.test(queryProps['petId'])) {
+            if (dbUtils.isValidID(queryProps['petId'])) {
                 // petId provided
                 sanitizedQueryProps['_id'] = queryProps['petId'];
             }
@@ -314,16 +331,14 @@ function MongoDB(instanceOptions) {
                 }
             }
         });
-        delete queryProps._id;
-        delete queryProps.petId;
         return _.defaults(sanitizedQueryProps, queryProps);
     };
 
 
     this._formatOutput = function (animalProps, options) {
-        var _options = _.defaults({
+        var _options = _.defaults(options, {
                 isV1Format: true
-            }, options),
+            }),
             sanitizedAnimalProps = {},
             model = self.modelsCollection[animalProps.species];
 
@@ -331,13 +346,12 @@ function MongoDB(instanceOptions) {
         // format to model structure
         _.forEach(model, function (propData, propName) {
             if (_.isUndefined(animalProps[propName])) return;
-            sanitizedAnimalProps[propName] = (_options.isV1Format) ? _.extend({}, model[propName], {
+            sanitizedAnimalProps[propName] = (_options.isV1Format) ? _.defaults({
                 val: animalProps[propName]
-            }) : animalProps[propName];
+            }, model[propName]) : animalProps[propName];
         });
-        sanitizedAnimalProps['petId'] = ((_options.isV1Format)) ? _.extend({}, model['petId'], {
-            val: animalProps['_id']
-        }) : animalProps['_id'];
+
+        sanitizedAnimalProps['petId'] = (_options.isV1Format) ? _.defaults({val: animalProps['_id']}, model['petId']) : animalProps['_id'];
 
         return sanitizedAnimalProps;
     };
@@ -345,6 +359,48 @@ function MongoDB(instanceOptions) {
     this._formatModelOutput = function (modelDoc) {
         var _model = (_.isFunction(modelDoc.toObject)) ? modelDoc.toObject() : modelDoc;
         return _.omit(_model, ['__v', '_id', 'timestamp'])
+    };
+
+    this.findUser = function (props, options) {
+        var _options = _.defaults(options, self.config.queryOptions);
+
+        this._exec(function () {
+            self.UserDoc.findOne({id: props.id || -1}, function (err, user) {
+
+                if (err) err.status = 404;
+                if (_options.debug >= config.DEBUG_LEVEL_MED) console.log('mongodb.findUser() - args: %s', util.inspect(arguments));
+                if (_options.complete) _options.complete.apply(_options.context, [err, user.toObject()]);
+            });
+
+        }, options)
+    };
+
+    this.saveUser = function (props, options) {
+        var _options = _.defaults(options, self.config.queryOptions);
+
+        this._exec(function () {
+            if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log("mongodb.saveUser() - received post for: ", props);
+
+            var user = new self.UserDoc(props),
+                userData = user.toObject();
+
+            delete userData._id;
+
+            self.AnimalDoc[species].findOneAndUpdate(
+                {id: user.id},
+                userData, {
+                    new: true,
+                    upsert: true
+                }, function (err, _user) {
+                    var user = {};
+                    if (err) {
+                        err.status = 404;
+                        console.error(err);
+                    }
+                    if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('saved and sending user: ', animal);
+                    if (_options.complete) _options.complete.apply(_options.context, [err, user.toObject()])
+                })
+        }, options);
     };
 
     /**
@@ -365,9 +421,12 @@ function MongoDB(instanceOptions) {
             self.AnimalDoc[species].remove({
                 _id: props.petId || props._id
             }, function (err, result) {
-                if (err) err.status = 404;
+                if (err || (result && result.n == 0)) {
+                    err = err || new Error("Could not delete pet");
+                    err.status = 404;
+                }
                 if (_options.debug >= config.DEBUG_LEVEL_MED) console.log('mongodb.removeAnimal() - args: %s', util.inspect(arguments));
-                if (_options.complete) _options.complete.apply(null, [err, {result: (result && result.n > 0) ? 'success' : 'failure'}]);
+                if (_options.complete) _options.complete.apply(null, [err, {result: (err) ? 'failure' : 'success'}]);
             })
         }, options);
     };
@@ -432,29 +491,46 @@ function MongoDB(instanceOptions) {
         var _options = _.defaults(options, self.config.queryOptions);
 
         this._exec(function () {
-            if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log("mongodb.saveAnimal() - received post for: ", props);
+            if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log("mongodb[%s].saveAnimal() - received post for: ", species, props);
 
             var animal = new self.AnimalDoc[species](props),
                 animalData = animal.toObject();
 
             delete animalData._id;
+            animalData.species = species;
+            if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log("mongodb[%s].saveAnimal() - searching for ID: ", species, animal.petId);
 
-            self.AnimalDoc[species].findOneAndUpdate(
-                {petId: animal.petId},
-                animalData, {
-                    new: true,
-                    upsert: true
-                }, function (err, _animal) {
-                    var animal = {};
+            if (!animalData.petId) {
+
+                self.AnimalDoc[species].create(animalData, function (err, animalDoc) {
+                    var formattedAnimalDoc = {};
                     if (err) {
                         err.status = 404;
                         console.error(err);
                     } else {
-                        animal = self._formatOutput(_animal._doc);
+                        formattedAnimalDoc = self._formatOutput(animalDoc.toObject());
                     }
-                    if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('saved and sending animal: ', animal);
-                    if (_options.complete) _options.complete.apply(_options.context, [err, animal])
+                    if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('saved and sending animal: ', formattedAnimalDoc);
+                    if (_options.complete) _options.complete.apply(_options.context, [err, formattedAnimalDoc])
                 })
+            } else {
+                self.AnimalDoc[species].findOneAndUpdate(
+                    {'_id': animalData.petId},
+                    animalData, {
+                        new: true,
+                        upsert: true
+                    }, function (err, animalDoc) {
+                        var formattedAnimalDoc = {};
+                        if (err) {
+                            err.status = 404;
+                            console.error(err);
+                        } else {
+                            formattedAnimalDoc = self._formatOutput(animalDoc.toObject());
+                        }
+                        if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('saved and sending animal: ', formattedAnimalDoc);
+                        if (_options.complete) _options.complete.apply(_options.context, [err, formattedAnimalDoc])
+                    })
+            }
         }, options);
     };
 
