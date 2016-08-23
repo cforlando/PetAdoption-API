@@ -191,16 +191,24 @@ function MongoDB(instanceOptions) {
      * @param {String} species
      * @param {Object} [options]
      * @param {Function} [options.onInitializationComplete]
+     * @param {String} [options.docNamePrefix]
      */
     this._initSpeciesDocs = function (species, options) {
-        var _options = _.defaults(options, {});
+        var _options = _.defaults(options, {
+            docNamePrefix :  (self.config.isDevelopment) ? 'dev' : 'prod'
+        });
+
         // init animals db document for given species
-        var Animal = require('./models/animal');
-        this.AnimalDoc[species] = new Animal(species, this.schemasCollection[species]);
+        var Animal = require('./models/animal'),
+            animalDocName = util.format('%s_%s', _options.docNamePrefix, species);
+
+        this.AnimalDoc[species] = new Animal(animalDocName, this.schemasCollection[species]);
 
         // init given species's model db document
-        var Species = require('./models/species');
-        this.ModelDoc[species] = new Species(util.format('%s-species', species), this.schemasCollection[species]);
+        var Species = require('./models/species'),
+            speciesDocName = util.format('%s_%s_species', _options.docNamePrefix, species);
+
+        this.ModelDoc[species] = new Species(speciesDocName, this.schemasCollection[species]);
 
         // find last saved model
         this.ModelDoc[species].find({})
@@ -215,15 +223,16 @@ function MongoDB(instanceOptions) {
                     self.modelsCollection[species] = hardcodedAnimalModel[species];
                     self.modelsCollection[species]['timestamp'] = new Date();
 
-                    self.ModelDoc[species].create(self.modelsCollection[species], function (createError, newlySavedAnimalModel) {
-                        if (createError) {
-                            console.log('%s', util.inspect(createError, {depth: null}));
-                            _options.onInitializationComplete(createError);
-                        } else {
-                            self.modelsCollection[species] = self._formatModelOutput(newlySavedAnimalModel);
-                            _options.onInitializationComplete();
-                        }
-                    });
+                    self.ModelDoc[species].create(self.modelsCollection[species], 
+                        function (createError, newlySavedAnimalModel) {
+                            if (createError) {
+                                console.log('%s', util.inspect(createError, {depth: null}));
+                                _options.onInitializationComplete(createError);
+                            } else {
+                                self.modelsCollection[species] = self._formatModelOutput(newlySavedAnimalModel);
+                                _options.onInitializationComplete();
+                            }
+                        });
                 } else {
                     self.modelsCollection[species] = self._formatModelOutput(foundAnimalModels[0]); // foundAnimalModels is an array of 1 model due to the limit set in the query
                     if (config.debugLevel >= config.DEBUG_LEVEL_MED) console.log('%s model initialization complete', species);
@@ -231,10 +240,18 @@ function MongoDB(instanceOptions) {
                 }
             });
     };
+    /*
+     * @param {Object} [options]
+     * @param {String} [options.docNamePrefix]
+     */
+    this._initUserDoc = function (options) {
+        var _options = _.defaults(options, {
+            docNamePrefix :  (self.config.isDevelopment) ? 'dev' : 'prod'
+        });
 
-    this._initUserDoc = function () {
-        var User = require('./models/user');
-        this.UserDoc = new User('users', this.schemasCollection.user);
+        var User = require('./models/user'),
+            userDocName = util.format("%s_users", _options.docNamePrefix);
+        this.UserDoc = new User(userDocName, this.schemasCollection.user);
     };
 
     /**

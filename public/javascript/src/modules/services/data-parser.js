@@ -82,7 +82,7 @@ define([
         this.convertToPetData = function (responseData) {
             var _data = {};
             _.forEach(responseData, function (propData, propName, props) {
-                if(!(propData.key)) return console.log('skipping %s => %o', propName, propData); // skip invalid properties
+                if(!(propData.key)) return console.log('skipping %s (%o)', propName, propData); // skip invalid properties
                 _data[propName] = _.extend({}, propData, {
                     val: parsePropValue(propData).val,
                     options: parsePropOptions(propData).options
@@ -92,42 +92,32 @@ define([
         };
 
         this.formatRenderData = function (model) {
-            var parsedData = {},
-                formattedData = {},
-                locationRegexResult,
-                locationFieldNames = [];
 
-            function preFilter() {
+            function parseModel(model) {
+                var parsedData = {},
+                    locationRegexResult,
+                    locationFieldNames = [];
+
                 _.forEach(model, function (propData, propName) {
                     locationRegexResult = /(.*)(Lat|Lon)$/.exec(propName);
                     if (locationRegexResult && locationRegexResult[2]) {
                         var baseFieldName = locationRegexResult[1],
                             baseFieldTypeName = locationRegexResult[2];
                         locationFieldNames.push(baseFieldName);
-                        parsedData[baseFieldName] = parsedData[baseFieldName] || {valType: 'Location'};
+                        parsedData[baseFieldName] = parsedData[baseFieldName] || {
+                            valType: 'Location',
+                            fieldLabel: baseFieldName
+                        };
                         parsedData[baseFieldName][baseFieldTypeName] = propData;
                     } else {
                         parsedData[propName] = propData;
                     }
                 });
+
+                return parsedData;
             }
 
-            function postFilter() {
-                _.forEach(parsedData, function (propData, propName) {
-                    var isLocationField = false,
-                        locationDetailFieldName ='';
-                    _.forEach(locationFieldNames, function (locationFieldName) {
-                        if (propName.indexOf(locationFieldName) >= 0 && locationFieldName != propName) {
-                            isLocationField = true;
-                            locationDetailFieldName = propName.substr(locationFieldName.length);
-                            formattedData[locationFieldName][locationDetailFieldName] = propData;
-                        }
-                    });
-                    if (!isLocationField)  formattedData[propName] = propData;
-                });
-            }
-
-            function sortFields(props) {
+            function sortRenderDataArray(props) {
                 return _.sortBy(props, function (propData) {
                     if (propData.key == 'petId') return 0;
                     if (propData.key == 'images') return 1;
@@ -136,12 +126,12 @@ define([
                 })
             }
 
-            preFilter();
-            postFilter();
-            var renderDataArray = Object.keys(formattedData).map(function (propName) {
-                    return formattedData[propName];
+            var renderData = parseModel(model),
+                renderDataArray = Object.keys(renderData).map(function (propName) {
+                    return renderData[propName];
                 }),
-                sortedRenderDataArray = sortFields(renderDataArray);
+                sortedRenderDataArray = sortRenderDataArray(renderDataArray);
+
             console.log('renderData: %o', sortedRenderDataArray);
             return sortedRenderDataArray;
         }

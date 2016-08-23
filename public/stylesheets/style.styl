@@ -1,104 +1,87 @@
 @charset "UTF-8";
-color-black = #000;
 @import "_slick"
 @import "_slick-theme"
 
-@keyframes fadeIn {
-  0% {
+color-black = #000;
+
+@keyframes fadeIn 
+  0% 
     opacity: 0;
-  }
-  100% {
+  
+  100% 
     opacity: 1;
-  }
-}
+  
 
-[ng-cloak] {
+
+[ng-cloak] 
   display: none;
-}
 
-.loading-text {
+
+.loading-text 
   position: absolute;
   left: 0;
   top: 240px;
   top: 50vh;
   top: calc(50vh - .5em);
   width: 100%;
-}
 
-body {
+
+body 
   animation: fadeIn 600ms ease;
   overflow hidden;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif
-
-  > md-progress-linear {
+  > md-progress-linear 
     position: fixed;
     top: 0;
     left: 0;
     z-index: 3;
-  }
-}
-
-.main-layout {
-
-  > .main-content {
+  
+.main-layout 
+  > .main-content 
     overflow-y: auto;
     overflow-x: hidden;
-  }
-}
-
-a {
+a 
   color: #00B7FF
-}
 
-.pet-list {
-  .checkbox{
+.pet-list 
+  .checkbox
     position absolute
     left 1em
     top 1em
     z-index 1
-  }
-
-  .tile-footer{
+  .tile-footer
     cursor pointer
-  }
-  //.pet-list-menu {
-  //  position absolute
-  //  bottom 1em
-  //  right 1em
-  //}
-}
 
-.invisible-container {
+.invisible-container 
   visibility hidden
-}
 
-.nav-menus {
+
+.nav-menus 
   text-align right
   align-self center
   flex-grow 1
   white-space no-wrap
-}
 
-.input--map {
+.input--map 
   margin: 18px auto;
-}
 
-.input {
+.input 
   display: block;
   margin-left: auto;
   margin-right: auto;
   width: calc(100% - 3em);
-
-  &--date {
+  &--date 
     width: "calc(100% - %s)" % em-auto(12);
-  }
-}
-
-.fab-anchor {
+  &__label
+    color: rgba(0, 0, 0, 0.54);
+    font-weight: normal;
+    margin: 0 auto;
+    width: calc(100% - 3em);
+  
+.fab-anchor 
   position: relative;
-}
 
-.material-icons {
+.material-icons 
   font-family: 'Material Icons';
   font-weight: normal;
   font-style: normal;
@@ -110,41 +93,31 @@ a {
   word-wrap: normal;
   white-space: nowrap;
   direction: ltr;
-
   /* Support for all WebKit browsers. */
   -webkit-font-smoothing: antialiased;
   /* Support for Safari and Chrome. */
   text-rendering: optimizeLegibility;
-
   /* Support for Firefox. */
   -moz-osx-font-smoothing: grayscale;
-
   /* Support for IE. */
   font-feature-settings: 'liga';
-}
 
-.google-maps {
+
+.google-maps 
   background-color: lighten(color-black, 25%);
-  height: 10em;
-}
+  height: 20em;
+  margin 0 auto
+  max-height: 33vh
+  max-width 36em;
 
-.date-label {
-  color: rgba(0, 0, 0, 0.54);
-  font-weight: normal;
-  margin: 0 auto;
-  width: calc(100% - 3em);
-}
-
-
-.gallery {
+.gallery 
   background lighten(#000, 25%)
   height 320px
   height 50vh
   overflow hidden;
   position relative
   box-shadow inset 0px -2px 16px -2px #000
-
-  .slide {
+  .slide 
     background-position center
     background-size cover
     background-repeat no-repeat
@@ -152,37 +125,27 @@ a {
     height 50vh
     position relative
     width 100%
-  }
-
-  .btn-remove {
+  .btn-remove 
     position absolute
     left em-auto(12)
     bottom em-auto(12)
     z-index 1
-  }
-
-  .btn-add {
+  .btn-add 
     position absolute
     right em-auto(12)
     bottom em-auto(12)
     z-index 1
-  }
-}
-
-.slider-upload-form {
+  
+.slider-upload-form 
   display none
-}
 
-.slick-slide{
-  img {
+.slick-slide
+  img 
     max-height 320px
     max-width 100%
     width auto
     height auto
-  }
-}
-
-.slick-dots {
+  
+.slick-dots 
   bottom auto
   top: em-auto(12);
-}

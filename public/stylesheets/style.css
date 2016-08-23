@@ -327,6 +327,12 @@ a {
 .input--date {
   width: calc(100% - 0.75em);
 }
+.input__label {
+  color: rgba(0,0,0,0.54);
+  font-weight: normal;
+  margin: 0 auto;
+  width: calc(100% - 3em);
+}
 .fab-anchor {
   position: relative;
 }
@@ -353,13 +359,10 @@ a {
 }
 .google-maps {
   background-color: #404040;
-  height: 10em;
-}
-.date-label {
-  color: rgba(0,0,0,0.54);
-  font-weight: normal;
+  height: 20em;
   margin: 0 auto;
-  width: calc(100% - 3em);
+  max-height: 33vh;
+  max-width: 36em;
 }
 .gallery {
   background: #404040;

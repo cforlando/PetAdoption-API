@@ -29,11 +29,7 @@ Animal.prototype.middleware = {
     post: {
         findOneAndUpdate: function (doc, next) {
             doc.petId = doc._id;
-            doc.update({
-                    _id: doc._id
-                },
-                doc,
-                function (err, savedDoc) {
+            doc.save(function (err, savedDoc) {
                     if (err) console.error(err);
                     next(err)
                 }

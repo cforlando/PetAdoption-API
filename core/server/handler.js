@@ -11,6 +11,8 @@ function ServerHandler() {
         database = require('../database'),
         csvReader = require('../csv-parser'),
         dump = require('../../lib/dump'),
+        
+        self = this,
         cachedSpeciesList = (function () {
             try {
                 var modelsDataStr = fs.readFileSync(path.resolve(process.cwd(), 'data/models.json')),
@@ -214,6 +216,100 @@ function ServerHandler() {
             })
     };
 
+    this.onJSONSave = function (req, res, next) {
+
+        database.saveAnimal(
+            req.params.species,
+            req.body, {
+                debug: config.debugLevel,
+                complete: function (err, newAnimal) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.locals.simplifiedFormat = false;
+                        res.locals.data = newAnimal;
+                        next();
+                    }
+                }
+            });
+    };
+
+    this.onMediaSave = function (req, res, next) {
+        console.log('onSaveMedia: %s-\n%s', dump(req.files), dump(req.body));
+        var props = req.body;
+        props.images = props.images || '';
+        props.images = props.images.split(',');
+        _.forEach(req.files, function (fileMeta, index) {
+            props.images.push(path.join(_options.paths.images, fileMeta.filename));
+        });
+        database.saveAnimal(
+            req.params.species,
+            props, {
+                debug: config.debugLevel,
+                complete: function (err, newAnimal) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.locals.simplifiedFormat = false;
+                        res.locals.data = newAnimal;
+                        next()
+                    }
+                }
+            });
+    };
+
+    this.onModelSave = function (req, res, next) {
+        database.saveModel(
+            req.params.species,
+            req.body, {
+                debug: config.debugLevel,
+                complete: function (err, newAnimal) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.locals.simplifiedFormat = false;
+                        res.locals.data = newAnimal;
+                        next();
+                    }
+                }
+            });
+
+    };
+
+
+    this.onFormatDBRequestSpecies = function (req, res, next) {
+
+        require('./utils').formatter.formatDB({
+            species: req.params.species,
+            complete: function (err) {
+                if (err) {
+                    next(err);
+                } else {
+                    res.send({result: 'success'})
+                }
+            }
+        })
+    };
+
+    this.onFormatDBRequestAll = function (req, res, next) {
+
+        async.each(cachedSpeciesList, function each(species, done) {
+            require('./utils').formatter.formatDB({
+                species: species,
+                complete: function (err) {
+                    done(err);
+                }
+            })
+        }, function complete(err) {
+
+            if (err) {
+                next(err);
+            } else {
+                res.send({result: 'success'})
+            }
+        })
+    };
+
     this.onResetRequest = function (req, res, next) {
 
         async.each(cachedSpeciesList, function each(species, onSpeciesDeleted) {
@@ -310,106 +406,12 @@ function ServerHandler() {
                     if (err) {
                         next(err);
                     } else {
-                        res.send({result: 'success'});
+                        self.onFormatDBRequestAll(req, res, next);
                     }
                 }
             );
         }
     };
-
-    this.onFormatDBRequestSpecies = function (req, res, next) {
-
-        require('./utils').formatter.formatDB({
-            species: req.params.species,
-            complete: function (err) {
-                if (err) {
-                    next(err);
-                } else {
-                    res.send({result: 'success'})
-                }
-            }
-        })
-    };
-
-    this.onFormatDBRequestAll = function (req, res, next) {
-
-        async.each(cachedSpeciesList, function each(species, done) {
-            require('./utils').formatter.formatDB({
-                species: species,
-                complete: function (err) {
-                    done(err);
-                }
-            })
-        }, function complete(err) {
-
-            if (err) {
-                next(err);
-            } else {
-                res.send({result: 'success'})
-            }
-        })
-    };
-
-    this.onJSONSave = function (req, res, next) {
-
-        database.saveAnimal(
-            req.params.species,
-            req.body, {
-                debug: config.debugLevel,
-                complete: function (err, newAnimal) {
-                    if (err) {
-                        next(err);
-                    } else {
-                        res.locals.simplifiedFormat = false;
-                        res.locals.data = newAnimal;
-                        next();
-                    }
-                }
-            });
-    };
-
-    this.onMediaSave = function (req, res, next) {
-        console.log('onSaveMedia: %s-\n%s', dump(req.files), dump(req.body));
-        var props = req.body;
-        props.images = props.images || '';
-        props.images = props.images.split(',');
-        _.forEach(req.files, function (fileMeta, index) {
-            props.images.push(path.join(_options.paths.images, fileMeta.filename));
-        });
-        database.saveAnimal(
-            req.params.species,
-            props, {
-                debug: config.debugLevel,
-                complete: function (err, newAnimal) {
-                    if (err) {
-                        next(err);
-                    } else {
-                        res.locals.simplifiedFormat = false;
-                        res.locals.data = newAnimal;
-                        next()
-                    }
-                }
-            });
-    };
-
-    this.onModelSave = function (req, res, next) {
-        database.saveModel(
-            req.params.species,
-            req.body, {
-                debug: config.debugLevel,
-                complete: function (err, newAnimal) {
-                    if (err) {
-                        next(err);
-                    } else {
-                        res.locals.simplifiedFormat = false;
-                        res.locals.data = newAnimal;
-                        next();
-                    }
-                }
-            });
-
-    };
-
 
 }
 
