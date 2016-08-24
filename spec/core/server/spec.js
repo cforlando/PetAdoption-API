@@ -301,7 +301,7 @@ _.forEach(speciesList, function (species) {
         });
     });
 
-    fdescribe(sprintf("POST save/%s/ and POST remove/%s/", species, species), function () {
+    describe(sprintf("POST save/%s/ and POST remove/%s/", species, species), function () {
 
         it(sprintf("can save and delete a %s", species), function (done) {
             request(server.app)
@@ -384,6 +384,17 @@ _.forEach(speciesList, function (species) {
                 })
             }
         }
+
+        it("returns 404 when species field not provided", function(done){
+           var queryProps = {
+                color: "White"
+           };
+            request(server.app)
+                .post(buildEndpoint('query'))
+                .set('Accept', 'application/json')
+                .send(queryProps)
+                .expect(404, buildJasmineCallback(done))
+        });
 
         _.forEach(speciesTestModel, function (propData, propName) {
             var queryProps = {species: species};
