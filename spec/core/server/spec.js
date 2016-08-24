@@ -319,7 +319,7 @@ _.forEach(speciesList, function (species) {
                     });
                 })
                 .end(function (err, savedPet) {
-
+                    if (!savedPet.body.petId) throw new Error(sprintf("%s was not saved", species));
                     request(server.app)
                         .post(buildEndpoint('remove', species))
                         .set('Accept', 'application/json')
