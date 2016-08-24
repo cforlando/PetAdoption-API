@@ -44,7 +44,14 @@ Species.prototype.plugins = {
 
         schema.pre('save', function (next) {
             this.timestamp = new Date;
-            next()
+            var locationPropNames = ['shelterGeoLat', 'shelterGeoLon', 'lostGeoLat', 'lostGeoLon'];
+            // fix for bad default values
+            _.forEach(locationPropNames, function(propName){
+                if(!_.isNumber(this[propName].defaultVal)){
+                    this[propName].defaultVal = -1;
+                };
+            });
+            next();
         })
     }
 };

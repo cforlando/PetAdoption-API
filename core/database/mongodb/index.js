@@ -266,6 +266,8 @@ function MongoDB(instanceOptions) {
             propValue;
 
         _.forEach(sanitizedSearchProps, function (propData, propName, collection) {
+            if(_.isUndefined(propData)) return console.error('Could not get value for %s', propName);
+            
             propValue = propData.val || propData; // check if data has been sent as a v1 or v2 structure
             switch (propName) {
                 case 'petId':

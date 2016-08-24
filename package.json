@@ -1,6 +1,6 @@
 {
   "name": "pet-adoption-server",
-  "version": "0.2.18",
+  "version": "0.2.19",
   "bin": {
     "pet-adoption-api-server": "bin/start-server.js"
   },
