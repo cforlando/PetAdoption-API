@@ -105,8 +105,9 @@ function buildEndpoint(operation, species, options) {
 }
 
 function buildJasmineCallback(done) {
-    return function (err) {
+    return function (err, response) {
         if (err) {
+            console.error(response.body);
             done.fail(err)
         } else {
             done()
@@ -318,15 +319,15 @@ _.forEach(speciesList, function (species) {
                         if (propVal != savedValue) throw new Error(sprintf("Pet data was incorrectly saved: %s(saved) != %s", savedValue, propVal))
                     });
                 })
-                .end(function (err, savedPet) {
-                    if (!savedPet.body.petId) throw new Error(sprintf("%s was not saved", species));
+                .expect(200, function (err, response) {
+                    if (!response.body.petId || err) throw err || new Error(sprintf("%s was not saved", species));
                     request(server.app)
                         .post(buildEndpoint('remove', species))
                         .set('Accept', 'application/json')
                         .expect('Content-Type', /json/)
                         .send({
                             species: species,
-                            petId: savedPet.body.petId.val
+                            petId: response.body.petId.val
                         })
                         .expect(200, buildJasmineCallback(done))
                 })
