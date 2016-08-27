@@ -7,10 +7,10 @@ html
         link(href="//fonts.googleapis.com/icon?family=Material+Icons", rel="stylesheet")
         meta(name="viewport", content="width=device-width, initial-scale=1")
         script(src="//maps.googleapis.com/maps/api/js")
-        //script(src="./javascript/src/vendors/require.js")
-        //script(src="./javascript/src/rjs-config.js")
-        //script(src="./javascript/src/app.js")
-        script(src="./javascript/app.js")
+        script(src="./javascript/src/vendors/require.js")
+        script(src="./javascript/src/rjs-config.js")
+        script(src="./javascript/src/app.js")
+        //script(src="./javascript/app.js")
     body(ng-controller='appController')
         md-progress-linear.loading-bar(md-mode="indeterminate", ng-show="loadingQueue.length > 0")
         div.main-layout(ng-cloak, layout="column",layout-fill, ng-controller='petDataController')
@@ -19,55 +19,7 @@ html
                     md-button(class="md-icon-button" aria-label="Side Nav Toggle" ng-click="toggleSidebar()")
                         md-icon.material-icons menu
                     span.md-title!=title
-                    .nav-menus
-                        md-menu(md-offset="0 -5")
-                            md-button.md-icon-button(aria-label="Pet Type", ng-click="toggleMenu($mdOpenMenu, $event)")
-                                md-icon.material-icons pets
-                            md-menu-content
-                                md-menu-item(ng-repeat="species in speciesList")
-                                    md-button(ng-click="setSpecies(species)") {{species}}
-                        md-menu(md-offset="0 -5")
-                            md-button.md-icon-button(aria-label="Open menu", ng-click="toggleMenu($mdOpenMenu, $event)")
-                                md-icon.material-icons more_vert
-                            md-menu-content()
-                                md-menu-item
-                                    md-button(ng-click='refreshApp()') Refresh
-                                md-menu-item
-                                    md-button(ng-click='syncShelterAddressMap()') Sync Shelter Address Map
-            md-sidenav(md-component-id="sidenav", md-is-open="sideNav.isOpen", class="list-side-nav md-sidenav-right")
-                .pet-list(ng-controller="petBatchDataController")
-                    md-tabs(md-selected="petList.currentSpeciesIndex", md-dynamic-height, md-border-bottom, md-autoselect, md-stretch-tabs)
-                        md-tab(ng-repeat="species in speciesList", label="{{species}}")
-                            md-grid-list(md-row-height="1:1", md-cols!="2")
-                                md-grid-tile(ng-repeat="pet in petList[species]", ng-style="{ 'background': 'url('+pet.images.val[0]+')', 'background-size': 'cover' }")
-                                    md-checkbox.checkbox(ng-model!="selectedPetsIndexCollection[species+$index]", ng-change="updatePetSelection(species+$index, pet)", aria-label="selected?")
-                                    md-grid-tile-footer.tile-footer(ng-click='loadPet(pet); sideNav.isOpen=!sideNav.isOpen;')
-                                        h3!="{{pet.petName.val || pet.petId.val || 'n/a'}}"
-                            md-fab-speed-dial.md-fab-bottom-right.md-scale.pet-list-menu(ng-show="isBatchEditActive()", md-direction="up", md-open="isPetListMenuOpen", ng-click="togglePetListMenu()")
-                                md-fab-trigger
-                                    md-button.md-fab
-                                        md-icon.material-icons menu
-                                md-fab-actions
-                                    md-button.md-fab.md-mini.md-raised(ng-click="batchEdit($event)")
-                                        md-icon.material-icons edit
-                    .invisible-container
-                        #batch-edit-dialog.md-dialog-container()
-                            md-dialog(aria-label="Batch Edit dialog")
-                                md-toolbar
-                                    .md-toolbar-tools
-                                        h2 Batch Edit
-                                md-dialog-content(layout-padding)
-                                    .pet-data-form(ng-if="isBatchEditActive()")
+            .pet-list
             md-content.main-content
                 block content
-                .layout.fab-anchor(layout='row')
-                    md-fab-speed-dial.md-fab-bottom-right.md-scale(md-direction="up", md-open="fab.isOpen", ng-click="toggleFAB()")
-                        md-fab-trigger()
-                            md-button.md-primary.md-fab.fab-toggle(aria-label="Add...")
-                                md-icon.material-icons add
-                        md-fab-actions
-                            md-button.btn-clear-form.md-fab.md-raised.md-mini(aria-label="Add New Pet", ng-click="clearPetData()")
-                                md-icon.material-icons clear
-                            md-button.btn-reuse-form.md-fab.md-raised.md-mini(aria-label="Add New Pet From Existing", ng-click="clearPetData({idOnly : true})")
-                                md-icon.material-icons cached
         h1.loading-text(style!='text-align: center;') Loading...

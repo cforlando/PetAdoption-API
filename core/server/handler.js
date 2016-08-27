@@ -240,7 +240,7 @@ function ServerHandler() {
         props.images = props.images || '';
         props.images = props.images.split(',');
         _.forEach(req.files, function (fileMeta, index) {
-            props.images.push(path.join(_options.paths.images, fileMeta.filename));
+            props.images.push(path.join(_options.paths.images, (req.params.species+'/'),  fileMeta.filename));
         });
         database.saveAnimal(
             req.params.species,

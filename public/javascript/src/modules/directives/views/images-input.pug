@@ -7,6 +7,7 @@ include _auto-generated/_-all
         .md-button.md-primary.md-fab.md-mini.btn-add(ng-click="uploadPhoto()")
             md-icon.material-icons add
     .slides()
-        .slide(ng-repeat="slide in slider.images.visible track by $index", image-placeholder="{{slide}}")
-            .md-button.md-primary.md-fab.md-mini.btn-remove(ng-click="removePhoto($index)")
+        .slide(ng-repeat="slide in slider.images.visible track by $index")
+            img.slide__img(ng-src="{{slide}}")
+            .md-button.md-primary.md-fab.md-mini.btn-remove(ng-click="removePhoto(slide)")
                 md-icon.material-icons clear

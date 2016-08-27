@@ -2,20 +2,17 @@ define([
     'require',
     'underscore',
     'ngApp'
-], function (require) {
+], function(require) {
     var ngApp = require('ngApp'),
         _ = require('underscore');
 
     return ngApp.controller('appController', ['$scope', '$http', '$mdToast',
-        function ($scope, $http, $mdToast) {
+        function($scope, $http, $mdToast) {
             $scope.loadingQueue = {
-                length : 0
+                length: 0
             };
             angular.element('.loading-text').remove();
             $scope.sideNav = {
-                isOpen: false
-            };
-            $scope.fab = {
                 isOpen: false
             };
 
@@ -23,50 +20,46 @@ define([
              *
              * @param {String} errorMessage
              */
-            $scope.showError = function (errorMessage) {
+            $scope.showError = function(errorMessage) {
                 $mdToast.show($mdToast.simple().textContent(errorMessage || 'Sorry. Try Again :-('));
             };
             /**
              *
              * @param {String} message
              */
-            $scope.showMessage = function (message) {
+            $scope.showMessage = function(message) {
                 $mdToast.show($mdToast.simple().textContent(message || 'Success'));
             };
 
-            $scope.showLoading = function () {
+            $scope.showLoading = function() {
                 $scope.loadingQueue.length++;
             };
 
-            $scope.hideLoading = function () {
-                if($scope.loadingQueue.length > 0) $scope.loadingQueue.length--;
+            $scope.hideLoading = function() {
+                if ($scope.loadingQueue.length > 0) $scope.loadingQueue.length--;
             };
 
 
-            $scope.onTabSelected = function (tab) {
+            $scope.onTabSelected = function(tab) {
                 console.log('tab selected: %s', tab);
                 $scope.$broadcast('change:tab', tab);
             };
 
-            $scope.toggleMenu = function ($mdOpenMenu, ev) {
+            $scope.toggleMenu = function($mdOpenMenu, ev) {
                 $mdOpenMenu(ev);
             };
 
-            $scope.toggleFAB = function(){
-                $scope.fab.isOpen = !$scope.fab.isOpen;
-            };
-
-            $scope.toggleSidebar = function(){
+            $scope.toggleSidebar = function() {
                 $scope.sideNav.isOpen = !$scope.sideNav.isOpen;
             };
 
-            $scope.refreshApp = function () {
+            $scope.refreshApp = function() {
                 $scope.$broadcast('reload:app');
             };
 
-            $scope.isSelectInput = function(propData){
+            $scope.isSelectInput = function(propData) {
                 if (!propData) return false;
-                switch(propData.key){
+                switch (propData.key) {
                     case 'species':
                         return true;
                         break;
@@ -75,25 +68,25 @@ define([
                 }
             };
 
-            $scope.isDateField = function(propData){
+            $scope.isDateField = function(propData) {
                 return (propData && propData.valType == "Date")
             };
 
-            $scope.isImagesField = function(propData){
+            $scope.isImagesField = function(propData) {
                 return (propData && propData.valType == "[Image]")
             };
 
-            $scope.isLocationField = function(propData){
+            $scope.isLocationField = function(propData) {
                 return (propData && propData.valType == "Location")
             };
 
-            $scope.isParagraphField = function(propData){
+            $scope.isParagraphField = function(propData) {
                 return (propData && propData.key == "description")
             };
 
-            $scope.isAutocompleteField = function(propData){
+            $scope.isAutocompleteField = function(propData) {
                 if (!propData) return false;
-                switch(propData.key){
+                switch (propData.key) {
                     case 'petId':
                     case 'description':
                     case 'species':
@@ -103,6 +96,6 @@ define([
                         return (propData.valType == "String")
                 }
             };
-        }])
+        }
+    ])
 });
-

@@ -9,14 +9,25 @@ block($selector)
     {block}
 
 
-modifier($modifier)
+mod($modifier)
   $modifier-selector-part = $modifier
   unless typeof($modifier) == 'string'
     $modifier-selector-part = s('%s',$modifier);
   &--{$modifier-selector-part}
     {block}
 
-element($element, $depth=-2)
+modifier=mod
+
+element($element, $depth=-1)
+  $element-selector-part = $element
+  unless typeof($element) == 'string'
+    $element-selector-part = "%s" % $element
+  $parent = s("& ^[%s..%s]", $depth, $depth)
+  {$parent}
+    &__{$element-selector-part}
+      {block}
+
+mod-element($element, $depth=-2)
   $element-selector-part = $element
   unless typeof($element) == 'string'
     $element-selector-part = "%s" % $element
@@ -40,15 +51,14 @@ overlay-before($bg-property = rgba(0, 0, 0, 0.5), $has-content = true) {
     else {
       background($bg-property);
     }
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     display: block;
+    bottom: -1px;
+    left: -1px;
+    right: -1px;
+    top: -1px;
     background-position center;
+    {block}
   }
-
-  {block}
 
   if ($has-content == true) {
     > * {
@@ -71,14 +81,13 @@ overlay-after($bg-property = rgba(0, 0, 0, 0.5), $has-content = true) {
       //TODO clean up fallback method for when background is not a gradient/image
       background-image-support($bg-property);
       background-position center;
-      bottom: 0;
       display: block;
-      left: 0;
-      right: 0;
-      top: 0;
+      bottom: -1px;
+      left: -1px;
+      right: -1px;
+      top: -1px;
+      {block}
     }
-
-    {block}
 
     if ($has-content == true) {
       > * {
@@ -302,3 +311,11 @@ placeholder() {
   }
 }
 
+// pulled from https://github.com/yangsu/nib/blob/98bdae7f2a5620bc56f6b2c9c98f71ce73a35fbf/lib/nib/vendor.styl
+compat-filter(radius, failbackPx=2px)
+  vendor('filter', '%s' % radius, only: webkit moz ms official)
+
+  if support-for-ie
+    unless typeof(radius) is unit
+      radius= failbackPx;
+    filter '"progid:DXImageTransform.Microsoft.Blur(PixelRadius=%d)"' % radius

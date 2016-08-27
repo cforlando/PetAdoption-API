@@ -19,7 +19,7 @@ define([
                     }
                     break;
                 case 'Boolean':
-                    _data.val = (propData.val === false) ? false : propData.val || propData.defaultVal || propData.example;
+                    _data.val = (propData.val === false) ? false : propData.val;
                     break;
                 case 'Location':
                 case 'Number':
@@ -36,8 +36,7 @@ define([
                     }
                     break;
                 default:
-                    // TODO remove autofill with example
-                    _data.val = propData.val || propData.defaultVal || propData.example;
+                    _data.val = propData.val;
             }
             return _data;
         }

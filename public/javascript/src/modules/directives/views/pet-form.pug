@@ -1,5 +1,9 @@
 include _auto-generated/_-all
-.form
+.form(ng-controller="petFormController")
+    //.batch-edit-list(ng-if="isBatchMode()")
+    //    .batch-edit-list__content
+    //        .pet-thumbnail(ng-repeat="pet in $parent.selectedPetsDataCollection")
+    //            .pet-thumbnail__placeholder(ng-style!="background:url('{{pet.images.val[0]}}')")
     .fields
         .field(class="field--{{propData.key}}", ng-repeat="propData in properties")
             .slider(ng-if="isImagesField(propData)")
@@ -12,3 +16,4 @@ include _auto-generated/_-all
         md-input-container
             md-button.btn-submit.md-primary.md-raised(ng-click='savePet()') Save
             md-button.btn-remove.md-warn.md-raised(ng-click='deletePet()') Delete
+            md-button.btn-remove.md-warn.md-raised(ng-click='clearPetData()') Clear

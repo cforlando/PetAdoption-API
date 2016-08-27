@@ -17,7 +17,7 @@ var path = require('path'),
     },
     storage = multer.diskStorage({
         destination: function (req, file, cb) {
-            cb(null, path.join(_options.paths.root, _options.paths.images))
+            cb(null, path.join(_options.paths.root, _options.paths.images, (req.params.species+'/')))
         },
         filename: function (req, file, cb) {
             console.log('new file: %s', dump(file));
