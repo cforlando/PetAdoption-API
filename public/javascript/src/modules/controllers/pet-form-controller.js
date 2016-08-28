@@ -140,6 +140,7 @@ define([
                     done: function (err, petData) {
                         $scope.petData = petData;
                         $scope.render(petData);
+                        $scope.showMessage('Option saved');
                     }
                 });
             };
