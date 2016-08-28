@@ -195,7 +195,7 @@ function MongoDB(instanceOptions) {
      */
     this._initSpeciesDocs = function (species, options) {
         var _options = _.defaults(options, {
-            docNamePrefix :  (self.config.isDevelopment) ? 'dev' : 'prod'
+            docNamePrefix: (self.config.isDevelopment) ? 'dev' : 'prod'
         });
 
         // init animals db document for given species
@@ -223,7 +223,7 @@ function MongoDB(instanceOptions) {
                     self.modelsCollection[species] = hardcodedAnimalModel[species];
                     self.modelsCollection[species]['timestamp'] = new Date();
 
-                    self.ModelDoc[species].create(self.modelsCollection[species], 
+                    self.ModelDoc[species].create(self.modelsCollection[species],
                         function (createError, newlySavedAnimalModel) {
                             if (createError) {
                                 console.log('%s', util.inspect(createError, {depth: null}));
@@ -246,7 +246,7 @@ function MongoDB(instanceOptions) {
      */
     this._initUserDoc = function (options) {
         var _options = _.defaults(options, {
-            docNamePrefix :  (self.config.isDevelopment) ? 'dev' : 'prod'
+            docNamePrefix: (self.config.isDevelopment) ? 'dev' : 'prod'
         });
 
         var User = require('./models/user'),
@@ -266,8 +266,8 @@ function MongoDB(instanceOptions) {
             propValue;
 
         _.forEach(sanitizedSearchProps, function (propData, propName, collection) {
-            if(_.isUndefined(propData)) return console.error('Could not get value for %s', propName);
-            
+            if (_.isUndefined(propData)) return console.error('Could not get value for %s', propName);
+
             propValue = propData.val || propData; // check if data has been sent as a v1 or v2 structure
             switch (propName) {
                 case 'petId':
@@ -405,7 +405,7 @@ function MongoDB(instanceOptions) {
 
             delete userData._id;
 
-            self.AnimalDoc[species].findOneAndUpdate(
+            self.UserDoc.findOneAndUpdate(
                 {id: user.id},
                 userData, {
                     new: true,
@@ -435,6 +435,7 @@ function MongoDB(instanceOptions) {
         var _options = _.defaults(options, self.config.queryOptions);
 
         this._exec(function () {
+            if(!self.AnimalDoc[species]) return _options.complete.call(null, self.errors.species);
 
             if (_options.debug >= config.DEBUG_LEVEL_MED) console.log('mongodb.removeAnimal() - searching for: ', props.petId || props._id);
             self.AnimalDoc[species].remove({
@@ -512,6 +513,8 @@ function MongoDB(instanceOptions) {
         this._exec(function () {
             if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log("mongodb[%s].saveAnimal() - received post for: ", species, props);
 
+            if(!self.AnimalDoc[species]) return _options.complete.call(null, self.errors.species);
+
             var animal = new self.AnimalDoc[species](props),
                 animalData = animal.toObject();
 
@@ -571,22 +574,27 @@ function MongoDB(instanceOptions) {
         var _options = _.defaults(options, self.config.queryOptions);
 
         this._exec(function () {
-            self.ModelDoc[species].find({})
-                .sort({timestamp: 'desc'})
-                .limit(1)
-                .exec(function (err, foundAnimalModels) {
-                    if (err && foundAnimalModels.length > 0) {
-                        err.status = 404;
-                        console.error(err || new Error("No models found"));
-                    } else {
-                        if (_options.debug >= config.DEBUG_LEVEL_LOW) console.log('mongoDb.findModel() - sending %s model from %s', species, foundAnimalModels[0].timestamp);
-                        // update active model instance
-                        self.modelsCollection[species] = self._formatModelOutput(foundAnimalModels[0]);
-                    }
-                    if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongoDb.findModel() - sending %s model: ', species, self.modelsCollection[species]);
-                    if (_options.complete) _options.complete.apply(_options.context, [null, err || self.modelsCollection[species]]);
-                });
-
+            if (self.ModelDoc[species]) {
+                self.ModelDoc[species].find({})
+                    .sort({timestamp: 'desc'})
+                    .limit(1)
+                    .exec(function (err, foundAnimalModels) {
+                        if (err && foundAnimalModels.length > 0) {
+                            err.status = 404;
+                            console.error(err || new Error("No models found"));
+                        } else {
+                            if (_options.debug >= config.DEBUG_LEVEL_LOW) console.log('mongoDb.findModel() - sending %s model from %s', species, foundAnimalModels[0].timestamp);
+                            // update active model instance
+                            self.modelsCollection[species] = self._formatModelOutput(foundAnimalModels[0]);
+                        }
+                        if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongoDb.findModel() - sending %s model: ', species, self.modelsCollection[species]);
+                        if (_options.complete) _options.complete.apply(_options.context, [err, self.modelsCollection[species]]);
+                    });
+            } else {
+                var err = new Error(util.format("No %s model found", species));
+                err.status = 404;
+                if (_options.complete) _options.complete.apply(_options.context, [err, {}]);
+            }
         }, options);
     };
 
@@ -609,24 +617,30 @@ function MongoDB(instanceOptions) {
 
             if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongodb.saveAnimalModel() - searching for %s model', species);
 
-            var newModel = new self.ModelDoc[species](props);
-            newModel.save(function (err, _animalModel) {
-                if (err) {
-                    err.status = 404;
-                    console.error(err);
-                    if (_options.complete) _options.complete.apply(_options.context, [err, self.modelsCollection[species]]);
-                } else {
-                    // update active model instance
-                    self.modelsCollection[species] = self._formatModelOutput(_animalModel);
-                    if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('saved and sending animal model: %j', self.modelsCollection[species]);
-
-                    fs.writeFile(path.resolve(process.cwd(), 'data/models.json'), JSON.stringify(self.modelsCollection), function () {
-                        if (_options.debug >= config.DEBUG_LEVEL_LOW) console.log('updated cached animal model');
+            if (self.ModelDoc[species]) {
+                var newModel = new self.ModelDoc[species](props);
+                newModel.save(function (err, _animalModel) {
+                    if (err) {
+                        err.status = 404;
+                        console.error(err);
                         if (_options.complete) _options.complete.apply(_options.context, [err, self.modelsCollection[species]]);
-                    });
-                }
+                    } else {
+                        // update active model instance
+                        self.modelsCollection[species] = self._formatModelOutput(_animalModel);
+                        if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('saved and sending animal model: %j', self.modelsCollection[species]);
 
-            })
+                        fs.writeFile(path.resolve(process.cwd(), 'data/models.json'), JSON.stringify(self.modelsCollection), function () {
+                            if (_options.debug >= config.DEBUG_LEVEL_LOW) console.log('updated cached animal model');
+                            if (_options.complete) _options.complete.apply(_options.context, [err, self.modelsCollection[species]]);
+                        });
+                    }
+
+                })
+            } else {
+                var err = new Error(util.format("Cannot save %s type model", species));
+                err.status = 404;
+                if (_options.complete) _options.complete.apply(_options.context, [err, {}]);
+            }
 
         }, options);
 
