@@ -3,14 +3,14 @@ define([
     'underscore',
     'async',
     'ngApp'
-], function(require) {
+], function (require) {
     var ngApp = require('ngApp'),
         async = require('async'),
         _ = require('underscore');
 
     return ngApp.controller('petDataController', ['$scope', '$http', '$mdToast', '$mdDialog', 'dataParserService', 'addressFinderService',
 
-        function($scope, $http, $mdToast, $mdDialog, dataParserService, addressFinderService) {
+        function ($scope, $http, $mdToast, $mdDialog, dataParserService, addressFinderService) {
 
             $scope.models = {};
             $scope.petList = {
@@ -18,7 +18,7 @@ define([
             };
             $scope.formScopes = {
                 registered: []
-            }
+            };
 
 
             /**
@@ -28,7 +28,7 @@ define([
              * @param {Function} [options.callback]
              * @param {Boolean} [options.useCache=false]
              */
-            $scope.getModel = function(species, options) {
+            $scope.getModel = function (species, options) {
                 var _options = _.defaults(options, {
                     useCache: false,
                 });
@@ -61,7 +61,7 @@ define([
              * @param {Object} [options]
              * @param {Function} [options.done]
              */
-            $scope.deletePet = function(petData, options) {
+            $scope.deletePet = function (petData, options) {
                 var data = petData,
                     _options = _.defaults(options, {});
                 $scope.showLoading();
@@ -84,24 +84,30 @@ define([
 
             /**
              *
-             * @param props
-             * @param done
+             * @param {Object} petData
+             * @param {Object} [options]
+             * @param {Function} [options.done]
              */
-            $scope.getPet = function(props, done) {
+            $scope.getPet = function (petData, options) {
+                var _options = _.defaults(options, {}),
+                    searchProps = _.pick(petData, ['petId', 'petName', 'species']),
+                    queryData = dataParserService.convertDataToSaveFormat(searchProps);
+
+                console.log('queryData; %o', queryData);
                 $scope.showLoading();
-                $http.post('/api/v1/query/', dataParserService.convertDataToSaveFormat(props)).then(
+                $http.post('/api/v1/query/', dataParserService.convertDataToSaveFormat(petData)).then(
                     function success(response) {
                         $scope.hideLoading();
                         var _persistedData = response.data[0];
                         console.log('_persistedData: %o', _persistedData);
                         $scope.showError('Successfully fetched pet info.');
-                        if (_.isFunction(done)) done.apply(null, [null, _persistedData]);
+                        if (_.isFunction(_options.done)) _options.done.apply(null, [null, _persistedData]);
                     },
                     function failure() {
                         $scope.hideLoading();
                         $scope.showError('Failed to get pet info.');
                         console.error('failed to save formData');
-                        if (_.isFunction(done)) done.call(null, new Error("Could not get pet"));
+                        if (_.isFunction(_options.done)) _options.done.call(null, new Error("Could not get pet"));
                     }
                 );
             };
@@ -112,19 +118,19 @@ define([
              * @param {Object} [options]
              * @param {Function} [options.done]
              */
-            $scope.savePet = function(petProps, options) {
+            $scope.savePet = function (petProps, options) {
                 $scope.showLoading();
                 var _options = _.defaults(options, {}),
                     data = petProps,
                     formData = new FormData();
                 console.log('sending photos %o', petProps.imageFiles);
-                _.forEach(petProps.imageFiles, function(file, index) {
+                _.forEach(petProps.imageFiles, function (file, index) {
                     formData.append("uploads", file);
                 });
                 var formattedPetData = dataParserService.convertDataToSaveFormat(data);
                 console.log('saving petData %o', formattedPetData);
-                _.forEach(formattedPetData, function(propValue, propName) {
-                    if(propValue) formData.append(propName, propValue);
+                _.forEach(formattedPetData, function (propValue, propName) {
+                    if (propValue) formData.append(propName, propValue);
                 });
 
                 $http.post('/api/v1/save/' + formattedPetData.species, formData, {
@@ -150,16 +156,14 @@ define([
 
             /**
              *
-             * @param {Function} [complete]
+             * @param {*} [species]
              * @param {Object} [options]
-             * @param {String} options.species
+             * @param {Function} [options.done]
              */
-            $scope.getPetList = function(complete, options) {
+            $scope.getPetList = function (species, options) {
                 $scope.showLoading();
-                var _options = _.defaults(options, {
-                        species: $scope.speciesList
-                    }),
-                    species = _options.species;
+                var _options = _.defaults(options, {}),
+                    requestedSpecies = species || $scope.speciesList;
 
                 function loadPetList(species, onPetListLoaded) {
 
@@ -177,53 +181,19 @@ define([
                         })
                 }
 
-                if (_.isArray(_options.species)) {
-                    async.each(_options.species,
+                if (_.isArray(requestedSpecies)) {
+                    async.each(requestedSpecies,
                         function each(species, done) {
                             loadPetList(species, done);
                         },
                         function onAllPetListLoaded(err) {
-                            if (complete) complete(err);
+                            if (_options.done) _options.done(err);
                         })
                 } else {
-                    loadPetList(species, complete);
+                    loadPetList(requestedSpecies, _options.done);
                 }
             };
 
-            /*
-             * @param {Object} petData
-             * @param {Object} [options]
-             * @param {Function} [options.done]
-             */
-            $scope.refreshPetData = function(petData, options) {
-                var _options = _.defaults(options, {}),
-                    searchProps = _.pick(petData, ['petId', 'petName', 'species']),
-                    queryData = dataParserService.convertDataToSaveFormat(searchProps);
-
-                console.log('queryData; %o', queryData);
-                $scope.showLoading();
-                $http.post('/api/v1/query', queryData).then(
-                    function success(response) {
-                        $scope.hideLoading();
-                        console.log(response.data);
-                        if (
-                            _.isArray(response.data) &&
-                            response.data.length > 0
-                        ) {
-                            var _persistedData = response.data[0];
-                            console.log('_persistedData: %o', _persistedData);
-                            if (_options.done) _options.done(null, dataParserService.convertToPetData(_persistedData));
-                            $scope.showMessage('Refreshed!');
-                        } else {
-                            $scope.showError('Pet has not been saved');
-                        }
-                    },
-                    function failure() {
-                        $scope.hideLoading();
-                        $scope.showError();
-                    }
-                );
-            };
 
             /**
              *
@@ -231,7 +201,7 @@ define([
              * @param {Object} [options]
              * @param {Boolean} [options.useCache=false]
              */
-            $scope.getSpeciesList = function(callback, options) {
+            $scope.getSpeciesList = function (callback, options) {
                 var _options = _.defaults(options, {
                     useCache: false
                 });
@@ -256,7 +226,7 @@ define([
             };
 
 
-            $scope.saveModel = function(petData, options) {
+            $scope.saveModel = function (petData, options) {
                 $scope.showLoading();
                 var _options = _.defaults(options, {}),
                     modelData = dataParserService.convertDataToModelFormat(petData);
@@ -265,7 +235,7 @@ define([
                         var _persistedData = response.data,
                             _sanitizedData = dataParserService.convertToPetData(_persistedData);
                         console.log('persisted data: %o', _sanitizedData);
-                        _.forEach(_sanitizedData, function(propData, propName) {
+                        _.forEach(_sanitizedData, function (propData, propName) {
                             petData[propName].options = propData.options;
                         });
                         $scope.hideLoading();
@@ -278,28 +248,31 @@ define([
                     });
             };
 
-            $scope.loadPet = function(petData){
-                _.forEach($scope.formScopes.registered, function($formScope) {
-                    $scope.getPet(petData, function(err, responsePetData){
-                        $formScope.setPet(responsePetData);
+            $scope.loadPet = function (petData) {
+                _.forEach($scope.formScopes.registered, function ($formScope) {
+                    $scope.getPet(petData, {
+                        done: function (err, responsePetData) {
+                            $formScope.setPet(responsePetData);
+                        }
                     })
                 });
             };
 
 
-            $scope.registerForm = function($formScope) {
+            $scope.registerForm = function ($formScope) {
                 $scope.formScopes.registered.push($formScope);
             };
 
             function init() {
-                $scope.getSpeciesList(function() {
-                    $scope.getPetList(function(err) {
-
-                        _.forEach($scope.formScopes.registered, function($formScope) {
-                            $formScope.setField('species', _.extend({}, $formScope.petData.species, {
-                                val: $scope.speciesList[0]
-                            }))
-                        });
+                $scope.getSpeciesList(function (err, speciesList) {
+                    $scope.getPetList(speciesList, {
+                        done: function (err) {
+                            _.forEach($scope.formScopes.registered, function ($formScope) {
+                                $formScope.setField('species', _.extend({}, $formScope.petData.species, {
+                                    val: speciesList[0]
+                                }))
+                            });
+                        }
                     });
                 });
             }

@@ -8,18 +8,18 @@ define([
 
     return ngApp.service('dataParserService', function () {
         function parsePropValue(propData) {
-            var _data = {};
+            var parsedPropData = {};
             // console.log('parsing %o (key: %s - type; %s)', propData, propData.key, propData.valType);
             switch (propData.valType) {
                 case 'Date':
                     // handle special case for date
-                    _data.val = new Date(propData.val);
-                    if (isNaN(_data.val.getTime())) {
-                        _data.val = new Date();
+                    parsedPropData.val = new Date(propData.val);
+                    if (isNaN(parsedPropData.val.getTime())) {
+                        parsedPropData.val = new Date();
                     }
                     break;
                 case 'Boolean':
-                    _data.val = (propData.val === false) ? false : propData.val;
+                    parsedPropData.val = (propData.val === false) ? false : propData.val;
                     break;
                 case 'Location':
                 case 'Number':
@@ -27,18 +27,18 @@ define([
                         if (/\./.test(propData.val.toString())) {
                             // value is float
                             // console.log('parsing float for %O', propData);
-                            _data.val = parseFloat(propData.val);
+                            parsedPropData.val = parseFloat(propData.val);
                         } else {
                             // console.log('parsing int for %O', propData);
                             // value is integer
-                            _data.val = parseInt(propData.val || -1);
+                            parsedPropData.val = parseInt(propData.val || -1);
                         }
                     }
                     break;
                 default:
-                    _data.val = propData.val;
+                    parsedPropData.val = propData.val;
             }
-            return _data;
+            return parsedPropData;
         }
 
         function parsePropOptions(propData) {
@@ -56,15 +56,15 @@ define([
 
         this.convertDataToSaveFormat = function (data) {
             console.log("convertDataToSaveFormat(%o)", data);
-            var _data = {},
-                _val;
+            var saveData = {},
+                propValue;
             _.forEach(data, function (propData, propName, props) {
                 if(!(propData.key)) return; // skip invalid properties
-                _val = parsePropValue(propData).val;
-                if(_.isUndefined(_val)) return;
-                _data[propName] = _val;
+                propValue = parsePropValue(propData).val;
+                if(_.isUndefined(propValue)) return;
+                saveData[propName] = propValue;
             });
-            return _data;
+            return saveData;
         };
 
         this.convertDataToModelFormat = function (data) {
@@ -121,6 +121,7 @@ define([
                     if (propData.key == 'petId') return 0;
                     if (propData.key == 'images') return 1;
                     if (propData.key == 'petName') return 2;
+                    if (propData.key == 'species') return 3;
                     return (props.length - 1);
                 })
             }

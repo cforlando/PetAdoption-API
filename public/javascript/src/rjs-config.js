@@ -4,11 +4,11 @@ var require = require.config({
     context: 'cfo_pet_adoption_entry',
     paths: {
         "build-production": "app",
-        "require-lib": "vendors/require",
-        "domReady": "vendors/domReady",
-        "text": "vendors/text",
-        "underscore": "vendors/lodash",
-        "moment": "vendors/moment",
+        "require-lib": "vendors/requirejs/require",
+        "domReady": "vendors/domReady/domReady",
+        "text": "vendors/text/text",
+        "underscore": "vendors/lodash/dist/lodash",
+        "moment": "vendors/moment/moment",
         "jquery-slick" : "vendors/slick/slick/slick",
         "async" : "vendors/async/dist/async",
         'ngApp': 'modules/ngApp',
@@ -23,7 +23,7 @@ var require = require.config({
         'ng-controllers': 'modules/controllers',
         'ng-directives': 'modules/directives',
         'ng-services': 'modules/services',
-        'ng-router': 'modules/router',
+        'ng-router': 'modules/router'
     },
     shim: {
         "jquery-slick" : ["jquery"],

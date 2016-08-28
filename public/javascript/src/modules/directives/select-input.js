@@ -13,7 +13,6 @@ define([
             template: require('text!./views/select-input.html'),
             controller: ['$scope', '$element',
                 function ($scope, $element) {
-                    console.log('select field: %o', $scope);
                     function init(){
                         if($scope['propData'].valType == 'Boolean' && $scope['propData'].options.length == 0){
                             $scope['propData'].options = [ true, false];

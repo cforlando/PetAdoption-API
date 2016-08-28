@@ -39,9 +39,12 @@ define([
                 $scope.petData[fieldName] = _.extend({}, $scope.petData[fieldName], fieldData);
                 //console.log('%s set to %o', fieldName, $scope.petData[fieldName]);
             };
-
-            $scope.setPetDataMediaInput = function (el) {
-                $scope.mediaInputEl = el;
+            /**
+             *
+             * @param {$scope} $imagesInputScope angular $scope of image input directive (Uses mediaInputEl member for file storage)
+             */
+            $scope.registerImagesInput = function ($imagesInputScope) {
+                $scope.mediaInputEl = $imagesInputScope.mediaInputEl;
             };
 
 
@@ -53,8 +56,7 @@ define([
                 var renderData = dataParserService.formatRenderData(model || $scope.petData);
                 console.log('rendering: %o', renderData);
                 $scope.properties = renderData;
-                $scope.showMessage('Form updated');
-            }
+            };
 
             function getShelterAddress() {
                 var shelterLocationProperties = ['shelterAddrLine1', 'shelterAddrLine2', 'shelterAddrCity', 'shelterAddrSt', 'shelterAddrZip'],
@@ -129,10 +131,11 @@ define([
                 }
 
             };
+
             $scope.createOption = function (fieldName, val) {
                 console.log(arguments);
                 $scope.petData[fieldName].options.push(val);
-                console.log('_modelData; %o', _data);
+                console.log('_modelData; %o', $scope.petData);
                 $scope.saveModel($scope.petData, {
                     done: function (err, petData) {
                         $scope.petData = petData;
@@ -172,24 +175,24 @@ define([
                     if (newPropData.valType) $scope.petData[propName].valType = newPropData.valType;
                     if (newPropData.options) $scope.petData[propName].options = newPropData.options;
                 });
-                $scope.render();
+                $scope.render($scope.petData);
             };
 
             $scope.loadPet = function (props, done) {
                 $scope.showLoading();
                 console.log('petForm.loadPet(%o)', props);
-                $scope.getPet(props, function (err, petData) {
-                    if (err) {
-                        $scope.hideLoading();
-                        console.error(err);
-                        $scope.showError('Could not load pet');
-                        if (_.isFunction(done)) done.apply(null, arguments);
-                    } else {
-                        $scope.setPet(petData);
-                        $scope.getPetList(function () {
+                $scope.getPet(props, {
+                    done: function (err, petData) {
+                        if (err) {
                             $scope.hideLoading();
-                            if (_.isFunction(done)) done.apply(null, arguments);
-                        });
+                            console.error(err);
+                            $scope.showError('Could not load pet');
+                        } else {
+                            $scope.setPet(petData);
+                            $scope.hideLoading();
+                            $scope.showMessage('Successfully loaded pet');
+                        }
+                        if (_.isFunction(done)) done.apply(null, arguments);
                     }
                 });
             };
@@ -228,20 +231,36 @@ define([
                     savePetData()
                 }
 
+                function formatData(petData){
+                    if($scope.mediaInputEl) {
+                        var formattedData = _.cloneDeep(petData);
+                        formattedData.imageFiles= $scope.mediaInputEl.files
+                    }
+
+                    if (formattedData.images){
+                        formattedData.images.val = _.filter(formattedData.images.val, function(imageURL){
+                            // remove preview data urls
+                           return imageURL && !(/^data/.test(imageURL));
+                        })
+                    }
+                    return formattedData;
+                }
+
                 function savePetData() {
-                    var petData = _.extend({}, {
-                        imageFiles: $scope.mediaInputEl.files
-                    }, $scope.petData);
+                    // avoid polluting the form's petData
+                    var petData = formatData($scope.petData);
                     $scope.$parent.savePet(petData, {
                         done: function (err, responsePetData) {
                             if (_options.setPetData) {
                                 $scope.setPet(responsePetData);
                             }
                             if (_options.updatePetList) {
-                                $scope.getPetList(function () {
-                                    $scope.hideLoading();
-                                    $mdToast.show($mdToast.simple().textContent('Saved data!'));
-                                    if (_.isFunction(_options.done)) _options.done.apply(null, [null, responsePetData]);
+                                $scope.getPetList(false, {
+                                    done: function () {
+                                        $scope.hideLoading();
+                                        $mdToast.show($mdToast.simple().textContent('Saved data!'));
+                                        if (_.isFunction(_options.done)) _options.done.apply(null, [null, responsePetData]);
+                                    }
                                 });
                             } else {
                                 $scope.hideLoading();
@@ -250,12 +269,12 @@ define([
                             }
                         }
                     });
-                };
-            }
+                }
+            };
 
             /*
              * @param {Object} [options]
-             * @param {Function} [options.done]
+             * @param {Function} [options.donem
              */
             $scope.deletePet = function (options) {
                 var _options = _.defaults(options, {});
@@ -264,12 +283,16 @@ define([
                         if (err) {
                             if (_options.done) _options.done.apply(null, arguments);
                         } else {
-                            $scope.getPetList(function () {
-                                $scope.clearPetData();
-                                if (_options.done) _options.done.apply(null, arguments);
-                                $scope.getPetList(function () {
-                                    $scope.showMessage('Updated pet list');
-                                });
+                            $scope.clearPetData();
+                            $scope.getPetList(null, {
+                                done: function (err) {
+                                    if (err) {
+                                        $scope.showError('Could not update pet list');
+                                    } else{
+                                        $scope.showMessage('Updated pet list');
+                                    }
+                                    if (_options.done) _options.done.apply(null, arguments);
+                                }
                             });
                         }
                     }
@@ -279,24 +302,31 @@ define([
 
             $scope.refreshPetData = function () {
                 console.log('petForm.refreshPetData(%o)', $scope.petData);
-                $scope.$parent.refreshPetData($scope.petData, function (err, petData) {
-                    if (err) {
-                        console.error(err);
-                    } else {
-                        $scope.setPet(petData);
+                $scope.getPet($scope.petData, {
+                    done: function (err, petData) {
+                        if (err) {
+                            console.error(err);
+                        } else {
+                            $scope.setPet(petData);
+                        }
                     }
-                });
+                })
+
             };
 
-            $scope.registerForm($scope);
+            function init(){
+                $scope.registerForm($scope);
 
-            $scope.$watch('petData.species.val', function (newValue, oldValue) {
-                console.log('petData.species.val: %s', newValue);
-                var speciesIndex = _.indexOf($scope.speciesList, newValue);
-                if (speciesIndex > -1) {
-                    $scope.updatePetDataFromModel();
-                }
-            });
+                $scope.$watch('petData.species.val', function (newValue, oldValue) {
+                    console.log('petData.species.val: %s', newValue);
+                    var speciesIndex = _.indexOf($scope.speciesList, newValue);
+                    if (speciesIndex > -1) {
+                        $scope.updatePetDataFromModel();
+                    }
+                });
+            }
+
+            init();
         }
     ]);
 

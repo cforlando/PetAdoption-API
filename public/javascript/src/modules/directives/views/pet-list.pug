@@ -1,5 +1,5 @@
 include _auto-generated/_-all
-md-sidenav(md-component-id="sidenav", md-is-open="sideNav.isOpen", class="list-side-nav md-sidenav-right")
+md-sidenav.md-sidenav-right(md-component-id="sidenav", md-is-open="sideNav.isOpen")
     .pet-list-container(ng-controller="petBatchDataController")
         md-tabs(md-selected="petList.currentSpeciesIndex", md-dynamic-height, md-border-bottom, md-autoselect, md-stretch-tabs)
             md-tab(ng-repeat="species in speciesList", label="{{species}}")
