@@ -43,13 +43,13 @@ Species.prototype.plugins = {
         schema.add({timestamp: Date});
 
         schema.pre('save', function (next) {
-            this.timestamp = new Date;
+            this.timestamp = new Date();
             var locationPropNames = ['shelterGeoLat', 'shelterGeoLon', 'lostGeoLat', 'lostGeoLon'];
             // fix for bad default values
             _.forEach(locationPropNames, function(propName){
-                if(!_.isNumber(this[propName].defaultVal)){
+                if(this[propName] && !_.isNumber(this[propName].defaultVal)){
                     this[propName].defaultVal = -1;
-                };
+                }
             });
             next();
         })
@@ -147,8 +147,8 @@ Species.prototype.initSchema = function () {
     }
 
     for (var pluginMethodName in this.plugins) {
-        if (this.middleware.hasOwnProperty(pluginMethodName)) {
-            this.schema.plugin(pluginMethodName, this.middleware[pluginMethodName]);
+        if (this.plugins.hasOwnProperty(pluginMethodName)) {
+            this.schema.plugin(this.plugins[pluginMethodName]);
         }
     }
 };

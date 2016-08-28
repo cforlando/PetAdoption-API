@@ -572,17 +572,18 @@ function MongoDB(instanceOptions) {
 
         this._exec(function () {
             self.ModelDoc[species].find({})
-                .sort({timestamp: -1})
+                .sort({timestamp: 'desc'})
                 .limit(1)
                 .exec(function (err, foundAnimalModels) {
                     if (err && foundAnimalModels.length > 0) {
                         err.status = 404;
                         console.error(err || new Error("No models found"));
                     } else {
+                        if (_options.debug >= config.DEBUG_LEVEL_LOW) console.log('mongoDb.findModel() - sending %s model from %s', species, foundAnimalModels[0].timestamp);
                         // update active model instance
                         self.modelsCollection[species] = self._formatModelOutput(foundAnimalModels[0]);
                     }
-                    if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongoDb.findModel() - sending animal model: ', self.modelsCollection[species]);
+                    if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('mongoDb.findModel() - sending %s model: ', species, self.modelsCollection[species]);
                     if (_options.complete) _options.complete.apply(_options.context, [null, err || self.modelsCollection[species]]);
                 });
 
@@ -613,17 +614,18 @@ function MongoDB(instanceOptions) {
                 if (err) {
                     err.status = 404;
                     console.error(err);
+                    if (_options.complete) _options.complete.apply(_options.context, [err, self.modelsCollection[species]]);
+                } else {
+                    // update active model instance
+                    self.modelsCollection[species] = self._formatModelOutput(_animalModel);
+                    if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('saved and sending animal model: %j', self.modelsCollection[species]);
+
+                    fs.writeFile(path.resolve(process.cwd(), 'data/models.json'), JSON.stringify(self.modelsCollection), function () {
+                        if (_options.debug >= config.DEBUG_LEVEL_LOW) console.log('updated cached animal model');
+                        if (_options.complete) _options.complete.apply(_options.context, [err, self.modelsCollection[species]]);
+                    });
                 }
 
-                // update active model instance
-                self.modelsCollection[species] = self._formatModelOutput(_animalModel);
-                if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('saved and sending animal model: %j', self.modelsCollection[species]);
-
-
-                fs.writeFile(path.resolve(process.cwd(), 'data/models.json'), JSON.stringify(self.modelsCollection), function () {
-                    if (_options.debug >= config.DEBUG_LEVEL_LOW) console.log('updated cached animal model');
-                    if (_options.complete) _options.complete.apply(_options.context, [err, self.modelsCollection[species]]);
-                });
             })
 
         }, options);
