@@ -236,12 +236,20 @@ function ServerHandler() {
 
     this.onMediaSave = function (req, res, next) {
         console.log('onSaveMedia: %s-\n%s', dump(req.files), dump(req.body));
-        var props = req.body;
-        props.images = props.images || '';
-        props.images = props.images.split(',');
+        var props = req.body,
+            imagesValue = props.images || '';
+
+        props.images = imagesValue.split(',');
+
         _.forEach(req.files, function (fileMeta, index) {
-            props.images.push(path.join(_options.paths.images, (req.params.species+'/'),  fileMeta.filename));
+            props.images.push(path.join(config.domain, _options.paths.images, (req.params.species+'/'),  fileMeta.filename));
         });
+
+        props.images = _.filter(props.images, function(url){
+            // only truthy values
+            return !!url;
+        });
+        console.log('images: %s', dump(props.images));
         database.saveAnimal(
             req.params.species,
             props, {
