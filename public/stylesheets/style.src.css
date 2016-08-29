@@ -495,6 +495,18 @@ a {
   bottom: auto;
   top: 0.75em;
 }
+.login {
+  height: 100%;
+}
+.login__content {
+  height: 100%;
+  position: relative;
+  text-align: center;
+}
+.login .btn--login {
+  position: relative;
+  top: 50%;
+}
 @-moz-keyframes fadeIn {
   0% {
     opacity: 0;

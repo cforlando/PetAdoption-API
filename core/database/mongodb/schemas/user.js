@@ -1,7 +1,7 @@
 module.exports = {
+        id : String,
+        privilege: Number,
         firstName : String,
         lastName : String,
-        id : String,
-        photo : String,
-        privilege: Number
+        photo : String
 };

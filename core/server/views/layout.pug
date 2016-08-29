@@ -12,14 +12,19 @@ html
         //script(src="./javascript/src/app.js")
         script(src="./javascript/app.js")
     body(ng-controller='appController')
-        md-progress-linear.loading-bar(md-mode="indeterminate", ng-show="loadingQueue.length > 0")
-        div.main-layout(ng-cloak, layout="column",layout-fill, ng-controller='petDataController')
-            md-toolbar
-                .md-toolbar-tools
-                    md-button(class="md-icon-button" aria-label="Side Nav Toggle" ng-click="toggleSidebar()")
-                        md-icon.material-icons menu
-                    span.md-title!=title
-            .pet-list
-            md-content.main-content
-                block content
+        if user
+            md-progress-linear.loading-bar(md-mode="indeterminate", ng-show="loadingQueue.length > 0")
+            div.main-layout(ng-cloak, layout="column",layout-fill, ng-controller='petDataController')
+                md-toolbar
+                    .md-toolbar-tools
+                        md-button(class="md-icon-button" aria-label="Side Nav Toggle" ng-click="toggleSidebar()")
+                            md-icon.material-icons menu
+                        span.md-title!=title
+                .pet-list
+                md-content.main-content
+                    block content
+        else
+            .login(ng-cloak, ng-controller='authController')
+                .login__content
+                    md-button.btn.btn--login.md-primary.md-raised(ng-click!='login()') Login
         h1.loading-text(style!='text-align: center;') Loading...

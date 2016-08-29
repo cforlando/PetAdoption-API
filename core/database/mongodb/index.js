@@ -388,7 +388,7 @@ function MongoDB(instanceOptions) {
 
                 if (err) err.status = 404;
                 if (_options.debug >= config.DEBUG_LEVEL_MED) console.log('mongodb.findUser() - args: %s', util.inspect(arguments));
-                if (_options.complete) _options.complete.apply(_options.context, [err, user.toObject()]);
+                if (_options.complete) _options.complete.apply(_options.context, [err, (user) ? user.toObject() : {}]);
             });
 
         }, options)
@@ -410,14 +410,13 @@ function MongoDB(instanceOptions) {
                 userData, {
                     new: true,
                     upsert: true
-                }, function (err, _user) {
-                    var user = {};
+                }, function (err, user) {
                     if (err) {
                         err.status = 404;
                         console.error(err);
                     }
-                    if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('saved and sending user: ', animal);
-                    if (_options.complete) _options.complete.apply(_options.context, [err, user.toObject()])
+                    if (_options.debug >= config.DEBUG_LEVEL_HIGH) console.log('saved and sending user: ', user);
+                    if (_options.complete) _options.complete.apply(_options.context, [err, (user) ? user.toObject() : {}])
                 })
         }, options);
     };

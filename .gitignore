@@ -12,6 +12,7 @@ public/images/pet/*.*
 ssl/*.crt
 ssl/*.key
 couchbase.config
+.google.credentials.json
 *.swp
 ### Windows template
 # Windows image file caches

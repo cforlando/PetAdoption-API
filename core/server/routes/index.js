@@ -3,15 +3,16 @@ var path = require('path'),
     util = require('util'),
 
     Express = require('express'),
-    passport = require('passport'),
 
     dump = require('../../../lib/dump'),
     router = Express.Router();
 
 
-//router.get('/', passport.authenticate('basic'), function (req, res, next) {
 router.get('/', function (req, res, next) {
-    res.render('index', { title: 'Pet Data Entry' });
+    res.render('index', {
+        user : (req.session && req.session.passport && req.session.passport.user) ? req.session.passport.user : false,
+        title: 'Pet Data Entry'
+    });
 });
 
 module.exports = router;

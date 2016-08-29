@@ -9,8 +9,7 @@ var fs = require('fs'),
     config = require('../config'),
     _ = require('lodash'),
     async = require('async'),
-    passport = require('passport'),
-    BasicStrategy = require('passport-http').BasicStrategy,
+    session = require('express-session'),
 
     serverUtils = require('./utils'),
 
@@ -31,9 +30,21 @@ server.app.set('views', path.resolve(__dirname, 'views'));
 server.app.set('view engine', 'pug');
 
 server.app.use(logger('dev'));
+server.app.use(cookieParser());
 server.app.use(bodyParser.json());
 server.app.use(bodyParser.urlencoded({extended: false}));
-server.app.use(cookieParser());
+/*
+ if (!config.isDevelopment) {
+ app.set('trust proxy', 1); // trust first proxy
+ sess.cookie.secure = true; // serve secure cookies
+ }
+ */
+server.app.set('trust proxy', 1); // trust first proxy
+server.app.use(session({
+    secret: 'cfo-petadoption-api',
+    saveUninitialized: true,
+    resave : true
+}));
 
 server.app.use(Express.static(path.join(process.cwd(), 'public')));
 
@@ -46,7 +57,7 @@ server.app.use(function (req, res, next) {
 
 // set reduceOutput flag
 server.app.use(function (req, res, next) {
-    switch (req.method){
+    switch (req.method) {
         case 'GET':
             res.locals.reducedOuput = (req.query.properties) ? serverUtils.parseArrayStr(req.query.properties) : false;
             break;
@@ -58,31 +69,6 @@ server.app.use(function (req, res, next) {
     }
     next();
 });
-
-passport.use(new BasicStrategy(function (username, password, done) {
-        var credentials = {
-            username: username,
-            password: password
-        };
-        console.log('credentials: %s', serverUtils.dump(credentials));
-        if (username && password) {
-            return done(null, credentials);
-        } else {
-            return done(null, false);
-        }
-
-    }
-));
-
-passport.serializeUser(function(user, done) {
-    done(null, user);
-});
-
-passport.deserializeUser(function(user, done) {
-    done(null, user);
-});
-
-server.app.use(passport.initialize());
 
 //CORS access
 server.app.use(function (req, res, next) {
@@ -132,7 +118,7 @@ server.app.use(function (request, response, next) {
         } else {
             response.json(response.locals.data);
         }
-    }else {
+    } else {
         next()
     }
 });
@@ -142,9 +128,9 @@ server.app.use(function (req, res, next) {
     if (/.(jpg|png)$/i.test(req.path)) {
         fs.access(path.resolve(_options.publicDir, req.path), function (err) {
             if (err) {
-                if (req.path.match(/dog/i)){
+                if (req.path.match(/dog/i)) {
                     res.sendFile(_options.placeholderDogImg);
-                } else if(req.path.match(/cat/i)){
+                } else if (req.path.match(/cat/i)) {
                     res.sendFile(_options.placeholderCatImg);
                 } else {
                     res.sendFile(_options.placeholderImg);
@@ -160,12 +146,12 @@ server.app.use(function (req, res, next) {
 
 // express error handlers
 server.app.use(function (err, req, res, next) {
-    console.log('error: %s', serverUtils.dump(err));
+    console.error('error: %s', serverUtils.dump(err));
     res.status(err.status || 500);
     res.render('error', {
         message: err.message,
         error: config.isDevelopment ? err : {},
-        isDevelopment : config.isDevelopment
+        isDevelopment: config.isDevelopment
     });
 });
 

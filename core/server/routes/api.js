@@ -1,31 +1,25 @@
-var path = require('path'),
+var Express = require('express'),
 
-    Express = require('express'),
-    multer = require('multer'),
-    passport = require('passport'),
+    handler = require('../controllers'),
+    router = Express.Router();
 
-    config = require('../../config'),
-    dump = require('../../../lib/dump'),
-    handler = require('../handler'),
-    router = Express.Router(),
 
-    _options = {
-        paths: {
-            root: path.resolve(process.cwd(), 'public/'),
-            images: '/images/pet/'
-        }
-    },
-    storage = multer.diskStorage({
-        destination: function (req, file, cb) {
-            cb(null, path.join(_options.paths.root, _options.paths.images, (req.params.species+'/')))
-        },
-        filename: function (req, file, cb) {
-            console.log('new file: %s', dump(file));
-            cb(null, file.originalname)
-        }
+
+router.use(handler.authenticator.passport.initialize());
+router.use(handler.authenticator.passport.session());
+
+router.get('/auth/google/',
+    handler.authenticator.passport.authenticate('google', {
+        scope: [
+            'https://www.googleapis.com/auth/plus.login'
+        ]
+    }));
+
+router.get('/auth/google/callback/',
+    handler.authenticator.passport.authenticate('google', {
+        failureRedirect: '/'
     }),
-    upload = multer({storage: storage});
-
+    handler.authenticator.onLoginSuccess);
 
 router.get('/options/:species', handler.onOptionsRequest);
 router.get('/options/:species/:option', handler.onSingleOptionRequest);
@@ -36,12 +30,13 @@ router.get('/list', handler.onListAllRequest);
 router.get('/list/:species', handler.onListRequest);
 router.get('/list/:species/:pageNumber', handler.onListRequest);
 router.get('/species/', handler.onSpeciesListRequest);
-router.post('/save/:species/json', handler.onJSONSave);
-router.post('/save/:species', upload.array('uploads'), handler.onMediaSave);
-router.post('/save/:species/model', handler.onModelSave);
-router.post('/remove/:species', handler.onDeleteRequest);
+router.post('/save/:species/json', handler.authenticator.verifyAuth, handler.onJSONSave);
+router.post('/save/:species', handler.authenticator.verifyAuth, handler.upload.array('uploads'), handler.onMediaSave);
+router.post('/save/:species/model', handler.authenticator.verifyAuth, handler.onModelSave);
+router.post('/remove/:species', handler.authenticator.verifyAuth, handler.onDeleteRequest);
 router.post('/query/:pageNumber', handler.onQueryRequest);
 router.post('/query', handler.onQueryRequest);
+
 
 router.get('/cleandb/', handler.onFormatDBRequestAll);
 router.get('/cleandb/:species/', handler.onFormatDBRequestSpecies);

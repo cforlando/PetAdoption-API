@@ -13,6 +13,10 @@ define([
                 });
         });
 
+    ngApp.config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.debugInfoEnabled(false);
+    }]);
+
     console.log('init angular.');
     
     return ngApp;

@@ -3,15 +3,16 @@ function ServerHandler() {
         path = require('path'),
         util = require('util'),
 
-        config = require('../config'),
+        config = require('../../config'),
         _ = require('lodash'),
         async = require('async'),
         multer = require('multer'),
 
-        database = require('../database'),
-        csvReader = require('../csv-parser'),
-        dump = require('../../lib/dump'),
-        
+        serverUtils = require('../utils'),
+        database = require('../../database'),
+        csvReader = require('../../csv-parser'),
+        dump = require('../../../lib/dump'),
+
         self = this,
         cachedSpeciesList = (function () {
             try {
@@ -29,7 +30,21 @@ function ServerHandler() {
                 root: path.resolve(process.cwd(), 'public/'),
                 images: '/images/pet/'
             }
-        };
+        },
+        storage = multer.diskStorage({
+            destination: function (req, file, cb) {
+                cb(null, path.join(_options.paths.root, _options.paths.images, (req.params.species + '/')))
+            },
+            filename: function (req, file, cb) {
+                console.log('new file: %s', dump(file));
+                cb(null, file.originalname)
+            }
+        }),
+        upload = multer({storage: storage});
+
+    this.authenticator = require('./auth');
+
+    this.upload = upload;
 
     this.onSpeciesListRequest = function (req, res, next) {
         fs.readFile(path.resolve(process.cwd(), 'data/models.json'),
@@ -104,7 +119,6 @@ function ServerHandler() {
         database.findAnimals(queryData, {
             debug: config.debugLevel,
             complete: function (err, animals) {
-                //console.log('getAnimal().mongoDB.findAnimal() - found animal:', animal);
                 if (err) {
                     next(err);
                 } else if (animals && animals.length > 0) {
@@ -206,7 +220,6 @@ function ServerHandler() {
             req.body, {
                 debug: config.debugLevel,
                 complete: function (err, result) {
-                    console.log('database.removeAnimal() - results: %j', arguments);
                     if (err) {
                         next(err);
                     } else {
@@ -235,21 +248,19 @@ function ServerHandler() {
     };
 
     this.onMediaSave = function (req, res, next) {
-        console.log('onSaveMedia: %s-\n%s', dump(req.files), dump(req.body));
         var props = req.body,
             imagesValue = props.images || '';
 
         props.images = imagesValue.split(',');
 
         _.forEach(req.files, function (fileMeta, index) {
-            props.images.push(path.join(config.domain, _options.paths.images, (req.params.species+'/'),  fileMeta.filename));
+            props.images.push(path.join(config.domain, _options.paths.images, (req.params.species + '/'), fileMeta.filename));
         });
 
-        props.images = _.filter(props.images, function(url){
+        props.images = _.filter(props.images, function (url) {
             // only truthy values
             return !!url;
         });
-        console.log('images: %s', dump(props.images));
         database.saveAnimal(
             req.params.species,
             props, {
@@ -284,10 +295,11 @@ function ServerHandler() {
 
     };
 
+    this.onLoginRequest = this.authenticator.onLoginRequest;
 
     this.onFormatDBRequestSpecies = function (req, res, next) {
 
-        require('./utils').formatter.formatDB({
+        serverUtils.formatter.formatDB({
             species: req.params.species,
             complete: function (err) {
                 if (err) {
@@ -302,7 +314,7 @@ function ServerHandler() {
     this.onFormatDBRequestAll = function (req, res, next) {
 
         async.each(cachedSpeciesList, function each(species, done) {
-            require('./utils').formatter.formatDB({
+            serverUtils.formatter.formatDB({
                 species: species,
                 complete: function (err) {
                     done(err);
