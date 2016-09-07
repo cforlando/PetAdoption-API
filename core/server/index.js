@@ -10,6 +10,7 @@ var fs = require('fs'),
     _ = require('lodash'),
     async = require('async'),
     session = require('express-session'),
+    compression = require('compression'),
 
     serverUtils = require('./utils'),
 
@@ -33,6 +34,7 @@ server.app.use(logger('dev'));
 server.app.use(cookieParser());
 server.app.use(bodyParser.json());
 server.app.use(bodyParser.urlencoded({extended: false}));
+server.app.use(compression());
 /*
  if (!config.isDevelopment) {
  app.set('trust proxy', 1); // trust first proxy
@@ -70,13 +72,18 @@ server.app.use(function (req, res, next) {
     next();
 });
 
+// Set default headers
+server.app.use(function (req, res, next){
+    res.header("Cache-Control", util.format("max-age=%s", (60 * 60))); // 60 seconds * 60 minutes
+    next();
+});
+
 //CORS access
 server.app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header("Access-Control-Allow-Origin", "*");
     next();
 });
-
 
 server.app.use('/', require('./routes/index'));
 server.app.use('/api/v1/', require('./routes/api'));

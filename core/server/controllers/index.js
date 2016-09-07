@@ -1,6 +1,7 @@
 function ServerHandler() {
     var fs = require('fs'),
         path = require('path'),
+        url = require('url'),
         util = require('util'),
 
         config = require('../../config'),
@@ -254,7 +255,8 @@ function ServerHandler() {
         props.images = imagesValue.split(',');
 
         _.forEach(req.files, function (fileMeta, index) {
-            props.images.push(path.join(config.domain, _options.paths.images, (req.params.species + '/'), fileMeta.filename));
+            var publicPath = path.join(_options.paths.images, (req.params.species + '/'), fileMeta.filename);
+            props.images.push(url.resolve(config.domain, publicPath));
         });
 
         props.images = _.filter(props.images, function (url) {

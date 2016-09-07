@@ -18,23 +18,23 @@ Current API location: http://cfo-pet-adoption-server.eastus.cloudapp.azure.com/a
 
 :xxxxx = dynamic field that must be specified within the endpoint itself
 
-Method  | Endpoint                               | Notes
---------| -------------------------------------- | ----------------------------------------------------------------
-GET     | list/                                  | will show all saved species
-GET     | list/:species                          | ex: '/list/dog' will show all saved dog species
-GET     | list/:species/:pageNumber              | paginated route for list/:species endpoint
-GET     | model/:species                         | provides JSON of model layout and meta data for species
-GET     | options/:species                       | JSON of all preselected options for given species
-GET     | options/:species/:option               | JSON of given option for a given species
-GET     | options/:species/:option/:pageNumber   | JSON of given option for a given species in pages. Page size defaults to 10. This can be changed via query argument (i.e. "/options/dog/breed/1?pageSize=15")
-GET     | schema/:species                        | returns JSON representation of a schema. Currently includes dog and cat schema
-GET     | species/                               | JSON array of possible species
-POST    | query/                                 | will match given parameters 
-POST    | query/:pageNumber                      | will match given parameters with paged results
-POST    | remove/:species                        | deletes pet as specified by `petId` or `petName`
-POST    | save/:species                          | fields will be saved as provided. Must match schema definition and should be of `multipart/form-data`. Responds with saved animal data
-POST    | save/:species/model                    | updates global model of pet in addition to saving data. Must match model format and should be of `application/json` Content-Type. Responds with saved animal data
-POST    | save/:species/json                     | fields will be saved as provided. Must match schema definition and should be of `application/json` Content-Type. Responds with saved animal data
+Method  | Endpoint                                | Notes
+--------| --------------------------------------- | ----------------------------------------------------------------
+GET     | /list                                   | will show all saved species
+GET     | /list/:species                          | ex: '/list/dog' will show all saved dog species
+GET     | /list/:species/:pageNumber              | paginated route for list/:species endpoint
+GET     | /model/:species                         | provides JSON of model layout and meta data for species
+GET     | /options/:species                       | JSON of all preselected options for given species
+GET     | /options/:species/:option               | JSON of given option for a given species
+GET     | /options/:species/:option/:pageNumber   | JSON of given option for a given species in pages. Page size defaults to 10. This can be changed via query argument (i.e. "/options/dog/breed/1?pageSize=15")
+GET     | /schema/:species                        | returns JSON representation of a schema. Currently includes dog and cat schema
+GET     | /species                                | JSON array of possible species
+POST    | /query                                  | will match given parameters 
+POST    | /query/:pageNumber                      | will match given parameters with paged results
+POST    | /remove/:species                        | deletes pet as specified by `petId` or `petName`
+POST    | /save/:species                          | fields will be saved as provided. Must match schema definition and should be of `multipart/form-data`. Responds with saved animal data
+POST    | /save/:species/model                    | updates global model of pet in addition to saving data. Must match model format and should be of `application/json` Content-Type. Responds with saved animal data
+POST    | /save/:species/json                     | fields will be saved as provided. Must match schema definition and should be of `application/json` Content-Type. Responds with saved animal data
 
 #### Queries
 
