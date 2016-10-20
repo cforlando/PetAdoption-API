@@ -33,8 +33,9 @@ POST    | /query                                  | will match given parameters
 POST    | /query/:pageNumber                      | will match given parameters with paged results
 POST    | /remove/:species                        | deletes pet as specified by `petId` or `petName`
 POST    | /save/:species                          | fields will be saved as provided. Must match schema definition and should be of `multipart/form-data`. Responds with saved animal data
-POST    | /save/:species/model                    | updates global model of pet in addition to saving data. Must match model format and should be of `application/json` Content-Type. Responds with saved animal data
 POST    | /save/:species/json                     | fields will be saved as provided. Must match schema definition and should be of `application/json` Content-Type. Responds with saved animal data
+POST    | /save/:species/model                    | updates global model of pet in addition to saving data. Must match model format and should be of `application/json` Content-Type. Responds with saved species data
+POST    | /save/:species                          | creates a new species with provided fields. Should be of `application/json` Content-Type. Responds with saved species data
 
 #### Queries
 
@@ -66,14 +67,16 @@ properties     | (String) Array  | Will only supply fields specified in array. e
 Execute `npm run test`
 
 #####TODO*
-- [ ] More tests needed
-- [ ] stub database should be used
+- [ ] More tests could always be helpful
 
 
 ## Developer Notes
 - `gulp-utils` provides easy compilation of javascript, stylus, and pug/jade files.
-    + you can can read more about how it works on its [github repo](https://github.com/khalidhoffman/gulp-utils.git)
-    + `gulp --tasks` shows a list of all possible tasks, but you'll probably only want to use `gulp build-js`
+    + you can can read more about how it works on its [github repo](https://github.com/khalidhoffman/gulp-utils)
+    + `gulp --tasks` shows a list of all possible tasks, but you'll probably only want to use:
+        - `gulp build-js` (for compiling web-interface js)
+        - `gulp pug-html` (for angular template files)
+        - `gulp stylus` (for style overrides)
 
 ## Contributors
 
