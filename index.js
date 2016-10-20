@@ -10,7 +10,7 @@ var http = require('http'),
     serverUtils = require('./core/server/utils'),
 
     database = new Database({
-        debugLevel: Debuggable.HIGH
+        debugLevel: Debuggable.PROD
     }),
     server = new Server(database),
 
