@@ -4,12 +4,19 @@ var http = require('http'),
     fs = require('fs'),
 
     config = require('./core/config'),
-    server = require('./core/server'),
+    Server = require('./core/server'),
+    Database = require('./core/mongodb'),
+    Debuggable = require('./core/lib/debuggable'),
     serverUtils = require('./core/server/utils'),
 
+    database = new Database({
+        debugLevel: Debuggable.HIGH
+    }),
+    server = new Server(database),
+
     ipAddress = (process.env.OPENSHIFT_NODEJS_IP) ? process.env.OPENSHIFT_NODEJS_IP : null,
-    httpPortNumber = serverUtils.normalizePort(process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || process.env.port || config.defaultPort),
-    httpsPortNumber = serverUtils.normalizePort(config.defaultHTTPSPort),
+    httpPortNumber = serverUtils.normalizePort(process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || process.env.port || config.port),
+    httpsPortNumber = serverUtils.normalizePort(config.httpsPort),
     privateKey  = (function(){
         try {
             return fs.readFileSync(path.resolve(__dirname, 'ssl/server.key'), 'utf8');
@@ -28,8 +35,8 @@ var http = require('http'),
     })(),
     credentials = {key: privateKey, cert: certificate},
 
-    httpServer = http.createServer(server.app),
-    httpsServer = https.createServer(credentials, server.app);
+    httpServer = http.createServer(server),
+    httpsServer = https.createServer(credentials, server);
 
 
 module.exports = {

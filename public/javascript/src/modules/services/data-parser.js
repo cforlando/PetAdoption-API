@@ -7,136 +7,138 @@ define([
         _ = require('underscore');
 
     return ngApp.service('dataParserService', function () {
-        function parsePropValue(propData) {
-            var parsedPropData = {};
+        var self = this;
+        this.getFormattedPropValue = function (propData) {
             // console.log('parsing %o (key: %s - type; %s)', propData, propData.key, propData.valType);
             switch (propData.valType) {
                 case 'Date':
                     // handle special case for date
-                    parsedPropData.val = new Date(propData.val);
-                    if (isNaN(parsedPropData.val.getTime())) {
-                        parsedPropData.val = new Date();
+                    var dateVal = new Date(propData.val);
+                    if (isNaN(dateVal.getTime())) {
+                        return new Date();
                     }
-                    break;
+                    return dateVal;
                 case 'Boolean':
-                    parsedPropData.val = (propData.val === false) ? false : propData.val;
-                    break;
+                    return (propData.val === false) ? false : propData.val;
                 case 'Location':
                 case 'Number':
                     if (propData.val) {
                         if (/\./.test(propData.val.toString())) {
                             // value is float
                             // console.log('parsing float for %O', propData);
-                            parsedPropData.val = parseFloat(propData.val);
+                            return parseFloat(propData.val);
                         } else {
                             // console.log('parsing int for %O', propData);
                             // value is integer
-                            parsedPropData.val = parseInt(propData.val || -1);
+                            return parseInt(propData.val || -1);
                         }
                     }
                     break;
                 default:
-                    parsedPropData.val = propData.val;
+                    return propData.val;
             }
-            return parsedPropData;
-        }
+        };
 
-        function parsePropOptions(propData) {
+        this.getFormattedPropOptions = function (propData) {
             if (propData) {
                 if (propData.options) {
-                    propData.options = _.uniq(propData.options);
+                    return _.uniq(propData.options);
                 } else {
                     console.log('propData(%o).key = "%s" does not have any options', propData, propData.key);
-                    propData.options = [];
+                    return []
                 }
-                return propData;
             }
-            return {options: null}; // use empty object value
-        }
+            return null; // use empty object value
+        };
 
         this.convertDataToSaveFormat = function (data) {
             console.log("convertDataToSaveFormat(%o)", data);
             var saveData = {},
                 propValue;
-            _.forEach(data, function (propData, propName, props) {
-                if(!(propData.key)) return; // skip invalid properties
-                propValue = parsePropValue(propData).val;
-                if(_.isUndefined(propValue)) return;
-                saveData[propName] = propValue;
+            _.forEach(data, function (propData) {
+                if (!(propData.key)) return; // skip invalid properties
+                propValue = self.getFormattedPropValue(propData);
+                if (_.isUndefined(propValue)) return;
+                saveData[propData.key] = propValue;
             });
             return saveData;
         };
 
-        this.convertDataToModelFormat = function (data) {
-            var _data = {};
-            _.forEach(data, function (propData, propName, props) {
-                if(!(propData.key)) return; // skip invalid properties
-                _data[propName] = _.extend({}, propData, {
-                    options: parsePropOptions(propData).options
-                });
+        this.convertDataToSpeciesFormat = function (data) {
+            var _data = [];
+            _.forEach(data, function (propData) {
+                if (!(propData.key)) return; // skip invalid properties
+                var newProp = _.defaults({
+                    options: self.getFormattedPropOptions(propData)
+                }, propData);
+                delete newProp.val; // remove saved values
+                _data.push(newProp);
+
             });
             return _data;
         };
 
         this.convertToPetData = function (responseData) {
             var _data = {};
-            _.forEach(responseData, function (propData, propName, props) {
-                if(!(propData.key)) return console.log('skipping %s (%o)', propName, propData); // skip invalid properties
-                _data[propName] = _.extend({}, propData, {
-                    val: parsePropValue(propData).val,
-                    options: parsePropOptions(propData).options
-                });
+            _.forEach(responseData, function (propData) {
+                if (!(propData.key)) return console.log('skipping %s (%o)', propData.key, propData); // skip invalid properties
+                _data[propData.key] = _.defaults({
+                    val: self.getFormattedPropValue(propData),
+                    options: self.getFormattedPropOptions(propData)
+                }, propData);
             });
             return _data;
         };
 
-        this.formatRenderData = function (model) {
+        this.formatModel = function (model) {
+            var formattedModelData = [],
+                locationRegexResult,
+                locationProps = {};
 
-            function parseModel(model) {
-                var parsedData = {},
-                    locationRegexResult,
-                    locationFieldNames = [];
-
-                _.forEach(model, function (propData, propName) {
-                    locationRegexResult = /(.*)(Lat|Lon)$/.exec(propName);
-                    if (locationRegexResult && locationRegexResult[2]) {
-                        var baseFieldName = locationRegexResult[1],
-                            baseFieldTypeName = locationRegexResult[2];
-                        locationFieldNames.push(baseFieldName);
-                        parsedData[baseFieldName] = parsedData[baseFieldName] || {
+            _.forEach(model, function (propData) {
+                if (!(propData.key)) return console.log('skipping formatting of %s (%o)', propData.key, propData); // skip invalid properties
+                locationRegexResult = /(.*)(Lat|Lon)$/.exec(propData.key);
+                if (locationRegexResult && locationRegexResult[2]) {
+                    var baseFieldName = locationRegexResult[1],
+                        baseFieldTypeName = locationRegexResult[2];
+                    locationProps[baseFieldName] = locationProps[baseFieldName] || {
                             valType: 'Location',
                             fieldLabel: baseFieldName
                         };
-                        parsedData[baseFieldName][baseFieldTypeName] = propData;
-                    } else {
-                        parsedData[propName] = propData;
+                    locationProps[baseFieldName][baseFieldTypeName] = propData;
+                    if (locationProps[baseFieldName].Lat && locationProps[baseFieldName].Lon) {
+                        // location prop fully parsed, so we push
+                        formattedModelData.push(locationProps[baseFieldName]);
+                        delete locationProps[baseFieldName];
                     }
-                });
+                } else {
+                    formattedModelData.push(propData);
+                }
+            });
 
-                return parsedData;
-            }
+            return formattedModelData;
+        };
 
-            function sortRenderDataArray(props) {
-                return _.sortBy(props, function (propData) {
-                    if (propData.key == 'petId') return 0;
-                    if (propData.key == 'images') return 1;
-                    if (propData.key == 'petName') return 2;
-                    if (propData.key == 'species') return 3;
-                    return (props.length - 1);
-                })
-            }
+        this._sortProps = function(props){
+            return _.sortBy(props, function (propData) {
+                if (propData.key == 'petId') return 0;
+                if (propData.key == 'images') return 1;
+                if (propData.key == 'petName') return 2;
+                if (propData.key == 'species') return 3;
+                return (props.length - 1);
+            })
+        };
 
-            var renderData = parseModel(model),
-                renderDataArray = Object.keys(renderData).map(function (propName) {
-                    return renderData[propName];
-                }),
-                sortedRenderDataArray = sortRenderDataArray(renderDataArray);
+        this.buildRenderData = function (model) {
+
+            var renderData = this.formatModel(model),
+                sortedRenderDataArray = this._sortProps(renderData);
 
             console.log('renderData: %o', sortedRenderDataArray);
             return sortedRenderDataArray;
-        }
+        };
 
         return this;
     });
 
-})
+});

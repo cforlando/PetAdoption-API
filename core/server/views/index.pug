@@ -1,3 +1,47 @@
-extends ./layout.pug
-block content
-    .pet-data-form
+doctype html
+html
+    head
+        title= title
+        meta(name="viewport", content="width=device-width, initial-scale=1")
+
+        //link(rel='stylesheet', href="/stylesheets/angular-material.min.css")
+        //link(rel="stylesheet", href="/stylesheets/material-icons.css")
+
+        link(rel='stylesheet', href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css")
+        link(href="//fonts.googleapis.com/icon?family=Material+Icons", rel="stylesheet")
+
+        link(rel='stylesheet', href='/stylesheets/style.css')
+
+        script(src="//maps.googleapis.com/maps/api/js")
+        //script(src="./javascript/src/vendors/requirejs/require.js")
+        //script(src="./javascript/src/rjs-config.js")
+        //script(src="./javascript/src/app.js")
+        script(src="./javascript/app.js")
+    body(ng-controller='appController')
+        .loading-screen(layout="row", layout-sm="column", layout-align="center center", ng-show="loadingQueue.length > 0")
+            md-progress-circular(md-mode="indeterminate")
+        .user-view(ng-controller='userController', layout='column', layout-fill, ng-cloak)
+            if user
+                div.main-view(layout="column", layout-fill, ng-controller='dataController')
+                    md-toolbar
+                        .md-toolbar-tools
+                            md-button(class="md-icon-button" aria-label="Side Nav Toggle" ng-click="toggleSidebar()")
+                                md-icon.material-icons menu
+                            span.md-title!=title
+                            span.flex
+                            img.user-avatar(ng-if="user.id", ng-src="{{user.photo}}", alt="{{user.firstName}}")
+                            md-button.md-icon-button(ng-click="toggleActionMenu()")
+                                md-icon.material-icons(md-menu-origin) more_vert
+                    md-content.main-view__content(layout='column', flex)
+                        md-sidenav.md-sidenav-left(md-component-id="sidenav", md-is-open="sideNav.isOpen")
+                            md-list
+                                md-list-item(ng-click="showAnimalSearch()") Search
+                                md-list-item(ng-click="showAnimalEditForm()") Add New Pet
+                                md-list-item(ng-click="showSpeciesSearch()") Edit Species
+                        ng-view(flex, layout-fill, layout='column')
+                    .action-menu
+            else
+                .view.view--login(layout-fill, layout='column')
+                    .view__content
+                        md-button.btn.btn--login.md-primary.md-raised(ng-click!='login()') Login
+        h1.loading-text(style!='text-align: center;') Loading...

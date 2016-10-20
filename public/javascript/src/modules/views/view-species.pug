@@ -1,0 +1,20 @@
+include _auto-generated/_-all
+.view.view--species(ng-controller="speciesFormController", layout='column')
+    md-content()
+        md-subheader.md-primary!="{{speciesName}}"
+        md-divider
+        div(flex)
+            md-card(md-3-line, ng-repeat="speciesProp in models[speciesName]", ng-if="isVisibleProp(speciesProp)")
+                md-card-title
+                    md-card-title-text
+                        span.md-headline!="{{speciesProp.fieldLabel}}"
+                        span.md-subhead!="{{speciesProp.key}}"
+                md-card-content(layout='column')
+                    p!="{{speciesProp.description}}"
+                md-card-actions(layout='row', layout-align='end')
+                    md-button.md-icon-button(ng-click="editProp(speciesProp)", ng-if="isEditableProp(speciesProp)")
+                        md-icon.material-icons mode_edit
+                    md-button.md-icon-button(ng-click="deleteProp(speciesProp)")
+                        md-icon.material-icons delete_forever
+    md-button.md-fab.md-primary.md-fab-bottom-right(aria-label!="Add species", ng-click="createNewProp($event)")
+        md-icon.material-icons add

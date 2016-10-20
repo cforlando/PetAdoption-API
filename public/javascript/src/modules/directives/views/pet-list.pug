@@ -1,25 +1,17 @@
 include _auto-generated/_-all
-md-sidenav.md-sidenav-right(md-component-id="sidenav", md-is-open="sideNav.isOpen")
-    .pet-list-container(ng-controller="petBatchDataController")
-        md-tabs(md-selected="petList.currentSpeciesIndex", md-dynamic-height, md-border-bottom, md-autoselect, md-stretch-tabs)
+.list(ng-controller="petBatchDataController", layout-fill, layout='column')
+    md-content
+        md-tabs(md-selected="petList.currentSpeciesIndex", md-dynamic-height, md-border-bottom, md-autoselect, md-stretch-tabs='always')
             md-tab(ng-repeat="species in speciesList", label="{{species}}")
-                md-grid-list(md-row-height="1:1", md-cols!="2")
+                md-grid-list(md-row-height="1:1", md-cols-xs= 2, md-cols-sm=3, md-cols-md=4, md-cols-lg=8, md-cols-gt-lg=12)
                     md-grid-tile(ng-repeat="pet in petList[species]", ng-style="{ 'background': 'url('+pet.images.val[0]+')', 'background-size': 'cover' }")
                         md-checkbox.checkbox(ng-model!="selectedPetsIndexCollection[species+$index]", ng-change="updatePetSelection(species+$index, pet)", aria-label="selected?")
-                        md-grid-tile-footer.tile-footer(ng-click='loadPet(pet); sideNav.isOpen=!sideNav.isOpen;')
+                        md-grid-tile-footer.tile-footer(ng-click='editPet(pet); sideNav.isOpen=false')
                             h3!="{{pet.petName.val || pet.petId.val || 'n/a'}}"
-                md-fab-speed-dial.md-fab-bottom-right.md-scale.pet-list-menu(ng-show="isBatchEditActive()", md-direction="up", md-open="isPetListMenuOpen", ng-click="togglePetListMenu()")
-                    md-fab-trigger
-                        md-button.md-fab
-                            md-icon.material-icons menu
-                    md-fab-actions
-                        md-button.md-fab.md-mini.md-raised(ng-click="batchEdit($event)")
-                            md-icon.material-icons edit
-        .invisible-container
-            #batch-edit-dialog.md-dialog-container()
-                md-dialog(aria-label="Batch Edit dialog")
-                    md-toolbar
-                        .md-toolbar-tools
-                            h2 Batch Edit
-                    md-dialog-content(layout-padding)
-                        .pet-data-form(ng-if="isBatchEditActive()")
+    md-fab-speed-dial.md-fab-bottom-right.md-scale.pet-list-menu(ng-show="isBatchEditActive()", md-direction="up", md-open="isPetListMenuOpen", ng-click="togglePetListMenu()")
+        md-fab-trigger
+            md-button.md-fab
+                md-icon.material-icons menu
+        md-fab-actions
+            md-button.md-fab.md-mini.md-raised(ng-click="batchEdit($event)")
+                md-icon.material-icons edit

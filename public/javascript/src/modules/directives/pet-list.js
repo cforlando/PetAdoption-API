@@ -7,6 +7,7 @@ define([
     ngApp.directive('petList', function(){
         return {
             restrict: 'EC',
+            replace: true,
             template: require('text!./views/pet-list.html')
         }
     });

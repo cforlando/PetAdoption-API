@@ -1,5 +1,5 @@
 define([
-    'modules/directives/pet-data-form',
+    'modules/directives/action-menu',
     'modules/directives/autocomplete-input',
     'modules/directives/date-input',
     'modules/directives/images-input',

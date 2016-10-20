@@ -1,4 +1,5 @@
 include _auto-generated/_-all
-.input.input--date
-    h4.input__label {{propData.fieldLabel}}
+include includes/_mixins
++form-input('date')
+    label.input__label {{propData.fieldLabel}}
     md-datepicker(ng-model="propData.val")

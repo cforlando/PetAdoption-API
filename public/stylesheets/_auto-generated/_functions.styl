@@ -1,3 +1,28 @@
+generateJoinedSelector($baseClass, $modifiers)
+  $selector = ''
+  for $mod in $modifiers
+    $selector += $baseClass+ '--' + $mod
+  return $selector
+
+generateJointModifierSelector($modifiers)
+  $selector = ''
+  for $mod, $index in $modifiers
+    if $index == 0
+      $selector += '../'+ '--' + $mod
+    else
+      $selector += '^[-2..-2]'+ '--' + $mod
+  return $selector
+
+generateSharedModifierSelector($modifiers)
+  $selector = ''
+  for $mod, $index in $modifiers
+    if $index == 0
+      $selector += '../'+ '--' + $mod
+    else
+      $selector += ', ../'+ '--' + $mod
+  return $selector
+
+
 
 $isMobile = 0 0;
 set-mobile(){
@@ -13,8 +38,8 @@ is-mobile(){
 }
 
 em-auto(fontSize, baseSize = false) {
-  $parentFontSize = px(baseSize || @font-size || 1em);
-  $mobileAdjustment = 1;
+  $defaultParentSize = baseSize || @font-size || 1em;
+  $parentFontSize = px($defaultParentSize);
   $fontSize = fontSize;
   if (unit(fontSize) == '') {
     $fontSize = fontSize * 1px;
@@ -23,11 +48,12 @@ em-auto(fontSize, baseSize = false) {
   //  debugLog(selector()+' is mobile');
   //  $mobileAdjustment = $ratio-font-reduction;
   //}
-  return round(((1em * $fontSize / $parentFontSize) / $mobileAdjustment), 5)
+  return round((1em * $fontSize / $parentFontSize) , 5)
 }
 
 em-auto-m(fontSize, baseSize = false) {
-  $parentFontSize = px(baseSize || @font-size || 1em);
+  $defaultParentSize = baseSize || @font-size || 1em;
+  $parentFontSize = px($defaultParentSize);
   $mobileAdjustment = $ratio-font-reduction;
   $fontSize = fontSize;
   if (unit(fontSize) == '') {

@@ -1,0 +1,14 @@
+include ../_auto-generated/_-all
+#new-species-prop-dialog.md-dialog-container()
+    md-dialog(aria-label="New Species Property Dialog")
+        md-toolbar
+            .md-toolbar-tools
+                h2 Add New Property
+        md-dialog-content
+            .md-dialog-content
+                md-input-container
+                    label Name
+                    input(ng-model="propName")
+            .actions
+                md-button(ng-click="hide()") Cancel
+                md-button(ng-click="save($event)") Create

@@ -8,8 +8,8 @@ define([
         return {
             restrict: 'EC',
             template: require('text!./views/location-input.html'),
-            controller: ['$scope', '$element', 'googleService',
-                function ($scope, $element, googleService) {
+            controller: ['$scope', '$element', 'googleService', '$timeout',
+                function ($scope, $element, googleService, $timeout) {
                     console.log('map.$scope: %o', $scope);
 
                     $scope.askForLocation = function () {
@@ -64,7 +64,9 @@ define([
                             disableDoubleClickZoom: true,
                             streetViewControl: false
                         };
-                        initializeGoogleMaps();
+                        $timeout(function(){
+                            initializeGoogleMaps();
+                        });
                     }
 
                     function initializeGoogleMaps() {

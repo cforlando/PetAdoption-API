@@ -3,14 +3,14 @@
   "basePath": "default",
   "tasks": [
     {
-      "name": "pug",
-      "input": "pug/",
-      "output": "./"
-    },
-    {
       "name": "pug-html",
       "input": "public/javascript/src/modules/directives/views/",
       "output": "public/javascript/src/modules/directives/views/"
+    },
+    {
+      "name": "pug-html",
+      "input": "public/javascript/src/modules/views/",
+      "output": "public/javascript/src/modules/views/"
     },
     {
       "name": "js",
@@ -23,7 +23,7 @@
     },
     {
       "name": "jsx",
-      "input": "js/src/"
+      "input": "public/javascript/src/"
     },
     {
       "name": "stylus",

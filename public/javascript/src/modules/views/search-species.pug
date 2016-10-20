@@ -1,0 +1,17 @@
+include _auto-generated/_-all
+.species-list(layout='column', ng-controller='speciesListController')
+    md-content
+        md-grid-list(
+        md-row-height="1:1",
+        md-cols-xs= 2,
+        md-cols-sm=3,
+        md-cols-md=4,
+        md-cols-lg=8,
+        md-cols-gt-lg=12
+        )
+            md-grid-tile(ng-repeat="species in speciesList", ng-click="showSpecies(species)", ng-style="{ 'background': 'url(\"/images/placeholders/'+species+'.png\") center', 'background-size': 'cover'}")
+                md-grid-tile-footer.tile-footer()
+                    h3!="{{species}}"
+    md-button.md-fab.md-primary.md-fab-bottom-right(aria-label!="Add species", ng-click="createNewProp($event)")
+        md-icon.material-icons add
+

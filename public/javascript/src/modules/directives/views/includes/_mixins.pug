@@ -1,0 +1,15 @@
+mixin form-input(type)
+    -
+        type = type || 'default';
+    .input(class!='input--'+type+" {{isDefaultAllowed(propData) ? '' : 'input--no-default'}}")
+        .input__input
+            block
+        .input__menu(ng-if="isDefaultAllowed(propData)")
+            md-menu
+                md-button.md-icon-button(ng-click="$mdOpenMenu($event)")
+                    md-icon.material-icons more_vert
+                md-menu-content
+                    md-menu-item.action.action--set-default
+                        md-button.action__button(ng-click='setAsDefault(propData)') Set As Default
+                    md-menu-item.action.action--set-default
+                        md-button.action__button(ng-click='resetFromDefault(propData)') Reset To Default

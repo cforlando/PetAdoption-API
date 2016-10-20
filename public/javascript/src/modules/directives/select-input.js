@@ -24,16 +24,6 @@ define([
                         }
                     }
 
-                    $scope.getLabel = function (option){
-                        if(option === true){
-                            return 'Yes';
-                        } else if(option === false){
-                            return 'No'
-                        } else {
-                            return option;
-                        }
-
-                    };
 
                     $scope.$watch('propData.options', function(){
                         init();

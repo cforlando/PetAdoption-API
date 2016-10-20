@@ -1,0 +1,14 @@
+include ../_auto-generated/_-all
+#new-species-dialog.md-dialog-container()
+    md-dialog(aria-label="New Species Dialog")
+        md-toolbar
+            .md-toolbar-tools
+                h2 Add New Species
+        md-dialog-content
+            .md-dialog-content
+                md-input-container
+                    label Species Name
+                    input(ng-model="speciesName")
+            .actions
+                md-button(ng-click="hide()") Cancel
+                md-button(ng-click="save($event)") Create

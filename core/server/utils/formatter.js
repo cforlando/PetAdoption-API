@@ -6,35 +6,36 @@ var util = require('util'),
     async = require('async'),
     _ = require('lodash'),
 
-    config = require('../../config'),
-    database = require('../../database');
+    Debuggable = require('../../lib/debuggable'),
+    config = require('../../config');
 
 /**
  *
+ * @extends Debuggable
+ * @class DataFormatter
+ * @param {MongoAPIDatabase} database
+ * @param {SpeciesDBImage[]} dbConfigurations
  * @param {Object} [options]
  * @param {Boolean} [options.createMissingFields=false]
  * @param {Boolean} [options.populateEmptyFields=false]
  * @constructor
  */
-function ModelFormatter(options) {
+function DataFormatter(database, dbConfigurations, options) {
     var self = this,
-        cachedModels = (function () {
-            try {
-                return JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'data/models.json'), {encoding: 'utf8'}));
-            } catch (err) {
-                console.log(err);
-                return {};
-            }
-        })(),
-        formatterOptions = _.defaults(options, {
-            createMissingFields : false,
-            populateEmptyFields : false
+        _options = _.defaults(options, {
+            debugTag: 'DataFormatter: ',
+            debugLevel: Debuggable.PROD,
+            createMissingFields: false,
+            populateEmptyFields: false
         });
 
+    this.setDebugLevel(_options.debugLevel);
+    this.setDebugTag(_options.debugTag);
     /**
      *
      * @param options
-     * @param options.complete
+     * @param {String} [options.species='cat']
+     * @param {Function} options.complete
      */
     this.formatDB = function (options) {
         var _options = _.defaults(options, {species: 'cat'}),
@@ -42,15 +43,19 @@ function ModelFormatter(options) {
             updatedAnimal;
 
         database.findAnimals(queryData, {
-            debug: config.debugLevel,
+            debugLevel: _options.debugLevel,
             complete: function (err, animals) {
                 async.each(animals, function each(animal, done) {
-                    updatedAnimal = self.formatAnimal(animal);
-                    self._saveAnimal(updatedAnimal, {
-                        complete: function () {
-                            done();
-                        }
-                    });
+                    if (animal) {
+                        updatedAnimal = self.formatAnimal(animal);
+                        self._saveAnimal(updatedAnimal, {
+                            complete: function () {
+                                done();
+                            }
+                        });
+                    } else {
+                        done();
+                    }
                 }, function complete() {
                     if (_options.complete) _options.complete.apply(_options.context);
                 });
@@ -68,17 +73,17 @@ function ModelFormatter(options) {
 
     this._saveAnimal = function (animalProps, options) {
         var _options = _.defaults(options, {}),
-            reducedModel = {};
+            reducedAnimalProps = _.reduce(animalProps, function (collection, propData, propName) {
+                collection[propName] = propData.val;
+                return collection;
+            }, {});
 
-        _.forEach(animalProps, function (propData, propName) {
-            reducedModel[propName] = propData.val;
-        });
+        this.log(Debuggable.PROD, 'saving %j', reducedAnimalProps);
 
-        console.log('saving %j', reducedModel);
-
-        database.saveAnimal(reducedModel.species, reducedModel, {
-            debug: config.debugLevel,
+        database.saveAnimal(reducedAnimalProps.species, reducedAnimalProps, {
+            debugLevel: _options.debugLevel,
             complete: function (err, newAnimal) {
+                if (err) console.error(err);
                 if (_options.complete) _options.complete.apply(_options.context, [null, newAnimal])
             }
         });
@@ -86,29 +91,32 @@ function ModelFormatter(options) {
 
     this.formatAnimal = function (animalProps) {
         var self = this,
-            species = animalProps.species.val || self._pickRandomOption(['dog', 'cat']);
-        console.log('formatting a %s', species);
-        _.forEach(cachedModels[species], function (propData, propName) {
-            switch (propName) {
+            species = animalProps.species.val || self._pickRandomOption(['dog', 'cat']),
+            dbConfig = _.find(dbConfigurations, function (dbConfig) {
+                return species == dbConfig.getSpeciesName();
+            });
+        this.log(Debuggable.PROD, 'formatting a %s', species);
+        _.forEach(dbConfig.getSpeciesProps(), function (propData) {
+            switch (propData.key) {
                 case 'images':
-                    var images = (animalProps[propName] && _.isArray(animalProps[propName].val)) ? animalProps[propName].val : (propData.defaultVal || propData.example);
+                    var images = (animalProps[propData.key] && _.isArray(animalProps[propData.key].val)) ? animalProps[propData.key].val : (propData.defaultVal || propData.example);
                     propData.val = self.formatImagesArray(images, {species: species});
-                    animalProps[propName] = propData;
+                    animalProps[propData.key] = propData;
                     break;
                 case 'species':
-                    animalProps[propName] = _.defaults( {val: species}, animalProps[propName] || propData);
+                    animalProps[propData.key] = _.defaults({val: species}, animalProps[propData.key] || propData);
                     break;
                 default:
-                    if (formatterOptions.createMissingFields){
+                    if (_options.createMissingFields) {
                         // assign values for all possible fields
-                        animalProps[propName] = _.defaults(animalProps[propName], propData);
-                    } else if (animalProps[propName]) {
+                        animalProps[propData.key] = _.defaults(animalProps[propData.key], propData);
+                    } else if (animalProps[propData.key]) {
                         // assign values for only currently assigned fields
-                        _.defaults(animalProps[propName], propData)
+                        animalProps[propData.key] = _.defaults(animalProps[propData.key], propData);
                     }
-                    if (formatterOptions.populateEmptyFields && _.isUndefined(animalProps[propName].val)) {
+                    if (_options.populateEmptyFields && _.isUndefined(animalProps[propData.key].val)) {
                         // chose a random value for a field
-                        animalProps[propName].val = self._pickRandomOption(propData.options) || animalProps[propName].val || propData.example || propData.defaultVal;
+                        animalProps[propData.key].val = self._pickRandomOption(propData.options) || animalProps[propData.key].val || propData.example || propData.defaultVal;
                     }
             }
         });
@@ -116,17 +124,20 @@ function ModelFormatter(options) {
     };
 
     this.formatImagesArray = function (imagesArr, options) {
-        var _options = _.defaults({species : 'dog'}, options);
-        console.log("formatting %s images", imagesArr.length);
-        function formatImgURL(imageURL) {
+        var _options = _.defaults({species: 'dog'}, options);
+        this.log(Debuggable.LOW, "formatting %s images", imagesArr.length);
+
+        return imagesArr.map(function formatImgURL(imageURL) {
             var fileBaseName = path.basename(imageURL),
                 relativeImagePath = util.format('/images/pet/%s/', _options.species);
             return url.resolve(config.domain, path.join(relativeImagePath, fileBaseName));
-        }
-
-        return imagesArr.map(formatImgURL);
+        });
     };
-};
+
+    return this;
+}
+
+DataFormatter.prototype = new Debuggable();
 
 
-module.exports = new ModelFormatter();
+module.exports = DataFormatter;

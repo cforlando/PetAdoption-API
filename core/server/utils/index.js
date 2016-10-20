@@ -28,6 +28,5 @@ module.exports = {
         }
         return false;
     },
-    formatter : require('./formatter'),
     dump : require('../../../lib/dump')
 };

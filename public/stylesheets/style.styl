@@ -24,9 +24,23 @@ $color-black = #000;
   top: calc(50vh - .5em);
   width: 100%;
 
+.loading-screen
+  transition opacity 400ms linear
+  position fixed
+  top 0
+  left 0
+  width 100%
+  bottom 0
+  right 0
+  z-index 999
+  background transparentify($color-black, 50%)
+  opacity 1
+  &.ng-hide
+    opacity 0
+
 body
   animation: fadeIn 600ms ease;
-  overflow hidden;
+  overflow-x hidden;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif
   > md-progress-linear
     position: fixed;
@@ -34,13 +48,29 @@ body
     left: 0;
     z-index: 3;
 
-.main-layout
-  > .main-content
+.main-view
+  > &__content
     overflow-y: auto;
     overflow-x: hidden;
 
 a
   color: #00B7FF
+
+md-sidenav
+  z-index 81 // ensures overlay over dialogs
+
+.action
+  &--bottommenu
+    md-icon
+      height: 1em;
+      width: 3em;
+      font-size: 4em;
+
+.user-avatar
+  height 1.5em
+  width auto
+  border-radius 50%;
+  overflow hidden
 
 .pet-list
   .checkbox
@@ -78,14 +108,34 @@ a
   display: block;
   margin-left: auto;
   margin-right: auto;
-  padding 0 1.5em
   &__label
     color: rgba(0, 0, 0, 0.54);
+    display block
     font-weight: normal;
-    margin: 0 auto;
-    padding 0 em-auto(4px)
-  &--map
-    margin 0 auto 3em
+    font-size em-auto(14 * .75, 14) // multiply by .75 to match scale transform on other labels
+    padding 0 em-auto(3px)
+
+.pet-data-form
+  .input
+    padding 0 1.5em
+    &__label
+      margin: 0 auto;
+    &--map
+      margin 0 auto 3em
+    &__input
+      width calc("100% - 4em", 75%) // kouto-swiss usage
+      ^[0]--no-default &
+        width calc("100% - 1.5em", 83%) // kouto-swiss usage
+    &__menu
+      margin-top 1em
+      ^[0]--date &
+        margin-top .5em
+    &__input,
+    &__menu
+      display inline-block
+      vertical-align top
+
+
 
 .fab-anchor
   position: relative;
@@ -167,14 +217,11 @@ a
   bottom auto
   top: em-auto(12);
 
-
-.login
-  height 100%
-  &__content
-    height 100%
-    position relative
-    text-align center
-  .btn
-    &--login
-      position relative
-      top 50%
+.view
+  &--species
+    md-content
+      padding-bottom 7em
+  &--login
+    justify-content center
+    .view__content
+      text-align center

@@ -2,6 +2,7 @@ require([
     'require',
     'domReady!',
     'ngApp',
+    'ng-router',
     'ng-services',
     'ng-controllers',
     'ng-directives'

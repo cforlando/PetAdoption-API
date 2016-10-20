@@ -1,12 +1,13 @@
 {
   "name": "pet-adoption-server",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "bin": {
     "pet-adoption-api-server": "bin/start-server.js"
   },
   "scripts": {
     "start": "node bin/start-server.js",
     "dev": "nodemon bin/start-server.js",
+    "doc": "jsdoc ./core -r -c ./jsdoc.conf.json -d ./docs",
     "setup:dev": "dp-setup",
     "test:init": "jasmine init",
     "generate-ssl": "mkdir ssl; openssl genrsa 1024 > ./ssl/server.key; chmod 400 ./ssl/server.key; openssl req -new -x509 -nodes -sha1 -days 365 -key ./ssl/server.key -out ./ssl/server.crt",
@@ -36,23 +37,26 @@
     "passport-http": "^0.3.0",
     "passport-local": "^1.0.0",
     "pug": "^2.0.0-beta4",
-    "request": "^2.70.0",
+    "q": "^1.4.1",
+    "request": "^2.75.0",
     "serve-favicon": "~2.3.0",
     "stylus": "^0.54.2",
     "url": "^0.11.0"
   },
   "devDependencies": {
-    "gulp-utils": "git://github.com/khalidhoffman/gulp-utils.git",
+    "glob": "^7.1.1",
+    "gulp-utils": "git://github.com/khalidhoffman/gulp-utils.git#dev",
     "jasmine": "^2.4.1",
     "jasmine-spec-reporter": "^2.5.0",
-    "request": "^2.73.0",
+    "jsdoc": "^3.4.1",
+    "jsdox": "^0.4.10",
     "supertest": "^1.2.0"
   },
   "description": "The Pet Adoption API is a project using the ASP.NET WebAPI and MVC stack.  Project is set and built with Visual Studio 2015 Community Edition as it is open-source. Database and API hosted in Azure Platform.",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/khalidhoffman/PetAdoption-API.git"
+    "url": "git+https://github.com/cforlando/PetAdoption-API.git"
   },
   "keywords": [
     "codefororlando",

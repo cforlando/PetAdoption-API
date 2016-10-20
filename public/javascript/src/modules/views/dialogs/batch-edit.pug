@@ -1,0 +1,8 @@
+include ../_auto-generated/_-all
+#batch-edit-dialog.md-dialog-container()
+    md-dialog(aria-label="Batch Edit dialog")
+        md-toolbar
+            .md-toolbar-tools
+                h2 Batch Edit
+        md-dialog-content(layout-padding)
+            .pet-data-form(ng-if="isBatchEditActive()")
