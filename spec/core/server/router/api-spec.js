@@ -36,12 +36,9 @@ describe("Router", function () {
     });
 
     afterAll(function(done){
-        apiDatabase.stop(done);
+        apiDatabase.stop();
+        done();
     });
-
-    // afterAll(function(done){
-    //     apiDatabase.stop(done);
-    // });
 
     describe("test data", function () {
 

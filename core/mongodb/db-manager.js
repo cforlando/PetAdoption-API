@@ -396,7 +396,7 @@ DatabaseManager.prototype = {
                 done();
             }
         }, function complete(err) {
-            callback(err);
+            if (callback) callback(err);
         });
     }
 
