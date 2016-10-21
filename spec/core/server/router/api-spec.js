@@ -114,7 +114,9 @@ describe("Router", function () {
                         .expect(function (res) {
                             _.forEach(res.body, function (animal) {
                                 _.forEach(animal, function (animalPropData, propName) {
-                                    if (!_.isPlainObject(animalPropData)) throw new Error("a %s did not return an object for %s", speciesName, propName);
+                                    if (!_.isPlainObject(animalPropData)) {
+                                        throw new Error(sprintf("a %s did not return an object for %s", speciesName, propName));
+                                    }
                                     expect(animalPropData.val).not.toBeUndefined(sprintf('%s.val not defined', dump(animal)));
                                     expect(animalPropData.example).not.toBeUndefined(sprintf('%s.example not defined', dump(animal)));
                                     expect(animalPropData.defaultVal).not.toBeUndefined();

@@ -28,34 +28,35 @@ mongoose.Promise = require('q').Promise;
  */
 function MongoDBAdapter(options) {
     var _options = _.defaults(options, {
-            retryTimeout: 2000,
-            debugTag: 'MongoDBAdapter: ',
-            debugLevel: Debuggable.PROD,
-            context: null,
-            onFailure: function () {
-                console.error.apply(console, arguments);
-            }
-        });
+        retryTimeout: 2000,
+        debugTag: 'MongoDBAdapter: ',
+        debugLevel: Debuggable.PROD,
+        context: null,
+        onFailure: function () {
+            console.error.apply(console, arguments);
+        }
+    });
 
     this.setDebugTag(_options.debugTag);
     this.setDebugLevel(_options.debugLevel);
 
     var localConfig = (function () {
-            var config = {
-                username: 'username',
-                password: 'password',
-                domain: 'example.com',
-                port: 'port',
-                database: 'no_database_provided'
-            };
-            try {
-                //override template config with local json file data
-                config = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'mongodb.config')));
-            } catch (e) {
-                self.error(e);
-            }
-            return config;
-        })();
+        var self = this;
+        var config = {
+            username: 'username',
+            password: 'password',
+            domain: 'example.com',
+            port: 'port',
+            database: 'no_database_provided'
+        };
+        try {
+            //override template config with local json file data
+            config = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'mongodb.config')));
+        } catch (e) {
+            self.error(e);
+        }
+        return config;
+    })();
 
     this._identity = {
         username: process.env.username || localConfig.username,
@@ -97,7 +98,7 @@ MongoDBAdapter.prototype = {
      */
     connect: function (options) {
         var self = this,
-            mongodbCred = util.format('%s%s', this._identity.username ? this._identity.username :  '', this._identity.password ? ':'+this._identity.password : ''),
+            mongodbCred = util.format('%s%s', this._identity.username ? this._identity.username : '', this._identity.password ? ':' + this._identity.password : ''),
             mongodbURL = util.format("mongodb://%s%s:%s/%s", mongodbCred ? mongodbCred + '@' : '', this._identity.domain, this._identity.port, this._identity.database),
             _options = options || {},
             context = _options.context || this._context,

@@ -33,7 +33,7 @@ function AnimalModelFactory(modelName, speciesProps, options) {
     this.log(Debuggable.HIGH, 'Set mongoose animal model name to ', this.getModelName());
     this.setSpeciesProps(speciesProps);
 
-    _.forEach(speciesProps, function (propData) {
+    _.forEach(this.speciesProps, function (propData) {
         self.addSchemaProp(propData.key, self.getPropValueSchemaType(propData.key));
     });
 
@@ -167,31 +167,29 @@ AnimalModelFactory.prototype = {
         this.log(Debuggable.TMI, "_formatAnimalForResponse() - formatting %s with: %s", animal, this.dump(this.getAnimalProps()));
 
 
-        var formattedAnimalData = _.reduce(_.pick(animalData, self.getAnimalProps().map(function (speciesPropData) {
-                return speciesPropData.key
-            })),
-            function (propCollection, propValue, propName) {
-                self.log(Debuggable.HIGH, "parsing prop '%s' for response", propName);
-                switch (propName) {
-                    case '_id':
-                    case '__v':
-                        // skip internal mongodb fields
-                        return propCollection;
-                        break;
-                    case 'petId':
-                        propValue = animalData._id;
-                        break;
-                    default:
-                        break;
-                }
-                var propData = _.defaults({val: propValue}, self.getAnimalProp(propName)),
+        var formattedAnimalData = _.reduce(self.getAnimalProps(), function (propCollection, speciesPropData) {
+            var propValue = animalData[speciesPropData.key];
+            self.log(Debuggable.HIGH, "parsing prop '%s' for response", speciesPropData.key);
+            switch (speciesPropData.key) {
+                case '_id':
+                case '__v':
+                    // skip internal mongodb fields
+                    return propCollection;
+                    break;
+                case 'petId':
+                    propValue = animalData._id;
+                    break;
+                default:
+                    break;
+            }
+            if (propValue != undefined || propValue != null) {
+                var propData = _.defaults({val: propValue}, self.getAnimalProp(speciesPropData.key)),
                     prop = new Prop(self.getAnimalProps(), propData);
-                propCollection[propName] = (_options.isV1Format) ? prop.getV1Format() : prop.getV2Format();
-                return propCollection;
-            }, {});
+                propCollection[speciesPropData.key] = (_options.isV1Format) ? prop.getV1Format() : prop.getV2Format();
+            }
+            return propCollection;
+        }, {});
 
-        // manually set petId if not already set
-        if (!formattedAnimalData.petId) formattedAnimalData.petId = animalData._id;
 
         return formattedAnimalData;
     },
@@ -236,7 +234,20 @@ AnimalModelFactory.prototype = {
     },
 
     setSpeciesProps: function (props) {
-        this.speciesProps = props;
+        // manually set petId if not already set
+        var speciesPetIdProp = _.find(props, {key: 'petId'});
+        if (!speciesPetIdProp) {
+            this.speciesProps = [{
+                description: 'auto generated',
+                defaultVal: '',
+                example: 'auto_generated',
+                key: 'petId',
+                note: 'auto generated',
+                valType: 'String'
+            }].concat(props);
+        } else {
+            this.speciesProps = props;
+        }
     },
 
     getAnimalProps: function () {

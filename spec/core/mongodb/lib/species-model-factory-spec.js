@@ -1,4 +1,6 @@
-var SpeciesFactory = require('../../../../core/mongodb/lib/species-model-factory'),
+var _ = require('lodash'),
+
+    SpeciesFactory = require('../../../../core/mongodb/lib/species-model-factory'),
     Debuggable = require('../../../../core/lib/debuggable'),
     MongoDBAdapter = require('../../../../core/mongodb/lib/adapter');
 
@@ -57,7 +59,11 @@ describe("SpeciesModelFactory", function () {
                     if (err) throw err;
                     aSpecies = savedSpecies.toObject();
                     expect(aSpecies).not.toBeUndefined('No species was returned on save');
-                    expect(aSpecies.responseFormat).toEqual(speciesProps, "responseFormat not set");
+                    _.forEach(speciesProps, function(speciesPropData){
+                        var savedSpeciesPropData = _.find(aSpecies.responseFormat, {key: speciesPropData.key});
+                        expect(savedSpeciesPropData).toEqual(speciesPropData)
+                    });
+                    expect(aSpecies.responseFormat).not.toBeUndefined("responseFormat not set");
                     done();
                 });
             })
@@ -68,7 +74,10 @@ describe("SpeciesModelFactory", function () {
                 tSpeciesModel.getLatest(function (err, foundSpecies) {
                     if (err) throw err;
                     expect(foundSpecies).not.toBeUndefined('No species was returned on save');
-                    expect(foundSpecies.responseFormat).toEqual(speciesProps);
+                    _.forEach(speciesProps, function(speciesPropData){
+                        var foundSpeciesPropData = _.find(foundSpecies.responseFormat, {key: speciesPropData.key});
+                        expect(foundSpeciesPropData).toEqual(speciesPropData)
+                    });
                     done()
                 });
             })

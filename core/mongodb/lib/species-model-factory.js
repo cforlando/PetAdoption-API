@@ -87,7 +87,7 @@ SpeciesModelFactory.prototype = {
                 defaultVal: [],
                 description: 'identifier',
                 note: '',
-                required: 'Yes',
+                required: true,
                 options: []
             },
             {
@@ -98,7 +98,7 @@ SpeciesModelFactory.prototype = {
                 defaultVal: '',
                 description: 'Species of the animal',
                 note: '',
-                required: 'Yes',
+                required: true,
                 options: []
             }
         ];

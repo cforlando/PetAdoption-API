@@ -151,9 +151,9 @@ describe("MongoAPIDatabase", function () {
                     aNewDateProp: moment().subtract(3, 'days').toDate().toISOString()
                 }
                 ,
-                newPropKeys = newPresetSpeciesProps.map(function(propData){
+                newPropKeys = _.uniq(newPresetSpeciesProps.map(function(propData){
                     return propData.key
-                });
+                }).concat('petId', 'species'));
 
             apiDatabase.saveSpecies(newSpeciesName, newPresetSpeciesProps, {
                 complete: function (err, newlySavedSpeciesProps) {
@@ -168,7 +168,9 @@ describe("MongoAPIDatabase", function () {
                             if (err) throw err;
                             _.forEach(animal, function (animalPropVal, animalPropName) {
                                 expect(_.includes(newPropKeys, animalPropName)).toBe(true, util.format('new animal props (%j) shouldn\'t contain %s', newPropKeys, animalPropName));
-                                expect(animalPropVal).toEqual(newSpeciesTestAnimal[animalPropName], 'the returned values should match the new original values');
+                            });
+                            _.forEach(newSpeciesTestAnimal, function (newSpeciesTestAnimalProp, newSpeciesTestAnimalPropName) {
+                                expect(animal[newSpeciesTestAnimalPropName]).toEqual(newSpeciesTestAnimalProp, 'the returned values should match the new original values');
                             });
                             done();
                         }
