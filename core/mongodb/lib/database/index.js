@@ -158,7 +158,7 @@ Database.prototype = {
      */
     stop: function (callback) {
         this._isActive = false;
-        if (!this._adapter.isClosed()) {
+        if (!(this._adapter.isClosed() || this._adapter.isDisconnecting())) {
             this._adapter.close(callback);
         } else {
             callback();
