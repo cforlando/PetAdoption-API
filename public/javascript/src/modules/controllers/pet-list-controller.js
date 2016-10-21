@@ -17,10 +17,6 @@ define([
                 registered: []
             };
 
-            $scope.hideDialog = function () {
-                $scope.$broadcast('dialog:hide');
-            };
-
             $scope.getActiveSpecies = function () {
                 var defaultSpecies = 'dog',
                     species = false;
@@ -38,7 +34,7 @@ define([
                 return (_.keys($scope.selectedPetsDataCollection).length > 0);
             };
 
-            $scope.updatePetSelection = function (petIndexID, petData) {
+            $scope.togglePetSelection = function (petIndexID, petData) {
                 if ($scope.selectedPetsDataCollection[petIndexID]) {
                     delete $scope.selectedPetsDataCollection[petIndexID];
                 } else {
@@ -57,10 +53,32 @@ define([
                 });
             };
 
+            $scope.isEditableByBatch = function(propData){
+                switch(propData.key){
+                    case 'petName':
+                        return false;
+                    default:
+                        break;
+                }
+                switch(propData.valType){
+                    case 'String':
+                    case 'Number':
+                    case 'Boolean':
+                    case 'Date':
+                        return true;
+                    default:
+                        return false;
+                }
+            };
+
+            $scope.closeBatchEditDialog = function(){
+                $scope.$broadcast('dialog:batch-edit:hide');
+            };
+
             $scope.batchEdit = function (ev) {
                 $mdDialog.show({
                     controller: function ($scope, $mdDialog) {
-                        var hideListenerRemover = $scope.$on('dialog:hide', function () {
+                        var hideListenerRemover = $scope.$on('dialog:batch-edit:hide', function () {
                             console.log('petList: mdDialog: closing dialog');
                             $mdDialog.hide();
                             hideListenerRemover();
@@ -93,6 +111,6 @@ define([
                 });
             };
 
-            console.log('petBatchDataController($scope = %o)', $scope);
+            console.log('petListController($scope = %o)', $scope);
         }]);
 });

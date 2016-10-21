@@ -5,4 +5,22 @@ include ../_auto-generated/_-all
             .md-toolbar-tools
                 h2 Batch Edit
         md-dialog-content(layout-padding)
-            .pet-data-form(ng-if="isBatchEditActive()")
+            .batch-form(ng-if="isBatchEditActive()")
+                .pet-data-form(ng-controller="petFormController")
+                    //.batch-edit-list(ng-if="isBatchMode()")
+                    //    .batch-edit-list__content
+                    //        .pet-thumbnail(ng-repeat="pet in $parent.selectedPetsDataCollection")
+                    //            .pet-thumbnail__placeholder(ng-style!="background:url('{{pet.images.val[0]}}')")
+                    .fields
+                        .field(class="field--{{propData.key}}", ng-repeat="propData in properties", ng-if="isEditableByBatch(propData)")
+                            .date-input(ng-if="isDateField(propData)")
+                            .textarea-input(ng-if="isParagraphField(propData)")
+                            .autocomplete-input(ng-if="isAutocompleteField(propData)")
+                            .autocomplete-input(ng-if="isNumberField(propData)")
+                            .select-input(ng-if="isBooleanInput(propData)")
+                            .select-input(ng-if="isSelectInput(propData)")
+                    .nav
+                        md-input-container
+                            md-button.btn-submit.md-primary.md-raised(ng-click='savePet()') Save
+                            md-button.btn-remove.md-warn.md-raised(ng-click='deletePet()') Delete
+                            md-button.btn-remove.md-clear.md-raised(ng-click='clearPetData()') Clear

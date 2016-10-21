@@ -14,9 +14,9 @@ define([
                 });
         });
 
-    // ngApp.config(['$compileProvider', function ($compileProvider) {
-    //     $compileProvider.debugInfoEnabled(false);
-    // }]);
+    ngApp.config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.debugInfoEnabled(false);
+    }]);
 
     console.log('init angular.');
     

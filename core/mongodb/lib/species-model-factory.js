@@ -39,6 +39,7 @@ function SpeciesModelFactory(modelName, options) {
 
     this.addMiddleware('pre', 'save', function (next) {
         this.timestamp = new Date();
+        this.json = JSON.stringify(self._autofillSpeciesData(JSON.parse(this.json)));
         next();
     });
 
@@ -76,6 +77,38 @@ function SpeciesModelFactory(modelName, options) {
 }
 
 SpeciesModelFactory.prototype = {
+    _autofillSpeciesData : function(props){
+        var requiredProps = [
+            {
+                key: 'petId',
+                valType: 'String',
+                fieldLabel: "Pet ID",
+                example: '',
+                defaultVal: [],
+                description: 'identifier',
+                note: '',
+                required: 'Yes',
+                options: []
+            },
+            {
+                key: 'species',
+                valType: 'String',
+                fieldLabel: "Animal's Species",
+                example: 'dog',
+                defaultVal: '',
+                description: 'Species of the animal',
+                note: '',
+                required: 'Yes',
+                options: []
+            }
+        ];
+
+        _.forEach(requiredProps, function(requiredPropData){
+            var newRequiredProp = _.find(props, {key: requiredPropData.key});
+            if (!newRequiredProp) props.push(requiredPropData);
+        });
+        return props;
+    },
 
     _generateResponse: function (doc) {
         if (!doc.json) {
@@ -112,7 +145,7 @@ SpeciesModelFactory.prototype = {
         return speciesDocData;
     }
 
-}
+};
 
 _.extend(SpeciesModelFactory.prototype, ModelFactory.prototype);
 

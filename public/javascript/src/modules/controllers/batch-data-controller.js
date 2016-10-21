@@ -7,7 +7,7 @@ define([
     var ngApp = require('ngApp'),
         async = require('async'),
         _ = require('underscore');
-    ngApp.controller('petBatchDataController', [
+    ngApp.controller('batchDataController', [
         '$scope',
         function ($scope) {
 
@@ -21,7 +21,7 @@ define([
                     done: function (petListErr) {
                         $scope.hideLoading();
                         $scope.showMessage(options.doneMessage || "All pets updated");
-                        $scope.hideDialog();
+                        $scope.closeBatchEditDialog();
                         $scope.clearSelectedPets();
                         if (options.done) options.done.apply(null, [opErr || petListErr]);
                         // $scope.clearSelectedPets();
@@ -49,18 +49,9 @@ define([
                         } else {
                             var batchPetData = _.map(model, function (propData) {
                                 switch (propData.key) {
-                                    case 'petId':
-                                    case 'petName':
-                                    case 'images':
-                                    // ignore these fields as they should never be batch edited
-                                    case 'shelterGeoLat':
-                                    case 'shelterGeoLon':
-                                    case 'lostGeoLat':
-                                    case 'lostGeoLon':
-                                        // ignore these as rendering 4 maps may have performance consequences
-                                        break;
                                     case 'species':
                                         propData.val = modelSpecies;
+                                        return propData;
                                         break;
                                     default:
                                         return _.omit(propData, ['val']);
@@ -77,11 +68,11 @@ define([
 
             /**
              *
-             * @param {Object} petProps
+             * @param {Object} batchPetProps
              * @param {Object} [options]
              * @param {Function} [options.done]
              */
-            $scope.savePet = function (petProps, options) {
+            $scope.savePet = function (batchPetProps, options) {
                 var _options = _.defaults({
                     doneMessage: 'All pets updated'
                 }, options);
@@ -94,11 +85,10 @@ define([
                                 done(new Error('Could not save pet data'));
                             } else {
                                 console.log('petList.savePet() - getPet result: %o', petData);
-                                _.forEach(petProps, function (propData, propName) {
-                                    if (propData && propData.val) {
-                                        petData[propName] = petData[propName] || propData;
-                                        petData[propName].val = propData.val;
-                                        console.log('petList: batch updating %s to %s', propName, petData[propName].val);
+                                _.forEach(batchPetProps, function (batchPropData) {
+                                    if (batchPropData && batchPropData.val !== undefined && batchPropData.val !== null && $scope.isEditableByBatch(batchPropData)) {
+                                        petData[batchPropData.key] =  batchPropData;
+                                        console.log('petList: batch updating %s to %s', batchPropData.key, petData[batchPropData.key].val);
                                     }
                                 });
                                 console.log('petList: saving %s[%s]', petData.petName.val, petData.petId.val);

@@ -157,6 +157,39 @@ define([
                     _options = _.defaults(options, {
                         speciesProps: [
                             {
+                                key: 'petId',
+                                valType: 'String',
+                                fieldLabel: "Pet ID",
+                                example: '',
+                                defaultVal: [],
+                                description: 'identifier',
+                                note: '',
+                                required: 'Yes',
+                                options: []
+                            },
+                            {
+                                key: 'species',
+                                valType: 'String',
+                                fieldLabel: "Animal's Species",
+                                example: 'dog',
+                                defaultVal: speciesName,
+                                description: 'Species of the animal',
+                                note: '',
+                                required: 'Yes',
+                                options: $scope.speciesList
+                            },
+                            {
+                                key: 'images',
+                                valType: '[Image]',
+                                fieldLabel: "Pet images",
+                                example: ['http://placehold.it/500x500'],
+                                defaultVal: [],
+                                description: 'Images of the animal',
+                                note: '',
+                                required: 'No',
+                                options: []
+                            },
+                            {
                                 key: 'petName',
                                 valType: 'String',
                                 fieldLabel: "Pet's name",

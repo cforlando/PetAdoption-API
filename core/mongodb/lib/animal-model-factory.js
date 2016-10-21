@@ -166,10 +166,8 @@ AnimalModelFactory.prototype = {
         this.log(Debuggable.HIGH, "_formatAnimalForResponse() - formatting %s", self.getAnimalProps());
         this.log(Debuggable.TMI, "_formatAnimalForResponse() - formatting %s with: %s", animal, this.dump(this.getAnimalProps()));
 
-        // manually set petId if not already set
-        if (!animalData.petId) animalData.petId = animalData._id;
 
-        return _.reduce(_.pick(animalData, self.getAnimalProps().map(function (speciesPropData) {
+        var formattedAnimalData = _.reduce(_.pick(animalData, self.getAnimalProps().map(function (speciesPropData) {
                 return speciesPropData.key
             })),
             function (propCollection, propValue, propName) {
@@ -191,6 +189,11 @@ AnimalModelFactory.prototype = {
                 propCollection[propName] = (_options.isV1Format) ? prop.getV1Format() : prop.getV2Format();
                 return propCollection;
             }, {});
+
+        // manually set petId if not already set
+        if (!formattedAnimalData.petId) formattedAnimalData.petId = animalData._id;
+
+        return formattedAnimalData;
     },
 
     /**

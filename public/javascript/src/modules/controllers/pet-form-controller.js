@@ -17,9 +17,6 @@ define([
         function ($scope, $element, request, $timeout, $mdToast, $mdDialog, dataParserService, addressFinderService, $routeParams, $controller) {
             angular.extend(this, $controller('formController', {$scope: $scope}));
 
-            $scope.isBatchMode = function () {
-                return ($scope.selectedPetsDataCollection && _.keys($scope.selectedPetsDataCollection).length > 0);
-            };
             $scope.petData = {};
             $scope.mediaInputEl = {
                 files: []
@@ -124,7 +121,7 @@ define([
                     useDefaults: false
                 });
                 console.log('loading model %s', speciesName);
-                console.log('petForm.updatePetDataFromModel()%s', $scope.isBatchMode() ? ' - batch active' : ' - batch inactive');
+                console.log('petForm.updatePetDataFromModel()%s', $scope.isBatchEditActive && $scope.isBatchEditActive() ? ' - batch active' : ' - batch inactive');
                 // var species = modelName || ($scope.petData.species) ? $scope.petData.species.val || $scope.petData.species.defaultVal || $scope.petData.species.example : false;
                 if (speciesName) {
                     $scope.getSpecies(speciesName, {
@@ -358,10 +355,6 @@ define([
 
             };
 
-            $scope.hideDialog = function () {
-                $scope.$broadcast('dialog:hide');
-            };
-
             $scope.isDefaultAllowed = function (propData) {
                 return propData.key != 'species';
             };
@@ -398,64 +391,95 @@ define([
             function init() {
                 console.log('init form: %o', $routeParams);
                 if ($routeParams.petId) {
+                    // Is main view
                     // load pet
                     $scope.loadPet({
                         petId: {
                             key: 'petId',
                             val: $routeParams.petId
                         }
-                    })
-                }
-                $scope.actionMenu.actions = [
-                    {
-                        onClick: function () {
-                            $scope.savePet()
-                        },
-                        label: 'save',
-                        icon: 'save'
-                    },
-                    {
-                        onClick: function () {
-                            $scope.deletePet()
-                        },
-                        label: 'delete',
-                        icon: 'delete_forever'
-                    },
-                    {
-                        onClick: function () {
-                            $scope.clearPetData()
-                        },
-                        label: 'clear',
-                        icon: 'clear'
-                    }
-                ];
-
-                $scope.$watch('petData.species.val', function (newValue, oldValue) {
-                    console.log('petData.species.val: %s', newValue);
-                    var speciesIndex = _.indexOf($scope.speciesList, newValue);
-                    if (speciesIndex > -1) {
-                        $scope.updatePetDataFromModel(newValue, {
-                            useDefaults: true
-                        });
-                        $scope.hideDialog();
-                    } else {
-                        // load model
-                        $mdDialog.show({
-                            controller: function ($scope, $mdDialog) {
-                                var hideListenerRemover = $scope.$on('dialog:hide', function () {
-                                    console.log('petFormController: mdDialog: closing dialog');
-                                    $mdDialog.hide();
-                                    hideListenerRemover();
-                                })
+                    });
+                    $scope.actionMenu.actions = [
+                        {
+                            onClick: function () {
+                                $scope.savePet()
                             },
-                            template: require('text!modules/views/dialogs/new-animal.html'),
-                            parent: angular.element('.pet-data-form'),
-                            scope: $scope,
-                            preserveScope: true,
-                            clickOutsideToClose: false
-                        })
-                    }
+                            label: 'save',
+                            icon: 'save'
+                        },
+                        {
+                            onClick: function () {
+                                $scope.deletePet()
+                            },
+                            label: 'delete',
+                            icon: 'delete_forever'
+                        },
+                        {
+                            onClick: function () {
+                                $scope.clearPetData()
+                            },
+                            label: 'clear',
+                            icon: 'clear'
+                        }
+                    ];
+                } else if ($scope.isBatchEditActive && $scope.isBatchEditActive()){
+                    $scope.registerForm($scope);
+                }
+
+                $scope.getSpeciesList(function(){
+                    $scope.$watch('petData.species.val', function (newValue, oldValue) {
+                        console.log('petData.species.val: %s', newValue);
+
+                        if (_.includes($scope.speciesList, newValue)) {
+                            $scope.updatePetDataFromModel(newValue, {
+                                useDefaults: true
+                            });
+                        } else {
+                            // load model
+
+                            if ($scope.isBatchEditActive && $scope.isBatchEditActive()){
+                                // species will be set by petListController
+
+                            } else {
+
+                                var speciesList = $scope.speciesList,
+                                    isFormValid = function(){
+                                        return $scope.petData && $scope.petData.species && _.includes($scope.speciesList, $scope.petData.species.val);
+                                    };
+
+                                $mdDialog.show({
+                                    controller: function ($scope, $mdDialog) {
+                                        $scope.setFormSpecies = function(selectedSpecies){
+                                            $mdDialog.hide(selectedSpecies);
+                                        };
+
+                                        $scope.speciesList = speciesList;
+
+                                        $scope.isFormValid = isFormValid;
+
+                                        $scope.$watch('isFormValid()', function(isValid){
+                                            if (isValid){
+                                                $mdDialog.hide();
+                                            }
+                                        });
+                                    },
+                                    template: require('text!modules/views/dialogs/new-animal.html'),
+                                    parent: angular.element('.pet-data-form'),
+                                    clickOutsideToClose: false
+                                }).then(
+                                    function confirm(speciesName){
+                                        $scope.setFormSpecies(speciesName);
+                                    },
+                                    function cancel(){
+
+                                    });
+
+                            }
+                        }
+                    });
+
                 });
+
             }
 
             init();
