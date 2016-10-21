@@ -27,21 +27,21 @@ mongoose.Promise = require('q').Promise;
  * @constructor
  */
 function MongoDBAdapter(options) {
-    var _options = _.defaults(options, {
-        retryTimeout: 2000,
-        debugTag: 'MongoDBAdapter: ',
-        debugLevel: Debuggable.PROD,
-        context: null,
-        onFailure: function () {
-            console.error.apply(console, arguments);
-        }
-    });
+    var self = this,
+        _options = _.defaults(options, {
+            retryTimeout: 2000,
+            debugTag: 'MongoDBAdapter: ',
+            debugLevel: Debuggable.PROD,
+            context: null,
+            onFailure: function () {
+                console.error.apply(console, arguments);
+            }
+        });
 
     this.setDebugTag(_options.debugTag);
     this.setDebugLevel(_options.debugLevel);
 
     var localConfig = (function () {
-        var self = this;
         var config = {
             username: 'username',
             password: 'password',
