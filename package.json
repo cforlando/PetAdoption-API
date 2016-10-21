@@ -1,6 +1,6 @@
 {
   "name": "pet-adoption-server",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "bin": {
     "pet-adoption-api-server": "bin/start-server.js"
   },
@@ -15,7 +15,7 @@
     "test:verbose": "jasmine JASMINE_CONFIG_PATH=spec/support/jasmine.json LCB_OPTIONS=\"detailed_errcodes=1\" LCB_LOGLEVEL=5",
     "production": "NODE_ENV=production node ./index.js",
     "submodules:init": "git submodule init && git submodule update",
-    "submodules:update": "git submodule foreach git-reset --hard origin/master && git submodule foreach git-pull"
+    "submodules:update": "git submodule foreach git-reset --hard origin/master && git submodule foreach git checkout master && git submodule foreach git-pull origin master"
   },
   "dependencies": {
     "async": "^2.0.0-rc.4",
