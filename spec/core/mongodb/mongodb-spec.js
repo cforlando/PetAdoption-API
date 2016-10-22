@@ -56,6 +56,10 @@ describe("MongoAPIDatabase", function () {
         });
     });
 
+    afterAll(function(done){
+        apiDatabase.stop(done);
+    });
+
     describe("createSpecies()", function () {
         it("adds a species", function (done) {
             var initialSpeciesList;

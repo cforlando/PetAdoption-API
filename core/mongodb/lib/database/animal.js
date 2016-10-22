@@ -40,7 +40,7 @@ function AnimalDatabase(speciesName, speciesProps, options) {
 
     var animalDocName = this.format('%s_%s_animal', _options.modelNamePrefix, speciesName);
 
-    this._init.call(this, new AnimalModelFactory(animalDocName, speciesProps, {
+    this._super.call(this, new AnimalModelFactory(animalDocName, speciesProps, {
         debugTag: this.format('AnimalModel(%s): ', speciesName),
         debugLevel: this.getDebugLevel()
     }), options);
@@ -55,12 +55,11 @@ function AnimalDatabase(speciesName, speciesProps, options) {
     this.setConfig('speciesName', speciesName);
 
 
-    this.onDBAdapterConnected(function () {
+    this.exec(function () {
         self.log(Debuggable.TMI, 'latest %s species model:', speciesName, self.dump(speciesProps));
 
         // init animals db document for given species
         self.AnimalModel = this.modelFactory.generateMongooseModel(self.getAdapter());
-        self.start();
     }, {
         context: this
     });

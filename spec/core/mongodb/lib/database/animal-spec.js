@@ -8,7 +8,8 @@ var fs = require('fs'),
     AnimalDB = require('../../../../../core/mongodb/lib/database/animal');
 
 describe("AnimalDatabase", function () {
-    var testAnimalProps = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'data/props.cat.json'), 'utf8')),
+    var testData = require('../../../../test-db-images'),
+        testAnimalProps = testData[0].getSpeciesProps(),
         animalDB,
         tAnimalProps = {
             petName: 'hello world',
@@ -16,10 +17,11 @@ describe("AnimalDatabase", function () {
         },
         tSavedAnimal;
 
-    beforeAll(function () {
+    beforeAll(function (done) {
         animalDB = new AnimalDB('test_animal', testAnimalProps, {
             debugLevel: Debuggable.PROD
         });
+        animalDB.exec(done)
     });
 
     afterAll(function (done) {

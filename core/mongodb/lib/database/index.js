@@ -26,18 +26,17 @@ function Database(modelFactory, options) {
      * @var {ModelFactory} modelFactory
      * @memberOf Database
      */
-    this._init.call(this, modelFactory, options);
+    this._super.call(this, modelFactory, options);
 
-    this.onDBAdapterConnected(function () {
+    this.exec(function () {
         this.log(Debuggable.LOW, 'initializing db model');
         this.MongooseModel = this.modelFactory.generateMongooseModel(this.getAdapter());
-        this.start();
     }, {context: this});
     return this;
 }
 
 Database.prototype = {
-    _init : function(modelFactory, options){
+    _super: function (modelFactory, options) {
         var _options = _.defaults(options, {
             modelNamePrefix: 'prod_',
             debugLevel: Debuggable.PROD,
@@ -51,37 +50,58 @@ Database.prototype = {
         this._queue = this._queue || [];
         this._cache = this._cache || new Cache();
         this.setAdapter(_options.adapter || new MongoDBAdapter({context: this}));
+        this._setupListeners(this.getAdapter());
+    },
+
+    /**
+     *
+     * @param {MongoDBAdapter} [mongoAdapter]
+     * @private
+     */
+    _setupListeners: function (mongoAdapter) {
+        var self = this,
+            adapter = mongoAdapter || this.getAdapter();
+
+        adapter.on('connected', function () {
+            self._processQueue();
+        });
+    },
+
+    _addToQueue: function (entry, context) {
+        if (_.isFunction(entry)) {
+            this._queue.push({
+                callback: entry,
+                context: context || this
+            });
+        }
+    },
+
+    _processQueue: function () {
+        while (this._queue.length > 0) {
+            this._queue[0].callback.call(this._queue[0].context, this.getAdapter());
+            this._queue.shift();
+        }
     },
 
     /**
      *
      * Adds function to the queue
      * @param {Function} [func]
+     * @param [options]
+     * @param [options.context]
      */
-    exec: function (func) {
-        var self = this;
+    exec: function (func, options) {
+        var _options = _.defaults(options, {});
 
-        if (!_.isFunction(func)) {
-            // this is okay for now because calls to .exec() are what initiate the queue
-            // this.warn('mongodb.exec() - no function passed');
-        } else {
-            this._queue.push({
-                callback: func
-            });
-        }
-        function processQueue() {
-            while (self._queue.length > 0) {
-                self._queue[0].callback.apply(self);
-                self._queue.shift();
-            }
-        }
+        this._addToQueue(func, _options.context);
 
-        if (this._adapter.isConnected() && this.isActive()) {
-            processQueue();
-        } else if (this._adapter.isClosed()) {
+        if (this._adapter.isConnected()) {
+            this._processQueue();
+        } else if (this._adapter.isClosed() || this._adapter.isDisconnecting()) {
             this._adapter.connect();
         }
     },
+
 
     /**
      *
@@ -113,63 +133,21 @@ Database.prototype = {
     },
 
     /**
-     * Starts a connection with the database
-     * @param callback
-     * @param [options]
-     * @param [options.context]
-     */
-    onDBAdapterConnected: function (callback, options) {
-        var self = this,
-            _options = _.defaults(options, {});
-
-        this._adapter.on('disconnected', function () {
-            this._isActive = false;
-        });
-
-        this._adapter.connect({
-            onSuccess: function () {
-                callback.call(_options.context, self._adapter);
-                self.exec(function () {
-                    // update queue
-                })
-            }
-        });
-    },
-
-    /**
-     *
-     * @returns {boolean}
-     */
-    isActive: function () {
-        return this._isActive;
-    },
-
-    /**
-     * Starts execution of the queue
-     */
-    start: function () {
-        this._isActive = true;
-        this.exec();
-    },
-
-    /**
      * Stops execution of the queue and disconnects
      * @param callback
      */
     stop: function (callback) {
-        this._isActive = false;
-        if (!(this._adapter.isClosed() || this._adapter.isDisconnecting())) {
-            this._adapter.close(callback);
-        } else {
+        this.getAdapter().once('close', function () {
             callback();
-        }
+        });
+        this.getAdapter().close();
     },
 
     /**
      *
      * @param {MongoDBAdapter} adapter
      */
-    setAdapter: function(adapter){
+    setAdapter: function (adapter) {
         this._adapter = adapter;
     },
 

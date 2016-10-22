@@ -10,34 +10,17 @@ describe('DBInstance', function () {
     });
 
     afterEach(function(done){
-        // TODO fix test not quit on completion
         dbInstance.stop(function(){
             done()
         });
     });
 
-    describe("ready()", function () {
-
-        it("executes callback", function (done) {
-            dbInstance.onDBAdapterConnected(function () {
-                done()
-            })
-        });
-
-    });
-
     describe("exec()", function () {
-        beforeAll(function (done) {
-            dbInstance.onDBAdapterConnected(function () {
-                done();
-            })
-        });
 
         it("executes a function when db is ready", function (done) {
             dbInstance.exec(function () {
                 done();
             });
-            dbInstance.start();
         })
     });
 });

@@ -113,10 +113,18 @@ MongoDBAdapter.prototype = {
 
         this.log(Debuggable.LOW, 'mongoose is connecting to %s', mongodbURL);
 
-        this.mongoose = mongoose.createConnection(mongodbURL);
+        if(!this.isConnecting()) this.mongoose = mongoose.createConnection(mongodbURL);
 
-        this.mongoose.on('disconnected', function () {
-            self.emit('disconnected');
+        this.mongoose.on('close', function () {
+            self.emit('close');
+        });
+
+        this.mongoose.on('connecting', function () {
+            self.emit('connecting');
+        });
+
+        this.mongoose.on('disconnecting', function () {
+            self.emit('disconnecting');
         });
 
         this.mongoose.on('error', function (err) {
@@ -124,10 +132,12 @@ MongoDBAdapter.prototype = {
             if (callbacks.onFailure) callbacks.onFailure.call(context);
         });
 
-        this.mongoose.once('open', function () {
+
+        this.mongoose.on('connected', function () {
             self.log(Debuggable.LOW, 'mongoose is connected');
             self.emit('connected');
-            if (callbacks.onSuccess) callbacks.onSuccess.call(context)
+            if (callbacks.onSuccess) callbacks.onSuccess.call(context);
+            delete callbacks.onSuccess;
         });
 
         this.on('error', function (err) {
@@ -136,17 +146,12 @@ MongoDBAdapter.prototype = {
         })
     },
 
-
     /**
      *
      * @param callback
      */
     close: function (callback) {
-        if (!(this.isClosed() || this.isDisconnecting())) {
-            this.mongoose.close(callback);
-        } else {
-            callback();
-        }
+        this.mongoose.close(callback);
     },
 
     /**
@@ -178,7 +183,7 @@ MongoDBAdapter.prototype = {
      * @returns {boolean}
      */
     isClosed: function () {
-        return this.mongoose.readyState === 0;
+        return !this.mongoose || this.mongoose.readyState === 0;
     },
 
     /**

@@ -200,11 +200,16 @@ DatabaseManager.prototype = {
      * @param {Function} callback
      */
     destroyAnimalDatabase: function (speciesName, callback) {
-        var self = this;
-        this.findAnimalDB(speciesName).stop(function (err) {
-            delete self.db[self._getAnimalDBName(speciesName)];
-            callback(err)
-        });
+        var self = this,
+            animalDatabase = this.findAnimalDB(speciesName);
+        if (animalDatabase) {
+            animalDatabase.stop(function (err) {
+                delete self.db[self._getAnimalDBName(speciesName)];
+                callback(err);
+            });
+        } else {
+            callback();
+        }
     },
 
 
@@ -257,7 +262,7 @@ DatabaseManager.prototype = {
      *
      * @param {Function} callback
      */
-    reloadAnimalDatabases: function (callback) {
+    reloadAllSpecies: function (callback) {
         var self = this;
         this.destroyAllAnimalDatabases(function (err) {
             if (err) return callback(err);
@@ -320,30 +325,32 @@ DatabaseManager.prototype = {
     createAnimalDatabase: function (speciesName, callback, options) {
         var self = this,
             _options = _.defaults(options, {});
-        if (_options.speciesData) {
-            var animalNamespace = self._getAnimalModelNamespace(speciesName);
-            self.db[self._getAnimalDBName(speciesName)] = new AnimalDatabase(
-                animalNamespace,
-                _options.speciesData.responseFormat, {
-                    debugTag: animalNamespace + ': ',
-                    debugLevel: self.getDebugLevel()
-                });
-            callback();
-        } else {
-            this.findSpeciesDB(speciesName).findLatest({
-                complete: function (err, speciesProps) {
-                    if (err) return callback(err);
-                    var animalNamespace = self._getAnimalModelNamespace(speciesName);
-                    self.db[self._getAnimalDBName(speciesName)] = new AnimalDatabase(
-                        animalNamespace,
-                        speciesProps.responseFormat, {
-                            debugTag: animalNamespace + ': ',
-                            debugLevel: self.getDebugLevel()
-                        });
-                    callback();
-                }
-            })
-        }
+        this.destroyAnimalDatabase(speciesName, function () {
+            if (_options.speciesData) {
+                var animalNamespace = self._getAnimalModelNamespace(speciesName);
+                self.db[self._getAnimalDBName(speciesName)] = new AnimalDatabase(
+                    animalNamespace,
+                    _options.speciesData.responseFormat, {
+                        debugTag: animalNamespace + ': ',
+                        debugLevel: self.getDebugLevel()
+                    });
+                callback();
+            } else {
+                self.findSpeciesDB(speciesName).findLatest({
+                    complete: function (err, speciesProps) {
+                        if (err) return callback(err);
+                        var animalNamespace = self._getAnimalModelNamespace(speciesName);
+                        self.db[self._getAnimalDBName(speciesName)] = new AnimalDatabase(
+                            animalNamespace,
+                            speciesProps.responseFormat, {
+                                debugTag: animalNamespace + ': ',
+                                debugLevel: self.getDebugLevel()
+                            });
+                        callback();
+                    }
+                })
+            }
+        });
     },
 
 
@@ -390,11 +397,7 @@ DatabaseManager.prototype = {
     stop: function (callback) {
         var self = this;
         async.each(self.db, function each(database, done) {
-            if (database.stop) {
-                database.stop(done);
-            } else {
-                done();
-            }
+            database.stop(done);
         }, function complete(err) {
             if (callback) callback(err);
         });
