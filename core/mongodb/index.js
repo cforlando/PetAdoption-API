@@ -141,7 +141,7 @@ MongoAPIDatabase.prototype = {
 
         this.manager.findDB('speciesList').findLatest({
             complete: function (err, result) {
-                _options.complete(err, result && result.speciesList ? result.speciesList : []);
+                if (_options.complete) _options.complete(err, result && result.speciesList ? result.speciesList : []);
             }
         })
     },
@@ -259,10 +259,10 @@ MongoAPIDatabase.prototype = {
                 json: JSON.stringify(props)
             }, {
                 complete: function (err, speciesData) {
-                    if (err){
+                    if (err) {
                         if (_options.complete) _options.complete(err)
                     } else {
-                        self.manager.reloadSpecies(speciesName, function(){
+                        self.manager.reloadSpecies(speciesName, function () {
                             if (_options.complete) _options.complete(null, speciesData.responseFormat)
                         })
                     }
@@ -271,6 +271,47 @@ MongoAPIDatabase.prototype = {
         } else {
             self.error('invalid save species request: %s', speciesName);
             if (_options.complete) _options.complete(new DBError.Species())
+        }
+    },
+
+
+    /**
+     *
+     * @param {String} speciesName
+     * @param {Object} props
+     * @param {Object} [options]
+     * @param {Function} [options.complete]
+     */
+    deleteSpecies: function (speciesName, options) {
+        var self = this,
+            speciesDB = this.manager.findSpeciesDB(speciesName),
+            _options = _.defaults(options, {});
+
+        if (speciesDB) {
+            this.manager.destroyAnimalDatabase(speciesName, function (err) {
+                if (err) {
+                    if (_options.complete) _options.complete(err);
+                } else {
+                    self.manager.destroySpeciesDatabase(speciesName, function (err) {
+                        if (err) {
+                            if (_options.complete) _options.complete(err);
+                        } else {
+                            self.saveSpeciesList({
+                                complete: function (err) {
+                                    if (err) {
+                                        if (_options.complete) _options.complete(err);
+                                    } else {
+                                        if (_options.complete) _options.complete(null, true);
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        } else {
+            this.error('invalid save species request: %s', speciesName);
+            if (_options.complete) _options.complete(new DBError.Species());
         }
     },
 

@@ -174,8 +174,12 @@ DatabaseManager.prototype = {
     destroySpeciesDatabase: function (speciesName, callback) {
         var self = this;
         this.findSpeciesDB(speciesName).stop(function (err) {
-            delete self.db[self._getSpeciesDBName(speciesName)];
-            callback(err)
+            if (err){
+                callback(err)
+            } else {
+                delete self.db[self._getSpeciesDBName(speciesName)];
+                callback()
+            }
         });
     },
 
@@ -204,8 +208,12 @@ DatabaseManager.prototype = {
             animalDatabase = this.findAnimalDB(speciesName);
         if (animalDatabase) {
             animalDatabase.stop(function (err) {
-                delete self.db[self._getAnimalDBName(speciesName)];
-                callback(err);
+                if (err){
+                    callback(err);
+                } else{
+                    delete self.db[self._getAnimalDBName(speciesName)];
+                    callback();
+                }
             });
         } else {
             callback();

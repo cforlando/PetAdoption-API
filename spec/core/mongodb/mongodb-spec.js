@@ -186,6 +186,43 @@ describe("MongoAPIDatabase", function () {
     });
 
 
+    describe("deleteSpecies()", function(){
+
+        beforeAll(function (done) {
+            apiDatabase.createSpecies(newSpeciesName, speciesProps, {
+                complete: function (err, species) {
+                    if (err) throw err;
+                    done();
+                }
+            });
+        });
+
+        it("removes a pre-existing species", function(done){
+            apiDatabase.getSpeciesList({
+                complete: function(err, speciesList){
+                    if (err) throw err;
+                    var initialList = speciesList;
+                    expect(_.includes(speciesList, newSpeciesName)).toBe(true, "initial species list should contain to be removed species");
+                    apiDatabase.deleteSpecies(newSpeciesName, {
+                        complete: function(err, result){
+                            if (err) throw err;
+                            expect(result).toBe(true, "the callback is provided with a boolean response");
+                            apiDatabase.getSpeciesList({
+                                complete: function(err, newSpeciesList){
+                                    if (err) throw err;
+                                    expect(_.includes(newSpeciesList, newSpeciesName)).toBe(false, "species list should not contain removed species");
+                                    expect(newSpeciesList.length).toEqual(initialList.length - 1, "new species list should contain one less entry than the initial species list");
+                                    done();
+                                }
+                            });
+                        }
+                    });
+                }
+            })
+        });
+    });
+
+
     describe("saveUser()", function () {
 
         it("can save a user", function (done) {
