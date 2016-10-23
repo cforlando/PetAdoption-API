@@ -38,7 +38,7 @@ function ViewRouter(controller){
         controller.passport.authenticate('google', {
             failureRedirect: '/'
         }),
-        controller.onLoginSuccess.bind(controller));
+        controller.onLoginSuccess());
 
     return router;
 }

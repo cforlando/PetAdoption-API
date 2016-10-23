@@ -28,20 +28,12 @@ function AuthController(database, options) {
         debugLevel: Debuggable.PROD
     });
 
-    this.credentials = (function () {
-        try {
-            var credentialsStr = fs.readFileSync(path.resolve(process.cwd(), './.google.credentials.json'));
-            return JSON.parse(credentialsStr);
-        } catch (err) {
-            return {
-                web: {
-                    client_id: 'n/a',
-                    client_secret: 'n/a',
-                    err: true
-                }
-            }
+    this.credentials = {
+        web: {
+            client_id: config.google_client_id,
+            client_secret: config.google_client_secret
         }
-    })();
+    };
 
     /**
      * @type {Passport}
@@ -58,7 +50,7 @@ function AuthController(database, options) {
         clientID: this.credentials.web.client_id,
         clientSecret: this.credentials.web.client_secret,
         callbackURL: url.resolve(config.domain, "/auth/google/callback")
-    }, this.onLoginRequest.bind(this)));
+    }, this.onLoginRequest()));
 
     this.passport.serializeUser(function (user, done) {
         done(null, user.id);
@@ -81,55 +73,62 @@ function AuthController(database, options) {
 
 AuthController.prototype = _.extend({
 
-    onLoginRequest: function (accessToken, refreshToken, profile, done) {
+    onLoginRequest: function(){
         var self = this;
-        this.database.findUser({id: profile.id}, {
-            debug: this._authOptions.debugLevel,
-            complete: function (err, user) {
-                if (err || !user.id) {
-                    var userData = {
-                        id: profile.id,
-                        privilege: 0,
-                        firstName: profile.name.givenName,
-                        lastName: profile.name.familyName
-                    };
-                    if (profile.photos.length > 0) userData.photo = profile.photos[0].value;
-                    self.database.saveUser(userData, {
-                        debug: self._authOptions.debugLevel,
-                        complete: function (err, user) {
-                            done(err, user)
-                        }
-                    })
-                } else {
-                    return done(err, user);
+
+        return function (accessToken, refreshToken, profile, done) {
+            self.database.findUser({id: profile.id}, {
+                debug: self._authOptions.debugLevel,
+                complete: function (err, user) {
+                    if (err || !user.id) {
+                        var userData = {
+                            id: profile.id,
+                            privilege: 0,
+                            firstName: profile.name.givenName,
+                            lastName: profile.name.familyName
+                        };
+                        if (profile.photos.length > 0) userData.photo = profile.photos[0].value;
+                        self.database.saveUser(userData, {
+                            debug: self._authOptions.debugLevel,
+                            complete: function (err, user) {
+                                done(err, user)
+                            }
+                        })
+                    } else {
+                        return done(err, user);
+                    }
                 }
-            }
-        });
-    },
-
-
-    onLoginSuccess: function (req, res, next) {
-        req.session.save(function (err) {
-            if (err) {
-                next(err);
-            } else {
-                res.redirect('/');
-            }
-        });
-
-    },
-
-    verifyAuth: function (req, res, next) {
-        if (req.isAuthenticated()) {
-            next();
-        } else {
-            var err = new Error("Not authenticated");
-            res.status(401);
-            res.render('error', {
-                message: err.message,
-                error: config.isDevelopment ? err : {},
-                isDevelopment: config.isDevelopment
             });
+        }
+    },
+
+
+    onLoginSuccess: function(){
+        return function (req, res, next) {
+            req.session.save(function (err) {
+                if (err) {
+                    next(err);
+                } else {
+                    res.redirect('/');
+                }
+            });
+
+        }
+    },
+
+    verifyAuth: function(){
+        return function (req, res, next) {
+            if (req.isAuthenticated()) {
+                next();
+            } else {
+                var err = new Error("Not authenticated");
+                res.status(401);
+                res.render('error', {
+                    message: err.message,
+                    error: config.isDevelopment ? err : {},
+                    isDevelopment: config.isDevelopment
+                });
+            }
         }
     }
 }, Debuggable.prototype);

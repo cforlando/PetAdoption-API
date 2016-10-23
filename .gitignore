@@ -1,3 +1,4 @@
+*.env.json
 aws.config.json
 .gitignore
 /data

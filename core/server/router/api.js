@@ -12,63 +12,62 @@ var Express = require('express');
 function APIRouter(controller){
     var router = Express.Router();
 
-    router.get('/options/:species', controller.onOptionsRequest.bind(controller));
-    router.get('/options/:species/:option', controller.onSingleOptionRequest.bind(controller));
-    router.get('/options/:species/:option/:pageNumber', controller.onSingleOptionRequest.bind(controller));
-    router.get('/model/:species', controller.onRetrieveSpecies.bind(controller));
-    router.get('/schema/:species', controller.onSchemaRequest.bind(controller));
-    router.get('/list', controller.onListAllRequest.bind(controller));
-    router.get('/list/:species', controller.onListSpeciesRequest.bind(controller));
-    router.get('/list/:species/:pageNumber', controller.onListSpeciesRequest.bind(controller));
-    router.get('/species', controller.onSpeciesListRequest.bind(controller));
+    router.get('/options/:species', controller.onOptionsRequest());
+    router.get('/options/:species/:option', controller.onSingleOptionRequest());
+    router.get('/options/:species/:option/:pageNumber', controller.onSingleOptionRequest());
+    router.get('/model/:species', controller.onRetrieveSpecies());
+    router.get('/list', controller.onListAllRequest());
+    router.get('/list/:species', controller.onListSpeciesRequest());
+    router.get('/list/:species/:pageNumber', controller.onListSpeciesRequest());
+    router.get('/species', controller.onSpeciesListRequest());
 
-    router.post('/query/:pageNumber', controller.onQueryRequest.bind(controller));
-    router.post('/query', controller.onQueryRequest.bind(controller));
+    router.post('/query/:pageNumber', controller.onQueryRequest());
+    router.post('/query', controller.onQueryRequest());
 
     // save a json of an animal
     router.post('/save/:species/json',
             controller.passport.session(),
-            controller.verifyAuth.bind(controller),
-            controller.onSaveAnimalJSON.bind(controller));
+            controller.verifyAuth(),
+            controller.onSaveAnimalJSON());
 
     // save an animal
     router.post('/save/:species',
             controller.passport.session(),
-            controller.verifyAuth.bind(controller),
+            controller.verifyAuth(),
             controller.upload.array('uploads'),
-            controller.onMediaSave.bind(controller));
+            controller.onMediaSave());
 
     // delete an animal
     router.post('/remove/:species',
         controller.passport.session(),
-        controller.verifyAuth.bind(controller),
-        controller.onDeleteSpecies.bind(controller));
+        controller.verifyAuth(),
+        controller.onDeleteSpecies());
 
     // save a species
     router.post('/save/:species/model',
             controller.passport.session(),
-            controller.verifyAuth.bind(controller),
-            controller.onSaveSpecies.bind(controller));
+            controller.verifyAuth(),
+            controller.onSaveSpecies());
 
     // create a species
     router.post('/create/:species/model',
         controller.passport.session(),
-        controller.verifyAuth.bind(controller),
-        controller.onCreateSpecies.bind(controller));
+        controller.verifyAuth(),
+        controller.onCreateSpecies());
 
     router.post('/user/save',
             controller.passport.session(),
-            controller.verifyAuth.bind(controller),
-            controller.onUserUpdate.bind(controller));
+            controller.verifyAuth(),
+            controller.onUserUpdate());
 
     router.get('/user', 
             controller.passport.session(),
-            controller.verifyAuth.bind(controller),
-            controller.onUserRetrieve.bind(controller));
+            controller.verifyAuth(),
+            controller.onUserRetrieve());
 
-    router.get('/cleandb/', controller.onFormatAllDB.bind(controller));
-    router.get('/cleandb/:species/', controller.onFormatSpeciesDB.bind(controller));
-    router.get('/reset', controller.onReset.bind(controller));
+    router.get('/cleandb/', controller.onFormatAllDB());
+    router.get('/cleandb/:species/', controller.onFormatSpeciesDB());
+    router.get('/reset', controller.onReset());
     return router;
 }
 

@@ -6,6 +6,7 @@ var util = require('util'),
     mongoose = require('mongoose'),
     _ = require('lodash'),
 
+    config = require('../../../config'),
     Debuggable = require('../../../lib/debuggable');
 
 // prevent mongoose promise warning
@@ -41,29 +42,12 @@ function MongoDBAdapter(options) {
     this.setDebugTag(_options.debugTag);
     this.setDebugLevel(_options.debugLevel);
 
-    var localConfig = (function () {
-        var config = {
-            username: 'username',
-            password: 'password',
-            domain: 'example.com',
-            port: 'port',
-            database: 'no_database_provided'
-        };
-        try {
-            //override template config with local json file data
-            config = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'mongodb.config')));
-        } catch (e) {
-            self.error(e);
-        }
-        return config;
-    })();
-
     this._identity = {
-        username: process.env.username || localConfig.username,
-        password: process.env.password || localConfig.password,
-        domain: process.env.domain || localConfig.domain,
-        port: process.env.port || localConfig.port,
-        database: process.env.database || localConfig.database
+        username: config.mongo_username,
+        password: config.mongo_password,
+        domain: config.mongo_domain,
+        port: config.mongo_port,
+        database: config.mongo_database
     };
 
 
