@@ -6,7 +6,7 @@ var fs = require('fs'),
 
     config = require('../../../core/config');
 
-fdescribe("S3Bucket", function () {
+describe("S3Bucket", function () {
     var S3Bucket = require('../../../core/s3'),
         testS3Bucket,
         testFileName = 'dog.png',
