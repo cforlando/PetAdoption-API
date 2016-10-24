@@ -1,5 +1,5 @@
 *.env.json
-aws.config.json
+aws*.json
 .gitignore
 /data
 !/data/dataset.dog.json

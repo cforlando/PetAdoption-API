@@ -2,12 +2,15 @@ var fs = require('fs'),
     path = require('path'),
     url = require('url'),
     util = require('util'),
+    stream = require('stream'),
 
-    config = require('../../config'),
     _ = require('lodash'),
     async = require('async'),
     multer = require('multer'),
+    sharp = require('sharp'),
 
+    config = require('../../config'),
+    S3Bucket = require('../../s3'),
     Debuggable = require('../../lib/debuggable'),
     SpeciesDBImage = require('../../mongodb/lib/species-db-image'),
     DBFormatter = require('../utils/formatter'),
@@ -19,6 +22,13 @@ var fs = require('fs'),
  * @class APIController
  * @param {MongoAPIDatabase} [database]
  * @param {Object} [options]
+ * @param {DebugLevel} [options.debugLevel]
+ * @param {Number} [options.pageSize]
+ * @param {Number} [options.maxImageHeight]
+ * @param {Object} [options.paths]
+ * @param {String} [options.paths.localRoot]
+ * @param {String} [options.paths.images]
+ * @param {String} [options.paths.placeholders]
  * @param {DebugLevel} [options.debugLevel=Debuggable.PROD]
  * @constructor
  */
@@ -30,28 +40,28 @@ function APIController(database, options) {
     this.database = this.database || database; // inherit database if already defined
     this._apiOptions = _.defaults(options, {
         debugLevel: Debuggable.PROD,
+        debugTag: "APIController: ",
         pageSize: 10,
+        maxImageHeight : 1080,
         paths: {
-            root: path.resolve(process.cwd(), 'public/'),
-            images: '/images/pet/'
-        }
-    });
-    this.storage = multer.diskStorage({
-        destination: function (req, file, cb) {
-            cb(null, path.join(self._apiOptions.paths.root, self._apiOptions.paths.images, (req.params.species + '/')))
-        },
-        filename: function (req, file, cb) {
-            self.log(Debuggable.LOW, 'new file: %s', dump(file));
-            cb(null, file.originalname)
+            localRoot: path.resolve(process.cwd(), 'public/'),
+            images: 'images/pet/',
+            placeholders: 'images/placeholders/'
         }
     });
 
-    this.upload = multer({storage: this.storage});
+    this.setDebugTag(this._apiOptions.debugTag);
+    this.setDebugLevel(this._apiOptions.debugLevel);
+
+    this.s3 = new S3Bucket(config.isDevelopment ? config.s3_dev_bucket_name : config.s3_prod_bucket_name);
+    this.storage = multer.memoryStorage();
+
+    this.uploader = multer({storage: this.storage});
     this.log(Debuggable.LOW, 'APIController() = %s', this.dump());
     return this;
 }
 
-APIController.prototype = _.extend({
+APIController.prototype = {
 
     getSpeciesList: function (callback) {
         this.database.getSpeciesList({
@@ -320,29 +330,47 @@ APIController.prototype = _.extend({
 
             props.images = imagesValue.split(',');
 
-            _.forEach(req.files, function (fileMeta) {
-                var publicPath = path.join(self._apiOptions.paths.images, (req.params.species + '/'), fileMeta.filename);
-                props.images.push(url.resolve(config.domain, publicPath));
-            });
+            async.each(req.files,
+                function each(fileMeta, done) {
+                    var bufferStream = new stream.PassThrough(),
+                        publicPath = path.join(self._apiOptions.paths.images, (req.params.species + '/'), fileMeta.originalname);
 
-            props.images = _.filter(props.images, function (url) {
-                // only truthy values
-                return !!url;
-            });
-            self.database.saveAnimal(
-                req.params.species,
-                props, {
-                    debug: self._apiOptions.debugLevel,
-                    complete: function (err, newAnimal) {
-                        if (err) {
-                            next(err);
-                        } else {
-                            res.locals.simplifiedFormat = false;
-                            res.locals.data = newAnimal;
-                            next()
-                        }
-                    }
+                    bufferStream.end(fileMeta.buffer);
+
+                    var imageFormatter = sharp()
+                        .resize(null, self._apiOptions.maxImageHeight)
+                        .withoutEnlargement();
+
+                    var formattedBufferStream = bufferStream.pipe(imageFormatter);
+
+                    self.s3.saveReadableStream(formattedBufferStream, publicPath, function (err, result) {
+                        if (err) return done(err);
+                        props.images.push(result.Location);
+                        done();
+                    });
+                },
+                function complete(err) {
+                    if (err) return next(err);
+                    props.images = _.reject(props.images, function (url) {
+                        // only truthy values
+                        return !url;
+                    });
+                    self.database.saveAnimal(
+                        req.params.species,
+                        props, {
+                            debug: self._apiOptions.debugLevel,
+                            complete: function (err, newAnimal) {
+                                if (err) {
+                                    next(err);
+                                } else {
+                                    res.locals.simplifiedFormat = false;
+                                    res.locals.data = newAnimal;
+                                    next()
+                                }
+                            }
+                        });
                 });
+
         }
     },
 
@@ -565,6 +593,8 @@ APIController.prototype = _.extend({
         }
     }
 
-}, Debuggable.prototype);
+};
+
+_.extend(APIController.prototype, Debuggable.prototype);
 
 module.exports = APIController;

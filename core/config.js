@@ -33,6 +33,13 @@ var config = {
     port : process.env.port || localJSON.port || '8080',
     httpsPort : process.env.httpsPort || localJSON.httpsPort || '8443',
 
+    aws_access_key_id : process.env.aws_access_key_id || localJSON.aws_access_key_id || '',
+    aws_secret_access_key : process.env.aws_secret_access_key || localJSON.aws_secret_access_key || '',
+
+    s3_prod_bucket_name: process.env.s3_prod_bucket_name || localJSON.s3_prod_bucket_name || "prod",
+    s3_dev_bucket_name: process.env.s3_dev_bucket_name || localJSON.s3_dev_bucket_name || "dev",
+    s3_test_bucket_name: process.env.s3_test_bucket_name || localJSON.s3_test_bucket_name || "test",
+
     google_client_id : process.google_client_id || localJSON.google_client_id || 'n/a',
     google_client_secret : process.google_client_secret || localJSON.google_client_secret || 'n/a',
 

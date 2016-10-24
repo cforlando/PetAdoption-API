@@ -71,7 +71,7 @@ function AuthController(database, options) {
     return this;
 }
 
-AuthController.prototype = _.extend({
+AuthController.prototype = {
 
     onLoginRequest: function(){
         var self = this;
@@ -131,6 +131,8 @@ AuthController.prototype = _.extend({
             }
         }
     }
-}, Debuggable.prototype);
+};
+
+_.extend(AuthController.prototype, Debuggable.prototype);
 
 module.exports = AuthController;

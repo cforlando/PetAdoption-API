@@ -21,8 +21,7 @@ function AppController(database, options){
     this.log(Debuggable.MED, 'AppController()');
     return this;
 }
-AppController.prototype = _.extend({
 
-}, AuthController.prototype, APIController.prototype);
+_.extend(AppController.prototype, AuthController.prototype, APIController.prototype);
 
 module.exports = AppController;

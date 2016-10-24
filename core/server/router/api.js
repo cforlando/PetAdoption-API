@@ -34,7 +34,7 @@ function APIRouter(controller){
     router.post('/save/:species',
             controller.passport.session(),
             controller.verifyAuth(),
-            controller.upload.array('uploads'),
+            controller.uploader.array('uploads'),
             controller.onMediaSave());
 
     // delete an animal
