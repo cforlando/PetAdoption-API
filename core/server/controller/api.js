@@ -322,7 +322,7 @@ APIController.prototype = {
         }
     },
 
-    onMediaSave: function () {
+    onSaveAnimalForm: function () {
         var self = this;
         return function (req, res, next) {
             var props = req.body,
@@ -393,6 +393,30 @@ APIController.prototype = {
                 });
         }
     },
+
+    onSaveSpeciesPlaceholder: function () {
+        var self = this;
+        return function (req, res, next) {
+            var species = req.params.species,
+                bufferStream = new stream.PassThrough(),
+                publicPath = path.join(self._apiOptions.paths.placeholders, species+'.png');
+            // TODO determine and use proper file extension
+
+            bufferStream.end(req.file.buffer);
+
+            var imageFormatter = sharp()
+                .resize(null, self._apiOptions.maxImageHeight)
+                .withoutEnlargement();
+
+            var formattedBufferStream = bufferStream.pipe(imageFormatter);
+
+            self.s3.saveReadableStream(formattedBufferStream, publicPath, function (err, result) {
+                if (err) return next(err);
+                res.json({result: "success", location: result.Location});
+            });
+        }
+    },
+
 
     onCreateSpecies: function () {
         var self = this;

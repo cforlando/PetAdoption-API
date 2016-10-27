@@ -35,7 +35,7 @@ function APIRouter(controller){
             controller.passport.session(),
             controller.verifyAuth(),
             controller.uploader.array('uploads'),
-            controller.onMediaSave());
+            controller.onSaveAnimalForm());
 
     // delete an animal
     router.post('/remove/:species',
@@ -48,6 +48,13 @@ function APIRouter(controller){
             controller.passport.session(),
             controller.verifyAuth(),
             controller.onSaveSpecies());
+
+    // save a species placeholder image
+    router.post('/save/:species/placeholder',
+        controller.passport.session(),
+        // controller.verifyAuth(),
+        controller.uploader.single('uploads'),
+        controller.onSaveSpeciesPlaceholder());
 
     // create a species
     router.post('/create/:species/model',

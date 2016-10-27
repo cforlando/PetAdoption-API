@@ -29,6 +29,7 @@ var localJSON = (function () {
  */
 var config = {
     domain : process.env.domain || localJSON.domain || "http://localhost:8080",
+    assetsDomain : process.env.domain || localJSON.assetsDomain || "http://localhost:8080",
     isDevelopment : !!process.env.isDevelopment || localJSON.isDevelopment || false,
     port : process.env.port || localJSON.port || '8080',
     httpsPort : process.env.httpsPort || localJSON.httpsPort || '8443',
