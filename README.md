@@ -1,6 +1,6 @@
 ## Synopsis
 
-The Pet Adoption API is a project using the ASP.NET WebAPI and MVC stack.  Project is set and built with Visual Studio 2015 Community Edition as it is open-source. Database and API hosted in Azure Platform.
+The Pet Adoption API is a project using the MEAN stack. The database and API are currently hosted in Azure Platform (via Mlab and Bitnami). Image assests are stored with Amazon S3.
 
 ## Motivation
 
@@ -8,7 +8,7 @@ Nobody likes to see animals be put down due to overcrowding at animal control ce
 
 ## Installation
 
-run `npm install`. Sudo privileges may be necessary.
+run `npm install`
 
 ## API Reference
 
@@ -35,7 +35,8 @@ POST    | /remove/:species                        | deletes pet as specified by 
 POST    | /save/:species                          | fields will be saved as provided. Must match schema definition and should be of `multipart/form-data`. Responds with saved animal data
 POST    | /save/:species/json                     | fields will be saved as provided. Must match schema definition and should be of `application/json` Content-Type. Responds with saved animal data
 POST    | /save/:species/model                    | updates global model of pet in addition to saving data. Must match model format and should be of `application/json` Content-Type. Responds with saved species data
-POST    | /save/:species                          | creates a new species with provided fields. Should be of `application/json` Content-Type. Responds with saved species data
+POST    | /create/:species/model                  | creates a new species with provided fields. Should be of `application/json` Content-Type. Responds with saved species data
+POST    | /remove/:species/model                  | removes specified species
 
 #### Queries
 
@@ -68,6 +69,7 @@ Execute `npm run test`
 
 #####TODO*
 - [ ] More tests could always be helpful
+- [ ] Web interface could use more UX consistency. Suggestions are welcome.
 
 
 ## Developer Notes
