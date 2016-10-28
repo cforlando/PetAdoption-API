@@ -27,11 +27,6 @@ function Prop(queryModel, data, options) {
     this.setDebugTag(_options.debugTag);
     this.setDebugLevel(_options.debugLevel);
 
-
-    this.getRegex = function () {
-        return this.getValue() ? this.escapeRegExp(this.getValue().toString()) : '.*'
-    };
-
     this.setQueryModel(queryModel);
     this.setData(data);
 
@@ -151,6 +146,10 @@ Prop.prototype = {
      */
     getV2Format: function () {
         return this.getValue();
+    },
+
+    getRegex: function () {
+        return this.getValue() ? this.escapeRegExp(this.getValue().toString()) : '.*'
     },
 
     /**
