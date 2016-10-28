@@ -20,7 +20,7 @@ define([
                     };
 
                     var urlWatchHandler = $scope.$watch('url', function (imageURL, oldImageURL) {
-                        if (!imageURL && $scope.last) return;
+                        if (!imageURL || !$scope.last) return;
                         var isRenderedWatchHandler = $scope.$watch($scope.isSlideRendered, function (isRendered) {
                             if (isRendered) {
                                 init();
@@ -45,8 +45,6 @@ define([
 
                 }],
             link: function (scope, element, attrs) {
-                // var id = generateHash(scope.url) + scope.$index;
-                // scope.id = id;
                 element.attr('data-slide-id', scope.$id);
                 if (scope.onDestroy) scope.$on("$destroy", scope.onDestroy);
 

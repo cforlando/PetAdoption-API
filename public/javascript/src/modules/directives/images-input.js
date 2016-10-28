@@ -132,10 +132,6 @@ define([
                             // eagerly delete slideScope from cache
                             $scope.deregisterSlide($slideScope);
 
-                            // $scope.setImages(_.reject($scope.propData.val, function (savedImageURL, index) {
-                            //     return index === imageIndex
-                            // }));
-
                             $scope.setField($scope['propData'].key, {val: _.reject($scope.propData.val, function (savedImageURL, index) {
                                 return index === imageIndex
                             })});
@@ -145,10 +141,6 @@ define([
                     $scope.removePhotoByURL = function (imageURL) {
                         // we use indexOf so that we only remove one and not any duplicate images
                         var imageIndex = $scope.propData.val.indexOf(imageURL);
-
-                        // $scope.setImages(_.reject($scope.propData.val, function (savedImageURL, index) {
-                        //     return index === imageIndex
-                        // }));
 
                         $scope.setField($scope['propData'].key, {val: _.reject($scope.propData.val, function (savedImageURL, index) {
                             return index === imageIndex
