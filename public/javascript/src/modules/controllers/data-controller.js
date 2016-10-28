@@ -153,6 +153,7 @@ define([
              * @param {Function} [options.done]
              */
             $scope.createSpecies = function (speciesName, options) {
+                $scope.showLoading();
                 var sanitizedSpeciesName = _.kebabCase(speciesName),
                     _options = _.defaults(options, {
                         speciesProps: [
@@ -208,6 +209,7 @@ define([
                     request.post('/api/v1/create/' + sanitizedSpeciesName + '/model', _options.speciesProps)
                         .then(
                             function success(response) {
+                                $scope.hideLoading();
                                 var speciesProps = response.data;
                                 $scope.models[sanitizedSpeciesName] = speciesProps;
                                 $scope.getSpeciesList(function (err, speciesList) {
@@ -221,6 +223,7 @@ define([
                                 })
                             },
                             function failure(err) {
+                                $scope.hideLoading();
                                 console.error(err);
                                 $scope.showError('Could not create species');
                                 if (_options.done) _options.done(err);
@@ -237,8 +240,24 @@ define([
              */
             $scope.deleteSpecies = function (speciesName, options) {
                 var _options = _.defaults(options, {});
-                $scope.showMessage('This feature is coming soon');
-                if (_options.done) _options.done(new Error("feature unimplemented"));
+                $scope.showLoading();
+
+                request.post('/api/v1/remove/' + speciesName + '/model').then(
+                    function success(response) {
+                        $scope.hideLoading();
+                        $scope.showMessage('Deleted ' + speciesName);
+                        $scope.getSpeciesList(function(err){
+                            if (err) console.error(err);
+                            if (_options.done) _options.done(null, response);
+                        }, {useCache: false});
+                    },
+                    function failure() {
+                        $scope.hideLoading();
+                        var errMessage = "Could not delete " + speciesName;
+                        $scope.showError(errMessage);
+                        if (_options.done) _options.done(new Error(errMessage));
+                    }
+                );
             };
 
 

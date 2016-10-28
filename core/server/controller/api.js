@@ -282,7 +282,7 @@ APIController.prototype = {
         }
     },
 
-    onDeleteSpecies: function () {
+    onDeleteAnimal: function () {
         var self = this;
         return function (req, res, next) {
 
@@ -433,6 +433,24 @@ APIController.prototype = {
                             res.locals.simplifiedFormat = false;
                             res.locals.data = newSpecies;
                             next();
+                        }
+                    }
+                });
+        }
+    },
+
+    onDeleteSpecies: function () {
+        var self = this;
+        return function (req, res, next) {
+
+            self.database.deleteSpecies(
+                req.params.species, {
+                    debug: self._apiOptions.debugLevel,
+                    complete: function (err) {
+                        if (err) {
+                            next(err);
+                        } else {
+                            res.json({result: 'success'})
                         }
                     }
                 });

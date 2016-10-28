@@ -41,7 +41,7 @@ function APIRouter(controller){
     router.post('/remove/:species',
         controller.passport.session(),
         controller.verifyAuth(),
-        controller.onDeleteSpecies());
+        controller.onDeleteAnimal());
 
     // save a species
     router.post('/save/:species/model',
@@ -61,6 +61,12 @@ function APIRouter(controller){
         controller.passport.session(),
         controller.verifyAuth(),
         controller.onCreateSpecies());
+
+    // create a species
+    router.post('/remove/:species/model',
+        controller.passport.session(),
+        controller.verifyAuth(),
+        controller.onDeleteSpecies());
 
     router.post('/user/save',
             controller.passport.session(),
