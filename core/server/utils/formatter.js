@@ -130,7 +130,7 @@ function DataFormatter(database, dbConfigurations, options) {
         return imagesArr.map(function formatImgURL(imageURL) {
             var fileBaseName = path.basename(imageURL),
                 relativeImagePath = util.format('/images/pet/%s/', _options.species);
-            return url.resolve(config.domain, path.join(relativeImagePath, fileBaseName));
+            return url.resolve(config.assetsDomain, path.join(relativeImagePath, fileBaseName));
         });
     };
 
