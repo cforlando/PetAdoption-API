@@ -8,19 +8,21 @@ define([
 
     ngApp.directive('fileInput', function(){
         return {
+            restrict: 'EC',
+            scope: true,
             controller: ['$scope', '$element', function($scope, $element){
                 $scope.$input = $element.find("input[type='file']");
+
+                $scope.upload = function () {
+                    $scope.$input.click();
+                };
 
                 $scope.onFileInputChange = function () {
                     var input = this,
                         numOfFiles = input.files.length,
                         _previewPhotos = [];
 
-                    $scope.upload = function () {
-                        $scope.$input.click();
-                    };
-
-                    $scope.$emit('file-form:change', $scope);
+                    $scope.$broadcast('file-input:change', $scope);
 
                     if (numOfFiles > 0) {
                         $scope.showLoading();
@@ -36,8 +38,9 @@ define([
                             _previewPhotos.push(e.target.result);
                             if (isLoadComplete()) {
                                 $scope.hideLoading();
+                                console.log('file input - load complete', arguments, readIndex, numOfFiles);
                                 $scope.files = _previewPhotos;
-                                $scope.$emit('file-form:set', $scope);
+                                $scope.$emit('file-input:set', $scope);
                             } else {
                                 reader.readAsDataURL(input.files[readIndex]);
                             }
@@ -48,8 +51,9 @@ define([
                 };
 
                 function init(){
+                    if ($scope.registerFileDOMElement) $scope.registerFileDOMElement($scope.$input[0]);
 
-                    $input.on('change', $scope.onFileInputChange);
+                    $scope.$input.on('change', $scope.onFileInputChange);
 
                     $scope.onDestroy = function(){
                         $scope.$input.off('change', null, $scope.onFileInputChange);

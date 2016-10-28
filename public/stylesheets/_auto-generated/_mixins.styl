@@ -97,7 +97,7 @@ cut-outer-paragraph-margin()
       margin-bottom: 0;
 
 cut-outer-margin($direction = vertical)
-  if $direction == vertical
+  if match('/v|vert|vertical/i', $direction)
     &:first-child
       margin-top: 0;
     &:last-child
@@ -109,7 +109,7 @@ cut-outer-margin($direction = vertical)
       margin-right: 0;
 
 cut-outer-type-margin($direction = vertical)
-  if $direction == vertical
+  if match('/v|vert|vertical/i', $direction)
     &:first-of-type
       margin-top: 0;
     &:last-of-type
@@ -121,7 +121,7 @@ cut-outer-type-margin($direction = vertical)
       margin-right: 0;
 
 cut-outer-padding($direction = vertical)
-  if $direction == vertical
+  if match('/v|vert|vertical/i', $direction)
     &:first-child
       padding-top: 0;
     &:last-child
@@ -134,7 +134,7 @@ cut-outer-padding($direction = vertical)
 
 
 cut-outer-type-padding($direction = vertical)
-  if $direction == vertical
+  if match('/v|vert|vertical/i', $direction)
     &:last-of-type
       padding-bottom: 0;
     &:first-of-type
@@ -216,6 +216,13 @@ default-transition()
   transition-duration: $duration-transition-default-ms;
   transition-timing-function: $timing-transition-default;
 
+snap-transition()
+  if length(arguments) > 1
+    transition-property:  unquote(join(', ', arguments));
+  else
+    transition-property: arguments;
+  transition-duration: $duration-transition-default-ms;
+  transition-timing-function: $timing-transition-snap;
 
 short-transition()
   if length(arguments) > 1

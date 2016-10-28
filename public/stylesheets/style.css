@@ -440,6 +440,9 @@ md-sidenav {
   max-height: 33vh;
   max-width: 36em;
 }
+.species-upload-form--hidden {
+  display: none;
+}
 .gallery {
   overflow: hidden;
   position: relative;

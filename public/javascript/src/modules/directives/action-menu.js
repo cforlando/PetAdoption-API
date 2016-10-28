@@ -10,6 +10,7 @@ define([
     return ngApp.directive('actionMenu', function () {
         return {
             restrict: 'C',
+            scope: '@',
             controller: ['$scope', '$mdBottomSheet',
                 function ($scope, $mdBottomSheet) {
 

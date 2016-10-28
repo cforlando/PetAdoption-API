@@ -30,6 +30,12 @@ define([
                 $scope.fab.isOpen = !$scope.fab.isOpen;
             };
 
+            $scope.upload = function(){
+                angular.element($scope.mediaInputEl).click();
+            };
+
+
+
 
             $scope.setFormSpecies = function (species) {
                 if (species) {
@@ -48,10 +54,10 @@ define([
             };
             /**
              *
-             * @param {$scope} $imagesInputScope angular $scope of image input directive (Uses mediaInputEl member for file storage)
+             * @param {HTMLElement} DOMElement
              */
-            $scope.registerImagesInput = function ($imagesInputScope) {
-                $scope.mediaInputEl = $imagesInputScope.mediaInputEl;
+            $scope.registerFileDOMElement = function (DOMElement) {
+                $scope.mediaInputEl = DOMElement;
             };
 
 

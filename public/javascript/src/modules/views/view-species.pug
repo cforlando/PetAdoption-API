@@ -1,5 +1,8 @@
 include _auto-generated/_-all
 .view.view--species(ng-controller="speciesFormController", layout='column')
+    form.species-upload-form.species-upload-form--hidden.file-input(method='post')
+        .placeholder-upload
+            input.placeholder-upload__input(name='placeholder', type='file')
     md-content()
         md-subheader.md-primary!="{{speciesName}}"
         md-divider

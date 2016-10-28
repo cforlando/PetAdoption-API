@@ -1,10 +1,10 @@
 include _auto-generated/_-all
 .gallery
-    form.slider-upload-form(method='post')
+    form.slider-upload-form.file-input(method='post')
         .image-upload
             input.image-upload__input(name='uploads', type='file', multiple)
     .images-nav
-        .md-button.md-primary.md-fab.md-mini.btn-add(ng-click="uploadPhoto()")
+        .md-button.md-primary.md-fab.md-mini.btn-add(ng-click="upload()")
             md-icon.material-icons add
     .slides()
         .slide(ng-repeat="url in propData.val track by $index")

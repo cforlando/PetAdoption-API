@@ -8,17 +8,6 @@ define([
 
     return ngApp.directive('slide', [function () {
 
-        function generateHash(str) {
-            var hash = 0, i, chr, len;
-            if (str.length === 0) return hash;
-            for (i = 0, len = str.length; i < len; i++) {
-                chr = str.charCodeAt(i);
-                hash = ((hash << 5) - hash) + chr;
-                hash |= 0; // Convert to 32bit integer
-            }
-            return hash;
-        }
-
         return {
             restrict: 'EC',
             scope: true,
@@ -31,7 +20,7 @@ define([
                     };
 
                     var urlWatchHandler = $scope.$watch('url', function (imageURL, oldImageURL) {
-                        if (!imageURL && !$scope.last) return;
+                        if (!imageURL && $scope.last) return;
                         var isRenderedWatchHandler = $scope.$watch($scope.isSlideRendered, function (isRendered) {
                             if (isRendered) {
                                 init();

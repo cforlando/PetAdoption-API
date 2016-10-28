@@ -9,8 +9,8 @@ define([
         _ = require('underscore');
 
     return ngApp.controller("speciesFormController", [
-        '$scope', '$routeParams', '$location', '$mdDialog', '$controller',
-        function ($scope, $routeParams, $location, $mdDialog, $controller) {
+        '$scope', '$routeParams', '$location', '$mdDialog', '$controller', 'request',
+        function ($scope, $routeParams, $location, $mdDialog, $controller, request) {
             angular.extend(this, $controller('formController', {$scope: $scope}));
             $scope.valTypes = ['String', 'Date', 'Number', 'Boolean'];
             $scope.speciesName = $routeParams.speciesName;
@@ -24,10 +24,54 @@ define([
                         })
                     },
                     icon: 'delete_forever',
-                    label: 'Delete Species'
+                    label: 'Delete'
+                },
+                {
+                    onClick: function () {
+                        angular.element($scope.mediaInputEl).click();
+                    },
+                    icon: 'photo',
+                    label: 'Placeholder'
                 }
             ];
 
+            /**
+             *
+             * @param {String} speciesName
+             * @param {HTMLElement} fileInput
+             * @param {Object} [options]
+             */
+            $scope.saveSpeciesPlaceholder = function(speciesName, fileInput, options){
+                $scope.showLoading();
+                var _options = _.defaults(options, {}),
+                    formData = new FormData();
+
+                _.forEach(fileInput.files, function(file){
+                    formData.append("uploads", file);
+                });
+
+                request.post('/api/v1/save/' + speciesName + '/placeholder', formData, {
+                    headers: {
+                        "Content-Type": undefined
+                    }
+                }).then(
+                    function success(response){
+                        $scope.hideLoading();
+                        $scope.showMessage("Saved placeholder");
+                        if(_options.done) _options.done();
+                    },
+                    function failure(){
+                        $scope.hideLoading();
+                        var errMessage = "Could not save placeholder";
+                        $scope.showError(errMessage);
+                        if(_options.done) _options.done(new Error(errMessage));
+                    }
+                )
+            };
+
+            $scope.registerFileDOMElement = function(fileElement){
+                $scope.mediaInputEl = fileElement;
+            };
 
             $scope.editProp = function (propData) {
                 $location.path('species/' + $scope.speciesName + '/' + propData.key);
@@ -105,6 +149,17 @@ define([
             };
 
             function init() {
+                $scope.$on('file-input:set', function ($evt, $mediaFormScope) {
+                    console.log("on('file-input:set'): %o", arguments);
+                    $scope.$apply(function () {
+                        $scope.saveSpeciesPlaceholder($scope.speciesName, $mediaFormScope.$input[0], {
+                            done: function(err){
+                                if (err) console.error(err);
+                            }
+                        });
+                    });
+                });
+
                 $scope.getSpecies($scope.speciesName, {
                     useCache: true,
                     callback: function (err, model) {
