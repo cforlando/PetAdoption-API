@@ -85,7 +85,7 @@ function Server(database, options) {
     server.use(dataFormatter());
 
     // send placeholder 404 images
-    server.use(localImageHandler());
+    // server.use(localImageHandler());
 
     // express error handlers
     server.use(function (err, req, res, next) {
