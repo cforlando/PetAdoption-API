@@ -41,7 +41,6 @@
     "request": "^2.75.0",
     "serve-favicon": "~2.3.0",
     "sharp": "^0.16.2",
-    "stylus": "^0.54.2",
     "url": "^0.11.0"
   },
   "devDependencies": {
