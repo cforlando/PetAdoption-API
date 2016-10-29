@@ -125,7 +125,7 @@ AuthController.prototype = {
                 res.status(401);
                 res.render('error', {
                     message: err.message,
-                    error: config.isDevelopment ? err : {},
+                    error: err,
                     isDevelopment: config.isDevelopment
                 });
             }
