@@ -25,7 +25,7 @@ module.exports = function(options) {
                     fs.access(placeholderImgPath, function (err) {
                         if (err) {
                             // placeholder not found
-                            res.sendFile(_options.defaultPlaceholderPath);
+                            next(err);
                         } else {
                             res.sendFile(placeholderImgPath);
                         }
