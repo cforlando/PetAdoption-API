@@ -60,7 +60,7 @@ function Server(database, options) {
      */
     server.set('trust proxy', 1); // trust first proxy
     server.use(session({
-        secret: 'cfo-petadoption-api',
+        secret: config.server_session_secret,
         saveUninitialized: true,
         resave: true
     }));

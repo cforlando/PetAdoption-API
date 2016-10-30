@@ -33,6 +33,7 @@ var config = {
     isDevelopment : !!process.env.isDevelopment || localJSON.isDevelopment || false,
     port : process.env.port || localJSON.port || '8080',
     httpsPort : process.env.httpsPort || localJSON.httpsPort || '8443',
+    server_session_secret: process.env.server_session_secret || localJSON.server_session_secret || 'pet-api',
 
     aws_access_key_id : process.env.aws_access_key_id || localJSON.aws_access_key_id || '',
     aws_secret_access_key : process.env.aws_secret_access_key || localJSON.aws_secret_access_key || '',
