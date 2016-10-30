@@ -8,6 +8,7 @@ var url = require('url'),
 
     Debuggable = require('../../../../core/lib/debuggable'),
     APIDatabase = require('../../../../core/mongodb'),
+    APIDatabaseFormatter = require('../../../../core/server/utils/formatter'),
 
     Server = require('../../../../core/server'),
     speciesDBImages = require('../../../test-db-images.js'),
@@ -28,14 +29,14 @@ describe("Router", function () {
             preset: speciesDBImages,
             debugLevel: Debuggable.PROD,
             modelNamePrefix: 'test_api_',
-            onInitialized: function(){
+            onInitialized: function () {
                 server = new Server(apiDatabase, {debugLevel: Debuggable.PROD});
                 done();
             }
         });
     });
 
-    afterAll(function(done){
+    afterAll(function (done) {
         apiDatabase.stop(done);
     });
 
@@ -75,7 +76,7 @@ describe("Router", function () {
         })
     });
 
-    describe("API", function(){
+    describe("API", function () {
 
         describe("/species", function () {
 
@@ -101,6 +102,20 @@ describe("Router", function () {
                     return collection;
                 }, {});
 
+            beforeAll(function (done) {
+
+                var dbFormatter = new APIDatabaseFormatter({
+                    createMissingFields: true,
+                    populateEmptyFields: true
+                });
+
+                dbFormatter.formatDB(apiDatabase, speciesProps, {
+                    complete: function () {
+                        done();
+                    }
+                })
+            });
+
             describe("V1", function () {
                 it(sprintf("returns metaData for %s property values", speciesName), function (done) {
                     request(server)
@@ -119,7 +134,7 @@ describe("Router", function () {
                                     expect(animalPropData.valType).not.toBeUndefined();
                                     expect(animalPropData.key).not.toBeUndefined();
                                     expect(animalPropData.options).not.toBeUndefined();
-                                    if(propName != 'images') expect(animalPropData.fieldLabel).not.toBeUndefined();
+                                    if (propName != 'images') expect(animalPropData.fieldLabel).not.toBeUndefined();
                                 });
                             })
                         })
@@ -152,7 +167,7 @@ describe("Router", function () {
                         .get(buildEndpoint('options', speciesName))
                         .set('Accept', 'application/json')
                         .expect('Content-Type', /json/)
-                        .expect(function ( res) {
+                        .expect(function (res) {
                             var responseOptions = res.body;
                             _.forEach(optionsData, function (singleOptionData, singleOptionName) {
                                 _.forEach(singleOptionData, function (option) {
@@ -356,10 +371,9 @@ describe("Router", function () {
             });
 
             describe("POST query/", function () {
-                // TODO determine why test is showing up in model
-                var speciesTestProps = _.reject(speciesProps, function(propData){
+                var speciesTestProps = _.reject(speciesProps, function (propData) {
                     return _.includes(['petId', 'description', 'images', 'defaults', 'test'], propData.key)
-                } );
+                });
 
                 it("accepts query when species field not provided", function (done) {
                     var queryProps = {
@@ -540,7 +554,8 @@ function buildEndpoint(operation, species, options) {
 function buildJasmineCallback(done) {
     return function (err, response) {
         if (err) {
-            if (response) console.error(response.body);
+            if (response) console.error('jasmine err response.body: %j' + response.body);
+            console.error(err);
             done.fail(err)
         } else {
             done()
@@ -614,6 +629,15 @@ function buildAnimalTest(queryProps, speciesProps) {
                         actualDate = new Date(actualValue);
 
                     if (actualDate.toISOString() === testDate.toISOString()) return;
+                } else if (speciesPropData.valType == 'Boolean') {
+                    var expectedBoolValue = expectedValue;
+                    if (expectedBoolValue.match(/y|yes/i)){
+                        expectedBoolValue = true;
+                    } else if(expectedBoolValue.match(/\w+/i)){
+                        // default to false
+                        expectedBoolValue = false;
+                    }
+                    if (actualValue === expectedBoolValue) return;
                 } else if (actualValue == expectedValue) {
                     // actualValues are equal
                     return;
