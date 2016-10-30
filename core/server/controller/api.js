@@ -12,7 +12,6 @@ var fs = require('fs'),
     config = require('../../config'),
     S3Bucket = require('../../s3'),
     Debuggable = require('../../lib/debuggable'),
-    SpeciesDBImage = require('../../mongodb/lib/species-db-image'),
     DBFormatter = require('../utils/formatter'),
     csvReader = require('../../csv-parser'),
     dump = require('../../../lib/dump');
@@ -42,7 +41,7 @@ function APIController(database, options) {
         debugLevel: Debuggable.PROD,
         debugTag: "APIController: ",
         pageSize: 10,
-        maxImageHeight : 1080,
+        maxImageHeight: 1080,
         paths: {
             localRoot: path.resolve(process.cwd(), 'public/'),
             images: 'images/pet/',
@@ -399,7 +398,7 @@ APIController.prototype = {
         return function (req, res, next) {
             var species = req.params.species,
                 bufferStream = new stream.PassThrough(),
-                publicPath = path.join(self._apiOptions.paths.placeholders, species+'.png');
+                publicPath = path.join(self._apiOptions.paths.placeholders, species + '.png');
             // TODO determine and use proper file extension
 
             bufferStream.end(req.file.buffer);
@@ -467,17 +466,19 @@ APIController.prototype = {
                     if (err) {
                         next(err);
                     } else {
-                        var dbFormatter = new DBFormatter(self.database, [new SpeciesDBImage(speciesName, [], speciesProps)]);
-                        dbFormatter.formatDB({
-                            species: speciesName,
-                            complete: function (err) {
-                                if (err) {
-                                    next(err)
-                                } else {
-                                    res.send({result: 'success'})
+                        var dbFormatter = new DBFormatter();
+                        dbFormatter.formatDB(
+                            self.database,
+                            speciesProps, {
+                                species: speciesName,
+                                complete: function (err) {
+                                    if (err) {
+                                        next(err)
+                                    } else {
+                                        res.send({result: 'success'})
+                                    }
                                 }
-                            }
-                        })
+                            })
                     }
                 }
             });
@@ -499,13 +500,15 @@ APIController.prototype = {
                                 if (err) {
                                     done(err)
                                 } else {
-                                    var dbFormatter = new DBFormatter(self.database, [new SpeciesDBImage(speciesName, [], speciesProps)]);
-                                    dbFormatter.formatDB({
-                                        species: speciesName,
-                                        complete: function (err) {
-                                            done(err);
-                                        }
-                                    })
+                                    var dbFormatter = new DBFormatter();
+                                    dbFormatter.formatDB(
+                                        self.database,
+                                        speciesProps, {
+                                            species: speciesName,
+                                            complete: function (err) {
+                                                done(err);
+                                            }
+                                        })
                                 }
                             }
                         });
@@ -575,7 +578,7 @@ APIController.prototype = {
                 });
             }
 
-            function onModelsParsed(formattedSchema, options) {
+            function onModelsParsed() {
                 self.log('schema parsed');
                 csvReader.parseOptions({
                     cache: true,
@@ -599,12 +602,13 @@ APIController.prototype = {
                 });
             }
 
-            function onDatasetParsed(petCollection, options) {
+            function onDatasetParsed(petCollection) {
                 self.log('dataset parsed');
-                var numOfPets = petCollection.length;
-                async.forEachOfSeries(petCollection,
-                    function each(petData, petIndex, done) {
-                        self.log('saving pet %j', petData);
+                var numOfPets = petCollection.length,
+                    savedPetCount = 0;
+                async.each(petCollection,
+                    function each(petData, done) {
+                        self.log(Debuggable.MED, 'saving pet %j', petData);
                         self.database.saveAnimal(petData.species || 'dog',
                             petData,
                             {
@@ -613,15 +617,12 @@ APIController.prototype = {
                                     if (err) {
                                         self.error(dump(err));
                                         done(err);
-                                    } else if (petIndex < numOfPets) {
-                                        self.log('Saved pet %s/%s', petIndex + 1, numOfPets);
-                                        done();
                                     } else {
+                                        self.log('saved %s/%s pets', savedPetCount++, numOfPets);
                                         done();
                                     }
                                 }
                             });
-                        // done();
                     },
                     function done(err) {
                         if (err) {
