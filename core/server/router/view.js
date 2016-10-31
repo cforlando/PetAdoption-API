@@ -22,7 +22,7 @@ function ViewRouter(controller){
 
     router.get('/', controller.passport.session(), function (req, res) {
         res.render('index', {
-            user : (req.session && req.session.passport && req.session.passport.user) ? req.session.passport.user : false,
+            user : req.user,
             title: 'Pet Data Entry'
         });
     });
