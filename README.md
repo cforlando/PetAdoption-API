@@ -76,7 +76,7 @@ Execute `npm run test`
 - `gulp-utils` provides easy compilation of javascript, stylus, and pug/jade files.
     + you can can read more about how it works on its [github repo](https://github.com/khalidhoffman/gulp-utils)
     + `gulp --tasks` shows a list of all possible tasks, but you'll probably only want to use:
-        - `gulp build-js` (for compiling web-interface js)
+        - `gulp build-rjs` (for compiling web-interface js)
         - `gulp pug-html` (for angular template files)
         - `gulp stylus` (for style overrides)
 
