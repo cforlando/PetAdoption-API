@@ -1,5 +1,7 @@
 define([
     'modules/directives/action-menu',
+    'modules/directives/auto-input',
+    'modules/directives/auto-default-input',
     'modules/directives/file-input',
     'modules/directives/autocomplete-input',
     'modules/directives/date-input',

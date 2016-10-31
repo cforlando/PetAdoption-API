@@ -8,6 +8,6 @@ include _auto-generated/_-all
             md-icon.material-icons add
     .slides()
         .slide(ng-repeat="url in propData.val track by $index")
-            img.slide__img(ng-src="{{url}}")
+            img.slide__img(ng-src="{{url}}", alt="{{url}}")
             .md-button.md-primary.md-fab.md-mini.btn-remove(ng-click="removePhotoByID($id)")
                 md-icon.material-icons clear

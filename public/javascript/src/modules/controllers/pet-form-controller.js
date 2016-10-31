@@ -278,7 +278,7 @@ define([
                 function formatData(petData) {
                     if ($scope.mediaInputEl) {
                         var formattedData = _.cloneDeep(petData);
-                        formattedData.imageFiles = $scope.mediaInputEl.files
+                        formattedData.$media = angular.element($scope.mediaInputEl)
                     }
 
                     if (formattedData.images) {

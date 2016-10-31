@@ -13,12 +13,7 @@ include ../_auto-generated/_-all
                     //            .pet-thumbnail__placeholder(ng-style!="background:url('{{pet.images.val[0]}}')")
                     .fields
                         .field(class="field--{{propData.key}}", ng-repeat="propData in properties", ng-if="isEditableByBatch(propData)")
-                            .date-input(ng-if="isDateField(propData)")
-                            .textarea-input(ng-if="isParagraphField(propData)")
-                            .autocomplete-input(ng-if="isAutocompleteField(propData)")
-                            .autocomplete-input(ng-if="isNumberField(propData)")
-                            .select-input(ng-if="isBooleanInput(propData)")
-                            .select-input(ng-if="isSelectInput(propData)")
+                            .auto-input
                     .nav
                         md-input-container
                             md-button.btn-submit.md-primary.md-raised(ng-click='savePet()') Save

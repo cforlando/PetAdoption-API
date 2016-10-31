@@ -1,0 +1,10 @@
+include _auto-generated/_-all
+.auto-input__content(ng-switch="getType()")
+    .slider(ng-switch-when="gallery")
+    .date-input(ng-switch-when="date")
+    .location-input(ng-switch-when="location")
+    .textarea-input(ng-switch-when="textarea")
+    .autocomplete-input(ng-switch-when="string")
+    .select-input(ng-switch-when="select")
+    .select-input(ng-switch-when="boolean")
+    .button.button--set-default(ng-if="isResetable()" ng-click="setUserDefault(propData)")

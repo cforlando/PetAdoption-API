@@ -47,6 +47,17 @@ define([
                 return angular.element('.section--edit-propData .input .md-input-invalid').length == 0;
             };
 
+            $scope.hasEditableOptions = function(propData){
+                if (!propData)  return false
+                switch ($scope.getPropType(propData)){
+                    case 'string':
+                    case 'number':
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
             $scope.saveProp = function (propData) {
                 if ($scope.isFormValid()) {
                     if (propData.val) {

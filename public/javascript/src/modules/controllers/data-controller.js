@@ -421,8 +421,8 @@ define([
                 var _options = _.defaults(options, {}),
                     data = petProps,
                     formData = new FormData();
-                console.log('sending photos %o', petProps.imageFiles);
-                _.forEach(petProps.imageFiles, function (file, index) {
+                console.log('sending photos %o', petProps.$media);
+                _.forEach(petProps.$media[0].files, function (file, index) {
                     formData.append("uploads", file);
                     // TODO only append if filename is saved in props
                 });
@@ -439,6 +439,7 @@ define([
                 }).then(
                     function success(response) {
                         $scope.hideLoading();
+                        petProps.$media.val('');
                         var _persistedData = response.data;
                         console.log('_persistedData: %o', _persistedData);
                         if (_.isFunction(_options.done)) _options.done.apply(null, [null, _persistedData]);

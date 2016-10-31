@@ -1,0 +1,38 @@
+include _auto-generated/_-all
+.auto-input__content(ng-switch="getType()")
+    .input.input--date(ng-switch-when="date")
+        label.input__label The default value
+        md-datepicker(ng-model="propData.defaultVal")
+    .input.input--number(ng-switch-when="number")
+        md-input-container.md-block
+            label The default value
+            input(ng-model!="propData.defaultVal", ng-pattern!="/^[0-9\.]*$/")
+            div(ng-messages="propData.defaultVal.$error" role="alert")
+                div(ng-message="pattern") Not a valid value
+    .input.input--textarea(ng-switch-when="textarea")
+        md-input-container.md-block
+            label The default value
+            textarea(ng-model="propData.val", max-rows="8", md-select-on-focus)
+    .input.input--autocomplete(ng-switch-when="string")
+        -
+            var attrs = {
+                "md-search-text": "propData.defaultVal",
+                "md-items": "option in propData.options | filter:propData.defaultVal",
+                "md-min-length" : 1,
+                "md-delay" : 250,
+                "md-floating-label":"The Default Value"
+            }
+        md-autocomplete.input-options&attributes(attrs)
+            md-item-template
+                span(ng-bind="option")
+    .input.input--select(ng-switch-when="select")
+        md-input-container.md-block
+            label The default value
+            md-select(ng-model="propData.defaultVal")
+                md-option(ng-value="option" ng-repeat="option in propData.options") option
+    .input.input--boolean(ng-switch-when="boolean")
+        md-input-container.md-block
+            label The default value
+            md-select(ng-model="propData.defaultVal")
+                md-option(ng-value="true") {{getSelectOptionLabel(true)}}
+                md-option(ng-value="false") {{getSelectOptionLabel(false)}}

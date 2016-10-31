@@ -13,6 +13,7 @@ define([
             scope: true,
             controller: ['$scope', '$element',
                 function ($scope, $element) {
+                    var renderTimeout = 6 * 1000;
                     console.log('image - slide.$scope: %o', $scope);
 
                     $scope.isSlideRendered = function () {
@@ -20,13 +21,29 @@ define([
                     };
 
                     var urlWatchHandler = $scope.$watch('url', function (imageURL, oldImageURL) {
-                        if (!imageURL || !$scope.last) return;
+                        if (!imageURL) return;
                         var isRenderedWatchHandler = $scope.$watch($scope.isSlideRendered, function (isRendered) {
                             if (isRendered) {
                                 init();
                                 isRenderedWatchHandler();
                             }
                         })
+
+                        setTimeout(function(){
+                            $scope.$apply(function(){
+                                if ($scope.isSlideRendered() === false){
+                                    var $img = $element.find('img');
+                                    // render fake image
+                                    $img.css({
+                                        minHeight: 240,
+                                        minWidth: 240,
+                                    });
+                                    $scope.showError('Could not render image');
+                                    isRenderedWatchHandler();
+                                    init();
+                                }
+                            });
+                        }, renderTimeout);
                     });
 
                     $scope.onDestroy = function () {

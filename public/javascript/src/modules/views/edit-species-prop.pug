@@ -16,43 +16,8 @@ include _auto-generated/_-all
                         md-select(ng-model="propData.valType")
                             md-option(ng-repeat="type in valTypes" ng-value="type") {{type}}
                 .propData-field.propData-field--defaultVal
-                    .input.input--date(ng-if="isDateField(propData)")
-                        label.input__label The default value
-                        md-datepicker(ng-model="propData.defaultVal")
-                    .input.input--number(ng-if="isNumberField(propData)")
-                        md-input-container.md-block
-                            label The default value
-                            input(ng-model!="propData.defaultVal", ng-pattern!="/^[0-9\.]*$/")
-                            div(ng-messages="propData.defaultVal.$error" role="alert")
-                                div(ng-message="pattern") Not a valid value
-                    .input.input--textarea(ng-if="isParagraphField(propData)")
-                        md-input-container.md-block
-                            label The default value
-                            textarea(ng-model="propData.val", max-rows="8", md-select-on-focus)
-                    .input.input--autocomplete(ng-if="isAutocompleteField(propData)")
-                        -
-                            var attrs = {
-                                "md-search-text": "propData.defaultVal",
-                                "md-items": "option in propData.options | filter:propData.defaultVal",
-                                "md-min-length" : 1,
-                                "md-delay" : 250,
-                                "md-floating-label":"The Default Value"
-                            }
-                        md-autocomplete.input-options&attributes(attrs)
-                            md-item-template
-                                span(ng-bind="option")
-                    .input.input--select(ng-if="isSelectInput(propData)")
-                        md-input-container.md-block
-                            label The default value
-                            md-select(ng-model="propData.defaultVal")
-                                md-option(ng-value="option" ng-repeat="option in propData.options") option
-                    .input.input--boolean(ng-if="isBooleanInput(propData)")
-                        md-input-container.md-block
-                            label The default value
-                            md-select(ng-model="propData.defaultVal")
-                                md-option(ng-value="true") {{getSelectOptionLabel(true)}}
-                                md-option(ng-value="false") {{getSelectOptionLabel(false)}}
-                md-chips(ng-model="propData.options", placeholder='Option', ng-if="isSelectInput(propData) || isAutocompleteField(propData)", readonly=false, md-removable=true md-enable-chip-edit="true")
+                    .auto-default-input
+                md-chips(ng-model="propData.options", placeholder='Option', ng-if="hasEditableOptions(propData)", readonly=false, md-removable=true md-enable-chip-edit="true")
             md-card-actions(layout='row', layout-align='end')
                 md-button.md-icon-button(ng-click="saveProp(propData)")
                     md-icon.material-icons save
