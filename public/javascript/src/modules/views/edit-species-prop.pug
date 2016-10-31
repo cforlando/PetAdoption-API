@@ -52,7 +52,7 @@ include _auto-generated/_-all
                             md-select(ng-model="propData.defaultVal")
                                 md-option(ng-value="true") {{getSelectOptionLabel(true)}}
                                 md-option(ng-value="false") {{getSelectOptionLabel(false)}}
-                md-chips(ng-model="propData.options", ng-if="isSelectInput(propData) || isAutocompleteField(propData)", readonly=false, md-removable=true md-enable-chip-edit="true")
+                md-chips(ng-model="propData.options", placeholder='Option', ng-if="isSelectInput(propData) || isAutocompleteField(propData)", readonly=false, md-removable=true md-enable-chip-edit="true")
             md-card-actions(layout='row', layout-align='end')
                 md-button.md-icon-button(ng-click="saveProp(propData)")
                     md-icon.material-icons save
