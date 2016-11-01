@@ -422,10 +422,13 @@ define([
                     data = petProps,
                     formData = new FormData();
                 console.log('sending photos %o', petProps.$media);
-                _.forEach(petProps.$media[0].files, function (file, index) {
-                    formData.append("uploads", file);
-                    // TODO only append if filename is saved in props
-                });
+                if (petProps.$media && petProps.$media[0]){
+                    // append uploaded files
+                    _.forEach(petProps.$media[0].files, function (file, index) {
+                        formData.append("uploads", file);
+                        // TODO only append if filename is saved in props
+                    });
+                }
                 var formattedPetData = dataParserService.convertDataToSaveFormat(data);
                 console.log('saving petData %o', formattedPetData);
                 _.forEach(formattedPetData, function (propValue, propName) {
