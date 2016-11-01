@@ -30,7 +30,7 @@ function MongoAPIDatabase(options) {
         _options = _.defaults(options, {
             debugLevel: Debuggable.PROD,
             debugTag: 'MongoAPIDatabase: ',
-            modelNamePrefix: config.isDevelopment ? 'dev_' : 'prod_ ',
+            modelNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_ ',
             preset: [new SpeciesDBImage('cat', [], (function () {
                 try {
                     return JSON.parse(fs.readFileSync(path.join(process.cwd(), './data/props.cat.json'), 'utf8'));
@@ -56,7 +56,7 @@ function MongoAPIDatabase(options) {
         modelNamePrefix: _options.modelNamePrefix
     });
 
-    this.log(Debuggable.LOW, 'Running in %s mode.', (config.isDevelopment) ? 'dev' : 'prod');
+    this.log(Debuggable.LOW, 'Running in %s mode.', (config.DEVELOPMENT_ENV) ? 'dev' : 'prod');
 
     this.getSpeciesList({
         complete: function (err, speciesList) {

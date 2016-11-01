@@ -53,14 +53,14 @@ function Server(database, options) {
     server.use(bodyParser.urlencoded({extended: false}));
     server.use(compression());
     /*
-     if (!config.isDevelopment) {
+     if (!config.DEVELOPMENT_ENV) {
      app.set('trust proxy', 1); // trust first proxy
      sess.cookie.secure = true; // serve secure cookies
      }
      */
     server.set('trust proxy', 1); // trust first proxy
     server.use(session({
-        secret: config.server_session_secret,
+        secret: config.SERVER_SESSION_SECRET,
         saveUninitialized: true,
         resave: true
     }));
@@ -93,8 +93,8 @@ function Server(database, options) {
         res.status(err.status || 500);
         res.render('error', {
             message: err.message,
-            error: config.isDevelopment ? err : {},
-            isDevelopment: config.isDevelopment
+            error: config.DEVELOPMENT_ENV ? err : {},
+            DEVELOPMENT_ENV: config.DEVELOPMENT_ENV
         });
     });
 

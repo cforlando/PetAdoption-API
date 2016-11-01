@@ -30,8 +30,8 @@ function AuthController(database, options) {
 
     this.credentials = {
         web: {
-            client_id: config.google_client_id,
-            client_secret: config.google_client_secret
+            client_id: config.GOOGLE_CLIENT_ID,
+            client_secret: config.GOOGLE_CLIENT_SECRET
         }
     };
 
@@ -49,7 +49,7 @@ function AuthController(database, options) {
     this.passport.use(new GoogleStrategy({
         clientID: this.credentials.web.client_id,
         clientSecret: this.credentials.web.client_secret,
-        callbackURL: url.resolve(config.domain, "/auth/google/callback")
+        callbackURL: url.resolve(config.DOMAIN, "/auth/google/callback")
     }, this.onLoginRequest()));
 
     this.passport.serializeUser(function (user, done) {
@@ -126,7 +126,7 @@ AuthController.prototype = {
                 res.render('error', {
                     message: err.message,
                     error: err,
-                    isDevelopment: config.isDevelopment
+                    DEVELOPMENT_ENV: config.DEVELOPMENT_ENV
                 });
             }
         }

@@ -13,7 +13,7 @@ describe("S3Bucket", function () {
         testFilePath = path.join(__dirname, testFileName);
 
     beforeAll(function () {
-        testS3Bucket = new S3Bucket(config.s3_test_bucket_name);
+        testS3Bucket = new S3Bucket(config.S3_TEST_BUCKET_NAME);
     });
 
     describe("saveReadableStream", function () {

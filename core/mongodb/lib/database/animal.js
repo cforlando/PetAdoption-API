@@ -29,7 +29,7 @@ function AnimalDatabase(speciesName, speciesProps, options) {
         _options = _.defaults(options, {
             debugLevel: Debuggable.PROD,
             debugTag: this.format("AnimalDatabase(%s): ", speciesName),
-            modelNamePrefix: (config.isDevelopment) ? 'dev' : 'prod',
+            modelNamePrefix: (config.DEVELOPMENT_ENV) ? 'dev' : 'prod',
             queryOptions: {
                 complete: function (err) {
                     if (err) self.warn(err);
@@ -50,7 +50,7 @@ function AnimalDatabase(speciesName, speciesProps, options) {
     this.setDebugLevel(_options.debugLevel);
     this.setDebugTag(_options.debugTag);
 
-    this.setConfig('isDevelopment', _options.isDevelopment);
+    this.setConfig('isDevelopment', _options.DEVELOPMENT_ENV);
     this.setConfig('queryOptions', _options.queryOptions);
     this.setConfig('speciesName', speciesName);
 

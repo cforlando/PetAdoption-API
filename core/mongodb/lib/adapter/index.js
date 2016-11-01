@@ -17,9 +17,9 @@ mongoose.Promise = require('q').Promise;
  * @extends Debuggable
  * @class MongoDBAdapter
  * @param [options]
- * @param {Number} [options.retryTimeout] in milliseconds
  * @param {String} [options.debugTag]
  * @param {DebugLevel} [options.debugLevel]
+ * @param [options.mongoConnectionURL]
  * @param [options.context]
  * @param {Function} [options.onSuccess]
  * @param {Function} [options.onFailure]
@@ -28,34 +28,20 @@ mongoose.Promise = require('q').Promise;
  * @constructor
  */
 function MongoDBAdapter(options) {
-    var self = this,
-        _options = _.defaults(options, {
-            retryTimeout: 2000,
-            debugTag: 'MongoDBAdapter: ',
-            debugLevel: Debuggable.PROD,
-            context: null,
-            onFailure: function () {
-                console.error.apply(console, arguments);
-            }
-        });
+    var _options = _.defaults(options, {
+        debugTag: 'MongoDBAdapter: ',
+        debugLevel: Debuggable.PROD,
+        mongoConnectionURI: config.MONGODB_URI,
+        context: null,
+        onFailure: function () {
+            console.error.apply(console, arguments);
+        }
+    });
 
     this.setDebugTag(_options.debugTag);
     this.setDebugLevel(_options.debugLevel);
 
-    this._identity = {
-        username: config.mongo_username,
-        password: config.mongo_password,
-        domain: config.mongo_domain,
-        port: config.mongo_port,
-        database: config.mongo_database
-    };
-
-
-    this._context = _options.context;
-
-    this._config = {
-        retryTimeout: _options.retryTimeout
-    };
+    this._config = _options;
 
     this._callbacks = {
         beforeConnect: _options.beforeConnect,
@@ -82,10 +68,12 @@ MongoDBAdapter.prototype = {
      */
     connect: function (options) {
         var self = this,
-            mongodbCred = util.format('%s%s', this._identity.username ? this._identity.username : '', this._identity.password ? ':' + this._identity.password : ''),
-            mongodbURL = util.format("mongodb://%s%s:%s/%s", mongodbCred ? mongodbCred + '@' : '', this._identity.domain, this._identity.port, this._identity.database),
-            _options = options || {},
-            context = _options.context || this._context,
+            _options = _.defaults(options, {
+                mongoConnectionURI: this._config.mongoConnectionURI,
+                context: this._config.context
+            }),
+            mongoConnectionURI = _options.mongoConnectionURI,
+            context = _options.context,
 
             // use local var declaration to keep scope of callbacks to this call only. ie. don't overwrite initial values
             callbacks = _.reduce(this._callbacks, function (callbacks, callbackFunc, callbackName) {
@@ -95,9 +83,9 @@ MongoDBAdapter.prototype = {
 
         if (callbacks.beforeConnect) callbacks.beforeConnect.call(context);
 
-        this.log(Debuggable.LOW, 'mongoose is connecting to %s', mongodbURL);
+        this.log(Debuggable.LOW, 'mongoose is connecting to %s', mongoConnectionURI);
 
-        if(!this.isConnecting()) this.mongoose = mongoose.createConnection(mongodbURL);
+        if (!this.isConnecting()) this.mongoose = mongoose.createConnection(mongoConnectionURI);
 
         this.mongoose.on('close', function () {
             self.emit('close');

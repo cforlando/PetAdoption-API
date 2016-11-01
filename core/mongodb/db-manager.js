@@ -37,7 +37,7 @@ function DatabaseManager(options) {
     this._config = _.defaults(options, {
         debugLevel: Debuggable.PROD,
         debugTag: 'MongoAPIDatabase: ',
-        modelNamePrefix: config.isDevelopment ? 'dev_' : 'prod_ '
+        modelNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_ '
     });
 
     this.setDebugLevel(this._config.debugLevel);

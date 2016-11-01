@@ -15,41 +15,44 @@ var localJSON = (function () {
 
 /**
  * @name config
- * @property {String} domain
- * @property {Boolean} isDevelopment Setting this value to anything yields true
- * @property {String} port
- * @property {String} httpsPort
- * @property {String} google_client_id
- * @property {String} google_client_secret
- * @property {String} mongo_username
- * @property {String} mongo_password
- * @property {String} mongo_domain
- * @property {String} mongo_port
- * @property {String} mongo_database
+ * @property {String} DOMAIN
+ * @property {Boolean} DEVELOPMENT_ENV Setting this value to anything yields true
+ * @property {String} PORT
+ * @property {String} HTTPS_PORT
+ * @property {String} [SERVER_SESSION_SECRET='pet-api]
+ *
+ * @property {String} ASSETS_DOMAIN Domain of image hosting resource (ie Amazon S3)
+ * @property {String} AWS_ACCESS_KEY_ID
+ * @property {String} AWS_SECRET_ACCESS_KEY
+ *
+ * @property {String} S3_PROD_BUCKET_NAME
+ * @property {String} S3_DEV_BUCKET_NAME
+ * @property {String} S3_TEST_BUCKET_NAME
+ *
+ * @property {String} GOOGLE_CLIENT_ID
+ * @property {String} GOOGLE_CLIENT_SECRET
+ *
+ * @property {String} MONGODB_URI
  */
 var config = {
-    domain : process.env.domain || localJSON.domain || "http://localhost:8080",
-    assetsDomain : process.env.assetsDomain || localJSON.assetsDomain || "http://localhost:8080",
-    isDevelopment : !!process.env.isDevelopment || localJSON.isDevelopment || false,
-    port : process.env.port || localJSON.port || '8080',
-    httpsPort : process.env.httpsPort || localJSON.httpsPort || '8443',
-    server_session_secret: process.env.server_session_secret || localJSON.server_session_secret || 'pet-api',
+    DOMAIN : process.env.DOMAIN || localJSON.DOMAIN || "http://localhost:8080",
+    DEVELOPMENT_ENV : !!process.env.DEVELOPMENT_ENV || localJSON.DEVELOPMENT_ENV || false,
+    PORT : process.env.PORT || localJSON.PORT || '8080',
+    HTTPS_PORT : process.env.HTTPS_PORT || localJSON.HTTPS_PORT || '8443',
+    SERVER_SESSION_SECRET: process.env.SERVER_SESSION_SECRET || localJSON.SERVER_SESSION_SECRET || 'pet-api',
 
-    aws_access_key_id : process.env.aws_access_key_id || localJSON.aws_access_key_id || '',
-    aws_secret_access_key : process.env.aws_secret_access_key || localJSON.aws_secret_access_key || '',
+    ASSETS_DOMAIN : process.env.ASSETS_DOMAIN || localJSON.ASSETS_DOMAIN || "http://localhost:8080",
+    AWS_ACCESS_KEY_ID : process.env.BUCKETEER_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || localJSON.AWS_ACCESS_KEY_ID || '',
+    AWS_SECRET_ACCESS_KEY : process.env.BUCKETEER_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || localJSON.AWS_SECRET_ACCESS_KEY || '',
 
-    s3_prod_bucket_name: process.env.s3_prod_bucket_name || localJSON.s3_prod_bucket_name || "prod",
-    s3_dev_bucket_name: process.env.s3_dev_bucket_name || localJSON.s3_dev_bucket_name || "dev",
-    s3_test_bucket_name: process.env.s3_test_bucket_name || localJSON.s3_test_bucket_name || "test",
+    S3_PROD_BUCKET_NAME: process.env.BUCKETEER_BUCKET_NAME || process.env.S3_BUCKET || process.env.S3_PROD_BUCKET_NAME || localJSON.S3_PROD_BUCKET_NAME || "prod",
+    S3_DEV_BUCKET_NAME: process.env.S3_DEV_BUCKET_NAME || localJSON.S3_DEV_BUCKET_NAME || "dev",
+    S3_TEST_BUCKET_NAME: process.env.S3_TEST_BUCKET_NAME || localJSON.S3_TEST_BUCKET_NAME || "test",
 
-    google_client_id : process.google_client_id || localJSON.google_client_id || 'n/a',
-    google_client_secret : process.google_client_secret || localJSON.google_client_secret || 'n/a',
+    GOOGLE_CLIENT_ID : process.GOOGLE_CLIENT_ID || localJSON.GOOGLE_CLIENT_ID || 'n/a',
+    GOOGLE_CLIENT_SECRET : process.GOOGLE_CLIENT_SECRET || localJSON.GOOGLE_CLIENT_SECRET || 'n/a',
 
-    mongo_username: process.env.mongo_username || localJSON.mongo_username,
-    mongo_password: process.env.mongo_password || localJSON.mongo_password,
-    mongo_domain: process.env.mongo_domain || localJSON.mongo_domain || 'domain',
-    mongo_port: process.env.mongo_port || localJSON.mongo_port,
-    mongo_database: process.env.mongo_database || localJSON.mongo_database || 'local'
+    MONGODB_URI: process.env.MONGODB_URI || localJSON.MONGODB_URI || 'mongodb://127.0.0.1/local'
 };
 
 

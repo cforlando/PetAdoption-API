@@ -52,7 +52,7 @@ function APIController(database, options) {
     this.setDebugTag(this._apiOptions.debugTag);
     this.setDebugLevel(this._apiOptions.debugLevel);
 
-    this.s3 = new S3Bucket(config.isDevelopment ? config.s3_dev_bucket_name : config.s3_prod_bucket_name);
+    this.s3 = new S3Bucket(config.DEVELOPMENT_ENV ? config.S3_DEV_BUCKET_NAME : config.S3_PROD_BUCKET_NAME);
     this.storage = multer.memoryStorage();
 
     this.uploader = multer({storage: this.storage});

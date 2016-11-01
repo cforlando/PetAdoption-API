@@ -17,8 +17,8 @@ var fs = require('fs'),
  */
 function S3Bucket(bucketName, options) {
     var _options = _.defaults(options, {
-        aws_access_key_id: config.aws_access_key_id,
-        aws_secret_access_key: config.aws_secret_access_key
+        aws_access_key_id: config.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key: config.AWS_SECRET_ACCESS_KEY
     });
 
     AWS.config.accessKeyId = _options.aws_access_key_id;

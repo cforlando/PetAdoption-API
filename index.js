@@ -15,8 +15,8 @@ var http = require('http'),
     server = new Server(database),
 
     ipAddress = (process.env.OPENSHIFT_NODEJS_IP) ? process.env.OPENSHIFT_NODEJS_IP : null,
-    httpPortNumber = serverUtils.normalizePort(process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || process.env.port || config.port),
-    httpsPortNumber = serverUtils.normalizePort(config.httpsPort),
+    httpPortNumber = serverUtils.normalizePort(config.PORT),
+    httpsPortNumber = serverUtils.normalizePort(config.HTTPS_PORT),
     privateKey  = (function(){
         try {
             return fs.readFileSync(path.resolve(__dirname, 'ssl/server.key'), 'utf8');
