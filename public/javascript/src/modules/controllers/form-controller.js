@@ -18,7 +18,7 @@ define([
                     case 'petId':
                         return 'hidden';
                     case 'species':
-                        return 'species';
+                        return 'select';
                     case 'description':
                         return 'textarea'
                     default:
