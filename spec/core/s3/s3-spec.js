@@ -47,10 +47,10 @@ describe("S3Bucket", function () {
                 readStream.pipe(testSaveStream)
                     .on('data', function (data) {
                         if (fileBuffer) {
-                            var chunkBuffer = Buffer.from(data);
+                            var chunkBuffer = new Buffer(data);
                             fileBuffer = Buffer.concat([fileBuffer, chunkBuffer]);
                         } else {
-                            fileBuffer = Buffer.from(data);
+                            fileBuffer = new Buffer(data);
                         }
                     })
                     .on('finish', function () {

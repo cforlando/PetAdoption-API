@@ -1,13 +1,20 @@
 language: node_js
 before_script:
   - npm install -g jasmine
+  - sleep 15
+  - mongo mydb_test --eval 'db.addUser("travis", "test");'
 node_js:
-  - "5.10"
+  - "4.3.1"
 addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
     packages:
     - g++-4.8
+services:
+  - mongodb
+cache:
+  directories:
+    - node_modules
 env:
   CXX=g++-4.8

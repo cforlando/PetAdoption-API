@@ -31,8 +31,12 @@ describe("ModelFactory", function () {
         })
     });
 
-    afterAll(function(done){
-        dbAdapter.close(done);
+    afterAll(function (done) {
+        UserModel.remove({}, function () {
+            dbAdapter.close(function () {
+                done();
+            });
+        });
     });
 
     describe("save()", function () {
@@ -65,11 +69,4 @@ describe("ModelFactory", function () {
         })
     });
 
-    afterAll(function (done) {
-        UserModel.remove({}, function () {
-            dbAdapter.close(function () {
-                done();
-            });
-        });
-    });
 });
