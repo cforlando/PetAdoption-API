@@ -5,6 +5,7 @@ var fs = require('fs'),
     _ = require('lodash'),
     passport = require('passport'),
     GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
+    session = require('express-session'),
 
     Debuggable = require('../../lib/debuggable'),
     config = require('../../config'),
@@ -34,6 +35,12 @@ function AuthController(database, options) {
             client_secret: config.GOOGLE_CLIENT_SECRET
         }
     };
+
+    this.userSession = session({
+        secret: config.SERVER_SESSION_SECRET,
+        saveUninitialized: true,
+        resave: true
+    });
 
     /**
      * @type {Passport}
@@ -73,7 +80,7 @@ function AuthController(database, options) {
 
 AuthController.prototype = {
 
-    onLoginRequest: function(){
+    onLoginRequest: function () {
         var self = this;
 
         return function (accessToken, refreshToken, profile, done) {
@@ -103,33 +110,30 @@ AuthController.prototype = {
     },
 
 
-    onLoginSuccess: function(){
+    onLoginSuccess: function () {
         return function (req, res, next) {
-            req.session.save(function (err) {
-                if (err) {
-                    next(err);
-                } else {
-                    res.redirect('/');
-                }
-            });
-
+            res.redirect('/');
         }
     },
 
-    verifyAuth: function(){
-        return function (req, res, next) {
-            if (req.isAuthenticated()) {
-                next();
-            } else {
-                var err = new Error("Not authenticated");
-                res.status(401);
-                res.render('error', {
-                    message: err.message,
-                    error: err,
-                    DEVELOPMENT_ENV: config.DEVELOPMENT_ENV
-                });
-            }
-        }
+    verifyAuth: function () {
+        return [
+            this.userSession,
+            this.passport.initialize(),
+            this.passport.session(),
+            function (req, res, next) {
+                if (req.isAuthenticated()) {
+                    next();
+                } else {
+                    var err = new Error("Not authenticated");
+                    res.status(401);
+                    res.render('error', {
+                        message: err.message,
+                        error: err,
+                        DEVELOPMENT_ENV: config.DEVELOPMENT_ENV
+                    });
+                }
+            }]
     }
 };
 

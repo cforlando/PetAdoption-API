@@ -9,7 +9,6 @@ var fs = require('fs'),
     config = require('../config'),
     _ = require('lodash'),
     async = require('async'),
-    session = require('express-session'),
     compression = require('compression'),
 
     Debuggable = require('../lib/debuggable'),
@@ -52,18 +51,8 @@ function Server(database, options) {
     server.use(bodyParser.json());
     server.use(bodyParser.urlencoded({extended: false}));
     server.use(compression());
-    /*
-     if (!config.DEVELOPMENT_ENV) {
-     app.set('trust proxy', 1); // trust first proxy
-     sess.cookie.secure = true; // serve secure cookies
-     }
-     */
-    server.set('trust proxy', 1); // trust first proxy
-    server.use(session({
-        secret: config.SERVER_SESSION_SECRET,
-        saveUninitialized: true,
-        resave: true
-    }));
+
+    server.set('trust proxy', 1); // trust first proxy hop
 
     // redirect images to s3 resource
     server.use('/images', assetsRedirect());

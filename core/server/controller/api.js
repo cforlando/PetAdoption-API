@@ -91,7 +91,7 @@ APIController.prototype = {
     onUserRetrieve: function () {
         var self = this;
         return function (req, res, next) {
-            var userId = (req.session && req.session.passport && req.session.passport.user) ? req.session.passport.user : false;
+            var userId = (req.user) ? req.user.id : false;
             if (!userId) {
                 var unauthorizedErr = new Error('Unauthorized');
                 unauthorizedErr.status = 401;
