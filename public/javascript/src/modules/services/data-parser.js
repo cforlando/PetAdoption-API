@@ -1,13 +1,52 @@
 define([
     'require',
     'underscore',
+    'async',
     'ngApp'
 ], function (require) {
     var ngApp = require('ngApp'),
+        async = require('async'),
         _ = require('underscore');
 
-    return ngApp.service('dataParserService', function () {
+    return ngApp.service('dataParser', function () {
         var self = this;
+
+        this.getURLsFrom$inputs = function ($inputs, callback) {
+            var _previewPhotos = [];
+
+            async.each($inputs,
+                function each(inputEl, done) {
+                    var numOfFiles = inputEl.files.length;
+
+                    if (numOfFiles > 0) {
+                        var reader = new FileReader(),
+                            readIndex = 0,
+                            isLoadComplete = function () {
+                                return readIndex === numOfFiles
+                            };
+
+                        reader.onload = function (e) {
+                            readIndex++;
+                            console.log('file input - reader.onload(%o) - %d/%d', arguments, readIndex, numOfFiles);
+                            _previewPhotos.push(e.target.result);
+                            if (isLoadComplete()) {
+                                console.log('file input - load complete', arguments, readIndex, numOfFiles);
+                                done();
+                            } else {
+                                reader.readAsDataURL(inputEl.files[readIndex]);
+                            }
+                        };
+
+                        reader.readAsDataURL(inputEl.files[readIndex]);
+                    } else {
+                        done();
+                    }
+                },
+                function complete() {
+                    callback(null, _previewPhotos);
+                });
+        };
+
         this.getFormattedPropValue = function (propData) {
             // console.log('parsing %o (key: %s - type; %s)', propData, propData.key, propData.valType);
             switch (propData.valType) {
@@ -119,7 +158,7 @@ define([
             return formattedModelData;
         };
 
-        this._sortProps = function(props){
+        this._sortProps = function (props) {
             return _.sortBy(props, function (propData) {
                 if (propData.key == 'petId') return 0;
                 if (propData.key == 'images') return 1;

@@ -1,25 +1,23 @@
-define([
-    'require',
-    'ng-route',
-    'ng-material'
-], function(require){
-    var ngApp = angular.module('cfo-pet-adoption-data-entry', ['ngMaterial', 'ngRoute'])
-        .config(function($mdThemingProvider) {
-            $mdThemingProvider.theme('default')
-                .primaryPalette('cyan',{
-                    'default': '800'
-                })
-                .accentPalette('teal',{
-                    'default': '900'
-                });
-        });
+var angular = require('angular'),
+    ngRoute = require('ng-route'),
+    slickCarousel = require('angular-slick-carousel'),
+    ngMessages = require('ng-messages'),
+    ngMaterial = require('ng-material');
 
-    ngApp.config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.debugInfoEnabled(false);
-    }]);
+var ngApp = angular.module('cfo-pet-adoption-data-entry', ['ngMaterial', 'ngMessages', 'ngRoute', 'slickCarousel'])
+    .config(function ($mdThemingProvider) {
+        $mdThemingProvider.theme('default')
+            .primaryPalette('cyan', {
+                'default': '800'
+            })
+            .accentPalette('teal', {
+                'default': '900'
+            });
+    });
 
-    console.log('init angular.');
-    
-    return ngApp;
+// ngApp.config(['$compileProvider', function ($compileProvider) {
+//     $compileProvider.debugInfoEnabled(false);
+// }]);
 
-});
+console.log('loading ng-app: %o', ngApp);
+module.exports = ngApp;

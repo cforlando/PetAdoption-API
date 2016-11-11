@@ -1,8 +1,8 @@
-define([
-    'modules/services/address-finder',
-    'modules/services/data-parser',
-    'modules/services/request',
-    'modules/services/google'
-], function () {
-    console.log('init services')
-});
+console.log('loading services');
+module.exports = [
+    require('modules/services/address-finder'),
+    require('modules/services/species-factory'),
+    require('modules/services/data-parser'),
+    require('modules/services/request'),
+    require('modules/services/google')
+];

@@ -1,11 +1,13 @@
 define([
     'require',
+    'angular',
     'underscore',
     'modules/controllers/form-controller',
     'text!modules/views/dialogs/new-species-prop.html',
     'ngApp'
 ], function (require) {
-    var ngApp = require('ngApp'),
+    var angular = require('angular'),
+        ngApp = require('ngApp'),
         _ = require('underscore');
 
     return ngApp.controller("speciesFormController", [
@@ -67,10 +69,6 @@ define([
                         if(_options.done) _options.done(new Error(errMessage));
                     }
                 )
-            };
-
-            $scope.registerFileDOMElement = function(fileElement){
-                $scope.mediaInputEl = fileElement;
             };
 
             $scope.editProp = function (propData) {

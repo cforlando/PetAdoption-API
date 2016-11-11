@@ -17,8 +17,8 @@
       "input": "./"
     },
     {
-      "name": "js-bundle",
-      "input": "public/javascript/src/build.js",
+      "name": "js-webpack",
+      "input": "public/javascript/src/webpack.config.js",
       "output": "public/javascript/"
     },
     {

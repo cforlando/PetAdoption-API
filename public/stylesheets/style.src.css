@@ -486,14 +486,6 @@ md-sidenav {
   max-height: 20em;
   max-width: 100%;
   width: auto;
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-  filter: alpha(opacity=0);
-  opacity: 0;
-}
-.gallery .slide.visible .slide__img {
-  -ms-filter: none;
-  filter: none;
-  opacity: 1;
 }
 .gallery .btn-remove {
   position: absolute;
@@ -507,7 +499,7 @@ md-sidenav {
   bottom: 0.75em;
   z-index: 1;
 }
-.slider-upload-form {
+.file-input__form {
   display: none;
 }
 .slick-slider.slick-dotted {

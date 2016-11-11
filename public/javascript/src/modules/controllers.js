@@ -1,17 +1,11 @@
-define([
-    'require',
-    'modules/controllers/app-controller',
-    'modules/controllers/user-controller',
-    'modules/controllers/data-controller',
-
-    'modules/controllers/pet-list-controller',
-    'modules/controllers/pet-form-controller',
-
-    'modules/controllers/species-list-controller',
-    'modules/controllers/species-form-controller',
-    'modules/controllers/species-prop-form-controller'
-], function() {
-
-    console.log('init controllers');
-
-});
+console.log('loading controllers');
+module.exports = [
+    require('modules/controllers/app-controller'),
+    require('modules/controllers/user-controller'),
+    require('modules/controllers/data-controller'),
+    require('modules/controllers/pet-list-controller'),
+    require('modules/controllers/pet-form-controller'),
+    require('modules/controllers/species-list-controller'),
+    require('modules/controllers/species-form-controller'),
+    require('modules/controllers/species-prop-form-controller')
+];

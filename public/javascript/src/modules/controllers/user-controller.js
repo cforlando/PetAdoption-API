@@ -1,14 +1,16 @@
 define([
     'require',
+    'angular',
     'underscore',
     'ngApp'
 ], function (require) {
-    var ngApp = require('ngApp'),
+    var angular = require('angular'),
+        ngApp = require('ngApp'),
         _ = require('underscore');
 
     ngApp.controller('userController', [
-        '$scope', 'request', 'dataParserService',
-        function ($scope, request, dataParserService) {
+        '$scope', 'request',
+        function ($scope, request) {
             $scope.user = {
                 // Get user ID
             };

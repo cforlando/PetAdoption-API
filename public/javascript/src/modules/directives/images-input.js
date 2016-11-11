@@ -2,88 +2,62 @@ define([
     'require',
     'text!./views/images-input.html',
     'jquery-slick',
+    'angular',
     'underscore',
     'ngApp'
 ], function (require) {
     var _ = require('underscore'),
+        angular = require('angular'),
         ngApp = require('ngApp');
     return ngApp.directive('slider', [function () {
         return {
             restrict: 'EC',
             template: require('text!./views/images-input.html'),
-            controller: ['$scope', '$element', '$timeout',
-                function ($scope, $element, $timeout) {
+            controller: ['$scope', '$element', '$timeout', 'dataParser',
+                function ($scope, $element, $timeout, dataParser) {
                     var watcherHandlers = {};
 
                     $scope.slider = {
                         options: {
+                            enabled: true,
                             dots: true,
                             infinite: false,
                             adaptiveHeight: true,
                             lazyLoad: 'ondemand'
                         },
                         state: {
-                            isRunning: function () {
-                                return ($scope.slider.$el && $scope.slider.$el.hasClass('slick-initialized'))
-                            },
-                            slides: {}
-                        },
-                        $el: $element.find('.slides')
+                            isReady: true,
+                        }
                     };
 
-                    $scope.initSlick = function () {
+                    /**
+                     *
+                     * @param {Function} [callback]
+                     */
+                    $scope.initSlick = function (callback) {
                         console.trace('imagesInput.initSlick()');
-                        if (!$scope.slider.state.isRunning()) {
-                            // cleanup slick
-                            var $slides = $element.find('.slide');
-                            if ($scope.propData.val.length == 0 && $slides.length > 0) {
-                                // clear all slides
-                                console.log('imagesInput - deleting all slides');
-                                $slides.remove();
-                            } else if (_.keys($scope.slider.state.slides).length > 0) {
-                                console.log('imagesInput - verifying %d slides', $slides.length);
-                                // remove ghost slides
-                                $slides.each(function (index, el) {
-                                    var $slide = $element.find(el);
-                                    if (!$scope.verifySlide($slide)) $slide.remove();
-                                });
-                            } else {
-                                console.log('imagesInput.initSlick() - no cleanup necessary: %o', $slides);
-                            }
-
-                            $timeout(function () {
-                                console.log('imagesInput - creating slider w/ %o', $scope.slider.options);
-                                var $slider = $element.find('.slides');
-                                console.log('imagesInput - $slider.length', $slider.find('.slide').length);
-                                if (!$scope.slider.state.isRunning()) {
-                                    // another check to ensure initialize wasn't called multipe times
-                                    // TODO ensure initSlick is only called once on file uploads
-                                    $scope.slider.$el = $slider.slick($scope.slider.options);
-                                }
-                            })
-                        } else {
-                            console.warn('imagesInput.initSlick() - slick slider already running');
-                        }
+                        $scope.slider.state.isReady = true;
+                        if (callback) $timeout(callback);
                     };
 
-                    $scope.destroySlick = function () {
+                    /**
+                     *
+                     * @param {Function} [callback]
+                     */
+                    $scope.destroySlick = function (callback) {
                         console.log('imagesInput - destroySlick()');
-                        if ($scope.slider.state.isRunning()) {
-                            console.log('imagesInput - slider - destroying slick');
-                            $scope.slider.$el.slick('unslick');
-                        }
+                        $scope.slider.state.isReady = false;
+                        if (callback) $timeout(callback);
                     };
 
-                    $scope.reloadSlick = function () {
-                        if ($scope.slider.state.isRunning()) {
-                            console.log('imagesInput.reloadSlider() - waiting to setProps');
-                            $scope.slider.$el.one('destroy', function () {
-                                $scope.initSlick();
-                            });
-                            $scope.destroySlick();
-                        } else {
-                            $scope.initSlick();
-                        }
+                    /**
+                     *
+                     * @param {Function} [callback]
+                     */
+                    $scope.reloadSlick = function (callback) {
+                        $scope.destroySlick(function(){
+                            $scope.initSlick(callback);
+                        });
                     };
 
                     /**
@@ -92,24 +66,16 @@ define([
                      * @param {Function} [callback]
                      */
                     $scope.setImages = function (imagesArr, callback) {
-                        var setProps = function () {
+                        $scope.destroySlick(function(){
+                            /*
+                            var $slides = $element.find('.slide');
+                            $slides.remove();
+                            */
                             $scope.propData.val = imagesArr;
                             $scope.setField($scope.propData.key, {val: $scope.propData.val});
                             console.log('imagesInput - setting propData.val = %o', imagesArr);
-                            $scope.reloadSlick();
-                            if (callback) callback();
-                        };
-
-                        if ($scope.slider.state.isRunning()) {
-                            console.log('imagesInput.setImages() - waiting to setProps');
-                            $scope.slider.$el.one('destroy', function () {
-                                setProps();
-                            });
-                            $scope.destroySlick();
-                        } else {
-                            setProps();
-                        }
-
+                            $scope.initSlick(callback);
+                        })
                     };
 
                     $scope.onDestroy = function () {
@@ -120,42 +86,23 @@ define([
                         })
                     };
 
-                    $scope.removePhotoByID = function (slideID) {
-                        var $slideScope = $scope.getSlideScopeByID(slideID);
-                        if ($slideScope.url.match(/^data/)) {
-                            // remove all temporary slides because we can't delete specific images from file input element
-                            $scope.removeTemporaryPhotos();
-                        } else {
-                            // we use indexOf so that we only remove one and not any duplicate images
-                            var imageURL = $slideScope.url,
-                                imageIndex = $scope.propData.val.indexOf(imageURL);
+                    $scope.removePhotoByProps = function (url, imageIndex) {
+                        var savedImagesCount = _.chain($scope.propData.val)
+                            .reject(function(imageURL){
+                                return imageURL.match(/^data/)
+                            })
+                            .value()
+                            .length;
 
-                            // eagerly delete slideScope from cache
-                            $scope.deregisterSlide($slideScope);
-
-                            $scope.setImages(_.reject($scope.propData.val, function (savedImageURL, index) {
-                                return index === imageIndex
-                            }));
+                        if (imageIndex >= savedImagesCount) {
+                            $scope.$fileInputScope.namespaces.splice(imageIndex - savedImagesCount, 1)
                         }
-                    };
-
-                    $scope.removePhotoByURL = function (imageURL) {
-                        // we use indexOf so that we only remove one and not any duplicate images
-                        var imageIndex = $scope.propData.val.indexOf(imageURL);
 
                         $scope.setImages(_.reject($scope.propData.val, function (savedImageURL, index) {
                             return index === imageIndex
                         }));
-                    };
+                    }
 
-                    $scope.removeTemporaryPhotos = function () {
-
-                        angular.element($scope.mediaInputEl).val('');
-                        $scope.setImages(_.reject($scope.propData.val, function (imageURL) {
-                            // reject preview data urls
-                            return imageURL.match(/^data/);
-                        }))
-                    };
 
                     /**
                      *
@@ -170,55 +117,35 @@ define([
                         return $scope.slider.state.slides[slideId];
                     };
 
-
-                    $scope.verifySlide = function ($slide) {
-                        var result = !!($scope.slider.state.slides[$slide.data('slideId')]);
-                        console.log('imagesInput.verifySlide() - checking %o = %s', $slide, result);
-                        return result;
-                    };
-
-                    $scope.registerSlide = function ($slideScope) {
-                        console.log('imagesInput.registerSlide(%o)', $slideScope);
-                        $slideScope.$el.data('image-slide-id');
-                        $scope.slider.state.slides[$slideScope.$id] = $slideScope;
-                        if ($slideScope.$last) {
-                            $scope.slider.state.lastSlide = $slideScope;
-                            console.log('imagesInput.registerSlide(%o) - last slide registered and initialized', $slideScope);
-                            $scope.reloadSlick();
-                        }
-                    };
-
-                    $scope.deregisterSlide = function ($slideScope) {
-                        console.log('imagesInput - deregister[%o](%s)', $slideScope, $slideScope.url.substr(-20));
-                        delete $scope.slider.state.slides[$slideScope.$id];
-                        $scope.reloadSlick();
+                    $scope.registerMediaScope = function($fileInputScope){
+                        $scope.$fileInputScope = $fileInputScope;
+                        $scope.$parent.registerMediaScope($scope.$fileInputScope);
                     };
 
                     function init() {
                         console.log('imagesInput - init slider');
 
-                        $scope.$on('file-input:change', function () {
+                        watcherHandlers.fileInputs = $scope.$on('file-input:change', function (evt, $fileInputScope) {
                             console.log("on('file-input:change')");
-                            $scope.$apply(function () {
-                                $scope.removeTemporaryPhotos();
-                            })
-                        });
-
-                        $scope.$on('file-input:set', function ($evt, $mediaFormScope) {
-                            console.log("on('file-input:set'): %o", arguments);
-                            $scope.$apply(function () {
-                                $scope.setImages($scope.propData.val.concat($mediaFormScope.files));
+                            dataParser.getURLsFrom$inputs($fileInputScope.$inputs, function (err, fileURLs) {
+                                $scope.$apply(function () {
+                                    $scope.setImages(_.chain($scope.propData.val)
+                                                        .reject(function(imageURL){
+                                                            // remove previous temporary images
+                                                            return imageURL.match(/^data/);
+                                                        })
+                                                        .concat(fileURLs)
+                                                        .value());
+                                })
                             });
                         });
-                        watcherHandlers.propData = $scope.$watch('petData.'+$scope.propData.key+'.val', function (newValue) {
+
+                        watcherHandlers.propData = $scope.$watch('petData.' + $scope.propData.key + '.val', function (newValue) {
                             console.log('imagesInput - slider - new propData images: %o', newValue);
                             if (!_.isArray(newValue)) {
                                 $scope.setImages([]);
-                            } else if (newValue.length == 0) {
-                                // slick will not be initialized by slide callbacks so we do it manually
-                                $scope.reloadSlick();
                             } else {
-                                // slick wiil be initialized by slide callbacks via registerSlide
+                                $scope.setImages(newValue);
                             }
                         });
                     }

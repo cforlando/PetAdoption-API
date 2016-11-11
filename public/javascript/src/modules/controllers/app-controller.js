@@ -1,14 +1,19 @@
 define([
     'require',
+    'angular',
     'underscore',
     'ngApp'
 ], function (require) {
     var ngApp = require('ngApp'),
-        _ = require('underscore');
+        _ = require('underscore'),
+        angular = require('angular');
+
+    console.log('loading app controller w/ %o', ngApp);
 
     return ngApp.controller('appController', [
         '$scope', 'request', '$mdToast', '$location',
         function ($scope, request, $mdToast, $location) {
+            console.log('init app controller');
             angular.element('.loading-text').remove();
             $scope.loadingQueue = {
                 length: 0
@@ -18,16 +23,17 @@ define([
                 isOpen: false
             };
 
+            $scope.defaultActions = [
+                {
+                    onClick: function () {
+                        console.log('click')
+                    },
+                    icon: 'code',
+                    label: 'no-op'
+                }
+            ];
             $scope.actionMenu = {
-                actions: [
-                    {
-                        onClick: function () {
-                            console.log('click')
-                        },
-                        icon: 'code',
-                        label: 'no-op'
-                    }
-                ]
+                actions: $scope.defaultActions
             };
 
             $scope.login = function () {
@@ -104,20 +110,17 @@ define([
                 $scope.$broadcast('toggle:action-menu');
             };
 
-            $scope.$on('$locationChangeSuccess', function(){
-                $scope.actionMenu = {
-                    actions: [
-                        {
-                            onClick: function () {
-                                $location.path('/');
-                            },
-                            icon: 'home',
-                            label: 'home'
-                        }
-                    ]
-                };
-            });
+            /**
+             *
+             * @param actions
+             */
+            $scope.registerMenuActions = function (actions) {
+                $scope.actionMenu.actions = actions;
+            };
 
+            $scope.$on('$locationChangeSuccess', function () {
+                $scope.registerMenuActions($scope.defaultActions)
+            });
 
         }
     ])

@@ -1,21 +1,16 @@
-define([
-    'modules/directives/action-menu',
-    'modules/directives/auto-input',
-    'modules/directives/auto-default-input',
-    'modules/directives/file-input',
-    'modules/directives/autocomplete-input',
-    'modules/directives/date-input',
-    'modules/directives/images-input',
-    'modules/directives/images-input-slide',
-    'modules/directives/image-placeholder',
-    'modules/directives/location-input',
-    'modules/directives/select-input',
-    'modules/directives/textarea-input',
-    'modules/directives/pet-list'
-], function () {
+console.log('loading directives');
 
-    console.log('init directives.');
-
-
-    return arguments;
-});
+module.exports = [
+    require('modules/directives/action-menu'),
+    require('modules/directives/auto-input'),
+    require('modules/directives/auto-default-input'),
+    require('modules/directives/file-input'),
+    require('modules/directives/autocomplete-input'),
+    require('modules/directives/date-input'),
+    require('modules/directives/images-input'),
+    require('modules/directives/image-placeholder'),
+    require('modules/directives/location-input'),
+    require('modules/directives/select-input'),
+    require('modules/directives/textarea-input'),
+    require('modules/directives/pet-list')
+]

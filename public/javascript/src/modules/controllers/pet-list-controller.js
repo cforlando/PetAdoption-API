@@ -1,11 +1,13 @@
 define([
     'require',
+    'angular',
     'underscore',
     'modules/controllers/batch-data-controller',
     'text!modules/views/dialogs/batch-edit.html',
     'ngApp'
 ], function (require) {
     var ngApp = require('ngApp'),
+        angular = require('angular'),
         _ = require('underscore');
     ngApp.controller('petListController', [
         '$scope', '$mdDialog', '$controller',

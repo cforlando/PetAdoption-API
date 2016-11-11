@@ -44,12 +44,24 @@
     "url": "^0.11.0"
   },
   "devDependencies": {
+    "angular": "^1.5.8",
+    "angular-animate": "^1.5.8",
+    "angular-aria": "^1.5.8",
+    "angular-material": "^1.1.1",
+    "angular-messages": "^1.5.8",
+    "angular-route": "^1.5.8",
+    "angular-sanitize": "^1.5.8",
+    "angular-slick-carousel": "^3.1.7",
     "gulp-utils": "git://github.com/khalidhoffman/gulp-utils.git#dev",
     "jasmine": "^2.4.1",
     "jasmine-spec-reporter": "^2.5.0",
+    "jquery": "^3.1.1",
     "jsdoc": "^3.4.1",
     "memorystream": "^0.3.1",
-    "supertest": "^1.2.0"
+    "raw-loader": "^0.5.1",
+    "slick-carousel": "^1.6.0",
+    "supertest": "^1.2.0",
+    "webpack": "^1.13.3"
   },
   "description": "The Pet Adoption API is a project using the ASP.NET WebAPI and MVC stack.  Project is set and built with Visual Studio 2015 Community Edition as it is open-source. Database and API hosted in Azure Platform.",
   "main": "index.js",

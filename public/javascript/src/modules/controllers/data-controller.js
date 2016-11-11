@@ -9,8 +9,8 @@ define([
         _ = require('underscore');
 
     return ngApp.controller('dataController', [
-        '$scope', 'request', '$mdToast', '$mdDialog', 'dataParserService', '$routeParams', '$location',
-        function ($scope, request, $mdToast, $mdDialog, dataParserService, $routeParams, $location) {
+        '$scope', 'request', '$mdToast', '$mdDialog', 'dataParser', '$routeParams', '$location', 'speciesFactory',
+        function ($scope, request, $mdToast, $mdDialog, dataParser, $routeParams, $location, speciesFactory) {
 
             $scope.models = {};
             $scope.petList = {
@@ -110,7 +110,7 @@ define([
                     request.get('/api/v1/model/' + species).then(function success(response) {
                             $scope.hideLoading();
                             $mdToast.show($mdToast.simple().textContent("Successfully fetched " + species + " model"));
-                            $scope.models[species] = dataParserService.convertDataToSpeciesFormat(response.data);
+                            $scope.models[species] = dataParser.convertDataToSpeciesFormat(response.data);
                             if (_options.callback) _options.callback(null, $scope.models[species]);
                         },
                         function failure() {
@@ -135,7 +135,7 @@ define([
                 request.post('/api/v1/save/' + speciesName + '/model/', speciesData).then(
                     function success(response) {
                         var _persistedData = response.data;
-                        $scope.models[speciesName] = dataParserService.convertDataToSpeciesFormat(_persistedData);
+                        $scope.models[speciesName] = dataParser.convertDataToSpeciesFormat(_persistedData);
                         $scope.hideLoading();
                         if (_options.done) _options.done(null, $scope.models[speciesName]);
                     },
@@ -156,57 +156,13 @@ define([
                 $scope.showLoading();
                 var sanitizedSpeciesName = _.kebabCase(speciesName),
                     _options = _.defaults(options, {
-                        speciesProps: [
-                            {
-                                key: 'petId',
-                                valType: 'String',
-                                fieldLabel: "Pet ID",
-                                example: '',
-                                defaultVal: [],
-                                description: 'identifier',
-                                note: '',
-                                required: 'Yes',
-                                options: []
-                            },
-                            {
-                                key: 'species',
-                                valType: 'String',
-                                fieldLabel: "Animal's Species",
-                                example: 'dog',
-                                defaultVal: speciesName,
-                                description: 'Species of the animal',
-                                note: '',
-                                required: 'Yes',
-                                options: $scope.speciesList
-                            },
-                            {
-                                key: 'images',
-                                valType: '[Image]',
-                                fieldLabel: "Pet images",
-                                example: ['http://placehold.it/500x500'],
-                                defaultVal: [],
-                                description: 'Images of the animal',
-                                note: '',
-                                required: 'No',
-                                options: []
-                            },
-                            {
-                                key: 'petName',
-                                valType: 'String',
-                                fieldLabel: "Pet's name",
-                                example: 'Fido',
-                                defaultVal: '',
-                                description: '',
-                                note: '',
-                                required: 'No',
-                                options: []
-                            }
-                        ]
+                        speciesProps: []
                     });
                 if ($scope.models[sanitizedSpeciesName]) {
                     if (_options.done) _options.done(null, $scope.models[sanitizedSpeciesName]);
                 } else {
-                    request.post('/api/v1/create/' + sanitizedSpeciesName + '/model', _options.speciesProps)
+                    var newSpecies = speciesFactory.createTemplate(sanitizedSpeciesName);
+                    request.post('/api/v1/create/' + sanitizedSpeciesName + '/model', newSpecies.getProps())
                         .then(
                             function success(response) {
                                 $scope.hideLoading();
@@ -246,7 +202,7 @@ define([
                     function success(response) {
                         $scope.hideLoading();
                         $scope.showMessage('Deleted ' + speciesName);
-                        $scope.getSpeciesList(function(err){
+                        $scope.getSpeciesList(function (err) {
                             if (err) console.error(err);
                             if (_options.done) _options.done(null, response);
                         }, {useCache: false});
@@ -338,7 +294,7 @@ define([
              * @param {Object} petData
              */
             $scope.editPet = function (petData) {
-                $location.path('/animals/edit/' + petData.petId.val);
+                $location.path('/animals/edit/' + petData.species.val + '/' + petData.petId.val);
             };
 
             /**
@@ -361,15 +317,17 @@ define([
              */
             $scope.deletePet = function (petData, options) {
                 var data = petData,
-                    _options = _.defaults(options, {});
+                    _options = _.defaults(options, {
+                        showSuccessNotification: true
+                    });
                 $scope.showLoading();
-                var formattedData = dataParserService.convertDataToSaveFormat(data);
+                var formattedData = dataParser.convertDataToSaveFormat(data);
                 console.log('_data; %o', formattedData);
 
                 request.post('/api/v1/remove/' + formattedData.species, formattedData).then(
                     function success(response) {
                         $scope.hideLoading();
-                        $scope.showMessage('Deleted!');
+                        if (_options.showSuccessNotification) $scope.showMessage('Deleted!');
                         if (_options.done) _options.done(null, response);
                     },
                     function failure() {
@@ -384,21 +342,24 @@ define([
              *
              * @param {Object} petData
              * @param {Object} [options]
+             * @param {Boolean} [options.showNotifications]
              * @param {Function} [options.done]
              */
             $scope.getPet = function (petData, options) {
-                var _options = _.defaults(options, {}),
+                var _options = _.defaults(options, {
+                        showSuccessNotification: true
+                    }),
                     searchProps = _.pick(petData, ['petId', 'petName', 'species']),
-                    queryData = dataParserService.convertDataToSaveFormat(searchProps);
+                    queryData = dataParser.convertDataToSaveFormat(searchProps);
 
                 console.log('queryData; %o', queryData);
                 $scope.showLoading();
-                request.post('/api/v1/query/', dataParserService.convertDataToSaveFormat(petData)).then(
+                request.post('/api/v1/query/', dataParser.convertDataToSaveFormat(petData)).then(
                     function success(response) {
                         $scope.hideLoading();
                         var _persistedData = response.data[0];
                         console.log('_persistedData: %o', _persistedData);
-                        $scope.showError('Successfully fetched pet info.');
+                        if(_options.showSuccessNotification) $scope.showMessage('Successfully fetched pet info.');
                         if (_.isFunction(_options.done)) _options.done.apply(null, [null, _persistedData]);
                     },
                     function failure() {
@@ -414,23 +375,30 @@ define([
              *
              * @param {Object} petProps
              * @param {Object} [options]
+             * @param {Function} [options.isMediaSaved]
              * @param {Function} [options.done]
              */
             $scope.savePet = function (petProps, options) {
                 $scope.showLoading();
                 var _options = _.defaults(options, {}),
-                    data = petProps,
                     formData = new FormData();
-                console.log('sending photos %o', petProps.$media);
-                if (petProps.$media && petProps.$media[0]){
+                if (petProps.$media) {
                     // append uploaded files
-                    _.forEach(petProps.$media[0].files, function (file, index) {
-                        formData.append("uploads", file);
-                        // TODO only append if filename is saved in props
+                    petProps.$media.each(function(){
+                        var fileInputEl = this;
+                        console.log('appending photos to save request: %o', fileInputEl.files);
+                        _.forEach(fileInputEl.files, function (file, index) {
+                            formData.append('uploads', file);
+                            // TODO only append if filename is saved in props
+                        });
                     });
+                    // we won't be needing the $media anymore - no sense in trying to format it
+                    delete petProps.$media;
                 }
-                var formattedPetData = dataParserService.convertDataToSaveFormat(data);
+
+                var formattedPetData = dataParser.convertDataToSaveFormat(petProps);
                 console.log('saving petData %o', formattedPetData);
+
                 _.forEach(formattedPetData, function (propValue, propName) {
                     if (propValue) formData.append(propName, propValue);
                 });
@@ -442,9 +410,9 @@ define([
                 }).then(
                     function success(response) {
                         $scope.hideLoading();
-                        petProps.$media.val('');
                         var _persistedData = response.data;
                         console.log('_persistedData: %o', _persistedData);
+                        $scope.showMessage('Pet saved');
                         if (_.isFunction(_options.done)) _options.done.apply(null, [null, _persistedData]);
                     },
                     function failure() {

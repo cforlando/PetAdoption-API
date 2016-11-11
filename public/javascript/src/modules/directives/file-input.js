@@ -1,67 +1,77 @@
 define([
     'require',
     'underscore',
+    'text!modules/directives/views/file-input.html',
     'ngApp'
-], function(){
+], function () {
     var _ = require('underscore'),
         ngApp = require('ngApp');
 
-    ngApp.directive('fileInput', function(){
+    ngApp.directive('fileInput', function () {
         return {
             restrict: 'EC',
             scope: true,
-            controller: ['$scope', '$element', function($scope, $element){
-                $scope.$input = $element.find("input[type='file']");
+            template: require('text!modules/directives/views/file-input.html'),
+            controller: ['$scope', '$element', '$timeout',
+                function ($scope, $element, $timeout) {
+                    console.log("init fileInput @ %o", $element);
+                    $scope.namespaces = [];
+                    $scope.get$inputs = function () {
+                        return $element.find("input[type='file']");
+                    };
+                    $scope.$inputs = $scope.get$inputs();
 
-                $scope.upload = function () {
-                    $scope.$input.click();
-                };
+                    $scope.clear = function(){
+                        $scope.namespaces = [];
+                    }
 
-                $scope.onFileInputChange = function () {
-                    var input = this,
-                        numOfFiles = input.files.length,
-                        _previewPhotos = [];
-
-                    $scope.$broadcast('file-input:change', $scope);
-
-                    if (numOfFiles > 0) {
-                        $scope.showLoading();
-                        var reader = new FileReader(),
-                            readIndex = 0,
-                            isLoadComplete = function () {
-                                return readIndex === numOfFiles
-                            };
-
-                        reader.onload = function (e) {
-                            readIndex++;
-                            console.log('file input - reader.onload(%o) - %d/%d', arguments, readIndex, numOfFiles);
-                            _previewPhotos.push(e.target.result);
-                            if (isLoadComplete()) {
-                                $scope.hideLoading();
-                                console.log('file input - load complete', arguments, readIndex, numOfFiles);
-                                $scope.files = _previewPhotos;
-                                $scope.$emit('file-input:set', $scope);
+                    $scope.upload = function (namespace) {
+                        var $lastInput = $scope.$inputs.last();
+                        if ($lastInput.length > 0) {
+                            if ($lastInput.val()) {
+                                // create a new dom input element
+                                $scope.namespaces.push(namespace || 'uploads-' + $scope.namespaces.length);
                             } else {
-                                reader.readAsDataURL(input.files[readIndex]);
+                                // don't create anything new and use last input dom element as is
                             }
-                        };
+                        } else {
+                            // skip checks and create a new dom input element
+                            $scope.namespaces.push(namespace || 'uploads-' + $scope.namespaces.length);
+                        }
+                        $timeout(function () {
+                            $scope.reloadInputs();
+                            $scope.$inputs.last().click();
+                        })
+                    };
 
-                        reader.readAsDataURL(input.files[readIndex]);
+                    $scope.onFileInputChange = function () {
+                        $scope.$emit('file-input:change', $scope);
+                    };
+
+                    $scope.addInputListeners = function () {
+                        $scope.$inputs = $scope.get$inputs();
+                        $scope.$inputs.on('change', $scope.onFileInputChange);
+                    };
+
+                    $scope.removeInputListeners = function () {
+                        $scope.$inputs.off('change', null, $scope.onFileInputChange);
+                    };
+
+                    $scope.reloadInputs = function () {
+                        $scope.removeInputListeners();
+                        $scope.addInputListeners();
+                    };
+
+                    $scope.onDestroy = function () {
+                        $scope.removeInputListeners();
                     }
-                };
 
-                function init(){
-                    if ($scope.registerFileDOMElement) $scope.registerFileDOMElement($scope.$input[0]);
-
-                    $scope.$input.on('change', $scope.onFileInputChange);
-
-                    $scope.onDestroy = function(){
-                        $scope.$input.off('change', null, $scope.onFileInputChange);
+                    function init() {
+                        if ($scope.registerMediaScope) $scope.registerMediaScope($scope);
                     }
-                }
 
-                init();
-            }],
+                    init();
+                }],
             link: function (scope, element, attributes) {
                 // When the destroy event is triggered, check to see if the above
                 // data is still available.
