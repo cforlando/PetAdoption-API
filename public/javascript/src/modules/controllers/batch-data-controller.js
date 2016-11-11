@@ -21,10 +21,8 @@ define([
                     done: function (petListErr) {
                         $scope.hideLoading();
                         $scope.showMessage(options.doneMessage || "All pets updated");
-                        $scope.closeBatchEditDialog();
                         $scope.clearSelectedPets();
                         if (options.done) options.done.apply(null, [opErr || petListErr]);
-                        // $scope.clearSelectedPets();
                     }
                 });
             }
@@ -79,6 +77,7 @@ define([
                 async.eachSeries($scope.selectedPetsDataCollection, function each(selectedPetData, done) {
                     if (!selectedPetData) done();
                     $scope.getPet(selectedPetData, {
+                        showSuccessNotification: false,
                         done: function (err, petData) {
                             if (err) {
                                 $scope.showError('Could not save pet data');
@@ -93,6 +92,7 @@ define([
                                 });
                                 console.log('petList: saving %s[%s]', petData.petName.val, petData.petId.val);
                                 $scope.$parent.savePet(petData, {
+                                    showSuccessNotification: false,
                                     done: function (err) {
                                         console.log('petList: savedPet');
                                         done(err);
@@ -133,17 +133,17 @@ define([
                             } else {
                                 console.log('petList: getPet result: %o', fetchedPetData);
                                 $scope.$parent.deletePet(fetchedPetData, {
+                                    showSuccessNotification: false,
                                     done: function (deleteErr) {
                                         $scope.hideLoading();
                                         if (_options.updatePetList) {
                                             $scope.getPetList(false, {
+                                                showSuccessNotification: false,
                                                 done: function () {
-                                                    if (_options.done) _options.done.apply(null, arguments);
                                                     done(deleteErr);
                                                 }
                                             })
                                         } else {
-                                            if (_options.done) _options.done.apply(null, arguments);
                                             done(deleteErr);
                                         }
                                         console.log('petList: deletedPet');

@@ -109,7 +109,7 @@ MongoDBAdapter.prototype = {
             self.log(Debuggable.LOW, 'mongoose is connected');
             self.emit('connected');
             if (callbacks.onSuccess) callbacks.onSuccess.call(context);
-            delete callbacks.onSuccess;
+            // delete callbacks.onSuccess;
         });
 
         this.on('error', function (err) {

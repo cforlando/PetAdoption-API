@@ -101,8 +101,8 @@ DataFormatter.prototype = {
                             populateEmptyFields: _options.populateEmptyFields
                         });
                         self._saveAnimal(database, formattedAnimalProps, {
-                            complete: function () {
-                                done();
+                            complete: function (err) {
+                                done(err);
                             }
                         });
                     } else {

@@ -416,7 +416,6 @@ APIController.prototype = {
         }
     },
 
-
     onCreateSpecies: function () {
         var self = this;
         return function (req, res, next) {
@@ -527,6 +526,7 @@ APIController.prototype = {
 
     onReset: function () {
         var self = this;
+        self.setDebugLevel(Debuggable.MED);
         return function (req, res, next) {
 
             self.getSpeciesList(function (err, speciesList) {
@@ -605,7 +605,7 @@ APIController.prototype = {
             function onDatasetParsed(petCollection) {
                 self.log('dataset parsed');
                 var numOfPets = petCollection.length,
-                    savedPetCount = 0;
+                    savedPetCount = 1;
                 async.each(petCollection,
                     function each(petData, done) {
                         self.log(Debuggable.MED, 'saving pet %j', petData);
@@ -618,7 +618,7 @@ APIController.prototype = {
                                         self.error(dump(err));
                                         done(err);
                                     } else {
-                                        self.log('saved %s/%s pets', savedPetCount++, numOfPets);
+                                        self.log(Debuggable.LOW, 'saved %s/%s pets', savedPetCount++, numOfPets);
                                         done();
                                     }
                                 }
@@ -628,7 +628,7 @@ APIController.prototype = {
                         if (err) {
                             next(err);
                         } else {
-                            self.onFormatAllDB(req, res, next);
+                            self.onFormatAllDB()(req, res, next);
                         }
                     }
                 );

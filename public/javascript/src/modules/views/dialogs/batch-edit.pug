@@ -4,6 +4,9 @@ include ../_auto-generated/_-all
         md-toolbar
             .md-toolbar-tools
                 h2 Batch Edit
+                span(flex)
+                md-button.md-icon-button(ng-click="close()")
+                    md-icon.material-icons close
         md-dialog-content(layout-padding)
             .batch-form(ng-if="isBatchEditActive()")
                 .pet-data-form(ng-controller="petFormController")
@@ -16,6 +19,6 @@ include ../_auto-generated/_-all
                             .auto-input
                     .nav
                         md-input-container
-                            md-button.btn-submit.md-primary.md-raised(ng-click='savePet()') Save
-                            md-button.btn-remove.md-warn.md-raised(ng-click='deletePet()') Delete
+                            md-button.btn-submit.md-primary.md-raised(ng-click='savePet({done: close})') Save
+                            md-button.btn-remove.md-warn.md-raised(ng-click='deletePet({done: close})') Delete
                             md-button.btn-remove.md-clear.md-raised(ng-click='clearPetData()') Clear

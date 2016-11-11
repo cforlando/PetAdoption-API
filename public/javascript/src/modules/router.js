@@ -16,7 +16,7 @@ define([
             .when("/animals", {
                 template: require('text!modules/views/search-animals.html')
             })
-            .when("/animals/edit/:petId", {
+            .when("/animals/edit/:petSpecies/:petId", {
                 template: require('text!modules/views/edit-animal.html')
             })
             .when("/animals/new", {

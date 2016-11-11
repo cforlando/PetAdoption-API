@@ -4,6 +4,7 @@ var path = require('path'),
 
     Express = require('express'),
 
+    config = require('../../config'),
     dump = require('../../../lib/dump');
 
 
@@ -15,19 +16,23 @@ var path = require('path'),
  * @returns {ViewRouter}
  * @constructor
  */
-function ViewRouter(controller){
+function ViewRouter(controller) {
     var router = Express.Router();
 
-    router.use(controller.passport.initialize());
-
-    router.get('/', controller.passport.session(), function (req, res) {
-        res.render('index', {
-            user : req.user,
-            title: 'Pet Data Entry'
+    router.get('/',
+        controller.userSession,
+        controller.passport.initialize(),
+        controller.passport.session(),
+        function (req, res) {
+            res.render('index', {
+                user: req.user,
+                title: 'Pet Data Entry'
+            });
         });
-    });
 
     router.get('/auth/google/',
+        controller.userSession,
+        controller.passport.initialize(),
         controller.passport.authenticate('google', {
             scope: [
                 'https://www.googleapis.com/auth/plus.login'
@@ -35,6 +40,8 @@ function ViewRouter(controller){
         }));
 
     router.get('/auth/google/callback/',
+        controller.userSession,
+        controller.passport.initialize(),
         controller.passport.authenticate('google', {
             failureRedirect: '/'
         }),

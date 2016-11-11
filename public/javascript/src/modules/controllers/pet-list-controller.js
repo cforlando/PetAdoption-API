@@ -44,15 +44,17 @@ define([
                 }
             };
 
+            $scope.clearSelectedPet = function(index){
+                delete $scope.selectedPetsDataCollection[index];
+                $scope.selectedPetsIndexCollection[index] = false;
+            };
+
             $scope.clearSelectedPets = function () {
 
                 _.forEach($scope.selectedPetsIndexCollection, function (val, index) {
-                    $scope.selectedPetsIndexCollection[index] = false;
+                    $scope.clearSelectedPet(index);
                 });
 
-                _.forEach($scope.selectedPetsDataCollection, function (val, index) {
-                    delete $scope.selectedPetsDataCollection[index];
-                });
             };
 
             $scope.isEditableByBatch = function(propData){
@@ -73,18 +75,13 @@ define([
                 }
             };
 
-            $scope.closeBatchEditDialog = function(){
-                $scope.$broadcast('dialog:batch-edit:hide');
-            };
-
             $scope.batchEdit = function (ev) {
                 $mdDialog.show({
                     controller: function ($scope, $mdDialog) {
-                        var hideListenerRemover = $scope.$on('dialog:batch-edit:hide', function () {
+                        $scope.close = function(){
                             console.log('petList: mdDialog: closing dialog');
                             $mdDialog.hide();
-                            hideListenerRemover();
-                        })
+                        }
                     },
                     template: require('text!modules/views/dialogs/batch-edit.html'),
                     parent: angular.element(document.body),
