@@ -7,6 +7,7 @@ var fs = require('fs'),
     config = require('../../../core/config');
 
 describe("S3Bucket", function () {
+    pending('internet connection required');
     var S3Bucket = require('../../../core/s3'),
         testS3Bucket,
         testFileName = 'dog.png',

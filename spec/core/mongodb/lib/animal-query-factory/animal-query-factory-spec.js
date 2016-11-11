@@ -1,6 +1,6 @@
 var _ = require('lodash'),
 
-    Debuggable = require('../../../../../core/lib/debuggable/index'),
+    Debuggable = require('../../../../../core/lib/debuggable'),
     Query = require('../../../../../core/mongodb/lib/animal-query-factory');
 
 describe("AnimalQueryFactory", function () {

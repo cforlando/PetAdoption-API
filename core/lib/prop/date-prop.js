@@ -1,7 +1,7 @@
 var _ = require('lodash'),
     moment = require('moment'),
 
-    Debuggable = require('../../../../lib/debuggable/index'),
+    Debuggable = require('../debuggable'),
     Prop = require('./prop');
 
 /**

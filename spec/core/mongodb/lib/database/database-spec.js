@@ -2,7 +2,7 @@ var Database = require('../../../../../core/mongodb/lib/database'),
     ModelFactory = require('../../../../../core/mongodb/lib/model-factory'),
     Debuggable = require('../../../../../core/lib/debuggable');
 
-describe('DBInstance', function () {
+describe('Database', function () {
     var dbInstance;
 
     beforeAll(function () {

@@ -1,6 +1,6 @@
 var _ = require('lodash'),
 
-    Debuggable = require('../../../../lib/debuggable/index');
+    Debuggable = require('../debuggable');
 
 
 /**

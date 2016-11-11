@@ -5,6 +5,7 @@ var fs = require('fs'),
     mongoose = require('mongoose'),
     _ = require('lodash'),
 
+    Species = require('../../lib/species'),
     ModelFactory = require('./model-factory'),
     speciesSchema = require('../schemas/species'),
     Debuggable = require('../../lib/debuggable/index');
@@ -77,72 +78,20 @@ function SpeciesModelFactory(modelName, options) {
 }
 
 SpeciesModelFactory.prototype = {
-    _autofillSpeciesData : function(props){
-        var requiredProps = [
-            {
-                key: 'petId',
-                valType: 'String',
-                fieldLabel: "Pet ID",
-                example: '',
-                defaultVal: [],
-                description: 'identifier',
-                note: '',
-                required: true,
-                options: []
-            },
-            {
-                key: 'species',
-                valType: 'String',
-                fieldLabel: "Animal's Species",
-                example: 'dog',
-                defaultVal: '',
-                description: 'Species of the animal',
-                note: '',
-                required: true,
-                options: []
-            }
-        ];
-
-        _.forEach(requiredProps, function(requiredPropData){
-            var newRequiredProp = _.find(props, {key: requiredPropData.key});
-            if (!newRequiredProp) props.push(requiredPropData);
-        });
-        return props;
+    _autofillSpeciesData: function (props) {
+        var newSpecies = new Species(null, props);
+        return newSpecies.getProps();
     },
 
     _generateResponse: function (doc) {
         if (!doc.json) {
             this.error('doc.json: %s', this.dump(doc));
             return [];
-            // throw new Error('doc.json not defined');
         }
         var speciesDoc = (doc.toObject) ? doc.toObject() : doc,
-            speciesDocData = JSON.parse(speciesDoc.json);
+            species = new Species(null, speciesDoc.json);
 
-        // debugger;
-        // fix for bad default values
-        _.forEach(speciesDocData, function (speciesPropData) {
-            if (speciesPropData.valType == 'Location' && !_.isNumber(speciesPropData.defaultVal)) {
-                speciesPropData.defaultVal = -1;
-            }
-            delete speciesPropData.val;
-            if (speciesPropData.options) {
-                speciesPropData.options = _.chain(speciesPropData.options)
-                    .uniq()
-                    .sortBy(function(option){return option})
-                    .value()
-            }
-        });
-
-        speciesDocData =  _.sortBy(speciesDocData, function (propData) {
-            if (propData.key == 'petId') return '0';
-            if (propData.key == 'images') return '1';
-            if (propData.key == 'petName') return '2';
-            if (propData.key == 'species') return '3';
-            return propData.key;
-        });
-
-        return speciesDocData;
+        return species.getProps();
     }
 
 };

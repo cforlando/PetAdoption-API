@@ -13,10 +13,6 @@ html
         link(rel='stylesheet', href='/stylesheets/style.css')
 
         script(src="//maps.googleapis.com/maps/api/js")
-        //script(src="./javascript/src/vendors/requirejs/require.js")
-        //script(src="./javascript/src/rjs-config.js")
-        //script(src="./javascript/src/app.js")
-        script(src="./javascript/app.js")
     body(ng-controller='appController')
         .loading-screen(layout="row", layout-sm="column", layout-align="center center", ng-show="loadingQueue.length > 0")
             md-progress-circular(md-mode="indeterminate")
@@ -45,3 +41,4 @@ html
                     .view__content
                         md-button.btn.btn--login.md-primary.md-raised(ng-click!='login()') Login
         h1.loading-text(style!='text-align: center;') Loading...
+        script(src="./javascript/app.js")

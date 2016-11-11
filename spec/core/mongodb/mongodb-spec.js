@@ -56,7 +56,7 @@ describe("MongoAPIDatabase", function () {
         });
     });
 
-    afterAll(function(done){
+    afterAll(function (done) {
         apiDatabase.stop(done);
     });
 
@@ -153,11 +153,7 @@ describe("MongoAPIDatabase", function () {
                 newSpeciesTestAnimal = {
                     species: newSpeciesName,
                     aNewDateProp: moment().subtract(3, 'days').toDate().toISOString()
-                }
-                ,
-                newPropKeys = _.uniq(newPresetSpeciesProps.map(function(propData){
-                    return propData.key
-                }).concat('petId', 'species'));
+                };
 
             apiDatabase.saveSpecies(newSpeciesName, newPresetSpeciesProps, {
                 complete: function (err, newlySavedSpeciesProps) {
@@ -165,6 +161,9 @@ describe("MongoAPIDatabase", function () {
                     expect(newlySavedSpeciesProps).not.toBeUndefined();
                     _.forEach(newPresetSpeciesProps, function (preSavedNewSpeciesProp) {
                         expect(_.find(newlySavedSpeciesProps, {key: preSavedNewSpeciesProp.key})).toEqual(preSavedNewSpeciesProp)
+                    });
+                    var newPropKeys = newlySavedSpeciesProps.map(function (propData) {
+                        return propData.key
                     });
                     apiDatabase.saveAnimal(newSpeciesName, newSpeciesTestAnimal, {
                         isV1Format: false,
@@ -186,7 +185,7 @@ describe("MongoAPIDatabase", function () {
     });
 
 
-    describe("deleteSpecies()", function(){
+    describe("deleteSpecies()", function () {
 
         beforeAll(function (done) {
             apiDatabase.createSpecies(newSpeciesName, speciesProps, {
@@ -197,18 +196,18 @@ describe("MongoAPIDatabase", function () {
             });
         });
 
-        it("removes a pre-existing species", function(done){
+        it("removes a pre-existing species", function (done) {
             apiDatabase.getSpeciesList({
-                complete: function(err, speciesList){
+                complete: function (err, speciesList) {
                     if (err) throw err;
                     var initialList = speciesList;
                     expect(_.includes(speciesList, newSpeciesName)).toBe(true, "initial species list should contain to be removed species");
                     apiDatabase.deleteSpecies(newSpeciesName, {
-                        complete: function(err, result){
+                        complete: function (err, result) {
                             if (err) throw err;
                             expect(result).toBe(true, "the callback is provided with a boolean response");
                             apiDatabase.getSpeciesList({
-                                complete: function(err, newSpeciesList){
+                                complete: function (err, newSpeciesList) {
                                     if (err) throw err;
                                     expect(_.includes(newSpeciesList, newSpeciesName)).toBe(false, "species list should not contain removed species");
                                     expect(newSpeciesList.length).toEqual(initialList.length - 1, "new species list should contain one less entry than the initial species list");

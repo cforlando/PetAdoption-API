@@ -1,40 +1,41 @@
 var _ = require('lodash'),
 
-    Debuggable = require('../../../../lib/debuggable/index'),
+    Debuggable = require('../debuggable'),
     Prop = require('./prop');
 
 /**
- *
- * @class IntegerProp
+ * @class StringArrayProp
  * @extends Prop
  * @param {Object} queryModel
  * @param {Object} data
  * @param {String} data.key
- * @param {Number} data.val
+ * @param {String[]} data.val
  * @param {Object} [options]
  * @param {Object} [options.debugLevel]
  * @param {Object} [options.debugTag]
- * @returns {IntegerProp}
+ * @returns {StringArrayProp}
  * @constructor
  */
-function IntegerProp(queryModel, data, options) {
+function StringArrayProp(queryModel, data, options) {
     var _options = _.defaults(options, {
-        debugTag : 'IntegerProp: ',
-        debugLevel : Debuggable.PROD
+        debugTag : 'StringArrayProp: ',
+        debugLevel : Debuggable.PROD,
+        defaultVal : null 
     });
 
     this.setDebugTag(_options.debugTag);
     this.setDebugLevel(_options.debugLevel);
 
-    this._validate = function(petId) {
-        return _.isFinite(this.getValue());
+
+    this._validate = function() {
+        // TODO string array prop
+        return false
     };
 
     this.setQueryModel(queryModel);
     this.setData(data);
     return this;
 }
+StringArrayProp.prototype = Object.create(Prop.prototype);
 
-IntegerProp.prototype = Object.create(Prop.prototype);
-
-module.exports = IntegerProp;
+module.exports = StringArrayProp;

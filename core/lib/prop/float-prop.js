@@ -1,40 +1,42 @@
 var _ = require('lodash'),
 
-    Debuggable = require('../../../../lib/debuggable/index'),
+    Debuggable = require('../debuggable'),
     Prop = require('./prop');
 
 /**
- * @class LocationProp
+ *
+ * @class FloatProp
  * @extends Prop
  * @param {Object} queryModel
  * @param {Object} data
  * @param {String} data.key
- * @param {Number|*} data.val
+ * @param {Number} data.val
  * @param {Object} [options]
+ * @param {Object} [options.defaultVal=null]
  * @param {Object} [options.debugLevel]
  * @param {Object} [options.debugTag]
- * @returns {LocationProp}
+ * @returns {FloatProp}
  * @constructor
  */
-function LocationProp(queryModel, data, options) {
+function FloatProp(queryModel, data, options) {
     var _options = _.defaults(options, {
-        debugTag : 'LocationProp: ',
-        debugLevel : Debuggable.PROD
+        debugTag : 'FloatProp: ',
+        debugLevel : Debuggable.PROD,
+        defaultVal : null 
     });
 
     this.setDebugTag(_options.debugTag);
     this.setDebugLevel(_options.debugLevel);
 
-
-    this._validate = function() {
-        // TODO implement location prop
-        return false
+    this._validate = function(){
+        return (_.isNumber(this.getValue()))
     };
 
     this.setQueryModel(queryModel);
     this.setData(data);
     return this;
 }
-LocationProp.prototype = Object.create(Prop.prototype);
 
-module.exports = LocationProp;
+FloatProp.prototype=  Object.create(Prop.prototype);
+
+module.exports = FloatProp;

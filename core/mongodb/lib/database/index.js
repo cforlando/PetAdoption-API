@@ -285,9 +285,10 @@ Database.prototype = {
                 if (err) {
                     err = new DBError(err);
                     self.error(err);
+                } else {
+                    self.log(Debuggable.HIGH, 'saved and sending db: ', savedDoc);
+                    var savedObj = savedDoc.toObject ? savedDoc.toObject() : savedDoc;
                 }
-                self.log(Debuggable.HIGH, 'saved and sending db: ', savedDoc);
-                var savedObj = savedDoc.toObject ? savedDoc.toObject() : savedDoc;
                 if (_options.complete) _options.complete.apply(_options.context, [err, (savedObj) ? savedObj : {}])
             });
         });

@@ -2,7 +2,7 @@ var util = require('util'),
 
     _ = require('lodash'),
 
-    Prop = require('./prop/index'),
+    Prop = require('./../../../lib/prop'),
     Debuggable = require('../../../lib/debuggable/index');
 
 /**

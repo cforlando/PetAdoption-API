@@ -1,7 +1,7 @@
 var _ = require('lodash'),
 
-    Prop = require('../../../../../../core/mongodb/lib/animal-query-factory/prop/index'),
-    Debuggable = require('../../../../../../core/lib/debuggable/index');
+    Prop = require('../../../../core/lib/prop'),
+    Debuggable = require('../../../../core/lib/debuggable');
 
 describe("Prop", function () {
     var speciesModel = {

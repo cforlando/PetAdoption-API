@@ -18,6 +18,7 @@ server.config.json
 couchbase.config
 .google.credentials.json
 *.swp
+*.swo
 ### Windows template
 # Windows image file caches
 

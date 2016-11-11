@@ -40,8 +40,8 @@ function AnimalModelFactory(modelName, speciesProps, options) {
     this.addMiddleware('post', 'save', function (doc, next) {
         // TODO this never gets called
         if (!doc.petId) {
-            doc.petId = '' + doc._id; // add quote as a hack to prevent ref copy
-            self.log('post.save - updating petId');
+            doc.petId = doc._id.toString();
+            self.log(Debuggable.LOW, 'post.save - updating petId');
             this.save(doc, function (err) {
                 next(err);
             });
@@ -53,6 +53,8 @@ function AnimalModelFactory(modelName, speciesProps, options) {
     });
 
     this.addMiddleware('post', 'findOneAndUpdate', function (doc) {
+        self.log(Debuggable.LOW, 'post.save - updating petId');
+        doc.petId = doc._id.toString();
         self.log(Debuggable.LOW, 'post.findOneAndUpdate - setting responseFormat');
         doc.responseFormat = self._generateResponse.call(self, doc, this.options);
     });
@@ -74,7 +76,7 @@ function AnimalModelFactory(modelName, speciesProps, options) {
                 new: true
             }),
             onComplete = (hasOptions) ? callback : options,
-            upsertQueryFactory = new QueryFactory(self.getAnimalProps(), searchProps, {
+            upsertQueryFactory = new QueryFactory(self.getSpeciesProps(), searchProps, {
                 debugLevel: self.getDebugLevel()
             }),
             doc = this,
@@ -109,7 +111,7 @@ function AnimalModelFactory(modelName, speciesProps, options) {
         var hasOptions = _.isPlainObject(options),
             _options = hasOptions ? _.defaults(options, {}) : {},
             onComplete = (hasOptions) ? callback : options,
-            queryFactory = new QueryFactory(self.getAnimalProps(), props, {
+            queryFactory = new QueryFactory(self.getSpeciesProps(), props, {
                 debugLevel: self.getDebugLevel()
             });
         self.log(Debuggable.MED, 'findAnimals() executed');
@@ -163,11 +165,11 @@ AnimalModelFactory.prototype = {
             _options = _.defaults(options, {
                 isV1Format: true
             });
-        this.log(Debuggable.HIGH, "_formatAnimalForResponse() - formatting %s", self.getAnimalProps());
-        this.log(Debuggable.TMI, "_formatAnimalForResponse() - formatting %s with: %s", animal, this.dump(this.getAnimalProps()));
+        this.log(Debuggable.HIGH, "_formatAnimalForResponse() - formatting %s", self.getSpeciesProps());
+        this.log(Debuggable.TMI, "_formatAnimalForResponse() - formatting %s with: %s", animal, this.dump(this.getSpeciesProps()));
 
 
-        var formattedAnimalData = _.reduce(self.getAnimalProps(), function (propCollection, speciesPropData) {
+        var formattedAnimalData = _.reduce(self.getSpeciesProps(), function (propCollection, speciesPropData) {
             var propValue = animalData[speciesPropData.key];
             self.log(Debuggable.HIGH, "parsing prop '%s' for response", speciesPropData.key);
             switch (speciesPropData.key) {
@@ -183,8 +185,8 @@ AnimalModelFactory.prototype = {
                     break;
             }
             if (propValue != undefined || propValue != null) {
-                var propData = _.defaults({val: propValue}, self.getAnimalProp(speciesPropData.key)),
-                    prop = new Prop(self.getAnimalProps(), propData);
+                var propData = _.defaults({val: propValue}, self.getSpeciesProp(speciesPropData.key)),
+                    prop = new Prop(self.getSpeciesProps(), propData);
                 propCollection[speciesPropData.key] = (_options.isV1Format) ? prop.getV1Format() : prop.getV2Format();
             }
             return propCollection;
@@ -200,10 +202,10 @@ AnimalModelFactory.prototype = {
      * @returns {Function|Function[]} A valid Schema Type
      */
     getPropValueSchemaType: function (propName) {
-        var propData = this.getAnimalProp(propName);
+        var propData = this.getSpeciesProp(propName);
         if (!propData) {
             // this.warn("getPropValueSchemaType(%s) - yielded no data", propName);
-            this.warn("getPropValueSchemaType(%s) - yielded no data from %s", propName, this.dump(this.getAnimalProps()));
+            this.warn("getPropValueSchemaType(%s) - yielded no data from %s", propName, this.dump(this.getSpeciesProps()));
             this.trace("getPropValueSchemaType(%s)", propName);
             return mongoose.Schema.Types.Mixed;
         } // return false for invalid prop names
@@ -250,11 +252,11 @@ AnimalModelFactory.prototype = {
         }
     },
 
-    getAnimalProps: function () {
+    getSpeciesProps: function () {
         return this.speciesProps;
     },
 
-    getAnimalProp: function (propName) {
+    getSpeciesProp: function (propName) {
         return _.find(this.speciesProps, {key: propName});
     }
 };
