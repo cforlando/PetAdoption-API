@@ -42,7 +42,7 @@ define([
                     $scope.petData['species'].val = species;
                     console.log('set species to %s', $scope.petData['species'].val);
                 } else {
-                    console.log('ignoring species value of: %s', $scope.petData['species'].val);
+                    console.log('ignoring species value of: %s', species);
                 }
             };
 
@@ -59,7 +59,7 @@ define([
             };
 
 
-            $scope.clearFileInputs = function(){
+            $scope.clearFileInputs = function () {
                 if ($scope.mediaScope) $scope.mediaScope.clear();
             }
 
@@ -356,7 +356,8 @@ define([
             };
 
             $scope.requestSpecies = function (callback, options) {
-                var _options = _.defaults(options, {});
+                var _options = _.defaults(options, {}),
+                    speciesList = $scope.speciesList;
 
                 $mdDialog.show({
                     controller: function ($scope, $mdDialog) {
@@ -469,9 +470,9 @@ define([
                                 // species will be set by petListController
 
                             } else {
-                                $scope.requestSpecies = function (speciesName) {
+                                $scope.requestSpecies(function (speciesName) {
                                     $scope.setFormSpecies(speciesName);
-                                }
+                                })
                             }
                         }
                     });
