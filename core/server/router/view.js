@@ -4,8 +4,7 @@ var path = require('path'),
 
     Express = require('express'),
 
-    config = require('../../config'),
-    dump = require('../../../lib/dump');
+    config = require('../../config');
 
 
 /**

@@ -13,8 +13,7 @@ var fs = require('fs'),
     S3Bucket = require('../../s3'),
     Debuggable = require('../../lib/debuggable'),
     DBFormatter = require('../utils/formatter'),
-    csvReader = require('../../csv-parser'),
-    dump = require('../../../lib/dump');
+    csvReader = require('../../csv-parser');
 
 /**
  * @extends Debuggable
@@ -615,7 +614,7 @@ APIController.prototype = {
                                 debug: self._apiOptions.debugLevel,
                                 complete: function (err) {
                                     if (err) {
-                                        self.error(dump(err));
+                                        self.error(self.dump(err));
                                         done(err);
                                     } else {
                                         self.log(Debuggable.LOW, 'saved %s/%s pets', savedPetCount++, numOfPets);

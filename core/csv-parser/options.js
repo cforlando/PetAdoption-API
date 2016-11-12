@@ -6,7 +6,6 @@ var fs = require('fs'),
     _ = require('lodash'),
 
     helperUtils = require('./helper-utils'),
-    dump = require('../../lib/dump'),
 
     __dirname = process.cwd(), //__dirname || path.resolve('./'),
     cwd = __dirname,
@@ -28,7 +27,6 @@ var fs = require('fs'),
     };
 
 function parseOptionsCSV(csvData) {
-    // console.log('sanitizing options: %s', dump(csvData));
     console.log('sanitizing options');
 
     var optionsData = {},
@@ -43,7 +41,6 @@ function parseOptionsCSV(csvData) {
         }
     });
 
-    // console.log('sanitized options: %s', dump(optionsData));
     console.log('sanitized options');
     return optionsData;
 }

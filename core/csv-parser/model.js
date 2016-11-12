@@ -8,7 +8,6 @@ var fs = require('fs'),
     moment = require('moment'),
 
     helperUtils = require('./helper-utils'),
-    dump = require('../../lib/dump'),
 
     __dirname = process.cwd(), //__dirname || path.resolve('./'),
     cwd = __dirname,
@@ -23,7 +22,6 @@ var fs = require('fs'),
     };
 
 function parseModelCSV(csvModelData) {
-    // console.log('sanitizing model: %s', dump(modelData));
     console.log('sanitizing model');
 
     var newModel = [{

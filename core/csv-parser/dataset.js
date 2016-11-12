@@ -5,7 +5,6 @@ var fs = require('fs'),
     csv = require('csv'),
     _ = require('lodash'),
 
-    dump = require('../../lib/dump'),
 
     defaults = {
         done: function () {
@@ -18,7 +17,6 @@ var fs = require('fs'),
     };
 
 function sanitizeTestDataCSV(csvData) {
-    // console.log('sanitizing dataset: %s', dump(csvData));
     console.log('sanitizing dataset');
 
     // imagesPath could be url such http://server.com/images/ (url must have trailing slash)
@@ -62,7 +60,6 @@ function sanitizeTestDataCSV(csvData) {
         }
     });
 
-    // console.log('sanitized dataset: %s', dump(pets));
     console.log('sanitized dataset');
     return pets;
 }

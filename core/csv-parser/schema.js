@@ -7,7 +7,6 @@ var fs = require('fs'),
     _ = require('lodash'),
 
     helperUtils = require('./helper-utils'),
-    dump = require('../../lib/dump'),
 
     defaults = {
         context: null,
@@ -20,7 +19,6 @@ var fs = require('fs'),
     };
 
 function parseSchemaCSV(csvSchemaData) {
-    // console.log('sanitizing schema: %s', dump(csvSchemaData));
     console.log('sanitizing schema');
     var newSchema = {},
         columnIndices = {

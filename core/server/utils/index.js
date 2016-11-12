@@ -27,6 +27,5 @@ module.exports = {
 
         }
         return false;
-    },
-    dump : require('../../../lib/dump')
+    }
 };

@@ -8,8 +8,7 @@ var fs = require('fs'),
     session = require('express-session'),
 
     Debuggable = require('../../lib/debuggable'),
-    config = require('../../config'),
-    dump = require('../../../lib/dump');
+    config = require('../../config');
 
 /**
  * @extends Debuggable
