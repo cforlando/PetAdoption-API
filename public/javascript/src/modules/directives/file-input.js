@@ -25,18 +25,25 @@ define([
                         $scope.namespaces = [];
                     }
 
-                    $scope.upload = function (namespace) {
-                        var $lastInput = $scope.$inputs.last();
+                    /**
+                     * @param {Object} [options]
+                     * @param {Boolean} [options.isSingle=false]
+                     */
+                    $scope.upload = function (options) {
+                        var _options = _.defaults(options, {
+                                isSingle: false
+                            }),
+                            $lastInput = $scope.$inputs.last();
                         if ($lastInput.length > 0) {
-                            if ($lastInput.val()) {
+                            if ($lastInput.val() && !_options.isSingle) {
                                 // create a new dom input element
-                                $scope.namespaces.push(namespace || 'uploads-' + $scope.namespaces.length);
+                                $scope.namespaces.push(_options.namespace || 'uploads-' + $scope.namespaces.length);
                             } else {
                                 // don't create anything new and use last input dom element as is
                             }
                         } else {
                             // skip checks and create a new dom input element
-                            $scope.namespaces.push(namespace || 'uploads-' + $scope.namespaces.length);
+                            $scope.namespaces.push(_options.namespace || 'uploads-' + $scope.namespaces.length);
                         }
                         $timeout(function () {
                             $scope.reloadInputs();

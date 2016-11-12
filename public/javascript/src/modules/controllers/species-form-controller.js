@@ -30,12 +30,19 @@ define([
                 },
                 {
                     onClick: function () {
-                        angular.element($scope.mediaInputEl).click();
+                        $scope.$fileInputScope.upload({
+                            isSingle: true
+                        });
                     },
                     icon: 'photo',
                     label: 'Placeholder'
                 }
             ];
+
+
+            $scope.registerMediaScope = function($fileInputScope){
+                $scope.$fileInputScope = $fileInputScope;
+            };
 
             /**
              *
@@ -147,10 +154,10 @@ define([
             };
 
             function init() {
-                $scope.$on('file-input:set', function ($evt, $mediaFormScope) {
+                $scope.$on('file-input:change', function ($evt, $mediaFormScope) {
                     console.log("on('file-input:set'): %o", arguments);
                     $scope.$apply(function () {
-                        $scope.saveSpeciesPlaceholder($scope.speciesName, $mediaFormScope.$input[0], {
+                        $scope.saveSpeciesPlaceholder($scope.speciesName, $mediaFormScope.get$inputs()[0], {
                             done: function(err){
                                 if (err) console.error(err);
                             }
