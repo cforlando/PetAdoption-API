@@ -357,6 +357,7 @@ define([
 
             $scope.requestSpecies = function (callback, options) {
                 var _options = _.defaults(options, {}),
+                    activeSpeciesName = $scope.speciesName,
                     speciesList = $scope.speciesList;
 
                 $mdDialog.show({
@@ -364,6 +365,11 @@ define([
                         $scope.selectSpecies = function (selectedSpecies) {
                             $mdDialog.hide(selectedSpecies);
                         };
+                        speciesWatchHandler = $scope.$watch(activeSpeciesName, function(newVal){
+                            if (_.includes(speciesList, newVal)) {
+                                $scope.selectSpecies(newVal);
+                            }
+                        });
 
                         $scope.speciesList = speciesList;
                     },
@@ -373,9 +379,11 @@ define([
                     escapeToClose: false
                 }).then(
                     function confirm(speciesName) {
+                        speciesWatchHandler();
                         callback(speciesName);
                     },
                     function cancel() {
+                        speciesWatchHandler();
                         callback();
                     });
             };
@@ -415,6 +423,29 @@ define([
 
             function init() {
                 console.log('init form: %o', $routeParams);
+                $scope.registerMenuActions([
+                    {
+                        onClick: function () {
+                            $scope.savePet()
+                        },
+                        label: 'save',
+                        icon: 'save'
+                    },
+                    {
+                        onClick: function () {
+                            $scope.deletePet()
+                        },
+                        label: 'delete',
+                        icon: 'delete_forever'
+                    },
+                    {
+                        onClick: function () {
+                            $scope.clearPetData()
+                        },
+                        label: 'clear',
+                        icon: 'clear'
+                    }
+                ]);
                 if ($routeParams.petId) {
                     // Is main view
                     // load pet per URL
@@ -428,29 +459,6 @@ define([
                             val: $routeParams.petSpecies
                         }
                     });
-                    $scope.registerMenuActions([
-                        {
-                            onClick: function () {
-                                $scope.savePet()
-                            },
-                            label: 'save',
-                            icon: 'save'
-                        },
-                        {
-                            onClick: function () {
-                                $scope.deletePet()
-                            },
-                            label: 'delete',
-                            icon: 'delete_forever'
-                        },
-                        {
-                            onClick: function () {
-                                $scope.clearPetData()
-                            },
-                            label: 'clear',
-                            icon: 'clear'
-                        }
-                    ]);
                 } else if ($scope.isBatchEditActive && $scope.isBatchEditActive()) {
                     $scope.registerForm($scope);
                 }
