@@ -5,6 +5,8 @@ var path = require('path'),
 
     Debuggable = require('../../../lib/debuggable/index'),
     Database = require('./index'),
+    Species = require('../../../lib/species'),
+    Animal = require('../../../lib/animal'),
     AnimalModelFactory = require('./../animal-model-factory'),
     config = require('../../../config'),
     DBError = require('../error');
@@ -37,6 +39,8 @@ function AnimalDatabase(speciesName, speciesProps, options) {
                 }
             }
         });
+
+    this.species = new Species(speciesName, speciesProps);
 
     var animalDocName = this.format('%s_%s_animal', _options.modelNamePrefix, speciesName);
 
@@ -156,8 +160,11 @@ AnimalDatabase.prototype = {
             self.log(Debuggable.MED, "[%s].saveAnimal() - received post for: %s", self.getConfig('speciesName'), self.dump(props));
 
 
-            var animal = new self.AnimalModel(props);
-            animal.upsert(props, {
+            var animal = new Animal(self.species, props),
+                animalProps = animal.toObject({isV1Format: false}),
+                animalModel = new self.AnimalModel(animalProps);
+
+            animalModel.upsert(animalProps, {
                 isV1Format: _options.isV1Format
             }, function (err, animalDoc) {
                 if (err) {

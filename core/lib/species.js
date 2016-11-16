@@ -2,6 +2,13 @@ var _ = require('lodash'),
 
     Debuggable = require('./debuggable');
 
+/**
+ * @extends Species
+ * @class Species
+ * @param speciesName
+ * @param props
+ * @constructor
+ */
 function Species(speciesName, props) {
     this.name = speciesName;
     this.baseProps = [
@@ -50,8 +57,8 @@ function Species(speciesName, props) {
             options: []
         }
     ];
-    this.props = this.baseProps;
-    this.setProps(_.isString(props) ? JSON.parse(props) : props);
+    this.props = this.baseProps.slice();
+    if (props) this.setProps(_.isString(props) ? JSON.parse(props) : props);
 }
 
 Species.prototype = {
@@ -62,12 +69,10 @@ Species.prototype = {
 
     setProps: function (props) {
         if (props) {
-            this.props = _.chain(props)
-                .concat(this.props)
-                .uniqBy(function (propData) {
-                    return propData.key
-                })
-                .value();
+            var allProps = props.concat(this.props);
+            this.props = _.uniqBy(allProps, function (propData) {
+                return propData.key
+            })
         }
     },
 
@@ -75,14 +80,15 @@ Species.prototype = {
         return _.find(this.props, {key: propName});
     },
 
-    getProps: function () {
+    getProps: function (options) {
+        var _options = _.defaults(options, {removeValues: true});
         this.props = _.chain(this.props)
             .reduce(function (props, speciesPropData) {
                 if (speciesPropData.valType == 'Location' && !_.isNumber(speciesPropData.defaultVal)) {
                     // fix for bad default values
                     speciesPropData.defaultVal = -1;
                 }
-                delete speciesPropData.val;
+                if (_options.removeValues) delete speciesPropData.val;
                 if (speciesPropData.options) {
                     speciesPropData.options = _.chain(speciesPropData.options)
                         .uniq()

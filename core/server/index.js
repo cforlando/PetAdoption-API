@@ -78,7 +78,7 @@ function Server(database, options) {
 
     // express error handlers
     server.use(function (err, req, res, next) {
-        console.error('error: %s', ServerUtils.dump(err));
+        console.error('error: %s', err);
         res.status(err.status || 500);
         res.render('error', {
             message: err.message,
