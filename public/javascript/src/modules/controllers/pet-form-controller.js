@@ -357,7 +357,7 @@ define([
 
             $scope.requestSpecies = function (callback, options) {
                 var _options = _.defaults(options, {}),
-                    activeSpeciesName = $scope.speciesName,
+                    getActiveSpeciesName = function (){ return ($scope.petData && $scope.petData.species) ? $scope.petData.species.val : null} ,
                     speciesList = $scope.speciesList;
 
                 $mdDialog.show({
@@ -365,7 +365,7 @@ define([
                         $scope.selectSpecies = function (selectedSpecies) {
                             $mdDialog.hide(selectedSpecies);
                         };
-                        speciesWatchHandler = $scope.$watch(activeSpeciesName, function(newVal){
+                        speciesWatchHandler = $scope.$watch(getActiveSpeciesName, function(newVal){
                             if (_.includes(speciesList, newVal)) {
                                 $scope.selectSpecies(newVal);
                             }
