@@ -271,8 +271,8 @@ define([
                 }
 
                 function formatData(petData) {
+                    var formattedData = angular.copy(petData);
                     if ($scope.mediaScope) {
-                        var formattedData = angular.copy(petData);
                         formattedData.$media = $scope.mediaScope.get$inputs();
                     }
 
