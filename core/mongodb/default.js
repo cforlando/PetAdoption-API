@@ -4,10 +4,11 @@ var util = require('util'),
     _ = require('lodash'),
     moment = require('moment'),
 
-    Cache = require('../../../lib/cache/index'),
-    MongoDBAdapter = require('../adapter'),
-    Debuggable = require('../../../lib/debuggable/index'),
-    DBError = require('../error');
+    Cache = require('../lib/cache'),
+    Debuggable = require('../lib/debuggable'),
+
+    MongoDBAdapter = require('./lib/adapter'),
+    DBError = require('./lib/error');
 
 /**
  * @extends Debuggable
@@ -22,50 +23,35 @@ var util = require('util'),
  * @constructor
  */
 function Database(modelFactory, options) {
-    /**
-     * @var {ModelFactory} modelFactory
-     * @memberOf Database
-     */
-    this._super.call(this, modelFactory, options);
-
-    this.exec(function () {
-        this.log(Debuggable.LOW, 'initializing db model');
-        this.MongooseModel = this.modelFactory.generateMongooseModel(this.getAdapter());
-    }, {context: this});
-    return this;
-}
-
-Database.prototype = {
-    _super: function (modelFactory, options) {
-        var _options = _.defaults(options, {
+    var self = this,
+        _options = _.defaults(options, {
             modelNamePrefix: 'prod_',
             debugLevel: Debuggable.PROD,
             debugTag: 'DB: '
         });
 
-        this.setDebugLevel(_options.debugLevel);
-        this.setDebugTag(_options.debugTag);
-        this.modelFactory = modelFactory;
-        this._config = this._config || {};
-        this._queue = this._queue || [];
-        this._cache = this._cache || new Cache();
-        this.setAdapter(_options.adapter || new MongoDBAdapter({context: this}));
-        this._setupListeners(this.getAdapter());
-    },
 
     /**
-     *
-     * @param {MongoDBAdapter} [mongoAdapter]
-     * @private
+     * @var {ModelFactory} modelFactory
+     * @memberOf Database
      */
-    _setupListeners: function (mongoAdapter) {
-        var self = this,
-            adapter = mongoAdapter || this.getAdapter();
+    this._config = this._config || {};
+    this._queue = this._queue || [];
+    this._cache = this._cache || new Cache();
+    this.modelFactory = modelFactory;
 
-        adapter.on('connected', function () {
-            self._processQueue();
-        });
-    },
+    this.setDebugLevel(_options.debugLevel);
+    this.setDebugTag(_options.debugTag);
+    this.setAdapter(_options.adapter || new MongoDBAdapter({context: this}));
+
+    this.MongooseModel = this.modelFactory.toMongooseModel(this.getAdapter());
+
+    this.getAdapter().on('connected', function () {
+        self._processQueue();
+    });
+}
+
+Database.prototype = {
 
     _addToQueue: function (entry, context) {
         if (_.isFunction(entry)) {
@@ -197,36 +183,6 @@ Database.prototype = {
      * @param {Object} result
      */
 
-    /**
-     *
-     * @param {Object} options
-     * @param {QueryCallback} options.complete callback on operation completion
-     * @param {Object} [options.context] context for complete function callback
-     */
-    findLatest: function (options) {
-        var self = this,
-            _options = _.defaults(options, self._config.queryOptions);
-
-        this.exec(function () {
-            self.MongooseModel.getLatest(function (err, doc) {
-                if (err || !doc) {
-                    err = new DBError(err || "No docs found");
-                    self.error(err);
-                    if (_options.complete) _options.complete(err);
-                } else {
-                    var cacheNamespace = util.format('%s.%s', self.getConfig('speciesName') || self.modelFactory.getModelName(), moment(doc.timestamp).format('M.D.YYYY'));
-                    self.cacheData(cacheNamespace, doc, {
-                        dir: path.join(process.cwd(), 'data/'),
-                        type: ['json'],
-                        done: function (cacheSaveErr) {
-                            self.log(Debuggable.LOW, 'updated cached species props');
-                            if (_options.complete) _options.complete(cacheSaveErr, doc);
-                        }
-                    });
-                }
-            });
-        });
-    },
 
     /**
      * @param {Object} whereProps

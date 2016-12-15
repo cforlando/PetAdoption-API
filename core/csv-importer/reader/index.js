@@ -27,15 +27,6 @@ module.exports  = {
      */
     parseOptions : require('./options').parse,
 
-    /**
-     *
-     * @param {Object} [options]
-     * @param {ParsedCallback} options.done
-     * @param {Object} options.context
-     * @param {Object} options.readPath
-     * @param {Object} options.writePath
-     */
-    parseSchema : require('./schema').parse,
 
     /**
      *
@@ -45,5 +36,5 @@ module.exports  = {
      * @param {Object} options.readPath
      * @param {Object} options.writePath
      */
-    parseModel : require('./model').parse
+    parseSpeciesProps : require('./species-props').parse
 };

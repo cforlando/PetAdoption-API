@@ -54,12 +54,11 @@ describe('Adapter', function () {
 
     });
 
+/*
     describe("getMongoose()", function () {
         var tDBAdapter = new MongoDBAdapter();
-        it("returns false before connect() is called", function () {
-            expect(tDBAdapter.getMongoose()).toBe(false);
-        });
     });
+*/
 
     it('returns the proper states', function (done) {
 

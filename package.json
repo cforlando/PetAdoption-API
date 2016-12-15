@@ -1,6 +1,6 @@
 {
   "name": "pet-adoption-server",
-  "version": "0.4.43",
+  "version": "0.5.0",
   "bin": {
     "pet-adoption-api-server": "bin/start-server.js"
   },
@@ -8,6 +8,7 @@
     "start": "node bin/start-server.js",
     "dev": "nodemon bin/start-server.js",
     "doc": "jsdoc ./core -r -c ./jsdoc.conf.json -d ./docs",
+    "setup:data": "node bin/parse-csv-data.js",
     "setup:dev": "dp-setup",
     "test:init": "jasmine init",
     "generate-ssl": "mkdir ssl; openssl genrsa 1024 > ./ssl/server.key; chmod 400 ./ssl/server.key; openssl req -new -x509 -nodes -sha1 -days 365 -key ./ssl/server.key -out ./ssl/server.crt",

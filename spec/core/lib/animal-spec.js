@@ -19,9 +19,40 @@ describe("Animal", function () {
             var testAnimalObject = testAnimal.toObject({isV1Format: false});
             expect(testAnimalObject).not.toBeUndefined('result should be defined');
             expect(_.isPlainObject(testAnimalObject)).toBe(true, 'result should be a plain object');
-            _.forEach(testAnimalProps, function(propValue, propName){
+            _.forEach(testAnimalProps, function (propValue, propName) {
                 expect(testAnimalObject[propName]).toEqual(propValue);
             });
         })
-    })
+    });
+
+    describe("getValue()", function(){
+        it("returns the value of a prop per name", function(){
+            var testAnimalProps = {
+                    sex: 'male',
+                    petName: 'valTester'
+                },
+                testAnimal = new Animal(testSpecies, testAnimalProps);
+
+            _.forEach(testAnimalProps, function(propValue, propName){
+                expect(testAnimal.getValue(propName)).toEqual(propValue);
+            });
+
+        })
+    });
+
+    describe("toQuery()", function () {
+
+        it("returns a mongodb query object", function () {
+            var testAnimalProps = {
+                    sex: 'female',
+                    petName: 'test'
+                },
+                testAnimal = new Animal(testSpecies, testAnimalProps);
+            var testAnimalQuery = testAnimal.toQuery();
+            expect(_.isPlainObject(testAnimalQuery)).toBe(true, 'query should be a plain object');
+            _.forEach(testAnimalProps, function (queryFieldValue, queryFieldName) {
+                expect(_.isRegExp(testAnimalQuery[queryFieldName])).toEqual(true);
+            });
+        })
+    });
 });

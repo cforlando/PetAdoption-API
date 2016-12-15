@@ -3,7 +3,6 @@ var _ = require('lodash'),
     Debuggable = require('./debuggable');
 
 /**
- * @extends Species
  * @class Species
  * @param speciesName
  * @param props
@@ -63,16 +62,18 @@ function Species(speciesName, props) {
 
 Species.prototype = {
 
-    getName: function () {
+    getSpeciesName: function () {
         return this.name
     },
 
     setProps: function (props) {
         if (props) {
-            var allProps = props.concat(this.props);
-            this.props = _.uniqBy(allProps, function (propData) {
-                return propData.key
-            })
+            this.props = _.chain(props)
+                .concat(this.props)
+                .uniqBy(function (propData) {
+                    return propData.key
+                })
+                .value()
         }
     },
 
@@ -81,14 +82,13 @@ Species.prototype = {
     },
 
     getProps: function (options) {
-        var _options = _.defaults(options, {removeValues: true});
-        this.props = _.chain(this.props)
+        var _options = _.defaults(options, {removeValues: false});
+        return _.chain(this.props)
             .reduce(function (props, speciesPropData) {
                 if (speciesPropData.valType == 'Location' && !_.isNumber(speciesPropData.defaultVal)) {
                     // fix for bad default values
                     speciesPropData.defaultVal = -1;
                 }
-                if (_options.removeValues) delete speciesPropData.val;
                 if (speciesPropData.options) {
                     speciesPropData.options = _.chain(speciesPropData.options)
                         .uniq()
@@ -101,6 +101,9 @@ Species.prototype = {
                 props.push(speciesPropData);
                 return props
             }, [])
+            .map(function (propData) {
+                return (_options.removeValues) ? _.omit(propData, ['val']) : propData;
+            })
             .sortBy(function (propData) {
                 if (propData.key == 'petId') return '0';
                 if (propData.key == 'images') return '1';
@@ -109,11 +112,20 @@ Species.prototype = {
                 return propData.key;
             })
             .value();
+    },
 
-        return this.props;
+    getSpeciesProps: function () {
+        return this.getProps({removeValues: true});
+    },
+
+    toMongooseDoc: function () {
+        return {
+            name: this.getSpeciesName(),
+            props: this.getProps()
+        }
     }
 };
 
-_.extend(Species.prototype, Debuggable.prototype);
+_.defaults(Species.prototype, Debuggable.prototype);
 
 module.exports = Species;

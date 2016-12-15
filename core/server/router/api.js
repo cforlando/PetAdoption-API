@@ -69,8 +69,7 @@ function APIRouter(controller) {
         controller.verifyAuth(),
         controller.onUserRetrieve());
 
-    router.get('/cleandb/', controller.onFormatAllDB());
-    router.get('/cleandb/:species/', controller.onFormatSpeciesDB());
+    router.get('/formatdb/', controller.onFormatDB());
     router.get('/reset', controller.onReset());
     return router;
 }

@@ -14,11 +14,12 @@ function Cache(){
 
     /**
      *
-     * @param {String} method options include: 'JSON'
+     * @param {String} method options include: 'json'
      * @param {*} data
      * @param {Object} [options]
      * @param {String} [options.name] name of cache file (if applicable)
      * @param {String} [options.dir] absolute path to save cache file (if applicable)
+     * @param {Function} [options.done]
      */
     this.save = function(method, data, options){
         var _options = _.defaults(options, {

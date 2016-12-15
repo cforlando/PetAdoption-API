@@ -6,14 +6,26 @@ describe("Formatter", function () {
     var DBFormatter = require('../../../../core/server/utils/formatter'),
         testDBFormatter = new DBFormatter(),
 
-        speciesProps = dbImages[0].getSpeciesProps(),
-        testProps = _.filter(speciesProps, function (speciesPropData) {
-            return speciesPropData.options
-                && (speciesPropData.valType == 'String' || speciesPropData.valType == 'Boolean')
-                && speciesPropData.options.length > 0
-        }),
+        speciesProps = _.reduce(dbImages, function (collection, dbImage) {
+            collection[dbImage.getSpeciesName()] = dbImage.getSpeciesProps();
+            return collection;
+        }, {}),
+
+        testableSpeciesProps = _.reduce(speciesProps, function (collection, speciesProps, speciesName) {
+            collection[speciesName] = _.filter(speciesProps, function (speciesPropData) {
+                return speciesPropData.options
+                    && (speciesPropData.valType == 'String' || speciesPropData.valType == 'Boolean')
+                    && speciesPropData.options.length > 0
+            });
+            return collection;
+        }, {}),
+
+        defaultTestSpeciesName = 'cat',
+        defaultSpeciesProps = speciesProps[defaultTestSpeciesName],
+        defaultTestProps = testableSpeciesProps[defaultTestSpeciesName],
+
         testAnimal = {},
-        testAnimalWithProps = _.reduce(speciesProps, function (collection, propData) {
+        testAnimalWithProps = _.reduce(defaultSpeciesProps, function (collection, propData) {
             var animalPropData = false;
             switch (propData.key) {
                 case 'species':
@@ -33,25 +45,25 @@ describe("Formatter", function () {
             return collection;
         }, {});
 
-    it("test data is initialized correctly", function(){
-        expect(testProps.length > 3).toBe(true, 'test props should have many fields');
+    it("test data is initialized correctly", function () {
+        expect(defaultTestProps.length > 3).toBe(true, 'test props should have many fields');
     });
 
     describe("formatAnimal", function () {
 
         it("correct creates and formats animal fields", function () {
-            var formattedAnimal = testDBFormatter.formatAnimal(speciesProps, testAnimal, {
+            var formattedAnimal = testDBFormatter.formatAnimal(defaultSpeciesProps, testAnimal, {
                 createMissingFields: true,
                 populateEmptyFields: true
             });
 
-            _.forEach(testProps, function (testPropData) {
+            _.forEach(defaultTestProps, function (testPropData) {
                 expect(formattedAnimal[testPropData.key].val).not.toBeUndefined();
             });
         });
 
         it("correct formats pre-created animal fields", function () {
-            var formattedAnimal = testDBFormatter.formatAnimal(speciesProps, testAnimalWithProps, {
+            var formattedAnimal = testDBFormatter.formatAnimal(defaultSpeciesProps, testAnimalWithProps, {
                 populateEmptyFields: true
             });
 
@@ -88,34 +100,31 @@ describe("Formatter", function () {
 
         beforeAll(function (done) {
             apiDatabase = new APIDatabase({
-                forcePreset: true,
-                preset: dbImages,
                 debugLevel: Debuggable.PROD,
                 modelNamePrefix: 'test_formatter_',
-                onInitialized: function () {
-                    done();
-                }
+            });
+
+            apiDatabase.clearAnimals(function () {
+                apiDatabase.uploadDBImages(dbImages, done)
             });
         });
 
         afterAll(function (done) {
-            apiDatabase.stop(done);
+            apiDatabase.clearAnimals(function () {
+                apiDatabase.stop(done);
+            });
         });
 
         it("formats an entire database", function (done) {
-            testDBFormatter.formatDB(apiDatabase, speciesProps, {
+            testDBFormatter.formatDB(apiDatabase, {
                 createMissingFields: true,
                 populateEmptyFields: true,
                 complete: function () {
-                    apiDatabase.findAnimals({
-                        // use example because of how data was unfortunately formatted initially
-                        species: _.find(speciesProps, {key: 'species'}).example.toLowerCase()
-                    }, {
+                    apiDatabase.findAnimals({}, {
                         complete: function (err, animals) {
-                            _.forEach(animals, function (formattedAnimal) {
-
-                                _.forEach(testProps, function (testPropData) {
-                                    expect(formattedAnimal[testPropData.key].val).not.toBeUndefined();
+                            _.forEach(animals, function (formattedAnimal, index) {
+                                _.forEach(testableSpeciesProps[formattedAnimal.species.val], function (testPropData) {
+                                    expect(formattedAnimal[testPropData.key].val).not.toBeUndefined('value for ' + testPropData.key + 'should be defined');
                                 });
                                 done();
                             })

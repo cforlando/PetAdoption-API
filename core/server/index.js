@@ -13,7 +13,6 @@ var fs = require('fs'),
 
     Debuggable = require('../lib/debuggable'),
     Router = require('./router'),
-    ServerUtils = require('./utils'),
 
     assetsRedirect = require('./middleware/assests-redirect'),
     flags = require('./middleware/flags'),
@@ -26,7 +25,7 @@ var fs = require('fs'),
  * @class Server
  * @param {MongoAPIDatabase} database
  * @param {Object} [options]
- * @param {DebugLevel} [options.debugLevel]
+ * @param {DebugLevel|Number} [options.debugLevel]
  * @returns {Express}
  * @constructor
  */
@@ -74,6 +73,7 @@ function Server(database, options) {
     server.use(dataFormatter());
 
     // send placeholder 404 images
+    // only works if serving images locally
     // server.use(localImageHandler());
 
     // express error handlers

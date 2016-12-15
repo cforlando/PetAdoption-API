@@ -13,7 +13,7 @@ var fs = require('fs'),
     S3Bucket = require('../../s3'),
     Debuggable = require('../../lib/debuggable'),
     DBFormatter = require('../utils/formatter'),
-    csvReader = require('../../csv-parser');
+    CSVImporter = require('../../csv-importer');
 
 /**
  * @extends Debuggable
@@ -154,42 +154,19 @@ APIController.prototype = {
     onListAllRequest: function () {
         var self = this;
         return function (req, res, next) {
-            var responseData = [];
             res.locals.pageNumber = req.params['pageNumber'];
 
-            self.getSpeciesList(function (err, speciesList) {
-                if (err) {
-                    next(err);
-                } else {
-                    async.each(speciesList, function each(species, done) {
-                        self.database.findAnimals({species: species}, {
-                            debug: self._apiOptions.debugLevel,
-                            complete: function (err, animals) {
-                                if (err) {
-                                    done(err);
-                                } else if (_.isArray(animals)) {
-                                    responseData = responseData.concat(animals);
-                                    done();
-                                } else {
-                                    done();
-                                }
-                            }
-                        });
-                    }, function complete(err) {
-                        if (err) {
-                            next(err);
-                        } else if (_.isArray(responseData)) {
-                            res.locals.data = responseData;
-                            next();
-                        } else {
-                            res.locals.data = [];
-                            next();
-                        }
-
-                    })
+            self.database.findAnimals({}, {
+                debug: self._apiOptions.debugLevel,
+                complete: function (err, animals) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.locals.data = animals;
+                        next();
+                    }
                 }
             });
-
         }
     },
 
@@ -223,12 +200,12 @@ APIController.prototype = {
             var species = req.params['species'];
 
             self.database.findSpecies(species, {
-                complete: function (err, speciesProps) {
+                complete: function (err, speciesData) {
                     if (err) {
                         next(err);
                     } else {
                         res.locals.simplifiedFormat = false;
-                        res.locals.data = _.reduce(speciesProps, function (collection, propData) {
+                        res.locals.data = _.reduce(speciesData.props, function (collection, propData) {
                             if (propData) collection[propData.key] = propData.options;
                             return collection;
                         }, {});
@@ -247,12 +224,12 @@ APIController.prototype = {
 
 
             self.database.findSpecies(species, {
-                complete: function (err, speciesProps) {
+                complete: function (err, speciesData) {
                     if (err) {
                         next(err);
                     } else {
                         res.locals.simplifiedFormat = false;
-                        var speciesPropData = _.find(speciesProps, {key: optionName});
+                        var speciesPropData = _.find(speciesData.props, {key: optionName});
                         res.locals.data = (speciesPropData) ? speciesPropData.options : [];
                         next();
                     }
@@ -267,12 +244,12 @@ APIController.prototype = {
 
             self.database.findSpecies(req.params.species, {
                 debug: self._apiOptions.debugLevel,
-                complete: function (err, animalModel) {
+                complete: function (err, speciesData) {
                     if (err) {
                         next(err)
                     } else {
                         res.locals.simplifiedFormat = false;
-                        res.locals.data = animalModel;
+                        res.locals.data = speciesData.props;
                         next();
                     }
                 }
@@ -454,184 +431,64 @@ APIController.prototype = {
         }
     },
 
-    onFormatSpeciesDB: function () {
-        var self = this;
-        return function (req, res, next) {
-            var speciesName = req.params.species;
-
-            self.database.findSpecies(speciesName, {
-                complete: function (err, speciesProps) {
-                    if (err) {
-                        next(err);
-                    } else {
-                        var dbFormatter = new DBFormatter();
-                        dbFormatter.formatDB(
-                            self.database,
-                            speciesProps, {
-                                species: speciesName,
-                                complete: function (err) {
-                                    if (err) {
-                                        next(err)
-                                    } else {
-                                        res.send({result: 'success'})
-                                    }
-                                }
-                            })
-                    }
-                }
-            });
-        }
-    },
-
-    onFormatAllDB: function () {
+    onFormatDB: function () {
         var self = this;
         return function (req, res, next) {
 
-            self.getSpeciesList(function (err, speciesList) {
-
-                if (err) {
-                    next(err);
-                } else {
-                    async.each(speciesList, function each(speciesName, done) {
-                        self.database.findSpecies(speciesName, {
-                            complete: function (err, speciesProps) {
-                                if (err) {
-                                    done(err)
-                                } else {
-                                    var dbFormatter = new DBFormatter();
-                                    dbFormatter.formatDB(
-                                        self.database,
-                                        speciesProps, {
-                                            species: speciesName,
-                                            complete: function (err) {
-                                                done(err);
-                                            }
-                                        })
-                                }
-                            }
-                        });
-                    }, function complete(err) {
-
-                        if (err) {
-                            next(err);
-                        } else {
-                            res.send({result: 'success'})
-                        }
-                    })
+            var dbFormatter = new DBFormatter();
+            dbFormatter.formatDB(self.database, {
+                complete: function (err) {
+                    if (err) return next(err);
+                    res.send({result: 'success'})
                 }
             });
         }
     },
 
     onReset: function () {
-        var self = this;
-        self.setDebugLevel(Debuggable.MED);
+        var self = this,
+            csvImporter = new CSVImporter();
+
         return function (req, res, next) {
 
-            self.getSpeciesList(function (err, speciesList) {
-                if (err) {
-                    next(err)
-                } else {
-                    async.each(speciesList, function each(species, onSpeciesDeleted) {
+            self.database.clearAnimals(function () {
 
-                        self.database.findAnimals({species: species}, {
-                            isV1Format: false,
-                            complete: function (err, pets) {
-                                async.each(pets, function each(pet, onPetDeleted) {
-                                    self.database.removeAnimal(pet.species, {
-                                        petId: pet.petId
-                                    }, {
-                                        complete: function (err) {
-                                            onPetDeleted(err);
+                csvImporter.run(function (petCollection) {
+
+                    self.log('dataset parsed');
+                    var numOfPets = petCollection.length,
+                        savedPetCount = 1;
+
+                    async.each(petCollection,
+                        function each(petData, done) {
+                            self.log(Debuggable.MED, 'saving pet %j', petData);
+                            self.database.saveAnimal(petData.species || 'dog',
+                                petData,
+                                {
+                                    debug: self._apiOptions.debugLevel,
+                                    complete: function (err) {
+                                        if (err) {
+                                            self.error(self.dump(err));
+                                            done(err);
+                                        } else {
+                                            self.log(Debuggable.LOW, 'saved %s/%s pets', savedPetCount++, numOfPets);
+                                            done();
                                         }
-                                    })
-                                }, function complete(err) {
-                                    onSpeciesDeleted(err);
-                                })
-
+                                    }
+                                });
+                        },
+                        function done(err) {
+                            if (err) {
+                                next(err);
+                            } else {
+                                // execute db formatting as well
+                                self.onFormatDB()(req, res, next);
                             }
                         });
-                    }, function complete(err) {
-                        if (err) return next(err);
-                        csvReader.parseSchema({
-                            readPath: [
-                                path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Cats.csv'),
-                                path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Dogs.csv')
-                            ],
-                            cache: true,
-                            done: onSchemaParsed
-                        });
-                    });
-                }
+
+                });
             });
 
-
-            function onSchemaParsed() {
-                csvReader.parseModel({
-                    readPath: [
-                        path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Cats.csv'),
-                        path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Dogs.csv')
-                    ],
-                    cache: true,
-                    done: onModelsParsed
-                });
-            }
-
-            function onModelsParsed() {
-                self.log('schema parsed');
-                csvReader.parseOptions({
-                    cache: true,
-                    readPath: [
-                        path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Small Animals.csv'),
-                        path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Rabbits.csv'),
-                        path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Reptiles.csv'),
-                        path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Birds.csv'),
-                        path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Dogs.csv'),
-                        path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Cats.csv')
-                    ],
-                    done: onOptionsParsed
-                })
-            }
-
-            function onOptionsParsed() {
-                self.log('options parsed');
-                csvReader.parseDataset({
-                    cache: true,
-                    done: onDatasetParsed
-                });
-            }
-
-            function onDatasetParsed(petCollection) {
-                self.log('dataset parsed');
-                var numOfPets = petCollection.length,
-                    savedPetCount = 1;
-                async.each(petCollection,
-                    function each(petData, done) {
-                        self.log(Debuggable.MED, 'saving pet %j', petData);
-                        self.database.saveAnimal(petData.species || 'dog',
-                            petData,
-                            {
-                                debug: self._apiOptions.debugLevel,
-                                complete: function (err) {
-                                    if (err) {
-                                        self.error(self.dump(err));
-                                        done(err);
-                                    } else {
-                                        self.log(Debuggable.LOW, 'saved %s/%s pets', savedPetCount++, numOfPets);
-                                        done();
-                                    }
-                                }
-                            });
-                    },
-                    function done(err) {
-                        if (err) {
-                            next(err);
-                        } else {
-                            self.onFormatAllDB()(req, res, next);
-                        }
-                    }
-                );
-            }
         }
     }
 

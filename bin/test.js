@@ -4,6 +4,7 @@ var path = require('path'),
     SpecReporter = require('jasmine-spec-reporter');
 
 var jrunner = new Jasmine();
+jrunner.env.clearReporters();
 jrunner.addReporter(new SpecReporter({
     displayStacktrace: 'all',
     displaySpecDuration: true

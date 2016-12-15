@@ -39,17 +39,20 @@ ModelFactory.prototype = {
 
     /**
      *
-     * @param {MongoDBAdapter} adapter
+     * @param {MongoDBAdapter|String} adapter
      * @returns {Model|*}
      * @private
      */
-    _buildMongooseModel : function (adapter) {
-        var mongoose = adapter.getMongoose();
-        if (!mongoose) {
-            this.warn("mongoose not declared. defaulting to global instance");
-            mongoose = require('mongoose');
+    _buildMongooseModel: function (adapter) {
+        var mongooseInstance;
+
+        if (adapter.getMongoose) {
+            mongooseInstance = adapter.getMongoose();
+        } else {
+            // create mongoose instance from string
+            mongooseInstance = mongoose.createConnection(adapter);
         }
-        this.mongooseModel = mongoose.model(this.modelName, this.toMongooseSchema());
+        this.mongooseModel = mongooseInstance.model(this.modelName, this.toMongooseSchema());
         return this.mongooseModel;
     },
 
@@ -57,15 +60,15 @@ ModelFactory.prototype = {
      *
      * @param {MongoDBAdapter} adapter
      * @returns {*|Aggregate|Model}
-     * @private
      */
-    _buildModel : function (adapter) {
+    toMongooseModel: function (adapter) {
+        var url = "";
         this._validate();
-        this._buildMongooseModel(adapter);
+        this._buildMongooseModel(adapter || url);
         return this.mongooseModel;
     },
 
-    _validateModelName : function (callback) {
+    _validateModelName: function (callback) {
         if (!(_.isString(this.modelName) && this.modelName.length > 0)) {
             return callback(new Error("Invalid modelName supplied"))
         }
@@ -73,25 +76,18 @@ ModelFactory.prototype = {
     },
 
 
-    _validate : function () {
+    _validate: function () {
         this._validateModelName(function (err) {
             if (err) throw err;
         });
     },
 
-    /**
-     * @param {MongoDBAdapter} adapter
-     * @returns {Mongoose.Model}
-     */
-    generateMongooseModel : function (adapter) {
-        return this._buildModel(adapter);
-    },
 
     /**
      *
      * @param {String} modelName
      */
-    setModelName : function (modelName) {
+    setModelName: function (modelName) {
         this.modelName = modelName;
     },
 
@@ -100,7 +96,7 @@ ModelFactory.prototype = {
      *
      * @returns {String}
      */
-    getModelName : function () {
+    getModelName: function () {
         return this.modelName;
     },
 

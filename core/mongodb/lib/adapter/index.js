@@ -50,8 +50,9 @@ function MongoDBAdapter(options) {
         onFatal: _options.onFatal
     };
 
-    this.mongoose = false;
+    this._mongoose = mongoose.createConnection(_options.mongoConnectionURI);
 
+    this.connect();
     return this;
 }
 
@@ -85,37 +86,52 @@ MongoDBAdapter.prototype = {
 
         this.log(Debuggable.LOW, 'mongoose is connecting to %s', mongoConnectionURI);
 
-        if (!this.isConnecting()) this.mongoose = mongoose.createConnection(mongoConnectionURI);
-
-        this.mongoose.on('close', function () {
-            self.emit('close');
-        });
-
-        this.mongoose.on('connecting', function () {
-            self.emit('connecting');
-        });
-
-        this.mongoose.on('disconnecting', function () {
-            self.emit('disconnecting');
-        });
-
-        this.mongoose.on('error', function (err) {
+        this._mongoose.on('error', function (err) {
             self.emit('error', err);
             if (callbacks.onFailure) callbacks.onFailure.call(context);
-        });
-
-
-        this.mongoose.on('connected', function () {
-            self.log(Debuggable.LOW, 'mongoose is connected');
-            self.emit('connected');
-            if (callbacks.onSuccess) callbacks.onSuccess.call(context);
-            // delete callbacks.onSuccess;
         });
 
         this.on('error', function (err) {
             // catch error events so node.js doesn't throw an error itself
             this.error('err: %s', err);
-        })
+        });
+
+        this._mongoose.on('connecting', function(){
+            self.onConnecting.apply(self, arguments)
+        });
+
+        this._mongoose.on('connected', function(){
+            self.onConnected.call(self, callbacks.onSuccess, context)
+        });
+
+        this._mongoose.on('disconnecting', function () {
+            self.emit('disconnecting');
+        });
+
+        this._mongoose.on('close', function () {
+            self.emit('close');
+        });
+
+        if (this.isConnecting()) {
+            this.onConnecting();
+        } else if (this.isConnected()) {
+            this.onConnected(callbacks.onSuccess, context);
+        } else {
+            this._mongoose.open(_options.mongoConnectionURI)
+        }
+    },
+    onConnecting: function (callback, context) {
+        this.log(Debuggable.LOW, 'mongoose is connecting');
+        this.emit('connecting');
+        if (callback) callback.call(context);
+        // delete callbacks.onSuccess;
+    },
+
+    onConnected: function (callback, context) {
+        this.log(Debuggable.LOW, 'mongoose is connected');
+        this.emit('connected');
+        if (callback) callback.call(context);
+        // delete callbacks.onSuccess;
     },
 
     /**
@@ -123,7 +139,7 @@ MongoDBAdapter.prototype = {
      * @param callback
      */
     close: function (callback) {
-        this.mongoose.close(callback);
+        this._mongoose.close(callback);
     },
 
     /**
@@ -131,7 +147,7 @@ MongoDBAdapter.prototype = {
      * @returns {boolean}
      */
     isConnecting: function () {
-        return this.mongoose.readyState === 2;
+        return this._mongoose.readyState === 2;
     },
 
     /**
@@ -139,7 +155,7 @@ MongoDBAdapter.prototype = {
      * @returns {boolean}
      */
     isConnected: function () {
-        return this.mongoose.readyState === 1;
+        return this._mongoose.readyState === 1;
     },
 
     /**
@@ -147,7 +163,7 @@ MongoDBAdapter.prototype = {
      * @returns {boolean}
      */
     isDisconnecting: function () {
-        return this.mongoose.readyState === 3;
+        return this._mongoose.readyState === 2;
     },
 
     /**
@@ -155,7 +171,7 @@ MongoDBAdapter.prototype = {
      * @returns {boolean}
      */
     isClosed: function () {
-        return !this.mongoose || this.mongoose.readyState === 0;
+        return !this._mongoose || this._mongoose.readyState === 0;
     },
 
     /**
@@ -163,7 +179,7 @@ MongoDBAdapter.prototype = {
      * @returns {Connection|false}
      */
     getMongoose: function () {
-        return this.mongoose;
+        return this._mongoose;
     }
 
 };

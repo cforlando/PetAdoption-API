@@ -1,13 +1,19 @@
 var Schema = require('mongoose').Schema;
 
 module.exports = {
-    id : String,
+    id: String,
     privilege: Number,
-    firstName : String,
-    lastName : String,
-    photo : String,
-    defaults : [{
-            key : String,
-            val: Schema.Types.Mixed
+    firstName: String,
+    lastName: String,
+    photo: String,
+    meta: [
+        {
+            name: String,
+            value: Schema.Types.Mixed
+        }
+    ],
+    defaults: [{
+        key: String,
+        val: Schema.Types.Mixed
     }]
 };

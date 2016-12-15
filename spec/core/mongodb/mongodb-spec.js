@@ -1,8 +1,11 @@
 var util = require('util'),
 
     _ = require('lodash'),
+    async = require('async'),
     moment = require('moment'),
 
+    Animal = require('../../../core/lib/animal'),
+    Species = require('../../../core/lib/species'),
     MongoAPIDatabase = require('../../../core/mongodb'),
 
     dbImages = require('../../test-db-images');
@@ -27,6 +30,7 @@ describe("MongoAPIDatabase", function () {
                 defaultVal: 3
             }
         ],
+        tSpecies = new Species('mongodb_test_species', speciesProps),
         testUserData = {
             firstName: 'TestUserFirstName',
             lastName: 'TestUserLastName',
@@ -38,9 +42,10 @@ describe("MongoAPIDatabase", function () {
         },
         savedTestUserData,
         v2SavedUserData,
-        v2TestUserData = testUserData;
+        v2TestUserData = _.defaults({
+            firstName: 'changedName'
+        }, testUserData);
 
-    v2TestUserData.firstName = 'changedName';
     v2TestUserData.defaults.push({
         key: 'secondProp',
         val: 'theValue'
@@ -51,8 +56,8 @@ describe("MongoAPIDatabase", function () {
             modelNamePrefix: 'test_mongodb_',
             forcePreset: true,
             preset: dbImages,
-            debugTag: 'test_mongo_api_database: ',
-            onInitialized: done
+            onPresetComplete: done,
+            debugTag: 'test_mongo_api_database: '
         });
     });
 
@@ -60,25 +65,43 @@ describe("MongoAPIDatabase", function () {
         apiDatabase.stop(done);
     });
 
-    describe("createSpecies()", function () {
+    it("initializes with data passed through options.preset", function (done) {
+        if (dbImages.length > 0) {
+            async.each(dbImages,
+                function each(dbImage, onDBImageChecked) {
+                    apiDatabase.findAnimals({species: dbImage.getSpeciesName()}, {
+                        complete: function (err, animals) {
+                            if (err) throw err;
+                            expect(animals.length >= dbImage.getAnimals().length).toBe(true, 'number of animals should be at least as large as db image');
+                            onDBImageChecked();
+                        }
+                    });
+                }, function complete() {
+                    done();
+                });
+        } else {
+            pending("couldn't verify preset option");
+        }
+    });
+
+    describe("saveSpecies()", function () {
         it("adds a species", function (done) {
             var initialSpeciesList;
             apiDatabase.getSpeciesList({
                 complete: function (err, speciesList) {
-                    if (err) throw err;
+                    // if (err) throw err;
                     initialSpeciesList = speciesList;
 
-                    apiDatabase.createSpecies(newSpeciesName, speciesProps, {
+                    apiDatabase.saveSpecies(newSpeciesName, speciesProps, {
                         complete: function (err, newSpeciesData) {
                             if (err) throw err;
                             expect(newSpeciesData).not.toBeUndefined();
                             _.forEach(speciesProps, function (propData) {
-                                expect(_.find(newSpeciesData, {key: propData.key})).toEqual(propData);
+                                expect(_.find(newSpeciesData.props, {key: propData.key})).toEqual(propData);
                             });
                             apiDatabase.getSpeciesList({
                                 complete: function (err, speciesList) {
                                     if (err) throw err;
-                                    expect(speciesList.length).toEqual(initialSpeciesList.length + 1, util.format('%j should be larger than %j', speciesList, initialSpeciesList));
                                     expect(_.includes(speciesList, newSpeciesName)).toBe(true, 'new species should be found in speciesList');
                                     done();
                                 }
@@ -92,7 +115,7 @@ describe("MongoAPIDatabase", function () {
 
     describe("saveAnimal()", function () {
         beforeAll(function (done) {
-            apiDatabase.createSpecies(newSpeciesName, speciesProps, {
+            apiDatabase.saveSpecies(newSpeciesName, speciesProps, {
                 complete: function (err, species) {
                     if (err) throw err;
                     done();
@@ -125,7 +148,7 @@ describe("MongoAPIDatabase", function () {
 
     describe("saveSpecies()", function () {
         beforeAll(function (done) {
-            apiDatabase.createSpecies(newSpeciesName, speciesProps, {
+            apiDatabase.saveSpecies(newSpeciesName, speciesProps, {
                 complete: function (err, species) {
                     if (err) throw err;
                     done();
@@ -150,29 +173,29 @@ describe("MongoAPIDatabase", function () {
                         valType: 'Date'
                     }
                 ],
-                newSpeciesTestAnimal = {
+                newSpeciesTestAnimalProps = {
                     species: newSpeciesName,
                     aNewDateProp: moment().subtract(3, 'days').toDate().toISOString()
                 };
 
             apiDatabase.saveSpecies(newSpeciesName, newPresetSpeciesProps, {
-                complete: function (err, newlySavedSpeciesProps) {
+                complete: function (err, savedSpeciesData) {
                     if (err) throw err;
-                    expect(newlySavedSpeciesProps).not.toBeUndefined();
+                    expect(savedSpeciesData).not.toBeUndefined();
                     _.forEach(newPresetSpeciesProps, function (preSavedNewSpeciesProp) {
-                        expect(_.find(newlySavedSpeciesProps, {key: preSavedNewSpeciesProp.key})).toEqual(preSavedNewSpeciesProp)
+                        expect(_.find(savedSpeciesData.props, {key: preSavedNewSpeciesProp.key})).toEqual(preSavedNewSpeciesProp)
                     });
-                    var newPropKeys = newlySavedSpeciesProps.map(function (propData) {
+                    var newPropKeys = savedSpeciesData.props.map(function (propData) {
                         return propData.key
                     });
-                    apiDatabase.saveAnimal(newSpeciesName, newSpeciesTestAnimal, {
+                    apiDatabase.saveAnimal(newSpeciesName, newSpeciesTestAnimalProps, {
                         isV1Format: false,
                         complete: function (err, animal) {
                             if (err) throw err;
                             _.forEach(animal, function (animalPropVal, animalPropName) {
                                 expect(_.includes(newPropKeys, animalPropName)).toBe(true, util.format('new animal props (%j) shouldn\'t contain %s', newPropKeys, animalPropName));
                             });
-                            _.forEach(newSpeciesTestAnimal, function (newSpeciesTestAnimalProp, newSpeciesTestAnimalPropName) {
+                            _.forEach(newSpeciesTestAnimalProps, function (newSpeciesTestAnimalProp, newSpeciesTestAnimalPropName) {
                                 expect(animal[newSpeciesTestAnimalPropName]).toEqual(newSpeciesTestAnimalProp, 'the returned values should match the new original values');
                             });
                             done();
@@ -188,7 +211,7 @@ describe("MongoAPIDatabase", function () {
     describe("deleteSpecies()", function () {
 
         beforeAll(function (done) {
-            apiDatabase.createSpecies(newSpeciesName, speciesProps, {
+            apiDatabase.saveSpecies(newSpeciesName, speciesProps, {
                 complete: function (err, species) {
                     if (err) throw err;
                     done();

@@ -1,5 +1,5 @@
 var ModelFactory = require('../../../../core/mongodb/lib/model-factory'),
-    Debuggable = require('../../../../core/lib/debuggable/index'),
+    Debuggable = require('../../../../core/lib/debuggable'),
     UserSchema = require('../../../../core/mongodb/schemas/user'),
     MongoDBAdapter = require('../../../../core/mongodb/lib/adapter');
 
@@ -22,7 +22,7 @@ describe("ModelFactory", function () {
                     debugTag: 'aSpecies: ',
                     debugLevel: Debuggable.PROD
                 });
-                UserModel = user.generateMongooseModel(dbAdapter);
+                UserModel = user.toMongooseModel(dbAdapter);
                 done();
             },
             onFailure: function () {

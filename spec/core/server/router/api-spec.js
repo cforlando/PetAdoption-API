@@ -4,6 +4,7 @@ var url = require('url'),
     fs = require('fs'),
 
     request = require('supertest'),
+    async = require('async'),
     _ = require('lodash'),
 
     Debuggable = require('../../../../core/lib/debuggable'),
@@ -25,19 +26,23 @@ describe("Router", function () {
 
     beforeAll(function (done) {
         apiDatabase = new APIDatabase({
-            forcePreset: true,
-            preset: speciesDBImages,
             debugLevel: Debuggable.PROD,
-            modelNamePrefix: 'test_api_',
-            onInitialized: function () {
+            modelNamePrefix: 'test_api_'
+        });
+
+        apiDatabase.clearAnimals(function () {
+            apiDatabase.uploadDBImages(speciesDBImages, function () {
                 server = new Server(apiDatabase, {debugLevel: Debuggable.PROD});
                 done();
-            }
+            })
         });
     });
 
     afterAll(function (done) {
-        apiDatabase.stop(done);
+        apiDatabase.clearAnimals(function (err) {
+            if (err) throw err;
+            apiDatabase.stop(done);
+        });
     });
 
     describe("test data", function () {
@@ -104,15 +109,12 @@ describe("Router", function () {
 
             beforeAll(function (done) {
 
-                var dbFormatter = new APIDatabaseFormatter({
-                    createMissingFields: true,
-                    populateEmptyFields: true
-                });
+                var dbFormatter = new APIDatabaseFormatter();
 
-                dbFormatter.formatDB(apiDatabase, speciesProps, {
-                    complete: function () {
-                        done();
-                    }
+                dbFormatter.formatDB(apiDatabase, {
+                    createMissingFields: true,
+                    populateEmptyFields: true,
+                    complete: done
                 })
             });
 
@@ -631,9 +633,9 @@ function buildAnimalTest(queryProps, speciesProps) {
                     if (actualDate.toISOString() === testDate.toISOString()) return;
                 } else if (speciesPropData.valType == 'Boolean') {
                     var expectedBoolValue = expectedValue;
-                    if (expectedBoolValue.match(/y|yes/i)){
+                    if (expectedBoolValue.match(/y|yes/i)) {
                         expectedBoolValue = true;
-                    } else if(expectedBoolValue.match(/\w+/i)){
+                    } else if (expectedBoolValue.match(/\w+/i)) {
                         // default to false
                         expectedBoolValue = false;
                     }

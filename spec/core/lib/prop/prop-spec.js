@@ -1,6 +1,6 @@
 var _ = require('lodash'),
 
-    Prop = require('../../../../core/lib/prop'),
+    Prop = require('../../../../core/lib/query-prop'),
     Debuggable = require('../../../../core/lib/debuggable');
 
 describe("Prop", function () {

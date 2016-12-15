@@ -7,6 +7,8 @@ var util = require('util'),
     _ = require('lodash'),
 
     Debuggable = require('../../lib/debuggable'),
+    Species = require('../../lib/species'),
+    Animal = require('../../lib/animal'),
     config = require('../../config');
 
 /**
@@ -30,6 +32,7 @@ function DataFormatter(options) {
     this.setDebugTag(_options.debugTag);
 
     this._config = _options;
+    this.speciesCache = {};
 }
 
 DataFormatter.prototype = {
@@ -76,41 +79,67 @@ DataFormatter.prototype = {
     /**
      *
      * @param {MongoAPIDatabase} database
-     * @param {Object[]} speciesProps
-     * @param options
+     * @param {Object} [options]
      * @param {Boolean} [options.createMissingFields=false]
      * @param {Boolean} [options.populateEmptyFields=false]
-     * @param {String} [options.species='cat']
-     * @param {Function} options.complete
+     * @param {Function} [options.complete]
      */
-    formatDB: function (database, speciesProps, options) {
+    formatDB: function (database, options) {
         var self = this,
-            _options = _.defaults(options, {
-                // use example because of how data was unfortunately formatted initially
-                species: _.find(speciesProps, {key: 'species'}).example.toLowerCase()
-            }, this._config),
-            queryData = {species: _options.species};
+            _options = _.defaults(options, this._config);
 
-        database.findAnimals(queryData, {
-            debugLevel: _options.debugLevel,
-            complete: function (err, animals) {
-                async.each(animals, function each(animal, done) {
-                    if (animal) {
-                        var formattedAnimalProps = self.formatAnimal(speciesProps, animal, {
-                            createMissingFields: _options.createMissingFields,
-                            populateEmptyFields: _options.populateEmptyFields
-                        });
-                        self._saveAnimal(database, formattedAnimalProps, {
-                            complete: function (err) {
-                                done(err);
+        database.getSpeciesList({
+            complete: function (err, speciesList) {
+                // get list of species
+
+                async.eachSeries(speciesList,
+                    function each(speciesName, onSpeciesFetched) {
+
+                        // save each species data to speciesCache
+                        database.findSpecies(speciesName, {
+                            complete: function (err, speciesData) {
+                                if (err) return onSpeciesFetched(err);
+                                self.speciesCache[speciesName] = new Species(speciesName, speciesData.props);
+                                onSpeciesFetched()
+                            }
+                        })
+                    },
+                    function complete() {
+
+                        // find all animals
+                        database.findAnimals({}, {
+                            debugLevel: _options.debugLevel,
+                            complete: function (err, animals) {
+
+                                // format each animal
+                                async.eachOf(animals,
+                                    function each(animal, index, onAnimalFormatted) {
+                                        var species = self.speciesCache[animal.species.val];
+                                        if (species) {
+                                            // format if species found in cache
+                                            var formattedAnimalProps = self.formatAnimal(species.getSpeciesProps(), animal, {
+                                                createMissingFields: _options.createMissingFields,
+                                                populateEmptyFields: _options.populateEmptyFields
+                                            });
+
+                                            // save formatted animal
+                                            self._saveAnimal(database, formattedAnimalProps, {
+                                                complete: function (err) {
+                                                    onAnimalFormatted(err);
+                                                }
+                                            });
+                                        } else {
+                                            // skip if no species data found
+                                            onAnimalFormatted();
+                                        }
+
+                                    },
+                                    function complete() {
+                                        if (_options.complete) _options.complete.apply(_options.context);
+                                    });
                             }
                         });
-                    } else {
-                        done();
-                    }
-                }, function complete() {
-                    if (_options.complete) _options.complete.apply(_options.context);
-                });
+                    })
             }
         });
     },
@@ -133,6 +162,11 @@ DataFormatter.prototype = {
         this.log(Debuggable.LOW, 'formatting a %s', species);
         _.forEach(speciesProps, function (propData) {
             switch (propData.key) {
+                case 'petId':
+                    animalProps[propData.key] = _.defaults({
+                        val: animalProps[propData.key] ? animalProps[propData.key].val : null
+                    }, propData);
+                    break;
                 case 'images':
                     var images = (animalProps[propData.key] && _.isArray(animalProps[propData.key].val)) ? animalProps[propData.key].val : (propData.defaultVal || propData.example);
                     propData.val = self.formatImagesArray(images, {species: species});
@@ -149,6 +183,7 @@ DataFormatter.prototype = {
                         // assign values for only currently assigned fields
                         animalProps[propData.key] = _.defaults(animalProps[propData.key], propData);
                     }
+
                     if (_options.populateEmptyFields && animalProps[propData.key] && _.isUndefined(animalProps[propData.key].val)) {
                         // chose a random value for a field
                         animalProps[propData.key].val = self._pickRandomOption(propData.options) || animalProps[propData.key].val || propData.example || propData.defaultVal;

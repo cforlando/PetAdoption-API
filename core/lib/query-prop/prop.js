@@ -7,7 +7,7 @@ var _ = require('lodash'),
  *
  * @extends Debuggable
  * @class Prop
- * @param {Object} queryModel
+ * @param {Object} queryPropModel
  * @param {Object} data
  * @param {String} data.key
  * @param {*} data.val
@@ -17,7 +17,7 @@ var _ = require('lodash'),
  * @returns {Prop}
  * @constructor
  */
-function Prop(queryModel, data, options) {
+function Prop(queryPropModel, data, options) {
     var _options = _.defaults(options, {
         debugTag: 'Prop: ',
         debugLevel: Debuggable.PROD,
@@ -27,7 +27,7 @@ function Prop(queryModel, data, options) {
     this.setDebugTag(_options.debugTag);
     this.setDebugLevel(_options.debugLevel);
 
-    this.setQueryModel(queryModel);
+    this.setQueryModel(queryPropModel);
     this.setData(data);
 
     /**

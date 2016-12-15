@@ -9,7 +9,7 @@ var DefaultProp = require('./prop'),
 
 /**
  * @class QueryProp
- * @param {Object} queryModel
+ * @param {Object} queryPropModel
  * @param {Object} propData
  * @param {String} propData.key
  * @param {*} propData.val
@@ -19,29 +19,29 @@ var DefaultProp = require('./prop'),
  * @returns {DateProp|PetIDProp|FloatProp|StringArrayProp|BooleanProp|Prop}
  * @constructor
  */
-function QueryProp(queryModel, propData, options) {
+function QueryProp(queryPropModel, propData, options) {
 
     switch (propData.key) {
         case 'petId':
-            return new IDProp(queryModel, propData, options);
+            return new IDProp(queryPropModel, propData, options);
         default:
             // proceed;
     }
 
     switch (propData.valType) {
         case 'Boolean':
-            return new BooleanProp(queryModel, propData, options);
+            return new BooleanProp(queryPropModel, propData, options);
         case '[Image]':
         case '[String]':
-            return new StringArrayProp(queryModel, propData, options);
+            return new StringArrayProp(queryPropModel, propData, options);
         case 'Location':
         case 'Float':
         case 'Number':
-            return new FloatProp(queryModel, propData, options);
+            return new FloatProp(queryPropModel, propData, options);
         case 'Date':
-            return new DateProp(queryModel, propData, options);
+            return new DateProp(queryPropModel, propData, options);
         default:
-            return new DefaultProp(queryModel, propData, options);
+            return new DefaultProp(queryPropModel, propData, options);
     }
 }
 

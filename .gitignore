@@ -2,6 +2,7 @@
 aws*.json
 .gitignore
 /data
+!/data/dataset.json
 !/data/dataset.dog.json
 !/data/props.dog.json
 !/data/props.cat.json

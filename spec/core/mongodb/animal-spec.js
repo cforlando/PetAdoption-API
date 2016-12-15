@@ -4,21 +4,24 @@ var fs = require('fs'),
     _ = require('lodash'),
     moment = require('moment'),
 
-    Debuggable = require('../../../../../core/lib/debuggable'),
-    AnimalDB = require('../../../../../core/mongodb/lib/database/animal');
+    Debuggable = require('../../../core/lib/debuggable'),
+    Species = require('../../../core/lib/species'),
+    Animal = require('../../../core/lib/animal'),
+    AnimalDB = require('../../../core/mongodb/animal');
 
 describe("AnimalDatabase", function () {
-    var testData = require('../../../../test-db-images'),
-        testAnimalProps = testData[0].getSpeciesProps(),
+    var testData = require('../../test-db-images'),
+        tSpeciesProps = testData[0].getSpeciesProps(),
         animalDB,
+        tSpecies = new Species('animal_db_test_species', tSpeciesProps),
         tAnimalProps = {
             petName: 'hello world',
             intakeDate: moment().subtract(5, 'days').toDate()
         },
-        tSavedAnimal;
+        tSavedAnimalProps;
 
     beforeAll(function (done) {
-        animalDB = new AnimalDB('test_animal', testAnimalProps, {
+        animalDB = new AnimalDB({
             debugLevel: Debuggable.PROD
         });
         animalDB.exec(done)
@@ -34,26 +37,30 @@ describe("AnimalDatabase", function () {
     describe("saveAnimal()", function () {
 
         it('saves an animal', function (done) {
+            var tAnimal = new Animal(tSpecies, tAnimalProps);
 
-            animalDB.saveAnimal(tAnimalProps, {
+            animalDB.saveAnimal(tAnimal, {
                 isV1Format: false,
-                complete: function (err, result) {
+                complete: function (err, animalProps) {
                     if (err) throw err;
-                    tSavedAnimal = result;
-                    expect(tSavedAnimal).not.toBeUndefined();
-                    expect(tSavedAnimal.petName).toEqual(tAnimalProps.petName);
+                    tSavedAnimalProps = animalProps;
+                    expect(tSavedAnimalProps).not.toBeUndefined();
+                    var tSavedAnimal = new Animal(tSpecies, tSavedAnimalProps);
+                    expect(tSavedAnimal.getValue('petName')).toEqual(tAnimalProps.petName);
                     done();
                 }
             })
         });
 
         it('assigns a petId to the animal', function (done) {
-            animalDB.saveAnimal(tAnimalProps, {
+            var tAnimal = new Animal(tSpecies, tAnimalProps);
+
+            animalDB.saveAnimal(tAnimal, {
                 isV1Format: false,
-                complete: function (err, result) {
+                complete: function (err, animalProps) {
                     if (err) throw err;
-                    tSavedAnimal = result;
-                    expect(tSavedAnimal.petId).not.toBeUndefined();
+                    tSavedAnimalProps = animalProps;
+                    expect(tSavedAnimalProps.petId).not.toBeUndefined();
                     done();
                 }
             })
@@ -64,8 +71,21 @@ describe("AnimalDatabase", function () {
     describe("findAnimals()", function () {
         var animals;
 
+        beforeAll(function (done) {
+            var tAnimal = new Animal(tSpecies, tAnimalProps);
+            animalDB.saveAnimal(tAnimal, {
+                isV1Format: false,
+                complete: function (err, result) {
+                    if (err) throw err;
+                    done();
+                }
+            })
+        });
+
         it("returns previously saved animals", function (done) {
-            animalDB.findAnimals(tAnimalProps, {
+            var tQueryAnimal = new Animal(tSpecies, tAnimalProps),
+                queryData = tQueryAnimal.toQuery();
+            animalDB.findAnimals(queryData, {
                 isV1Format: false,
                 complete: function (err, result) {
                     if (err) throw err;
@@ -99,14 +119,14 @@ describe("AnimalDatabase", function () {
             complete: function (err, animals) {
                 if (err) throw err;
                 expect(animals.length > 0).toBe(true, 'an animal should be returned from previous tests');
-                var aAnimal = animals[0];
-                aAnimal.sex = 'female';
+                var aAnimal = new Animal(tSpecies, animals[0]);
+                aAnimal.setValue('sex', 'female');
 
                 animalDB.saveAnimal(aAnimal, {
                     isV1Format: false,
                     complete: function (err, savedAnimal) {
                         if (err) throw err;
-                        expect(savedAnimal.sex).toEqual('female');
+                        expect(savedAnimal.sex).toMatch('female');
                         done();
                     }
                 })
@@ -119,18 +139,19 @@ describe("AnimalDatabase", function () {
         describe("tests", function () {
 
             it("are initialized correctly", function () {
-                expect(tSavedAnimal).not.toBeUndefined('animal was not returned after save');
-                expect(tSavedAnimal.petId).not.toBeUndefined('petId was not set after save');
+                expect(tSavedAnimalProps).not.toBeUndefined('animal was not returned after save');
+                expect(tSavedAnimalProps.petId).not.toBeUndefined('petId was not set after save');
             })
 
         });
 
         it('removes an animal', function (done) {
+            var tAnimal = new Animal(tSpecies, tSavedAnimalProps);
 
-            animalDB.removeAnimal(tSavedAnimal, {
+            animalDB.removeAnimal(tAnimal, {
                 complete: function (err, removeData) {
                     if (err) throw err;
-                    expect(removeData.result).toEqual('success');
+                    expect(removeData.result).toMatch('success');
                     done();
                 }
             })

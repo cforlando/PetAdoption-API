@@ -46,12 +46,12 @@ describe("Species", function () {
         expect(dTestSpecies.getProp(aTestProp2Name)).toEqual(testProps[0]);
     });
 
-    describe("getName()", function(){
+    describe("getSpeciesName()", function(){
         var speciesName = 'cat',
             someSpecies = new Species(speciesName);
 
         it("returns the species name", function(){
-            expect(someSpecies.getName()).toEqual(speciesName);
+            expect(someSpecies.getSpeciesName()).toEqual(speciesName);
         });
     });
 

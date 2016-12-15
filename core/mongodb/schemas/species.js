@@ -1,5 +1,8 @@
+var mongoose = require("mongoose"),
+    SpeciesProp = new mongoose.Schema(require('./species-prop'));
+
 module.exports = {
     name: String,
-    json: String,
-    timestamp : Date
+    timestamp : Date,
+    props: [SpeciesProp]
 };
