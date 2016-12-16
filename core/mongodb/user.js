@@ -1,6 +1,7 @@
 var _ = require('lodash'),
 
     Database = require('./default'),
+    config = require('../config'),
 
     ModelFactory = require('./lib/model-factory'),
     UserSchema = require('./schemas/user');
@@ -13,11 +14,11 @@ var _ = require('lodash'),
  */
 function UserDatabase(options) {
     var _options = _.defaults(options, {
-        modelNamePrefix: 'species_collection'
+        modelNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_'
     });
 
 
-    Database.call(this, new ModelFactory('users', UserSchema, {
+    Database.call(this, new ModelFactory(_options.modelNamePrefix + 'users', UserSchema, {
         debugLevel: this.getDebugLevel(),
         modelNamePrefix: _options.modelNamePrefix
     }));

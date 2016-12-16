@@ -113,11 +113,11 @@ DataFormatter.prototype = {
 
                                 // format each animal
                                 async.eachOf(animals,
-                                    function each(animal, index, onAnimalFormatted) {
-                                        var species = self.speciesCache[animal.species.val];
+                                    function each(animalProps, index, onAnimalFormatted) {
+                                        var species = self.speciesCache[animalProps.species.val];
                                         if (species) {
                                             // format if species found in cache
-                                            var formattedAnimalProps = self.formatAnimal(species.getSpeciesProps(), animal, {
+                                            var formattedAnimalProps = self.formatAnimal(species.getSpeciesProps(), animalProps, {
                                                 createMissingFields: _options.createMissingFields,
                                                 populateEmptyFields: _options.populateEmptyFields
                                             });

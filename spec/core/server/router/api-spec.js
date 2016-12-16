@@ -27,6 +27,7 @@ describe("Router", function () {
     beforeAll(function (done) {
         apiDatabase = new APIDatabase({
             debugLevel: Debuggable.PROD,
+            preset: [],
             modelNamePrefix: 'test_api_'
         });
 

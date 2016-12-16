@@ -44,10 +44,10 @@ function AnimalDatabase(options) {
 
     this._model.addMiddleware('post', 'save', function (doc, next) {
         // TODO this never gets called
-        if (!doc.petId) {
-            doc.petId = doc._id.toString();
+        if (!this.petId) {
+            this.petId = this._id.toString();
             self.log(Debuggable.LOW, 'post.save - updating petId');
-            this.save(doc, function (err) {
+            this.save(function (err) {
                 next(err);
             });
         } else {
@@ -87,16 +87,16 @@ function AnimalDatabase(options) {
                 });
         } else {
             model.create(saveData, function (err, newAnimal) {
-                self.log(Debuggable.LOW, 'created new animal: %s', newAnimal._id);
-                var newAnimalData = newAnimal.toObject();
-
                 if (!err && !newAnimal) err = new Error("Animal could not be created");
+
 
                 if (onComplete) {
                     if (err) {
                         onComplete(err)
                     } else {
-                        onComplete(null, newAnimalData)
+                        var newAnimalData = newAnimal.toObject();
+                        self.log(Debuggable.LOW, 'created new animal: %s', newAnimal._id);
+                        onComplete(null, newAnimalData);
                     }
                 }
             })

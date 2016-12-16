@@ -54,10 +54,14 @@ describe("MongoAPIDatabase", function () {
     beforeAll(function (done) {
         apiDatabase = new MongoAPIDatabase({
             modelNamePrefix: 'test_mongodb_',
-            forcePreset: true,
-            preset: dbImages,
-            onPresetComplete: done,
+            preset: [],
             debugTag: 'test_mongo_api_database: '
+        });
+
+        apiDatabase.clearAnimals(function () {
+            apiDatabase.uploadDBImages(dbImages, function () {
+                done();
+            })
         });
     });
 

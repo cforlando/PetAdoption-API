@@ -50,9 +50,9 @@ module.exports = {
      *
      * @param options
      * @param {Function} options.done
-     * @param {Object} options.context
-     * @param {Object} options.readPath
-     * @param {Object} options.writePath
+     * @param {Object} [options.context]
+     * @param {Object} [options.readPath]
+     * @param {Object} [options.writePath]
      */
     parse: function (options) {
         var _options = _.defaults(options, defaults);

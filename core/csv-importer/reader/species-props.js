@@ -85,26 +85,26 @@ function parseModelCSV(csvModelData) {
 
 /**
  *
- * @param {Object} data
+ * @param {Object} speciesDataCollection
  * @param {Object} optionsData
  * @param {Function} callback
  */
-function _mergeOptionsAndModel(data, optionsData, callback) {
-    var _modelsData = {};
-    _.forEach(data, function (speciesProps, speciesName, models) {
-        var mergedSpeciesProps = [];
-        _.forEach(speciesProps, function (speciesPropData, index, props) {
-            mergedSpeciesProps.push(
-                _.defaults({
-                    options: _.sortBy( optionsData[speciesName][speciesPropData.key] || [], function (option) {
-                        return option;
-                    })
-                }, speciesPropData)
-            );
+function _mergeOptionsAndModel(speciesDataCollection, optionsData, callback) {
+
+    _.forEach(speciesDataCollection, function (speciesProps, speciesName) {
+
+        _.forEach(speciesProps, function (speciesPropData) {
+            if (optionsData[speciesName][speciesPropData.key]) {
+                speciesPropData.options = optionsData[speciesName][speciesPropData.key];
+            } else if (optionsData[speciesName]['breed'] && speciesPropData.key.match(/breed/ig)) {
+                speciesPropData.options = optionsData[speciesName]['breed'].sort();
+            } else {
+                speciesPropData.options = [];
+            }
         });
-        _modelsData[speciesName] = mergedSpeciesProps;
     });
-    callback.call(null, _modelsData);
+
+    callback.call(null, speciesDataCollection);
 }
 
 module.exports = {
@@ -146,11 +146,11 @@ module.exports = {
                     done: function (optionsData) {
                         _mergeOptionsAndModel(data, optionsData, function onMergeComplete(mergedModelsData) {
                             if (_options.cache === true) {
-                                async.eachOf(mergedModelsData, function(speciesData, speciesName, done){
+                                async.eachOf(mergedModelsData, function (speciesData, speciesName, done) {
                                     fs.writeFile(path.join(_options.writeDir, util.format('%s.%s.json', _options.cacheName, speciesName)), JSON.stringify(speciesData), function (err) {
                                         done(err)
                                     })
-                                }, function(err){
+                                }, function (err) {
                                     if (err) throw err;
                                     _options.done.apply(_options.context, [mergedModelsData, _options]);
                                 });

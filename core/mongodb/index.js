@@ -24,7 +24,6 @@ var util = require('util'),
  * @param {Object} [options]
  * @param {Function} [options.onInitialized]
  * @param {String} [options.modelNamePrefix]
- * @param {Boolean} [options.forcePreset]
  * @param {SpeciesDBImage[]} [options.preset]
  * @param {Function} [options.onPresetComplete]
  * @returns {MongoAPIDatabase}
@@ -36,7 +35,26 @@ function MongoAPIDatabase(options) {
             debugLevel: Debuggable.PROD,
             debugTag: 'MongoAPIDatabase: ',
             modelNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_ ',
-            preset: []
+            preset: (function () {
+
+                var catProps = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'data/props.cat.json')), 'utf8'),
+                    dogProps = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'data/props.dog.json')), 'utf8'),
+
+                    // TODO Need better test data
+                    data = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'data/dataset.json')), 'utf8'),
+
+                    cats = _.chain(data)
+                        .filter({species: 'cat'})
+                        .value(),
+                    dogs = _.chain(data)
+                        .filter({species: 'dog'})
+                        .value();
+
+                return [
+                    new SpeciesDBImage('cat', cats, catProps),
+                    new SpeciesDBImage('dog', dogs, dogProps)
+                ];
+            })()
         });
 
     this.setDebugLevel(_options.debugLevel);
@@ -44,9 +62,9 @@ function MongoAPIDatabase(options) {
 
     this.log(Debuggable.LOW, 'Running in %s mode.', (config.DEVELOPMENT_ENV) ? 'dev' : 'prod');
 
-    this.UserDB = new UserDatabase();
-    this.SpeciesCollectionDB = new SpeciesCollectionDatabase();
-    this.AnimalDB = new AnimalDatabase();
+    this.UserDB = new UserDatabase({modelNamePrefix: _options.modelNamePrefix});
+    this.SpeciesCollectionDB = new SpeciesCollectionDatabase({modelNamePrefix: _options.modelNamePrefix});
+    this.AnimalDB = new AnimalDatabase({modelNamePrefix: _options.modelNamePrefix});
     this.speciesCache = {};
 
     if (_options.preset && _options.preset.length > 0) this.uploadDBImages(_options.preset, _options.onPresetComplete);
@@ -73,15 +91,20 @@ MongoAPIDatabase.prototype = {
         var self = this;
         async.eachSeries(speciesDBImages,
             function each(dbImage, done) {
+
                 self.saveSpecies(dbImage.getSpeciesName(), dbImage.getSpeciesProps(), {
                     complete: function () {
                         async.eachSeries(dbImage.getAnimals(),
                             function each(animalData, onAnimalSaved) {
                                 self.saveAnimal(dbImage.getSpeciesName(), animalData, {
-                                    complete: onAnimalSaved
+                                    complete: function (err) {
+                                        onAnimalSaved(err)
+                                    }
                                 })
                             },
-                            done
+                            function (err) {
+                                done(err);
+                            }
                         );
                     }
                 })
@@ -96,12 +119,10 @@ MongoAPIDatabase.prototype = {
      * @param [options.complete]
      */
     getSpeciesList: function (options) {
-        var self = this,
-            _options = _.defaults(options, {});
+        var _options = _.defaults(options, {});
 
         this.SpeciesCollectionDB.findLatest({
             complete: function (err, latestSpeciesCollection) {
-                if (err) throw err;
                 var speciesList = [];
                 if (latestSpeciesCollection) {
                     speciesList = latestSpeciesCollection.speciesList.map(function (speciesDoc) {
