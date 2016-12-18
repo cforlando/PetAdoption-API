@@ -31,6 +31,8 @@ module.exports = {
             'ng-services': 'modules/services',
             'ng-router': 'modules/router',
 
+            'jquery-ui': 'modules/vendors/jquery-ui',
+            'touch-punch': 'modules/vendors/jquery.ui.touch-punch',
             'ng-animate': 'angular-animate',
             'ng-aria': 'angular-aria',
             'ng-material': 'angular-material',
@@ -41,10 +43,6 @@ module.exports = {
             'underscore': 'lodash'
         }
     },
-    shim: {
-        "live": [],
-        "jquery-slick": ["jquery"]
-    },
     plugins: [
         // new webpack.optimize.UglifyJsPlugin({
         //     compress : {
@@ -54,7 +52,9 @@ module.exports = {
         // }),
 
         new webpack.ProvidePlugin({
-              "window.jQuery": "jquery"
+            $: "jquery",
+            jQuery: "jquery",
+            "window.jQuery": "jquery"
         }),
         // Hack for requirejs's domReady plugin
         new ModuleReplace(/^(domReady\!)$/, 'modules/null-module'),

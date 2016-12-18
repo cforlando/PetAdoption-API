@@ -158,20 +158,33 @@ define([
             return formattedModelData;
         };
 
-        this._sortProps = function (props) {
+        this.sortSpeciesProps = function (props, userPropPriorities) {
+            var propPriorities = _.defaults({
+                petId: 0,
+                images: 1,
+                petName: 2,
+                species: 3
+            }, _.reduce(userPropPriorities, function (collection, propOrderVal, propName) {
+                // +4 to start after species
+                collection[propName] = propOrderVal + 4;
+                return collection;
+            }, {}));
             return _.sortBy(props, function (propData) {
-                if (propData.key == 'petId') return 0;
-                if (propData.key == 'images') return 1;
-                if (propData.key == 'petName') return 2;
-                if (propData.key == 'species') return 3;
-                return (props.length - 1);
+                // default to prop order in not specified
+                return propPriorities[propData.key] ? propPriorities[propData.key] : props.length - 1;
             })
         };
 
-        this.buildRenderData = function (model) {
-
-            var renderData = this.formatModel(model),
-                sortedRenderDataArray = this._sortProps(renderData);
+        /**
+         *
+         * @param model
+         * @param [options]
+         * @param [options.userPropPriorities]
+         */
+        this.buildRenderData = function (model, options) {
+            var _options = _.defaults(options, {}),
+                renderData = this.formatModel(model),
+                sortedRenderDataArray = this.sortSpeciesProps(renderData, _options.userPropPriorities);
 
             console.log('renderData: %o', sortedRenderDataArray);
             return sortedRenderDataArray;

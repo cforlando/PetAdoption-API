@@ -1,10 +1,13 @@
 var angular = require('angular'),
     ngRoute = require('ng-route'),
+    jQueryUI = require('jquery-ui'),
+    jQUeryUITouchPunch = require('touch-punch'),
+    ngDragDrop = require('angular-dragdrop'),
     slickCarousel = require('angular-slick-carousel'),
     ngMessages = require('ng-messages'),
     ngMaterial = require('ng-material');
 
-var ngApp = angular.module('cfo-pet-adoption-data-entry', ['ngMaterial', 'ngMessages', 'ngRoute', 'slickCarousel'])
+var ngApp = angular.module('cfo-pet-adoption-data-entry', ['ngMaterial', 'ngMessages', 'ngRoute', 'slickCarousel', 'ngDragDrop'])
     .config(function ($mdThemingProvider) {
         $mdThemingProvider.theme('default')
             .primaryPalette('cyan', {

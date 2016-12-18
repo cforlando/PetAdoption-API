@@ -1,6 +1,6 @@
 {
   "name": "pet-adoption-server",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "bin": {
     "pet-adoption-api-server": "bin/start-server.js"
   },
@@ -57,6 +57,7 @@
     "jasmine": "^2.4.1",
     "jasmine-spec-reporter": "^2.5.0",
     "jquery": "^3.1.1",
+    "jquery-ui": "^1.12.1",
     "jsdoc": "^3.4.1",
     "memorystream": "^0.3.1",
     "raw-loader": "^0.5.1",

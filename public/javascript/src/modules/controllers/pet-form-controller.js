@@ -80,7 +80,10 @@ define([
                     }
                 });
 
-                var renderData = dataParser.buildRenderData(model || $scope.petData);
+                var renderData = dataParser.buildRenderData(model || $scope.petData, {
+                    userPropPriorities: $scope.getPropPriorities()
+                });
+
                 console.log('rendering: %o', renderData);
                 $scope.properties = renderData;
             };
@@ -357,15 +360,18 @@ define([
 
             $scope.requestSpecies = function (callback, options) {
                 var _options = _.defaults(options, {}),
-                    getActiveSpeciesName = function (){ return ($scope.petData && $scope.petData.species) ? $scope.petData.species.val : null} ,
-                    speciesList = $scope.speciesList;
+                    getActiveSpeciesName = function () {
+                        return ($scope.petData && $scope.petData.species) ? $scope.petData.species.val : null
+                    },
+                    speciesList = $scope.speciesList,
+                    speciesWatchHandler;
 
                 $mdDialog.show({
                     controller: function ($scope, $mdDialog) {
                         $scope.selectSpecies = function (selectedSpecies) {
                             $mdDialog.hide(selectedSpecies);
                         };
-                        speciesWatchHandler = $scope.$watch(getActiveSpeciesName, function(newVal){
+                        speciesWatchHandler = $scope.$watch(getActiveSpeciesName, function (newVal) {
                             if (_.includes(speciesList, newVal)) {
                                 $scope.selectSpecies(newVal);
                             }

@@ -4,7 +4,7 @@ include _auto-generated/_-all
         md-tabs(md-selected="petList.currentSpeciesIndex", md-dynamic-height, md-border-bottom, md-autoselect, md-stretch-tabs='auto')
             md-tab(ng-repeat="species in speciesList", label="{{species}}")
                 md-grid-list(md-row-height="1:1", md-cols-xs= 2, md-cols-sm=3, md-cols-md=4, md-cols-lg=8, md-cols-gt-lg=12)
-                    md-grid-tile(ng-repeat="pet in petList[species]", ng-style="{ 'background': 'url('+pet.images.val[0]+')', 'background-size': 'cover' }")
+                    md-grid-tile(ng-repeat="pet in petList[species]", ng-style="{ 'background': 'url('+pet.images.val[0]+') center', 'background-size': 'cover' }")
                         md-checkbox.checkbox(ng-model!="selectedPetsIndexCollection[species+$index]", ng-change="togglePetSelection(species+$index, pet)", aria-label="selected?")
                         md-grid-tile-footer.tile-footer(ng-click='editPet(pet); sideNav.isOpen=false')
                             h3!="{{pet.petName.val || pet.petId.val || 'n/a'}}"

@@ -17,6 +17,7 @@ define([
         function ($scope, $routeParams, $location, $mdDialog, $controller) {
             angular.extend(this, $controller('formController', {$scope: $scope}));
             $scope.propName = $routeParams.propName;
+            $scope.propOrderValue = $scope.getPropPriority($scope.propName);
 
             $scope.setField = function (key, propData) {
                 // in this instance, set the default value
@@ -35,7 +36,7 @@ define([
                     $scope.propData = angular.copy($speciesProp);
                 } else {
                     // $scope.showError("Property not valid");
-                    $location.path('/species/'+$scope.speciesName);
+                    $location.path('/species/' + $scope.speciesName);
                     console.error('invalid propName')
                 }
             };
@@ -49,19 +50,22 @@ define([
                 return angular.element('.section--edit-propData .input .md-input-invalid').length == 0;
             };
 
-            $scope.hasEditableOptions = function(propData){
+            $scope.hasEditableOptions = function (propData) {
                 if (!propData)  return false
-                switch ($scope.getPropType(propData)){
+                switch ($scope.getPropType(propData)) {
                     case 'string':
                     case 'number':
                         return true;
                     default:
                         return false;
                 }
-            }
+            };
 
             $scope.saveProp = function (propData) {
                 if ($scope.isFormValid()) {
+                    if ($scope.propOrderValue) {
+                        $scope.setPropPriority(propData.key, $scope.propOrderValue);
+                    }
                     if (propData.val) {
                         propData.defaultVal = angular.copy(propData.val);
                     }
@@ -81,15 +85,23 @@ define([
                     delete propData.val;
                     $scope.setSpeciesProp($scope.speciesName, propData);
 
-                    $scope.saveSpecies($scope.speciesName, $scope.models[$scope.speciesName], {
-                        done: function (err) {
+                    $scope.saveUser({
+                        done: function (err, userData) {
                             if (err) {
-                                $scope.showError("Failed to save property");
-                            } else {
-                                $scope.showError("Saved '" + propData.key + "'");
+                                console.error(err);
+                                $scope.showError('Could not save prop priority');
                             }
+                            $scope.saveSpecies($scope.speciesName, $scope.models[$scope.speciesName], {
+                                done: function (err) {
+                                    if (err) {
+                                        $scope.showError("Failed to save property");
+                                    } else {
+                                        $scope.showError("Saved '" + propData.key + "'");
+                                    }
+                                }
+                            })
                         }
-                    })
+                    });
                 } else {
                     $scope.showError("Form is invalid. Please fix.");
                 }
@@ -107,20 +119,20 @@ define([
                         $scope.propData.defaultVal = moment.utc($scope.propData.defaultVal).toDate();
                         break;
                     case 'Number':
-                        if (!_.isNumber($scope.propData.defaultVal)){
+                        if (!_.isNumber($scope.propData.defaultVal)) {
                             $scope.propData.defaultVal = 0;
-                        };
+                        }
                         break;
                     case 'Boolean':
-                        if (!_.isBoolean($scope.propData.defaultVal)){
+                        if (!_.isBoolean($scope.propData.defaultVal)) {
                             $scope.propData.defaultVal = true;
-                        };
+                        }
                         break;
                     case 'String':
                     default:
-                        if (!_.isString($scope.propData.defaultVal)){
+                        if (!_.isString($scope.propData.defaultVal)) {
                             $scope.propData.defaultVal = '';
-                        };
+                        }
                 }
             };
 

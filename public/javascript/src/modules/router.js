@@ -1,18 +1,11 @@
-define([
-    'require',
-    'ng-controllers',
-    'text!modules/views/search-animals.html',
-    'text!modules/views/edit-animal.html',
-    'text!modules/views/search-species.html',
-    'text!modules/views/view-species.html',
-    'text!modules/views/edit-species-prop.html',
-    'ngApp'
-], function (require) {
-    var ngApp = require('ngApp');
+var ngApp = require('ngApp');
 
+ngApp.config([
+    "$routeProvider", "$locationProvider",
+    function ($routeProvider, $locationProvider) {
+        $locationProvider.html5Mode(false);
 
-    var router = ngApp.config(["$routeProvider", function ($routeProvider) {
-        return $routeProvider
+        $routeProvider
             .when("/animals", {
                 template: require('text!modules/views/search-animals.html')
             })
@@ -34,10 +27,6 @@ define([
             .otherwise({redirectTo: "/animals"})
     }]);
 
-    console.log('init router.');
+console.log('init router.');
 
-    return {
-        router: router
-    };
-
-});
+module.exports = ngApp;

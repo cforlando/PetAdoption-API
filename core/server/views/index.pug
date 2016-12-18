@@ -10,7 +10,7 @@ html
         link(rel='stylesheet', href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css")
         link(href="//fonts.googleapis.com/icon?family=Material+Icons", rel="stylesheet")
 
-        link(rel='stylesheet', href='/stylesheets/style.css')
+        link(rel='stylesheet', href='/stylesheets/style.min.css')
 
         script(src="//maps.googleapis.com/maps/api/js")
     body(ng-controller='appController')
@@ -18,7 +18,7 @@ html
             md-progress-circular(md-mode="indeterminate")
         .user-view(ng-controller='userController', layout='column', layout-fill, ng-cloak)
             if user
-                div.main-view(layout="column", layout-fill, ng-controller='dataController')
+                div.main-view(layout="column" layout-fill ng-controller='dataController')
                     md-toolbar
                         .md-toolbar-tools
                             md-button(class="md-icon-button" aria-label="Side Nav Toggle" ng-click="toggleSidebar()")
@@ -28,7 +28,7 @@ html
                             img.user-avatar(ng-if="user.id", ng-src="{{user.photo}}", alt="{{user.firstName}}")
                             md-button.md-icon-button(ng-click="toggleActionMenu()")
                                 md-icon.material-icons(md-menu-origin) more_vert
-                    md-content.main-view__content(layout='column', flex)
+                    md-content.main-view__content(layout='column' flex ng-if="user.id")
                         md-sidenav.md-sidenav-left(md-component-id="sidenav", md-is-open="sideNav.isOpen")
                             md-list
                                 md-list-item(ng-click="showAnimalSearch()") Search

@@ -63,6 +63,10 @@ define([
                 if ($scope.loadingQueue.length > 0) $scope.loadingQueue.length--;
             };
 
+            $scope._persistCurrentPath = function(){
+                $location.path($location.path());
+            };
+
             $scope.showAnimalSearch = function () {
                 $location.path('/animals/');
                 $scope.closeSidebar();

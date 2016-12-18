@@ -5,7 +5,16 @@ include _auto-generated/_-all
         md-subheader.md-primary!="{{speciesName}}"
         md-divider
         div(flex)
-            md-card(md-3-line, ng-repeat="speciesProp in models[speciesName]", ng-if="isVisibleProp(speciesProp)")
+            md-card(md-3-line
+            ng-if="isVisibleProp(speciesProp)"
+            ng-repeat="speciesProp in speciesProps"
+
+            data-drop="true"
+            data-drag="true"
+            ng-model="speciesProps"
+            jqyoui-droppable="{index: {{$index}}, onDrop: 'onDragDrop'}"
+            jqyoui-draggable="{index: {{$index}}, animate:true, insertInline: true}"
+            data-jqyoui-options="{revert: 'invalid', handle: 'md-card-title .md-headline'}")
                 md-card-title
                     md-card-title-text
                         span.md-headline!="{{speciesProp.fieldLabel}}"

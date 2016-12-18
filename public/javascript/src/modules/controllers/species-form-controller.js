@@ -16,6 +16,7 @@ define([
             angular.extend(this, $controller('formController', {$scope: $scope}));
             $scope.valTypes = ['String', 'Date', 'Number', 'Boolean'];
             $scope.speciesName = $routeParams.speciesName;
+            $scope.speciesProps = [];
             $scope.actionMenu.actions = [
                 {
                     onClick: function () {
@@ -39,8 +40,25 @@ define([
                 }
             ];
 
+            $scope.onDragDrop = function () {
+                console.log('dragdrog: %o', arguments);
 
-            $scope.registerMediaScope = function($fileInputScope){
+                _.forEach($scope.speciesProps, function (propData, index) {
+                    $scope.setPropPriority(propData.key, index);
+                });
+
+                $scope.saveUser({
+                    done: function (err) {
+                        if (err) {
+                            console.error(err);
+                        } else {
+                            $scope.showMessage('Saved order');
+                        }
+                    }
+                })
+            };
+
+            $scope.registerMediaScope = function ($fileInputScope) {
                 $scope.$fileInputScope = $fileInputScope;
             };
 
@@ -50,12 +68,12 @@ define([
              * @param {HTMLElement} fileInput
              * @param {Object} [options]
              */
-            $scope.saveSpeciesPlaceholder = function(speciesName, fileInput, options){
+            $scope.saveSpeciesPlaceholder = function (speciesName, fileInput, options) {
                 $scope.showLoading();
                 var _options = _.defaults(options, {}),
                     formData = new FormData();
 
-                _.forEach(fileInput.files, function(file){
+                _.forEach(fileInput.files, function (file) {
                     formData.append("uploads", file);
                 });
 
@@ -64,16 +82,16 @@ define([
                         "Content-Type": undefined
                     }
                 }).then(
-                    function success(response){
+                    function success(response) {
                         $scope.hideLoading();
                         $scope.showMessage("Saved placeholder");
-                        if(_options.done) _options.done();
+                        if (_options.done) _options.done();
                     },
-                    function failure(){
+                    function failure() {
                         $scope.hideLoading();
                         var errMessage = "Could not save placeholder";
                         $scope.showError(errMessage);
-                        if(_options.done) _options.done(new Error(errMessage));
+                        if (_options.done) _options.done(new Error(errMessage));
                     }
                 )
             };
@@ -158,7 +176,7 @@ define([
                     console.log("on('file-input:set'): %o", arguments);
                     $scope.$apply(function () {
                         $scope.saveSpeciesPlaceholder($scope.speciesName, $mediaFormScope.get$inputs()[0], {
-                            done: function(err){
+                            done: function (err) {
                                 if (err) console.error(err);
                             }
                         });
@@ -171,6 +189,7 @@ define([
                         if (err) {
                             $scope.showError("Could not load '" + $scope.speciesName + "'")
                         } else {
+                            $scope.speciesProps = $scope.sortSpeciesProps($scope.models[$scope.speciesName]);
                         }
                     }
                 })

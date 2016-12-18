@@ -211,22 +211,20 @@ MongoAPIDatabase.prototype = {
 
                 speciesCollectionDoc = speciesCollectionDoc || {speciesList: []};
 
-                var speciesDoc = _.find(speciesCollectionDoc.speciesList, {name: species.getSpeciesName()}),
+                var prevSpeciesDoc = _.find(speciesCollectionDoc.speciesList, {name: species.getSpeciesName()}),
                     newSpeciesDoc = species.toMongooseDoc();
 
-                if (speciesDoc) {
+                if (prevSpeciesDoc) {
                     // update referenced species doc in collection
-                    // TODO verify this overwrites speciesCollectionDoc
-                    speciesDoc = newSpeciesDoc;
+                    speciesCollectionDoc.speciesList = speciesCollectionDoc.speciesList.map(function (speciesDoc) {
+                        return speciesDoc.name == newSpeciesDoc.name ? newSpeciesDoc : speciesDoc
+                    });
                 } else {
                     // add new species doc
                     speciesCollectionDoc.speciesList.push(newSpeciesDoc);
                 }
 
-                var newSpeciesCollectionDoc = _.chain(speciesCollectionDoc)
-                    .omit(['_id', '__v'])
-                    .set('speciesList', _.uniqBy(speciesCollectionDoc.speciesList, 'name'))
-                    .value();
+                var newSpeciesCollectionDoc = _.omit(speciesCollectionDoc, ['_id', '__v']);
 
                 self._setSpeciesCacheFromCollection(newSpeciesCollectionDoc);
                 // save updated species collection

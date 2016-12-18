@@ -24,7 +24,7 @@ define([
                 return _.find($scope.user.defaults, {key: propName});
             };
 
-            $scope.getUserDefaults = function(){
+            $scope.getUserDefaults = function () {
                 return $scope.user.defaults;
             };
 
@@ -40,11 +40,11 @@ define([
              *
              * @param propData
              */
-            $scope.updateUserDefault = function(propData){
-                var propDefaultIndex = _.findIndex($scope.user.defaults, function(propDefaultData){
+            $scope.updateUserDefault = function (propData) {
+                var propDefault = _.find($scope.user.defaults, function (propDefaultData) {
                     return propDefaultData.key == propData.key;
                 });
-                $scope.user.defaults[propDefaultIndex] = _.pick(propData, ['key', 'val']);
+                propDefault = _.pick(propData, ['key', 'val']);
             };
 
             /**
@@ -58,6 +58,61 @@ define([
                 } else {
                     $scope.updateUserDefault(propData);
                 }
+            };
+
+            /**
+             *
+             * @param {String} propName
+             * @param {Number} priorityVal
+             */
+            $scope.setPropPriority = function (propName, priorityVal) {
+                var propOrderData = _.find($scope.user.meta, function (metaProp) {
+                    return metaProp.name == 'propOrder';
+                });
+                // define if not set
+                if (!propOrderData) {
+                    propOrderData = {name: 'propOrder', value: '{}'};
+                    $scope.user.meta.push(propOrderData);
+                }
+                var propOrderValue = JSON.parse(propOrderData.value);
+                propOrderValue[propName] = priorityVal;
+                propOrderData.value = JSON.stringify(propOrderValue);
+            };
+
+            $scope.setPropPriorities = function (propPriorities) {
+                _.forEach(propPriorities, function (propOrderVal, propName) {
+                    $scope.setPropPriority(propName, propOrderVal);
+                });
+            };
+
+            $scope.getPropPriorities = function () {
+                var propPriorities = _.find($scope.user.meta, function (metaProp) {
+                    return metaProp.name == 'propOrder';
+                });
+                // define if not set
+                if (!propPriorities) {
+                    propPriorities = {name: 'propOrder', value: '{}'};
+                    $scope.user.meta.push(propPriorities);
+                }
+                return JSON.parse(propPriorities.value);
+            };
+
+            $scope.getPropPriority = function (propName) {
+                var propPriorities = $scope.getPropPriorities();
+                return propPriorities[propName];
+            };
+
+            $scope.sortSpeciesProps = function (props) {
+                var propPriorities = _.defaults($scope.getPropPriorities(), {
+                    petId: 0,
+                    images: 1,
+                    petName: 2,
+                    species: 3
+                });
+                return _.sortBy(props, function (propData) {
+                    // default to prop order in not specified
+                    return propPriorities[propData.key] ? propPriorities[propData.key] : props.length - 1;
+                })
             };
 
             /**
@@ -95,14 +150,14 @@ define([
             };
 
             function init() {
-                if (angular.element('.main-view').length > 0){
-                    console.log("userController - fetching user data");
-                    $scope.getUserData({
-                        done: function(err, userData){
-                            console.log('getUserData() = %o', arguments);
-                        }
-                    })
-                }
+                console.log("userController - fetching user data");
+                $scope.getUserData({
+                    done: function (err, userData) {
+                        console.log('getUserData() = %o', arguments);
+                        // hack to handle lack ng-view initialization after initial render
+                        $scope._persistCurrentPath();
+                    }
+                })
             }
 
             init();
