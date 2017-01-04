@@ -99,7 +99,8 @@ If you would like to join the API group, our contact info is below.  You can als
 **Eric Fisher** (EricJFisher@Live.com) - Slack (@ericjfisher) <br />
 **Andrew Studnicky** (a.j.studnicky@gmail.com) - Slack (@studnicky) <br />
 **Khalid Hoffman** - Slack (@khalidhoffman) <br />
-**Tim Ferrell** - Slack (@timferrell)
+**Jim Sandridge** - Twitter (@zero_map) <br />
+**Tim Ferrell** - Twitter (@ferrell_tim)
 
 ## License
 
