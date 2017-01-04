@@ -21,7 +21,6 @@ var http = require('http'),
         try {
             return fs.readFileSync(path.resolve(__dirname, 'ssl/server.key'), 'utf8');
         } catch (err){
-            console.error(err);
             return false;
         }
     })(),
@@ -29,7 +28,6 @@ var http = require('http'),
         try {
             return fs.readFileSync(path.resolve(__dirname, 'ssl/server.crt'), 'utf8');
         } catch (err){
-            console.error(err);
             return false
         }
     })(),

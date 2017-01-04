@@ -102,7 +102,7 @@ describe("Formatter", function () {
             apiDatabase = new APIDatabase({
                 debugLevel: Debuggable.PROD,
                 preset: [],
-                modelNamePrefix: 'test_formatter_',
+                modelNamePrefix: 'test_formatter_'
             });
 
             apiDatabase.clearAnimals(function () {
@@ -128,12 +128,12 @@ describe("Formatter", function () {
                             _.forEach(animals, function (formattedAnimal, index) {
                                 _.forEach(testableSpeciesProps[formattedAnimal.species.val], function (testPropData) {
                                     if (!formattedAnimal[testPropData.key]) {
-                                        console.log(`invalid prop[${index}]: ${testPropData.key}`)
+                                        console.log("invalid prop[%s]: %s", index, testPropData.key);
                                     }
                                     expect(formattedAnimal[testPropData.key].val).not.toBeUndefined('value for ' + testPropData.key + 'should be defined');
                                 });
-                                done();
-                            })
+                            });
+                            done();
                         }
                     })
                 }

@@ -3,6 +3,7 @@ var util = require("util"),
     _ = require('lodash'),
 
     Debuggable = require('./debuggable'),
+    AnimalQuery = require('./query'),
     Species = require('./species');
 
 /**
@@ -49,13 +50,13 @@ Animal.prototype = {
 
     setValue: function (propName, propValue) {
         var prop;
-        if (propValue.val) {
+        if (propValue.val === undefined) {
+            prop = this.getProp(propName) || {key: propName};
+            prop.val = propValue;
+        } else {
             // v1
             prop = this.getProp(propName) || propValue;
             prop.val = propValue.val;
-        } else {
-            prop = this.getProp(propName) || {key: propName};
-            prop.val = propValue;
         }
         this.setProps([prop]);
     },
@@ -74,7 +75,29 @@ Animal.prototype = {
     toMongooseDoc: function () {
         return {
             petId: this.getValue('petId'),
-            props: this.getProps()
+            props: this.getProps().map(function(propData){
+                switch (propData.valType) {
+                    case 'Number':
+                        propData.val = parseInt(propData.val);
+                        break;
+                    case 'Float':
+                        propData.val = parseFloat(propData.val);
+                        break;
+                    case 'Boolean':
+                        if (!_.isBoolean(propData.val)) {
+                            propData.val = /y|yes/i.test(propData.val)
+                        }
+                        break;
+                    case 'Date':
+                        if (_.isDate(propData.val)) {
+                            propData.val = propData.val.toISOString();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                return propData;
+            })
         }
     },
 
@@ -106,6 +129,7 @@ Animal.prototype = {
                     if (_.isString(propData.val)) {
                         propValue = /y|yes/i.test(propData.val)
                     }
+                    break;
                 case 'Date':
                     if (_.isDate(propData.val)) {
                         propValue = propData.val.toISOString();
@@ -115,7 +139,7 @@ Animal.prototype = {
                     break;
             }
 
-            if (propValue != undefined && propValue != null) {
+            if (!(propValue === undefined || propValue === null)) {
                 propData.val = propValue;
                 propCollection[propData.key] = (_options.isV1Format) ? propData : propValue;
             }
@@ -128,70 +152,9 @@ Animal.prototype = {
     },
 
     toQuery: function (metaProps) {
-
-        var self = this,
-            queryMetaProps = metaProps || {},
-            query = {};
-
-        this.log(Debuggable.MED, 'building query with props: %s', this.dump(this.props));
-
-        this.props.forEach(function (prop) {
-            var propName = prop.key,
-                queryFieldName = propName,
-                propValue = prop.val;
-
-            // only process valid props
-            if (propValue !== undefined && propValue !== null && _.find(self.props, {key: prop.key})) {
-                self.log(Debuggable.HIGH, 'parsing %s', propName);
-
-                //build query
-                switch (propName) {
-                    case 'petId':
-                    case 'hashId':
-                    case '_id':
-                        // only use given id and quit early
-                        query = {
-                            petId: propValue
-                        };
-                        self.log(Debuggable.LOW, 'searching by id: %s', propValue);
-                        return false;
-                    case 'species':
-                        query[queryFieldName] = new RegExp(propValue.toString(), 'i');
-                        break;
-                    case 'images':
-                        // ignore images
-                        break;
-                    default:
-                        if (prop.valType && prop.valType.toLowerCase() == 'string') {
-                            var prefix = '',
-                                suffix = '',
-                                regexArgs = '';
-                            if (queryMetaProps.matchStartFor && _.includes(queryMetaProps.matchStartFor, propName)) {
-                                prefix = '^';
-                            }
-                            if (queryMetaProps.matchEndFor && _.includes(queryMetaProps.matchEndFor, propName)) {
-                                suffix = '$';
-                            }
-                            if (queryMetaProps.ignoreCaseFor && _.includes(queryMetaProps.ignoreCaseFor, propName)) {
-                                regexArgs = 'i';
-                            }
-                            if (propName == 'color' || propName == 'petName') {
-                                // ignore case for color,petName searches
-                                regexArgs = 'i';
-                            }
-                            query[queryFieldName] = new RegExp(util.format('%s%s%s', prefix, propValue.toString(), suffix), regexArgs);
-                        } else {
-                            query[queryFieldName] = propValue;
-                        }
-                        break;
-                }
-            }
-
-        });
-
-        this.log(Debuggable.LOW, 'built query: %s', this.dump(query));
-        // return {props: {$elemMatch: query}};
-        return query;
+        var props = metaProps ? this.toArray().concat(metaProps) : this.toArray(),
+            animalQuery = new AnimalQuery(props, this);
+        return animalQuery.toObject();
     }
 };
 

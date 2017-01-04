@@ -8,7 +8,6 @@ var localJSON = (function () {
     try {
         return JSON.parse(fs.readFileSync(path.join(process.cwd(), './.env.json')));
     } catch (e) {
-        console.error(e);
         return {};
     }
 })();

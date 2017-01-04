@@ -10,6 +10,7 @@ var path = require('path'),
     ModelFactory = require('./lib/model-factory'),
     DBError = require('./lib/error'),
     Animal = require('../lib/animal'),
+    AnimalQuery = require('../lib/query'),
     AnimalSchema = require('./schemas/animal');
 
 /**
@@ -108,30 +109,8 @@ function AnimalDatabase(options) {
         var hasOptions = _.isPlainObject(options),
             _options = hasOptions ? _.defaults(options, {}) : {},
             onComplete = (hasOptions) ? callback : options,
-            query;
-
-        if (props._id || props.petId) {
-            query = {
-                petId: props._id || props.petId
-            };
-        } else if (_.keys(props).length == 0) {
-            query = {}
-        } else {
-            query = {
-                props: {
-                    $all: _.reduce(props, function (propsCollection, propValue, propName) {
-                        propsCollection.push({
-                            $elemMatch: {
-                                key: propName,
-                                val: propValue
-                            }
-                        });
-                        return propsCollection;
-                    }, [])
-                }
-            };
-        }
-
+            animalQuery = new AnimalQuery(props),
+            query = animalQuery.toMongoQuery();
 
         this.model(self._model.getModelName())
             .find(query)

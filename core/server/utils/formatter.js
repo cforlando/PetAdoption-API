@@ -68,6 +68,7 @@ DataFormatter.prototype = {
 
         database.saveAnimal(reducedAnimalProps.species, reducedAnimalProps, {
             debugLevel: _options.debugLevel,
+            species: _options.species,
             complete: function (err, newAnimal) {
                 if (err) console.error(err);
                 if (_options.complete) _options.complete.apply(_options.context, [null, newAnimal])
@@ -124,6 +125,7 @@ DataFormatter.prototype = {
 
                                             // save formatted animal
                                             self._saveAnimal(database, formattedAnimalProps, {
+                                                species: species,
                                                 complete: function (err) {
                                                     onAnimalFormatted(err);
                                                 }
@@ -160,33 +162,33 @@ DataFormatter.prototype = {
             species = _.find(speciesProps, {key: 'species'}).example.toLowerCase();
 
         this.log(Debuggable.LOW, 'formatting a %s', species);
-        _.forEach(speciesProps, function (propData) {
-            switch (propData.key) {
+        _.forEach(speciesProps, function (speciesPropData) {
+            switch (speciesPropData.key) {
                 case 'petId':
-                    animalProps[propData.key] = _.defaults({
-                        val: animalProps[propData.key] ? animalProps[propData.key].val : null
-                    }, propData);
+                    animalProps[speciesPropData.key] = _.defaults({
+                        val: animalProps[speciesPropData.key] ? animalProps[speciesPropData.key].val : null
+                    }, speciesPropData);
                     break;
                 case 'images':
-                    var images = (animalProps[propData.key] && _.isArray(animalProps[propData.key].val)) ? animalProps[propData.key].val : (propData.defaultVal || propData.example);
-                    propData.val = self.formatImagesArray(images, {species: species});
-                    animalProps[propData.key] = propData;
+                    var images = (animalProps[speciesPropData.key] && _.isArray(animalProps[speciesPropData.key].val)) ? animalProps[speciesPropData.key].val : (speciesPropData.defaultVal || speciesPropData.example);
+                    speciesPropData.val = self.formatImagesArray(images, {species: species});
+                    animalProps[speciesPropData.key] = speciesPropData;
                     break;
                 case 'species':
-                    animalProps[propData.key] = _.defaults({val: species}, animalProps[propData.key] || propData);
+                    animalProps[speciesPropData.key] = _.defaults({val: species}, animalProps[speciesPropData.key] || speciesPropData);
                     break;
                 default:
                     if (_options.createMissingFields) {
                         // assign values for all possible fields
-                        animalProps[propData.key] = _.defaults(animalProps[propData.key], propData);
-                    } else if (animalProps[propData.key]) {
+                        animalProps[speciesPropData.key] = _.defaults(animalProps[speciesPropData.key], speciesPropData);
+                    } else if (animalProps[speciesPropData.key]) {
                         // assign values for only currently assigned fields
-                        animalProps[propData.key] = _.defaults(animalProps[propData.key], propData);
+                        animalProps[speciesPropData.key] = _.defaults(animalProps[speciesPropData.key], speciesPropData);
                     }
 
-                    if (_options.populateEmptyFields && animalProps[propData.key] && _.isUndefined(animalProps[propData.key].val)) {
+                    if (_options.populateEmptyFields && animalProps[speciesPropData.key] && _.isUndefined(animalProps[speciesPropData.key].val)) {
                         // chose a random value for a field
-                        animalProps[propData.key].val = self._pickRandomOption(propData.options) || animalProps[propData.key].val || propData.example || propData.defaultVal;
+                        animalProps[speciesPropData.key].val = self._pickRandomOption(speciesPropData.options) || animalProps[speciesPropData.key].val || speciesPropData.example || speciesPropData.defaultVal;
                     }
             }
         });

@@ -89,29 +89,31 @@ MongoAPIDatabase.prototype = {
      */
     uploadDBImages: function (speciesDBImages, onSetComplete) {
         var self = this;
-        async.eachSeries(speciesDBImages,
-            function each(dbImage, done) {
+        self.clearAnimals(function () {
+            async.eachSeries(speciesDBImages,
+                function each(dbImage, done) {
 
-                self.saveSpecies(dbImage.getSpeciesName(), dbImage.getSpeciesProps(), {
-                    complete: function () {
-                        async.eachSeries(dbImage.getAnimals(),
-                            function each(animalData, onAnimalSaved) {
-                                self.saveAnimal(dbImage.getSpeciesName(), animalData, {
-                                    complete: function (err) {
-                                        onAnimalSaved(err)
-                                    }
-                                })
-                            },
-                            function (err) {
-                                done(err);
-                            }
-                        );
-                    }
+                    self.saveSpecies(dbImage.getSpeciesName(), dbImage.getSpeciesProps(), {
+                        complete: function () {
+                            async.eachSeries(dbImage.getAnimals(),
+                                function each(animalData, onAnimalSaved) {
+                                    self.saveAnimal(dbImage.getSpeciesName(), animalData, {
+                                        complete: function (err) {
+                                            onAnimalSaved(err)
+                                        }
+                                    })
+                                },
+                                function (err) {
+                                    done(err);
+                                }
+                            );
+                        }
+                    })
+                },
+                function complete(err) {
+                    if (onSetComplete) onSetComplete(err);
                 })
-            },
-            function complete(err) {
-                if (onSetComplete) onSetComplete(err);
-            })
+        });
     },
     /**
      *
@@ -275,9 +277,11 @@ MongoAPIDatabase.prototype = {
      * @param {Function} [options.complete]
      */
     removeAnimal: function (speciesName, props, options) {
-        var _options = _.defaults(options, {}),
-            animal = new Animal(this.speciesCache[speciesName], props);
-        this.AnimalDB.removeAnimal(animal, _options);
+        var opts = _.defaults(options, {
+                species: this.speciesCache[speciesName]
+            }),
+            animal = new Animal(opts.species, props);
+        this.AnimalDB.removeAnimal(animal, opts);
     },
 
 
@@ -289,9 +293,11 @@ MongoAPIDatabase.prototype = {
      * @param {Function} [options.complete]
      */
     saveAnimal: function (speciesName, props, options) {
-        var _options = _.defaults(options, {}),
-            animal = new Animal(this.speciesCache[speciesName], props);
-        this.AnimalDB.saveAnimal(animal, _options);
+        var opts = _.defaults(options, {
+                species: this.speciesCache[speciesName]
+            }),
+            animal = new Animal(opts.species, props);
+        this.AnimalDB.saveAnimal(animal, opts);
     },
 
 
@@ -312,8 +318,7 @@ MongoAPIDatabase.prototype = {
      * @param {Function} [callback]
      */
     clearAnimals: function (callback) {
-        var self = this;
-        self.AnimalDB.clear(callback)
+        this.AnimalDB.clear(callback)
     },
 
     stop: function (callback) {
