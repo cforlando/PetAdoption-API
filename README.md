@@ -19,6 +19,11 @@ If you are new to containers, run through the Docker hello world here: https://d
   1. TODO: figure out what environment we need to pass into the pet-api container
   2. Create a compose file to manage setting up pet-api and mongo
 
+To use Docker Compose to run the PetApi and Mongo:
+
+1. `docker-compose up --build -d`
+2. `docker-compose stop`
+
 ## API Reference
 
 Current API location: http://cfo-pet-adoption-server.eastus.cloudapp.azure.com/api/v1/
@@ -38,7 +43,7 @@ GET     | /options/:species/:option               | JSON of given option for a g
 GET     | /options/:species/:option/:pageNumber   | JSON of given option for a given species in pages. Page size defaults to 10. This can be changed via query argument (i.e. "/options/dog/breed/1?pageSize=15")
 GET     | /schema/:species                        | returns JSON representation of a schema. Currently includes dog and cat schema
 GET     | /species                                | JSON array of possible species
-POST    | /query                                  | will match given parameters 
+POST    | /query                                  | will match given parameters
 POST    | /query/:pageNumber                      | will match given parameters with paged results
 POST    | /remove/:species                        | deletes pet as specified by `petId` or `petName`
 POST    | /save/:species                          | fields will be saved as provided. Must match schema definition and should be of `multipart/form-data`. Responds with saved animal data
@@ -58,19 +63,19 @@ ignoreCase     | (String) Array  | Allows the fields specified to ignore casing
 matchStartFor  | (String) Array  | Requires the fields specified in the array to match starting from the beginning (prepends a '^' line start regex meta-character)
 matchEndFor    | (String) Array  | Requires the fields specified in the array to match from the ending (appends a '$' line end regex meta-character)
 properties     | (String) Array  | Will only supply fields specified in array
-pageSize       | Number          | Defaults to 10 (only meaningful when making paged query) 
+pageSize       | Number          | Defaults to 10 (only meaningful when making paged query)
 
 ##### Additional GET request parameters you can set:
 
 Name           | Type            | Description
 ---------------| ----------------| ----------------------------------------------------------
-pageSize       | Number          | Defaults to 10 (only meaningful when making paged query) 
+pageSize       | Number          | Defaults to 10 (only meaningful when making paged query)
 properties     | (String) Array  | Will only supply fields specified in array. ex: `?properties=['species','petName','sex']` (Must not include spaces between field names)
 
 
 ###### More Notes
 
-`api/v2` will only send values for request animals. `api/v1` will send the value for an animal property as well as an example, default value, type, etc. as available. 
+`api/v2` will only send values for request animals. `api/v1` will send the value for an animal property as well as an example, default value, type, etc. as available.
 
 ## Tests
 
