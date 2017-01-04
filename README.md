@@ -19,6 +19,8 @@ To use Docker Compose to run the PetApi and Mongo services together:
 1. `./start_services.sh` or `docker-compose up --build -d`
 2. `./stop_services.sh` or `docker-compose stop`
 
+**TODO / Warning** - the mongo container is being started without the `--auth` flag, which probably makes it less secure than you want.
+
 ## API Reference
 
 Current API location: http://cfo-pet-adoption-server.eastus.cloudapp.azure.com/api/v1/
