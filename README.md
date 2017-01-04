@@ -17,6 +17,7 @@ If you are new to containers, run through the Docker hello world here: https://d
 1. `docker build -t pet-api .`
 2. `docker run pet-api`
   1. TODO: figure out what environment we need to pass into the pet-api container
+  2. Create a compose file to manage setting up pet-api and mongo
 
 ## API Reference
 
