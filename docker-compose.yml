@@ -1,0 +1,26 @@
+version: '2'
+services:
+  mongo:
+    image: mongo:3.0.4
+    volumes:
+      - mongodata:/data/db
+    ports:
+      - "27017:27017"
+    command: --smallfiles --rest
+  petapi:
+    image: pet-api
+    build:
+      context: .
+      dockerfile : ./Dockerfile
+    container_name: 'pet-api-cont'
+    environment:
+      MONGODB_URI: mongo
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+    links:
+      - mongo
+volumes:
+  mongodata:
+    driver: local
