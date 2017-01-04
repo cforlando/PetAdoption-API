@@ -10,6 +10,14 @@ Nobody likes to see animals be put down due to overcrowding at animal control ce
 
 run `npm install`
 
+## Building Docker Container
+
+If you are new to containers, run through the Docker hello world here: https://docs.docker.com/engine/tutorials/dockerizing/
+
+1. `docker build -t pet-api .`
+2. `docker run pet-api`
+  1. TODO: figure out what environment we need to pass into the pet-api container
+
 ## API Reference
 
 Current API location: http://cfo-pet-adoption-server.eastus.cloudapp.azure.com/api/v1/
