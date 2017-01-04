@@ -95,8 +95,8 @@ If you would like to join the API group, our contact info is below.  You can als
 
 **Luis Moraguez** (lmoraguez@kissimmee.org) - Slack (@lmoraguez) - API Group Lead <br />
 **Eric Fisher** (EricJFisher@Live.com) - Slack (@ericjfisher) <br />
-**Andrew Studnicky** (a.j.studnicky@gmail.com) - Slack (@studnicky)
-**Khalid Hoffman** - Slack (@khalidhoffman)
+**Andrew Studnicky** (a.j.studnicky@gmail.com) - Slack (@studnicky) <br />
+**Khalid Hoffman** - Slack (@khalidhoffman) <br />
 **Tim Ferrell** - Slack (@timferrell)
 
 ## License
