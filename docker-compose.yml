@@ -1,0 +1,17 @@
+version: '2'
+services:
+  mongo:
+    image: mongo:3.0.4
+    volumes:
+      - mongodata:/data/db
+    ports:
+      - "27017:27017"
+    command: --smallfiles --rest
+  petapi:
+    image: pet-api
+    container_name: 'pet-api-cont'
+    depends_on:
+      - mongo
+volumes:
+  mongodata:
+    driver: local
