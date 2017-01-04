@@ -10,6 +10,8 @@ services:
   petapi:
     image: pet-api
     container_name: 'pet-api-cont'
+    ports:
+     - "8080:8080"
     depends_on:
       - mongo
 volumes:
