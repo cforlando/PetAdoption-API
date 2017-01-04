@@ -10,19 +10,14 @@ Nobody likes to see animals be put down due to overcrowding at animal control ce
 
 run `npm install`
 
-## Building Docker Container
+## Docker Services
 
 If you are new to containers, run through the Docker hello world here: https://docs.docker.com/engine/tutorials/dockerizing/
 
-1. `docker build -t pet-api .`
-2. `docker run pet-api`
-  1. TODO: figure out what environment we need to pass into the pet-api container
-  2. Create a compose file to manage setting up pet-api and mongo
+To use Docker Compose to run the PetApi and Mongo services together:
 
-To use Docker Compose to run the PetApi and Mongo:
-
-1. `docker-compose up --build -d`
-2. `docker-compose stop`
+1. `./start_services.sh` or `docker-compose up --build -d`
+2. `./stop_services.sh` or `docker-compose stop`
 
 ## API Reference
 
@@ -101,6 +96,8 @@ If you would like to join the API group, our contact info is below.  You can als
 **Luis Moraguez** (lmoraguez@kissimmee.org) - Slack (@lmoraguez) - API Group Lead <br />
 **Eric Fisher** (EricJFisher@Live.com) - Slack (@ericjfisher) <br />
 **Andrew Studnicky** (a.j.studnicky@gmail.com) - Slack (@studnicky)
+**Khalid Hoffman** - Slack (@khalidhoffman)
+**Tim Ferrell** - Slack (@timferrell)
 
 ## License
 
