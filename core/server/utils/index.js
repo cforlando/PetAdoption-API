@@ -19,7 +19,8 @@ module.exports = {
     parseArrayStr : function(str){
         try {
             var _result = str
-                .substr(1, (str.length - 2))
+                .replace(/^\[[\'\"]?/, '')
+                .replace(/[\'\"]?]$/, '')
                 .replace(/[\'\"]/g, '')
                 .split(',');
             return (_.isArray(_result)) ? _result : false;
