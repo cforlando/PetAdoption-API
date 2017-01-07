@@ -48,8 +48,8 @@ var config = {
     S3_DEV_BUCKET_NAME: process.env.S3_DEV_BUCKET_NAME || localJSON.S3_DEV_BUCKET_NAME || "dev",
     S3_TEST_BUCKET_NAME: process.env.S3_TEST_BUCKET_NAME || localJSON.S3_TEST_BUCKET_NAME || "test",
 
-    GOOGLE_CLIENT_ID : process.GOOGLE_CLIENT_ID || localJSON.GOOGLE_CLIENT_ID || 'n/a',
-    GOOGLE_CLIENT_SECRET : process.GOOGLE_CLIENT_SECRET || localJSON.GOOGLE_CLIENT_SECRET || 'n/a',
+    GOOGLE_CLIENT_ID : process.env.GOOGLE_CLIENT_ID || localJSON.GOOGLE_CLIENT_ID || 'n/a',
+    GOOGLE_CLIENT_SECRET : process.env.GOOGLE_CLIENT_SECRET || localJSON.GOOGLE_CLIENT_SECRET || 'n/a',
 
     MONGODB_URI: process.env.MONGODB_URI || localJSON.MONGODB_URI || 'mongodb://127.0.0.1/local'
 };

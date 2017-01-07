@@ -15,6 +15,9 @@ services:
     container_name: 'pet-api-cont'
     environment:
       MONGODB_URI: mongo
+      GOOGLE_CLIENT_ID: '${GOOGLE_CLIENT_ID}'
+      GOOGLE_CLIENT_SECRET: '${GOOGLE_CLIENT_SECRET}'
+      DOMAIN: "${DOMAIN}"
     ports:
       - "8080:8080"
     depends_on:
