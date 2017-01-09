@@ -6,6 +6,8 @@
   },
   "scripts": {
     "start": "node bin/start-server.js",
+    "create-cron" : "node bin/create-cron.js",
+    "docker": "bash ./start_services.sh",
     "dev": "nodemon bin/start-server.js",
     "doc": "jsdoc ./core -r -c ./jsdoc.conf.json -d ./docs",
     "setup:data": "node bin/parse-csv-data.js",
