@@ -517,6 +517,9 @@ md-sidenav {
   -ms-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0);
 }
+.view--species md-card-title .md-headline {
+  cursor: move;
+}
 .view--login {
   -webkit-justify-content: center;
   -ms-justify-content: center;
