@@ -1,5 +1,5 @@
 var Database = require('../../../core/mongodb/default'),
-    ModelFactory = require('../../../core/mongodb/lib/model-factory'),
+    Collection = require('../../../core/mongodb/lib/collection'),
     Debuggable = require('../../../core/lib/debuggable');
 
 describe('Database', function () {
@@ -7,7 +7,7 @@ describe('Database', function () {
         TestSchema = {test: String};
 
     beforeAll(function () {
-        dbInstance = new Database(new ModelFactory('test', TestSchema));
+        dbInstance = new Database(new Collection('test', TestSchema));
     });
 
     afterEach(function (done) {

@@ -7,7 +7,7 @@ var path = require('path'),
     Debuggable = require('../lib/debuggable/index'),
 
     Database = require('./default'),
-    ModelFactory = require('./lib/model-factory'),
+    Collection = require('./lib/collection'),
     DBError = require('./lib/error'),
     Animal = require('../lib/animal'),
     AnimalQuery = require('../lib/query'),
@@ -21,7 +21,7 @@ var path = require('path'),
  * @param {Boolean} [options.isDevelopment]
  * @param {DebugLevel} [options.debugLevel]
  * @param {String} [options.debugTag]
- * @param {String} [options.modelNamePrefix]
+ * @param {String} [options.collectionNamePrefix]
  * @param {{complete: Function, isV1Format: Boolean}} [options.queryOptions] default query options
  * @returns {AnimalDatabase}
  * @constructor
@@ -31,7 +31,7 @@ function AnimalDatabase(options) {
         _options = _.defaults(options, {
             debugLevel: Debuggable.PROD,
             debugTag: "AnimalDatabase: ",
-            modelNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_',
+            collectionNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_',
             queryOptions: {
                 complete: function (err) {
                     if (err) self.warn(err);
@@ -41,9 +41,9 @@ function AnimalDatabase(options) {
             }
         });
 
-    this._model = new ModelFactory(_options.modelNamePrefix + 'animal', AnimalSchema);
+    this.collection = new Collection(_options.collectionNamePrefix + 'animal', AnimalSchema);
 
-    this._model.addMiddleware('post', 'save', function (doc, next) {
+    this.collection.addMiddleware('post', 'save', function (doc, next) {
         // TODO this never gets called
         if (!this.petId) {
             this.petId = this._id.toString();
@@ -57,13 +57,13 @@ function AnimalDatabase(options) {
         }
     });
 
-    this._model.addMiddleware('post', 'findOneAndUpdate', function (doc) {
+    this.collection.addMiddleware('post', 'findOneAndUpdate', function (doc) {
         self.log(Debuggable.LOW, 'post.save - updating petId');
 
         if (doc && doc._id) doc.petId = doc._id.toString();
     });
 
-    this._model.addStaticMethod('upsert', function (searchProps, saveData, options, callback) {
+    this.collection.addStaticMethod('upsert', function (searchProps, saveData, options, callback) {
         var hasOptions = _.isPlainObject(options),
             _options = _.defaults(hasOptions ? options : {}, {
                 upsert: true,
@@ -71,7 +71,7 @@ function AnimalDatabase(options) {
             }),
             onComplete = (hasOptions) ? callback : options,
             doc = this,
-            model = this.model(self._model.getModelName());
+            model = this.model(self.collection.getCollectionName());
 
         self.log(Debuggable.LOW, 'upsert() w/ options %s', self.dump(_options));
 
@@ -104,7 +104,7 @@ function AnimalDatabase(options) {
         }
     });
 
-    this._model.addStaticMethod('findAnimals', function (props, options, callback) {
+    this.collection.addStaticMethod('findAnimals', function (props, options, callback) {
         self.log(Debuggable.MED, 'Received query for %s', self.dump(props));
         var hasOptions = _.isPlainObject(options),
             _options = hasOptions ? _.defaults(options, {}) : {},
@@ -112,7 +112,7 @@ function AnimalDatabase(options) {
             animalQuery = new AnimalQuery(props),
             query = animalQuery.toMongoQuery();
 
-        this.model(self._model.getModelName())
+        this.model(self.collection.getCollectionName())
             .find(query)
             .lean()
             .exec(function (err, animals) {
@@ -127,15 +127,13 @@ function AnimalDatabase(options) {
             })
     });
 
-    Database.call(this, this._model);
+    Database.call(this, this.collection);
 
     this.setDebugLevel(_options.debugLevel);
     this.setDebugTag(_options.debugTag);
 
     this.setConfig('isDevelopment', _options.DEVELOPMENT_ENV);
     this.setConfig('queryOptions', _options.queryOptions);
-
-    self.AnimalModel = self.MongooseModel;
 }
 
 AnimalDatabase.prototype = {
@@ -163,7 +161,7 @@ AnimalDatabase.prototype = {
 
             var petId = animal.getValue('petId');
             self.log(Debuggable.MED, 'mongodb.removeAnimal() - searching for: ', petId);
-            self.AnimalModel.remove({_id: petId}, function (err, removeOpInfo) {
+            self.MongooseModel.remove({_id: petId}, function (err, removeOpInfo) {
                 if (err || (removeOpInfo.result && removeOpInfo.result.n == 0)) {
                     err = new DBError(err || "Could not delete pet");
                 }
@@ -198,7 +196,7 @@ AnimalDatabase.prototype = {
         this.exec(function () {
             self.log(Debuggable.HIGH, "mongodb.findAnimals() - received query for: ", props);
 
-            self.AnimalModel.findAnimals(props, {
+            self.MongooseModel.findAnimals(props, {
                 isV1Format: _options.isV1Format
             }, function (err, animals) {
                 if (err) {
@@ -230,7 +228,7 @@ AnimalDatabase.prototype = {
 
         this.exec(function () {
 
-            this.AnimalModel.upsert(
+            this.MongooseModel.upsert(
                 query,
                 animalDocData,
                 {
@@ -260,7 +258,7 @@ AnimalDatabase.prototype = {
      * @param {Function} [callback]
      */
     clear: function (callback) {
-        this.AnimalModel.remove({}, function (err) {
+        this.MongooseModel.remove({}, function (err) {
             if (callback) callback(err);
         });
     }

@@ -23,7 +23,7 @@ var util = require('util'),
  * @class MongoAPIDatabase
  * @param {Object} [options]
  * @param {Function} [options.onInitialized]
- * @param {String} [options.modelNamePrefix]
+ * @param {String} [options.collectionNamePrefix]
  * @param {SpeciesDBImage[]} [options.preset]
  * @param {Function} [options.onPresetComplete]
  * @returns {MongoAPIDatabase}
@@ -34,7 +34,7 @@ function MongoAPIDatabase(options) {
         _options = _.defaults(options, {
             debugLevel: Debuggable.PROD,
             debugTag: 'MongoAPIDatabase: ',
-            modelNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_ ',
+            collectionNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_ ',
             preset: (function () {
 
                 var catProps = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'data/props.cat.json')), 'utf8'),
@@ -62,9 +62,9 @@ function MongoAPIDatabase(options) {
 
     this.log(Debuggable.LOW, 'Running in %s mode.', (config.DEVELOPMENT_ENV) ? 'dev' : 'prod');
 
-    this.UserDB = new UserDatabase({modelNamePrefix: _options.modelNamePrefix});
-    this.SpeciesCollectionDB = new SpeciesCollectionDatabase({modelNamePrefix: _options.modelNamePrefix});
-    this.AnimalDB = new AnimalDatabase({modelNamePrefix: _options.modelNamePrefix});
+    this.UserDB = new UserDatabase({collectionNamePrefix: _options.collectionNamePrefix});
+    this.SpeciesCollectionDB = new SpeciesCollectionDatabase({collectionNamePrefix: _options.collectionNamePrefix});
+    this.AnimalDB = new AnimalDatabase({collectionNamePrefix: _options.collectionNamePrefix});
     this.speciesCache = {};
 
     if (_options.preset && _options.preset.length > 0) this.uploadDBImages(_options.preset, _options.onPresetComplete);

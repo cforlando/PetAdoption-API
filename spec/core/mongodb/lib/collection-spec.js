@@ -1,9 +1,9 @@
-var ModelFactory = require('../../../../core/mongodb/lib/model-factory'),
+var MongooseModel = require('../../../../core/mongodb/lib/collection'),
     Debuggable = require('../../../../core/lib/debuggable'),
     UserSchema = require('../../../../core/mongodb/schemas/user'),
     MongoDBAdapter = require('../../../../core/mongodb/lib/adapter');
 
-describe("ModelFactory", function () {
+describe("Collection", function () {
     var dbAdapter,
         tUserProps = {id: 'test', firstName: 'hello', lastName: 'world'},
         user,
@@ -16,7 +16,7 @@ describe("ModelFactory", function () {
         });
         dbAdapter.connect({
             onSuccess: function () {
-                user = new ModelFactory('test_model_factory',
+                user = new MongooseModel('test_model_factory',
                     UserSchema,
                     {
                     debugTag: 'aSpecies: ',

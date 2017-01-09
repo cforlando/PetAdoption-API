@@ -28,7 +28,7 @@ describe("Router", function () {
         apiDatabase = new APIDatabase({
             debugLevel: Debuggable.PROD,
             preset: [],
-            modelNamePrefix: 'test_api_'
+            collectionNamePrefix: 'test_api_'
         });
 
         apiDatabase.clearAnimals(function () {

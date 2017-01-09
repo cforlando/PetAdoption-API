@@ -1,5 +1,4 @@
 var util = require('util'),
-    path = require('path'),
 
     _ = require('lodash'),
     moment = require('moment'),
@@ -13,38 +12,38 @@ var util = require('util'),
 /**
  * @extends Debuggable
  * @class Database
- * @param {ModelFactory} modelFactory
+ * @param {Collection} collection
  * @param {Object} [options]
  * @param {MongoDBAdapter} [options.adapter]
- * @param {String} [options.modelNamePrefix]
+ * @param {String} [options.collectionNamePrefix]
  * @param {DebugLevel} [options.debugLevel]
  * @param {String} [options.debugTag]
  * @class Database
  * @constructor
  */
-function Database(modelFactory, options) {
+function Database(collection, options) {
     var self = this,
         _options = _.defaults(options, {
-            modelNamePrefix: 'prod_',
+            collectionNamePrefix: 'prod_',
             debugLevel: Debuggable.PROD,
             debugTag: 'DB: '
         });
 
 
     /**
-     * @var {ModelFactory} modelFactory
+     * @var {Collection} collection
      * @memberOf Database
      */
+    this.collection = collection;
     this._config = this._config || {};
     this._queue = this._queue || [];
     this._cache = this._cache || new Cache();
-    this.modelFactory = modelFactory;
 
     this.setDebugLevel(_options.debugLevel);
     this.setDebugTag(_options.debugTag);
     this.setAdapter(_options.adapter || new MongoDBAdapter({context: this}));
 
-    this.MongooseModel = this.modelFactory.toMongooseModel(this.getAdapter());
+    this.MongooseModel = this.collection.toMongooseModel(this.getAdapter());
 
     this.getAdapter().on('connected', function () {
         self._processQueue();

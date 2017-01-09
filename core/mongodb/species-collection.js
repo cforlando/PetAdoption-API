@@ -5,7 +5,7 @@ var _ = require('lodash'),
 
     TimestampedDatabase = require('./timestamped'),
     SpeciesCollectionSchema = require('./schemas/species-collection'),
-    ModelFactory = require('./lib/model-factory');
+    Collection = require('./lib/collection');
 
 /**
  *
@@ -19,11 +19,11 @@ function SpeciesCollectionDatabase(options) {
             modelNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_'
         });
 
-    this._model = new ModelFactory(_options.modelNamePrefix + 'species_collection', SpeciesCollectionSchema);
-    this._model.setDebugTag(_options.debugTag);
-    this._model.setDebugLevel(_options.debugLevel);
+    this.collection = new Collection(_options.collectionNamePrefix + 'species_collection', SpeciesCollectionSchema);
+    this.collection.setDebugTag(_options.debugTag);
+    this.collection.setDebugLevel(_options.debugLevel);
 
-    TimestampedDatabase.call(this, this._model);
+    TimestampedDatabase.call(this, this.collection);
 }
 
 SpeciesCollectionDatabase.prototype = {};

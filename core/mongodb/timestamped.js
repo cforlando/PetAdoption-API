@@ -12,25 +12,25 @@ var util = require('util'),
 /**
  * @extends Database
  * @class TimestampedDatabase
- * @param {ModelFactory} modelFactory
+ * @param {Collection} collection
  * @param {Object} [options]
  * @param {MongoDBAdapter} [options.adapter]
- * @param {String} [options.modelNamePrefix]
+ * @param {String} [options.collectionNamePrefix]
  * @param {DebugLevel} [options.debugLevel]
  * @param {String} [options.debugTag]
  * @constructor
  */
-function TimestampedDatabase(modelFactory, options) {
+function TimestampedDatabase(collection, options) {
 
     var self = this;
 
-    this.modelFactory = modelFactory;
+    this.collection = collection;
 
     /**
-     * @var {ModelFactory} modelFactory
+     * @var {Collection} collection
      * @memberOf Database
      */
-    this.modelFactory.addPlugin('timestamp', function (schema) {
+    this.collection.addPlugin('timestamp', function (schema) {
 
         schema.pre('save', function (next) {
             this.timestamp = new Date;
@@ -38,9 +38,9 @@ function TimestampedDatabase(modelFactory, options) {
         })
     });
 
-    this.modelFactory.addStaticMethod('getLatest', function (callback) {
-        self.log(Debuggable.LOW, 'getting latest model for %s', self.modelFactory.getModelName());
-        var TimestampedMongooseModel = this.model(self.modelFactory.getModelName());
+    this.collection.addStaticMethod('getLatest', function (callback) {
+        self.log(Debuggable.LOW, 'getting latest model for %s', self.collection.getCollectionName());
+        var TimestampedMongooseModel = this.model(self.collection.getCollectionName());
 
         TimestampedMongooseModel.findOne({})
             .lean()
@@ -58,7 +58,7 @@ function TimestampedDatabase(modelFactory, options) {
             })
     });
 
-    Database.call(this, this.modelFactory, options);
+    Database.call(this, this.collection, options);
 }
 
 TimestampedDatabase.prototype = {
@@ -79,7 +79,7 @@ TimestampedDatabase.prototype = {
                     self.error(err);
                     if (_options.complete) _options.complete(err);
                 } else {
-                    var cacheNamespace = util.format('%s.%s', self.getConfig('speciesName') || self.modelFactory.getModelName(), moment(doc.timestamp).format('M.D.YYYY'));
+                    var cacheNamespace = util.format('%s.%s', self.getConfig('speciesName') || self.collection.getCollectionName(), moment(doc.timestamp).format('M.D.YYYY'));
                     self.cacheData(cacheNamespace, doc, {
                         dir: path.join(process.cwd(), 'data/'),
                         type: ['json'],

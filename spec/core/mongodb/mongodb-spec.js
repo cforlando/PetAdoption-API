@@ -4,8 +4,6 @@ var util = require('util'),
     async = require('async'),
     moment = require('moment'),
 
-    Animal = require('../../../core/lib/animal'),
-    Species = require('../../../core/lib/species'),
     MongoAPIDatabase = require('../../../core/mongodb'),
 
     dbImages = require('../../test-db-images');
@@ -30,7 +28,6 @@ describe("MongoAPIDatabase", function () {
                 defaultVal: 3
             }
         ],
-        tSpecies = new Species('mongodb_test_species', speciesProps),
         testUserData = {
             firstName: 'TestUserFirstName',
             lastName: 'TestUserLastName',
@@ -53,7 +50,7 @@ describe("MongoAPIDatabase", function () {
 
     beforeAll(function (done) {
         apiDatabase = new MongoAPIDatabase({
-            modelNamePrefix: 'test_mongodb_',
+            collectionNamePrefix: 'test_mongodb_',
             preset: [],
             debugTag: 'test_mongo_api_database: '
         });

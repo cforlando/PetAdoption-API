@@ -3,7 +3,7 @@ var _ = require('lodash'),
     Database = require('./default'),
     config = require('../config'),
 
-    ModelFactory = require('./lib/model-factory'),
+    Collection = require('./lib/collection'),
     UserSchema = require('./schemas/user');
 
 /**
@@ -14,14 +14,15 @@ var _ = require('lodash'),
  */
 function UserDatabase(options) {
     var _options = _.defaults(options, {
-        modelNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_'
-    });
+            collectionNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_'
+        }),
+        collectionName = _options.collectionNamePrefix + 'users';
 
-
-    Database.call(this, new ModelFactory(_options.modelNamePrefix + 'users', UserSchema, {
+    this.collection = new Collection(collectionName, UserSchema, {
         debugLevel: this.getDebugLevel(),
-        modelNamePrefix: _options.modelNamePrefix
-    }));
+        collectionNamePrefix: _options.collectionNamePrefix
+    });
+    Database.call(this, this.collection);
 }
 
 UserDatabase.prototype = {};

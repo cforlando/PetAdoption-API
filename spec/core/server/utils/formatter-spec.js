@@ -102,7 +102,7 @@ describe("Formatter", function () {
             apiDatabase = new APIDatabase({
                 debugLevel: Debuggable.PROD,
                 preset: [],
-                modelNamePrefix: 'test_formatter_'
+                collectionNamePrefix: 'test_formatter_'
             });
 
             apiDatabase.clearAnimals(function () {
