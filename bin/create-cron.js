@@ -8,4 +8,3 @@ var fs = require('fs'),
     cronScriptPath = path.join(projectDir, './cron_job');
 
 fs.writeFileSync(cronScriptPath, cronScript);
-exec('crontab ' + cronScriptPath, console.log.bind(console), console.log.bind(console));

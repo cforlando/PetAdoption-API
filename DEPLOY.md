@@ -2,19 +2,15 @@
 
 The current deployment steps involve setting up a cron job on a Docker host.
 
-1. Check out repository on Docker host
-2. Create and populate `envvars.sh` (see below)
-3. Create cron job (see immediately below)
+### 1. Check out repository on Docker host
+*TODO:* perhaps provide a url to docker host
 
-### The cron job
+### 2. Create `envvars.sh` (see below)
 
-Looks something like: `* * * * * . /home/ubuntu/envvars.sh; /home/ubuntu/PetAdoption-API/redeploy.sh >> /home/ubuntu/deploy.log 2>&1`
+A shell script used to determine the environment for the cron job. 
+We need this because the docker compose file expects certain environment variables to be set.
 
-You may need to alter `/home/ubuntu` according to the particulars of your setup.
-
-### envvars.sh
-
-A shell script used to determine the environment for the cron job. We need this because the docker compose file expects certain environment variables to be set.
+* should be saved in the project's directory
 
 A skeleton looks like this:
 
@@ -37,3 +33,16 @@ export GOOGLE_CLIENT_ID=$YOUR_GOOGLE_CLIENT_ID$
 # (optional)
 export GOOGLE_MAPS_KEY=$YOUR_GOOGLE_MAPS_KEY$
 ```
+### 3. Enable auto-updating
+
+To start the auto updating cron job, run:
+
+`npm run start-auto-update`
+
+To stop:
+
+`npm run stop-auto-update`
+
+
+### 4. Execute `start_services.sh`
+execute `sh ./start_services.sh` or `npm run docker`

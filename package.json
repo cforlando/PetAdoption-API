@@ -7,6 +7,8 @@
   "scripts": {
     "start": "node bin/start-server.js",
     "create-cron" : "node bin/create-cron.js",
+    "start-auto-update" : "npm run create-cron; crontab cron_job;",
+    "stop-auto-update" : "crontab -r;",
     "docker": "bash ./start_services.sh",
     "dev": "nodemon bin/start-server.js",
     "doc": "jsdoc ./core -r -c ./jsdoc.conf.json -d ./docs",
