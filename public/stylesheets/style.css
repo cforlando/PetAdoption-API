@@ -315,11 +315,6 @@ a {
 md-sidenav {
   z-index: 81;
 }
-.action--bottommenu md-icon {
-  height: 1em;
-  width: 3em;
-  font-size: 4em;
-}
 .user-avatar {
   height: 1.5em;
   width: auto;
