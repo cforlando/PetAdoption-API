@@ -24,63 +24,61 @@ var fs = require('fs'),
 function parseModelCSV(csvModelData) {
     console.log('sanitizing model');
 
-    var newModel = [{
+    var speciesProps = [{
             key: 'images',
             valType: '[Image]',
             defaultVal: ['http://placehold.it/500x500', 'http://placehold.it/720x480', 'http://placehold.it/480x480'],
             example: ['http://placehold.it/500x500', 'http://placehold.it/720x480', 'http://placehold.it/480x480']
         }],
         columnIndices = {
-            name: 1,
+            key: 1,
             fieldLabel: 2,
-            type: 3,
+            valType: 3,
             description: 4,
-            default: 5,
+            defaultVal: 5,
             required: 6,
             example: 7,
             note: 8
         };
-    _.forEachRight(csvModelData, function (csvRow, rowIndex, arr) {
-        if (rowIndex == 0) return; //skip the field labels
-
-        var _modelPropData = {};
-        if (csvRow[columnIndices['name']] && csvRow[columnIndices['type']]) {
-            _.forEach(columnIndices, function (columnIndex, columnIndexName, indices) {
-                switch (columnIndexName) {
-                    case 'type':
-                        if (csvRow[columnIndex].match(/integer/i)) {
-                            _modelPropData['valType'] = 'Number';
-                        } else {
-                            _modelPropData['valType'] = _.capitalize(csvRow[columnIndex]);
-                        }
-                        break;
-                    case 'default':
-                        _modelPropData['defaultVal'] = csvRow[columnIndex];
-                        break;
-                    case 'name':
-                        _modelPropData['key'] = csvRow[columnIndex];
-                        break;
-                    default:
-                        _modelPropData[columnIndexName] = csvRow[columnIndex];
-                        break;
-                }
-            });
-            if (_modelPropData['key'].match(/(lostGeoL|shelterGeoL)/)) {
-                _modelPropData['defaultVal'] = csvRow[columnIndices.example] || 'Location';
-                _modelPropData['valType'] = 'Location';
-            }
-            if (_modelPropData['valType'] == 'Date') {
-                if (!moment(_modelPropData['defaultVal']).isValid()) {
-                    _modelPropData['defaultVal'] = null;
-                }
-            }
-            newModel.push(_modelPropData);
-        }
-    });
 
     console.log('sanitized model');
     // console.log('sanitized model: %j', newModel);
-    return newModel;
+    return _.reduce(csvModelData, function (speciesProps, csvRow, rowIndex) {
+        if (rowIndex == 0) return; //skip the first row which contains field labels
+        if (!(csvRow[columnIndices['key']] && csvRow[columnIndices['valType']])) return; // skip invalid rows
+
+        var speciesProp = {};
+        _.forEach(columnIndices, function (columnIndex, columnIndexName) {
+            switch (columnIndexName) {
+                case 'valType':
+                    if (csvRow[columnIndex].match(/integer/i)) {
+                        speciesProp['valType'] = 'Number';
+                    } else {
+                        speciesProp['valType'] = _.capitalize(csvRow[columnIndex]);
+                    }
+                    break;
+                case 'defaultVal':
+                    speciesProp['defaultVal'] = csvRow[columnIndex];
+                    break;
+                case 'key':
+                    speciesProp['key'] = csvRow[columnIndex];
+                    break;
+                default:
+                    speciesProp[columnIndexName] = csvRow[columnIndex];
+                    break;
+            }
+        });
+        if (speciesProp['key'].match(/(lostGeoL|shelterGeoL)/)) {
+            speciesProp['defaultVal'] = csvRow[columnIndices.example] || 'Location';
+            speciesProp['valType'] = 'Location';
+        }
+        if (speciesProp['valType'] == 'Date') {
+            if (!moment(speciesProp['defaultVal']).isValid()) {
+                speciesProp['defaultVal'] = null;
+            }
+        }
+        speciesProps.push(speciesProp);
+    }, []);
 }
 
 /**
@@ -93,13 +91,13 @@ function _mergeOptionsAndModel(speciesDataCollection, optionsData, callback) {
 
     _.forEach(speciesDataCollection, function (speciesProps, speciesName) {
 
-        _.forEach(speciesProps, function (speciesPropData) {
-            if (optionsData[speciesName][speciesPropData.key]) {
-                speciesPropData.options = optionsData[speciesName][speciesPropData.key];
-            } else if (optionsData[speciesName]['breed'] && speciesPropData.key.match(/breed/ig)) {
-                speciesPropData.options = optionsData[speciesName]['breed'].sort();
+        _.forEach(speciesProps, function (speciesProp) {
+            if (optionsData[speciesName][speciesProp.key]) {
+                speciesProp.options = optionsData[speciesName][speciesProp.key];
+            } else if (optionsData[speciesName]['breed'] && speciesProp.key.match(/breed/ig)) {
+                speciesProp.options = optionsData[speciesName]['breed'].sort();
             } else {
-                speciesPropData.options = [];
+                speciesProp.options = [];
             }
         });
     });
