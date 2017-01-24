@@ -3,7 +3,6 @@ var util = require('util'),
     fs = require('fs'),
 
     _ = require('lodash'),
-    async = require('async'),
 
     config = require('../config'),
     Debuggable = require('../lib/debuggable'),
@@ -81,19 +80,18 @@ MongoAPIDatabase.prototype = {
      * @private
      */
     _saveToSpeciesCache: function (speciesCollectionDoc) {
-        this.speciesCache = _.reduce(speciesCollectionDoc.speciesList, function (collection, speciesData) {
-            collection[speciesData.name] = new Species(speciesData.name, speciesData.props);
-            return collection;
-        }, {});
+        this.speciesCache = _.reduce(speciesCollectionDoc.speciesList, function (speciesCache, speciesData) {
+            speciesCache[speciesData.name] = new Species(speciesData.name, speciesData.props);
+            return speciesCache;
+        }, this.speciesCache || {});
     },
 
 
     /**
      *
      * @param {SpeciesDBImage[]} speciesDBImages
-     * @param {Function} [onUpdateComplete]
      */
-    uploadDBImages: function (speciesDBImages, onUpdateComplete) {
+    uploadDBImages: function (speciesDBImages) {
         var self = this;
 
 
@@ -118,18 +116,22 @@ MongoAPIDatabase.prototype = {
             });
         }
 
-        var resetPromiseHandler = function (resolve, reject) {
+        var uploadPromiseHandler = function (resolve, reject) {
             self.clearAnimals(function () {
-                var dbSaveOps = speciesDBImages.map(function (dbImage) {
-                    return saveDBImage(dbImage);
-                });
-                Promise.all(dbSaveOps)
+                var dbSaveOps = speciesDBImages.reduce(
+                    function (saveOpChain, dbImage) {
+                        return saveOpChain.then(function () {
+                            return saveDBImage(dbImage)
+                        });
+                    }, Promise.resolve());
+
+                dbSaveOps
                     .then(resolve)
                     .catch(reject);
             });
         };
 
-        return new Promise(resetPromiseHandler);
+        return new Promise(uploadPromiseHandler);
 
 
     },
@@ -364,7 +366,7 @@ MongoAPIDatabase.prototype = {
         this.AnimalDB.findAnimals(props, _options);
     },
 
-    _getAnimalSpeciesFromProps: function(props){
+    _getAnimalSpeciesFromProps: function (props) {
         var speciesProp = props.species || _.find(props, {key: 'species'});
         return speciesProp ? speciesProp.val || speciesProp : null;
     },
@@ -374,7 +376,7 @@ MongoAPIDatabase.prototype = {
      * @param {Function} [callback]
      */
     clearAnimals: function (callback) {
-        this.AnimalDB.clear(callback)
+        return this.AnimalDB.clear(callback)
     },
 
     stop: function (callback) {

@@ -74,7 +74,7 @@ describe("Formatter", function () {
     });
 
 
-    describe("formatDB()", function () {
+    describe.only("formatDB()", function () {
         var apiDatabase;
 
         before(function (done) {
@@ -94,26 +94,24 @@ describe("Formatter", function () {
         });
 
         after(function (done) {
-            apiDatabase.clearAnimals(function () {
-                apiDatabase
-                    .stop()
-                    .then(done)
-                    .catch(done)
-            });
+            apiDatabase.clearAnimals()
+                .then(apiDatabase.stop.bind(apiDatabase))
+                .then(done)
+                .catch(done)
         });
 
         it("formats an entire database", function (done) {
             function checkAnimal(animalData, speciesProps) {
                 speciesProps.forEach(function (testPropData) {
                     if (!animalData[testPropData.key]) {
-                        console.log("invalid prop: %s", testPropData.key);
+                        throw new Error("invalid prop: " + testPropData.key);
                     }
                     expect(animalData[testPropData.key].val).not.to.be(undefined, 'value for ' + testPropData.key + 'should be defined');
                 });
             }
 
             function checkAnimals(speciesName, speciesProps) {
-                return new Promise(function(resolve, reject){
+                return new Promise(function (resolve, reject) {
                     apiDatabase.findAnimals({
                         species: speciesName
                     }, {
@@ -132,7 +130,7 @@ describe("Formatter", function () {
                     testDBFormatter.formatDB(apiDatabase, {
                         createMissingFields: true,
                         populateEmptyFields: true,
-                        complete: function(){
+                        complete: function () {
                             checkAnimals(dbImage.getSpeciesName(), dbImage.getSpeciesProps())
                                 .then(resolve)
                                 .catch(reject)
@@ -143,7 +141,7 @@ describe("Formatter", function () {
 
             Promise
                 .all(dbTests)
-                .then(function(){
+                .then(function () {
                     // wrap done to handle args
                     done()
                 })

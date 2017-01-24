@@ -246,11 +246,14 @@ AnimalDatabase.prototype = {
      */
     clear: function (callback) {
         var self = this;
-        this.exec(function(){
-            self.MongooseModel.remove({}, function (err) {
-                if (callback) callback(err);
-            });
-        })
+        return new Promise(function(resolve, reject){
+            self.exec(function(){
+                self.MongooseModel.remove({}, function (err) {
+                    if (callback) callback(err);
+                    err ? reject(err) : resolve();
+                });
+            })
+        });
     }
 };
 

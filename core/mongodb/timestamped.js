@@ -22,8 +22,6 @@ var util = require('util'),
  */
 function TimestampedDatabase(collection, options) {
 
-    var self = this;
-
     this.collection = collection;
 
     /**
@@ -36,26 +34,6 @@ function TimestampedDatabase(collection, options) {
             this.timestamp = new Date;
             next()
         })
-    });
-
-    this.collection.addStaticMethod('getLatest', function (callback) {
-        self.log(Debuggable.LOW, 'getting latest model for %s', self.collection.getCollectionName());
-        var TimestampedMongooseModel = this.model(self.collection.getCollectionName());
-
-        TimestampedMongooseModel.findOne({})
-            .lean()
-            .sort({
-                timestamp: -1
-            })
-            .exec(function (err, latestModel) {
-                if (err) {
-                    callback(err)
-                } else if (!latestModel) {
-                    callback(new Error('Model collection is empty()'));
-                } else {
-                    callback(null, latestModel);
-                }
-            })
     });
 
     Database.call(this, this.collection, options);
@@ -73,23 +51,30 @@ TimestampedDatabase.prototype = {
             _options = _.defaults(options, self._config.queryOptions);
 
         this.exec(function () {
-            self.MongooseModel.getLatest(function (err, doc) {
-                if (err || !doc) {
-                    err = new DBError(err || "No docs found");
-                    self.error(err);
-                    if (_options.complete) _options.complete(err);
-                } else {
-                    var cacheNamespace = util.format('%s.%s', self.getConfig('speciesName') || self.collection.getCollectionName(), moment(doc.timestamp).format('M.D.YYYY'));
-                    self.cacheData(cacheNamespace, doc, {
-                        dir: path.join(process.cwd(), 'data/'),
-                        type: ['json'],
-                        done: function (cacheSaveErr) {
-                            self.log(Debuggable.LOW, 'updated cached species props');
-                            if (_options.complete) _options.complete(cacheSaveErr, doc);
-                        }
-                    });
-                }
-            });
+            self.MongooseModel
+                .findOne({})
+                .lean()
+                .sort({
+                    timestamp: -1
+                })
+                .exec(function (err, doc) {
+                    if (err || !doc) {
+                        err = new DBError(err || "No docs found");
+                        self.error(err);
+                        if (_options.complete) _options.complete(err);
+                    } else {
+                        // TODO fs caching should probably be removed
+                        var cacheNamespace = util.format('%s.%s', self.getConfig('speciesName') || self.collection.getCollectionName(), moment(doc.timestamp).format('M.D.YYYY'));
+                        self.cacheData(cacheNamespace, doc, {
+                            dir: path.join(process.cwd(), 'data/'),
+                            type: ['json'],
+                            done: function (cacheSaveErr) {
+                                self.log(Debuggable.LOW, 'updated cached species props');
+                                if (_options.complete) _options.complete(cacheSaveErr, doc);
+                            }
+                        });
+                    }
+                });
         });
     }
 };
