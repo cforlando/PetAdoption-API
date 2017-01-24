@@ -75,7 +75,7 @@ Animal.prototype = {
     toMongooseDoc: function () {
         return {
             petId: this.getValue('petId'),
-            props: this.getProps().map(function(propData){
+            props: this.getProps().map(function (propData) {
                 switch (propData.valType) {
                     case 'Number':
                         propData.val = parseInt(propData.val);
@@ -152,9 +152,12 @@ Animal.prototype = {
     },
 
     toQuery: function (metaProps) {
-        var props = metaProps ? this.toArray().concat(metaProps) : this.toArray(),
+        var props = metaProps ? Object.keys(metaProps).reduce(function (mergedProps, propName) {
+                    mergedProps[propName] = metaProps[propName];
+                    return mergedProps;
+                }, this.toObject()) : this.toObject(),
             animalQuery = new AnimalQuery(props, this);
-        return animalQuery.toObject();
+        return animalQuery.toMongoQuery();
     }
 };
 

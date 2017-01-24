@@ -45,9 +45,7 @@ function Database(collection, options) {
 
     this.MongooseModel = this.collection.toMongooseModel(this.getAdapter());
 
-    this.getAdapter().on('connected', function () {
-        self._processQueue();
-    });
+    this.getAdapter().on('connected', this._processQueue.bind(this))
 }
 
 Database.prototype = {
@@ -123,9 +121,10 @@ Database.prototype = {
      */
     stop: function (callback) {
         this.getAdapter().once('close', function () {
-            callback();
+            if (callback) callback();
         });
-        this.getAdapter().close();
+
+        return this.getAdapter().close();
     },
 
     /**

@@ -35,6 +35,7 @@ function MongoAPIDatabase(options) {
             debugLevel: Debuggable.PROD,
             debugTag: 'MongoAPIDatabase: ',
             collectionNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_ ',
+            // TODO this should probably be removed
             preset: (function () {
 
                 var catProps = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'data/props.cat.json')), 'utf8'),
@@ -74,7 +75,12 @@ function MongoAPIDatabase(options) {
 
 MongoAPIDatabase.prototype = {
 
-    _setSpeciesCacheFromCollection: function (speciesCollectionDoc) {
+    /**
+     *
+     * @param speciesCollectionDoc
+     * @private
+     */
+    _saveToSpeciesCache: function (speciesCollectionDoc) {
         this.speciesCache = _.reduce(speciesCollectionDoc.speciesList, function (collection, speciesData) {
             collection[speciesData.name] = new Species(speciesData.name, speciesData.props);
             return collection;
@@ -85,36 +91,50 @@ MongoAPIDatabase.prototype = {
     /**
      *
      * @param {SpeciesDBImage[]} speciesDBImages
-     * @param {Function} [onSetComplete]
+     * @param {Function} [onUpdateComplete]
      */
-    uploadDBImages: function (speciesDBImages, onSetComplete) {
+    uploadDBImages: function (speciesDBImages, onUpdateComplete) {
         var self = this;
-        self.clearAnimals(function () {
-            async.eachSeries(speciesDBImages,
-                function each(dbImage, done) {
 
-                    self.saveSpecies(dbImage.getSpeciesName(), dbImage.getSpeciesProps(), {
+
+        function saveAnimals(speciesName, animals) {
+            return Promise.all(animals.map(function (animalData) {
+                return self.saveAnimal(speciesName, animalData);
+            }));
+        }
+
+        function saveDBImage(dbImage) {
+            return new Promise(function (resolve, reject) {
+                self.saveSpecies(
+                    dbImage.getSpeciesName(),
+                    dbImage.getSpeciesProps(),
+                    {
                         complete: function () {
-                            async.eachSeries(dbImage.getAnimals(),
-                                function each(animalData, onAnimalSaved) {
-                                    self.saveAnimal(dbImage.getSpeciesName(), animalData, {
-                                        complete: function (err) {
-                                            onAnimalSaved(err)
-                                        }
-                                    })
-                                },
-                                function (err) {
-                                    done(err);
-                                }
-                            );
+                            saveAnimals(dbImage.getSpeciesName(), dbImage.getAnimals())
+                                .then(resolve)
+                                .catch(reject);
                         }
                     })
-                },
-                function complete(err) {
-                    if (onSetComplete) onSetComplete(err);
-                })
-        });
+            });
+        }
+
+        var resetPromiseHandler = function (resolve, reject) {
+            self.clearAnimals(function () {
+                var dbSaveOps = speciesDBImages.map(function (dbImage) {
+                    return saveDBImage(dbImage);
+                });
+                Promise.all(dbSaveOps)
+                    .then(resolve)
+                    .catch(reject);
+            });
+        };
+
+        return new Promise(resetPromiseHandler);
+
+
     },
+
+
     /**
      *
      * @param [options]
@@ -171,12 +191,13 @@ MongoAPIDatabase.prototype = {
     findSpecies: function (speciesName, options) {
         var self = this,
             _options = _.defaults(options, {});
+
         this.SpeciesCollectionDB.findLatest({
             complete: function (err, speciesCollectionDoc) {
                 if (err) {
                     if (_options.complete) _options.complete(err)
                 } else {
-                    self._setSpeciesCacheFromCollection(speciesCollectionDoc);
+                    self._saveToSpeciesCache(speciesCollectionDoc);
                     var speciesDoc = _.find(speciesCollectionDoc.speciesList, {name: speciesName.toLocaleLowerCase()});
                     if (speciesDoc) {
                         if (_options.complete) _options.complete(null, speciesDoc)
@@ -202,33 +223,40 @@ MongoAPIDatabase.prototype = {
             _options = _.defaults(options, {}),
             species = new Species(speciesName, props);
 
-
         this.SpeciesCollectionDB.findLatest({
             complete: function (err, speciesCollectionDoc) {
                 if (err) {
-                    // if (_options.complete) _options.complete(err);
-                    // return;
+                    // if (_options.complete) return _options.complete(err);
                     console.error(err);
                 }
 
+                // create speciesCollectionDoc if not already defined
                 speciesCollectionDoc = speciesCollectionDoc || {speciesList: []};
 
+                // search for species in speciesCollectionDoc
                 var prevSpeciesDoc = _.find(speciesCollectionDoc.speciesList, {name: species.getSpeciesName()}),
                     newSpeciesDoc = species.toMongooseDoc();
 
                 if (prevSpeciesDoc) {
+
                     // update referenced species doc in collection
                     speciesCollectionDoc.speciesList = speciesCollectionDoc.speciesList.map(function (speciesDoc) {
                         return speciesDoc.name == newSpeciesDoc.name ? newSpeciesDoc : speciesDoc
                     });
+
                 } else {
-                    // add new species doc
+
+                    // add new species to speciesCollection
                     speciesCollectionDoc.speciesList.push(newSpeciesDoc);
+
                 }
 
                 var newSpeciesCollectionDoc = _.omit(speciesCollectionDoc, ['_id', '__v']);
 
-                self._setSpeciesCacheFromCollection(newSpeciesCollectionDoc);
+                // this is unnecessary but can serve as a backup in case of data loss in the db
+                // cache a copy of speciesCollection (currently a local json file)
+                self._saveToSpeciesCache(newSpeciesCollectionDoc);
+
                 // save updated species collection
                 self.SpeciesCollectionDB.create(newSpeciesCollectionDoc, {
                     complete: function (err, newSpeciesCollection) {
@@ -247,15 +275,18 @@ MongoAPIDatabase.prototype = {
      * @param {Function} [options.complete]
      */
     deleteSpecies: function (speciesName, options) {
-
         var self = this,
             _options = _.defaults(options, {});
 
 
         this.SpeciesCollectionDB.findLatest({
             complete: function (err, speciesCollectionDoc) {
+
+                // create a new speciesCollection to save to database
+                // NOTE we are not updating, but creating a new speciesCollection each time
+                // db size can become a concern if a species is updated many times
                 var newSpeciesCollectionDoc = _.chain(speciesCollectionDoc)
-                    .omit(['_id', '__v'])
+                    .omit(['_id', '__v']) // remove mongodb-generated properties
                     .set('speciesList', _.reject(speciesCollectionDoc.speciesList, {name: speciesName}))
                     .value();
 
@@ -281,6 +312,7 @@ MongoAPIDatabase.prototype = {
                 species: this.speciesCache[speciesName]
             }),
             animal = new Animal(opts.species, props);
+
         this.AnimalDB.removeAnimal(animal, opts);
     },
 
@@ -293,11 +325,27 @@ MongoAPIDatabase.prototype = {
      * @param {Function} [options.complete]
      */
     saveAnimal: function (speciesName, props, options) {
-        var opts = _.defaults(options, {
-                species: this.speciesCache[speciesName]
-            }),
-            animal = new Animal(opts.species, props);
-        this.AnimalDB.saveAnimal(animal, opts);
+        var self = this;
+        return new Promise(function (resolve, reject) {
+            var _opts = _.defaults({
+
+                    // reuse cached species instance
+                    species: self.speciesCache[speciesName],
+
+                    // TODO remove support for saveAnimal options.complete callback
+                    // wrap callback
+                    complete: function (err, animalData) {
+                        if (options && options.complete) {
+                            options.complete.apply(null, arguments);
+                        }
+                        err ? reject(err) : resolve(animalData);
+                    }
+                }, options),
+                animal = new Animal(_opts.species, props);
+
+            self.AnimalDB.saveAnimal(animal, _opts);
+        })
+
     },
 
 
@@ -309,8 +357,16 @@ MongoAPIDatabase.prototype = {
      * @param {Function} [options.complete]
      */
     findAnimals: function (props, options) {
-        var _options = _.defaults(options, {});
+        var _options = _.defaults(options, {
+            species: this.speciesCache[this._getAnimalSpeciesFromProps(props)]
+        });
+
         this.AnimalDB.findAnimals(props, _options);
+    },
+
+    _getAnimalSpeciesFromProps: function(props){
+        var speciesProp = props.species || _.find(props, {key: 'species'});
+        return speciesProp ? speciesProp.val || speciesProp : null;
     },
 
     /**
@@ -322,13 +378,16 @@ MongoAPIDatabase.prototype = {
     },
 
     stop: function (callback) {
-        async.eachSeries([this.AnimalDB, this.UserDB, this.SpeciesCollectionDB],
-            function each(database, done) {
-                database.stop(done);
-            },
-            function complete(err) {
-                callback(err);
-            })
+        return Promise.all([
+            this.AnimalDB,
+            this.UserDB,
+            this.SpeciesCollectionDB
+        ].map(function (db) {
+            return db.stop()
+        })).then(function () {
+            if (callback) callback();
+            return Promise.resolve();
+        })
     }
 
 };

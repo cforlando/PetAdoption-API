@@ -18,6 +18,7 @@ var path = require('path'),
  * @extends Database
  * @class AnimalDatabase
  * @param {Object} [options]
+ * @param {MongoDBAdapter} [options.adapter]
  * @param {Boolean} [options.isDevelopment]
  * @param {DebugLevel} [options.debugLevel]
  * @param {String} [options.debugTag]
@@ -104,29 +105,6 @@ function AnimalDatabase(options) {
         }
     });
 
-    this.collection.addStaticMethod('findAnimals', function (props, options, callback) {
-        self.log(Debuggable.MED, 'Received query for %s', self.dump(props));
-        var hasOptions = _.isPlainObject(options),
-            _options = hasOptions ? _.defaults(options, {}) : {},
-            onComplete = (hasOptions) ? callback : options,
-            animalQuery = new AnimalQuery(props),
-            query = animalQuery.toMongoQuery();
-
-        this.model(self.collection.getCollectionName())
-            .find(query)
-            .lean()
-            .exec(function (err, animals) {
-                if (err) {
-                    self.error(err);
-                    onComplete(err);
-                } else {
-                    self.log(Debuggable.MED, 'findAnimals() - found %s w/ %o', animals.length, query);
-                    self.log(Debuggable.TMI, 'findAnimals() - found animals (preformatted): ', animals);
-                    onComplete(err, animals);
-                }
-            })
-    });
-
     Database.call(this, this.collection);
 
     this.setDebugLevel(_options.debugLevel);
@@ -180,8 +158,9 @@ AnimalDatabase.prototype = {
 
     /**
      *
-     * @param props
+     * @param {Object|Object[]}props an object with v1 properties or an array of v1 property objects
      * @param {Object} options
+     * @param {Species} [options.species]
      * @param {Boolean} [options.isV1Format] V1 format includes additional metadata
      * @param {AnimalQueryCallback} options.complete callback on operation completion
      * @param {Boolean} [options.isV1Format=true]
@@ -191,24 +170,32 @@ AnimalDatabase.prototype = {
         var self = this,
             _options = _.defaults(options, self._config.queryOptions);
 
-        self.log(Debuggable.HIGH, "findAnimals(%s)", this.dump(arguments));
+        self.log(Debuggable.MED, 'Received query for %s', self.dump(props));
 
         this.exec(function () {
-            self.log(Debuggable.HIGH, "mongodb.findAnimals() - received query for: ", props);
+            var animalQuery = new AnimalQuery(props, _options.species),
+                query = animalQuery.toMongoQuery();
 
-            self.MongooseModel.findAnimals(props, {
-                isV1Format: _options.isV1Format
-            }, function (err, animals) {
-                if (err) {
-                    err = new DBError(err);
-                    self.error(err);
-                }
-                if (_options.complete) _options.complete(err, animals.map(function (animalData) {
-                    var newAnimal = new Animal(animalData.props);
-                    newAnimal.setValue('petId', animalData._id.toString());
-                    return _options.isV1Format ? newAnimal.toObject() : newAnimal.toLeanObject();
-                }));
-            })
+            self.MongooseModel
+                .find(query)
+                .lean()
+                .exec(function (err, animals) {
+                    if (err) {
+                        var dbErr = new DBError(err);
+                        self.error(dbErr);
+                        if (_options.complete) _options.complete(dbErr);
+                    } else {
+                        self.log(Debuggable.MED, 'findAnimals() - found %s w/ %o', animals.length, query);
+                        self.log(Debuggable.TMI, 'findAnimals() - found animals (preformatted): ', animals);
+                        if (_options.complete) {
+                            _options.complete(null, animals.map(function (animalData) {
+                                var newAnimal = new Animal(animalData.props);
+                                newAnimal.setValue('petId', animalData._id.toString());
+                                return _options.isV1Format ? newAnimal.toObject() : newAnimal.toLeanObject();
+                            }));
+                        }
+                    }
+                })
         });
     },
 
@@ -258,9 +245,12 @@ AnimalDatabase.prototype = {
      * @param {Function} [callback]
      */
     clear: function (callback) {
-        this.MongooseModel.remove({}, function (err) {
-            if (callback) callback(err);
-        });
+        var self = this;
+        this.exec(function(){
+            self.MongooseModel.remove({}, function (err) {
+                if (callback) callback(err);
+            });
+        })
     }
 };
 

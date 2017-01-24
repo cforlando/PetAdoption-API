@@ -13,54 +13,63 @@ var _ = require('lodash'),
 function Query(props, species) {
 
     var self = this,
-        metaProps = ['matchStartFor', 'matchEndFor', 'ignoreCaseFor'],
-        queryMetaProps = _.isArray(props) ? _.filter(props, function (propData, index) {
-                return propData && _.includes(metaProps, propData.key)
-            }) : _.pick(props, metaProps);
+        metaPropNames = ['matchStartFor', 'matchEndFor', 'ignoreCase', 'ignoreCaseFor', 'properties'],
+        rawQueryMetaProps = _.isArray(props) ? _.filter(props, function (propData, index) {
+                return propData && _.includes(metaPropNames, propData.key)
+            }) : _.pick(props, metaPropNames);
 
-    this.metaProps = metaProps;
+    this.metaPropNames = metaPropNames;
     this.species = species;
     this.props = props;
-    this.queryMeta = _.reduce(queryMetaProps, function (collection, metaPropData, metaPropIdx) {
-        collection[metaPropData.key || metaPropIdx] = self.parseArrayStr(metaPropData.val || metaPropData);
-        return collection;
+    this.queryMeta = _.reduce(rawQueryMetaProps, function (queryMetaProps, metaPropValue, metaPropName) {
+        queryMetaProps[metaPropName] = self.parseArrayStr(metaPropValue);
+        return queryMetaProps;
     }, {});
 }
 
 Query.prototype = {
 
     toObject: function () {
-        var props = this.props,
-            queryMeta = this.queryMeta,
-            metaProps = this.metaProps,
-            species = this.species;
+        return _.omit(this.props, this.metaPropNames);
+    },
 
-        return _.reduce(_.omit(props, metaProps), function (query, propData, propIdx) {
+    toFormattedObject: function () {
+        var self = this;
+        return _.reduce(this.toObject(), function (collection, propData, propIdx) {
             var propName = propData.key ? propData.key : propIdx,
                 propValue = propData.key ? propData.val : propData,
-                propType = (function(){
-                    if (propData.valType) {
+                propType = (function () {
+                    if (self.species && self.species.getProp(propName)) {
+                        return self.species.getProp(propName).valType;
+                    } else if (propData.valType) {
                         return propData.valType;
-                    } else if(_.isDate(propValue)){
+                    } else if (_.isDate(propValue)) {
                         return 'Date'
-                    } else if (_.isFinite(propValue)){
+                    } else if (_.isFinite(propValue)) {
                         return 'Number';
-                    } else if (_.isNumber(propValue)){
+                    } else if (_.isNumber(propValue)) {
                         return 'Float';
+                    } else if (propValue !== undefined
+                        && propValue !== null
+                        && /^\s*(y|yes|true|n|no|false)\s*$/i.test(propValue.toString())
+                    ) {
+                        return 'Boolean';
                     } else {
                         return null;
                     }
-                })(),
-                queryFieldName = propName;
+                })();
 
-            if (propValue == undefined ||
-                propValue == null ||
-                (species && !_.find(species.getSpeciesProps(), {key: propName}))
+            if (propValue == undefined
+                || propValue == null
+                || (self.species && !_.find(self.species.getSpeciesProps(), {key: propName}))
             ) {
                 // ignore invalid props
             } else {
-                // continue build query
+
                 switch (propType) {
+                    case 'Boolean':
+                        propValue = /^\s*(y|yes|true)\s*$/i.test(propValue.toString());
+                        break;
                     case 'Number':
                         propValue = parseInt(propValue);
                         break;
@@ -72,27 +81,47 @@ Query.prototype = {
                         break;
                 }
 
+            }
+            collection[propName] = {
+                key: propName,
+                valType: propType,
+                val: propValue
+            };
+            return collection;
+
+        }, {});
+    },
+
+    toMongoQuery: function () {
+        var self = this,
+            query = {},
+            queryMeta = this.queryMeta,
+            props = _.reduce(this.toFormattedObject(), function (mongoQueryProps, propData) {
+                var propValue = propData.val,
+                    propName = propData.key;
+
                 switch (propName) {
                     case 'petId':
                     case 'hashId':
                     case '_id':
                         // only use given id and quit early
-                        query = {
+                        mongoQueryProps = {
                             petId: propValue.toString()
                         };
                         break;
                     case 'species':
-                        if (_.isRegExp(propValue)){
-                            query[queryFieldName] = propValue;
+                        if (_.isRegExp(propValue)) {
+                            mongoQueryProps[propName] = propValue;
                         } else {
-                            query[queryFieldName] = new RegExp(propValue.toString(), 'i');
+                            mongoQueryProps[propName] = new RegExp(propValue.toString(), 'i');
                         }
                         break;
                     case 'images':
                         // ignore images
                         break;
                     default:
-                        if (propType && propType.toLowerCase() == 'string' && !_.isRegExp(propValue)) {
+
+                        if (self.isPropRegex(propData)) {
                             var prefix = '',
                                 suffix = '',
                                 regexArgs = '';
@@ -102,28 +131,22 @@ Query.prototype = {
                             if (queryMeta.matchEndFor && _.includes(queryMeta.matchEndFor, propName)) {
                                 suffix = '$';
                             }
-                            if (queryMeta.ignoreCaseFor && _.includes(queryMeta.ignoreCaseFor, propName)) {
+                            if (queryMeta.ignoreCase && _.includes(queryMeta.ignoreCase, propName)
+                                || queryMeta.ignoreCaseFor && _.includes(queryMeta.ignoreCaseFor, propName)) {
                                 regexArgs = 'i';
                             }
                             if (propName == 'color' || propName == 'petName') {
                                 // ignore case for color,petName searches
                                 regexArgs = 'i';
                             }
-                            query[queryFieldName] = new RegExp(util.format('%s%s%s', prefix, propValue.toString(), suffix), regexArgs);
+                            mongoQueryProps[propName] = new RegExp(util.format('%s%s%s', prefix, self.escapeRegExp(propValue), suffix), regexArgs);
                         } else {
-                            query[queryFieldName] = propValue;
+                            mongoQueryProps[propName] = propValue;
                         }
                         break;
                 }
-            }
-            return query;
-
-        }, {});
-    },
-
-    toMongoQuery: function(){
-        var query = {},
-            props = this.toObject();
+                return mongoQueryProps;
+            }, {});
 
         if (props._id || props.petId) {
             query = {
@@ -149,6 +172,27 @@ Query.prototype = {
 
         return query;
     },
+
+    isPropRegex: function (propData) {
+        var self = this,
+            isString = propData.valType && propData.valType.toLowerCase() == 'string' && !_.isRegExp(propData.val),
+            hasMeta = (function () {
+                var result = false;
+                _.forEach(self.queryMeta, function (queryMetaValue) {
+                    if (_.includes(queryMetaValue, propData.key)) {
+                        result = true;
+                        return false;
+                    }
+                });
+                return result;
+            })();
+        return isString || hasMeta;
+    },
+
+    escapeRegExp: function (str) {
+        return str.toString().replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+    },
+
     parseArrayStr: function (str) {
         try {
             var _result = str

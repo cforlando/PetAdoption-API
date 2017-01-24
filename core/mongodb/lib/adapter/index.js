@@ -76,7 +76,8 @@ MongoDBAdapter.prototype = {
             mongoConnectionURI = _options.mongoConnectionURI,
             context = _options.context,
 
-            // use local var declaration to keep scope of callbacks to this call only. ie. don't overwrite initial values
+            // use local var declaration to keep scope of callbacks to this call only.
+            // ie. don't overwrite initial values
             callbacks = _.reduce(this._callbacks, function (callbacks, callbackFunc, callbackName) {
                 callbacks[callbackName] = _options[callbackName] || callbackFunc;
                 return callbacks;
@@ -139,7 +140,14 @@ MongoDBAdapter.prototype = {
      * @param callback
      */
     close: function (callback) {
-        this._mongoose.close(callback);
+        var self = this;
+        return new Promise(function(resolve, reject){
+            if (!self._mongoose) return resolve();
+            self._mongoose.close(function(){
+                if (callback) callback();
+                resolve();
+            });
+        })
     },
 
     /**
