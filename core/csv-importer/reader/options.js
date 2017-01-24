@@ -27,21 +27,25 @@ var fs = require('fs'),
     };
 
 function parseOptionsCSV(csvData) {
-    console.log('sanitizing options');
+    console.log('parsing csv options...');
 
-    var optionsData = {},
-        csvLabelsRow = csvData[0];
-    _.forEachRight(csvLabelsRow, function (field, index, collection) {
-        optionsData[field] = [];
-    });
-    _.forEachRight(csvData, function (csvRow, index, options) {
-        if (index == 0) return; //skip the field labels
-        for (var column = 0; column < csvLabelsRow.length; column++) {
-            if (csvRow[column]) optionsData[csvLabelsRow[column]].push(csvRow[column]);
-        }
-    });
-
-    console.log('sanitized options');
+    var csvLabelsRow = csvData[0],
+        optionsData = _.reduce(csvData, function (collection, csvRow, rowIndex) {
+            if (rowIndex == 0) {
+                csvRow.forEach(function (fieldName) {
+                    collection[_.camelCase(fieldName)] = [];
+                });
+            } else {
+                for (var column = 0; column < csvLabelsRow.length; column++) {
+                    if (csvRow[column]) {
+                        var fieldName = csvLabelsRow[column];
+                        collection[_.camelCase(fieldName)].push(csvRow[column]);
+                    }
+                }
+            }
+            return collection;
+        }, {});
+    console.log('parsed csv options');
     return optionsData;
 }
 
@@ -62,16 +66,16 @@ module.exports = {
             optionsData = {};
         async.each(fileList,
             function each(filePath, done) {
-                
-                helperUtils.download(filePath, function(err, content){
-                    if(err) throw err;
+
+                helperUtils.download(filePath, function (err, content) {
+                    if (err) throw err;
                     csv.parse(content, function onParsed(err, csvData) {
                         var namespace = helperUtils.getTypeFromPath(filePath);
                         optionsData[namespace] = parseOptionsCSV(csvData);
                         done();
                     });
                 });
-                
+
             },
             function complete(error) {
                 if (error) throw error;
