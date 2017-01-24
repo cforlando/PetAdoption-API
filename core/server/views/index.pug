@@ -12,7 +12,7 @@ html
 
         link(rel='stylesheet', href='/stylesheets/style.min.css')
 
-        script(src="//maps.googleapis.com/maps/api/js")
+        script(src="//maps.googleapis.com/maps/api/js?key=" + GOOGLE_MAPS_KEY)
     body(ng-controller='appController')
         .loading-screen(layout="row", layout-sm="column", layout-align="center center", ng-show="loadingQueue.length > 0")
             md-progress-circular(md-mode="indeterminate")
