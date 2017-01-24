@@ -74,6 +74,23 @@ describe("Species", function () {
         })
     });
 
+    describe("removeProp()", function(){
+        var newTestPropName = 'aTestProp',
+            anotherTestSpecies = new Species('testSpecies', [
+                {
+                    key: newTestPropName,
+                    valType: 'String'
+                }
+            ]);
+
+        it("deletes a species' prop", function () {
+            var beforePropsLength = anotherTestSpecies.getProps().length;
+            anotherTestSpecies.removeProp(newTestPropName);
+            expect(anotherTestSpecies.getProps().length).to.equal(beforePropsLength - 1, 'there should be one less prop');
+            expect(anotherTestSpecies.getProp(newTestPropName)).to.be(undefined);
+        })
+    });
+
     describe("getPropByKey()", function () {
         var newTestPropName = 'aTestProp',
             cTestSpecies = new Species('testSpecies'),

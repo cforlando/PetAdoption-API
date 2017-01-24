@@ -1,8 +1,5 @@
-var util = require("util"),
+var _ = require('lodash'),
 
-    _ = require('lodash'),
-
-    Debuggable = require('./debuggable'),
     AnimalQuery = require('./query'),
     Species = require('./species');
 
@@ -46,6 +43,18 @@ Animal.prototype = {
     getValue: function (propName) {
         var prop = _.find(this.props, {key: propName});
         return prop ? prop.val : null;
+    },
+
+    getId: function(){
+        return this.getValue('id')
+    },
+
+    getSpeciesName: function(){
+        return this.getValue('species')
+    },
+
+    getName: function(){
+        return this.getValue('name')
     },
 
     setValue: function (propName, propValue) {
@@ -108,7 +117,6 @@ Animal.prototype = {
             self = this;
         return _.reduce(this.props, function (propCollection, propData) {
             var propValue = propData.val;
-            self.log(Debuggable.HIGH, "parsing prop '%s' for response", propData.key);
             switch (propData.key) {
                 case '_id':
                 case '__v':

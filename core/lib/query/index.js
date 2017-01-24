@@ -1,7 +1,4 @@
-var _ = require('lodash'),
-    util = require('util'),
-
-    Debuggable = require('../debuggable');
+var _ = require('lodash');
 
 /**
  * @class QueryProp
@@ -139,7 +136,7 @@ Query.prototype = {
                                 // ignore case for color,petName searches
                                 regexArgs = 'i';
                             }
-                            mongoQueryProps[propName] = new RegExp(util.format('%s%s%s', prefix, self.escapeRegExp(propValue), suffix), regexArgs);
+                            mongoQueryProps[propName] = new RegExp(prefix + self.escapeRegExp(propValue) + suffix, regexArgs);
                         } else {
                             mongoQueryProps[propName] = propValue;
                         }

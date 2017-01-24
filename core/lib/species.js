@@ -1,6 +1,4 @@
-var _ = require('lodash'),
-
-    Debuggable = require('./debuggable');
+var _ = require('lodash');
 
 /**
  * @class Species
@@ -9,7 +7,7 @@ var _ = require('lodash'),
  * @constructor
  */
 function Species(speciesName, props) {
-    this.name = speciesName;
+    this.speciesName = speciesName;
     this.baseProps = [
         {
             key: 'petId',
@@ -63,7 +61,7 @@ function Species(speciesName, props) {
 Species.prototype = {
 
     getSpeciesName: function () {
-        return this.name
+        return this.speciesName
     },
 
     setProps: function (props) {
@@ -75,6 +73,12 @@ Species.prototype = {
                 })
                 .value()
         }
+    },
+
+    removeProp: function(propName){
+        this.props = _.reject(this.props, function(propData){
+            return propData.key == propName;
+        });
     },
 
     getProp: function (propName) {
@@ -120,12 +124,10 @@ Species.prototype = {
 
     toMongooseDoc: function () {
         return {
-            name: this.getSpeciesName(),
+            speciesName: this.getSpeciesName(),
             props: this.getProps()
         }
     }
 };
-
-_.defaults(Species.prototype, Debuggable.prototype);
 
 module.exports = Species;

@@ -396,7 +396,7 @@ APIController.prototype = {
         var self = this;
         return function (req, res, next) {
 
-            self.database.createSpecies(
+            self.database.saveSpecies(
                 req.params.species,
                 req.body, {
                     debug: self._apiOptions.debugLevel,

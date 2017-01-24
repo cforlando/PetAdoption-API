@@ -81,7 +81,7 @@ MongoAPIDatabase.prototype = {
      */
     _saveToSpeciesCache: function (speciesCollectionDoc) {
         this.speciesCache = _.reduce(speciesCollectionDoc.speciesList, function (speciesCache, speciesData) {
-            speciesCache[speciesData.name] = new Species(speciesData.name, speciesData.props);
+            speciesCache[speciesData.speciesName] = new Species(speciesData.speciesName, speciesData.props);
             return speciesCache;
         }, this.speciesCache || {});
     },
@@ -150,7 +150,7 @@ MongoAPIDatabase.prototype = {
                 var speciesList = [];
                 if (latestSpeciesCollection) {
                     speciesList = latestSpeciesCollection.speciesList.map(function (speciesDoc) {
-                        return speciesDoc.name;
+                        return speciesDoc.speciesName;
                     });
                 }
 
@@ -200,7 +200,7 @@ MongoAPIDatabase.prototype = {
                     if (_options.complete) _options.complete(err)
                 } else {
                     self._saveToSpeciesCache(speciesCollectionDoc);
-                    var speciesDoc = _.find(speciesCollectionDoc.speciesList, {name: speciesName.toLocaleLowerCase()});
+                    var speciesDoc = _.find(speciesCollectionDoc.speciesList, {speciesName: speciesName.toLocaleLowerCase()});
                     if (speciesDoc) {
                         if (_options.complete) _options.complete(null, speciesDoc)
                     } else {
@@ -236,14 +236,14 @@ MongoAPIDatabase.prototype = {
                 speciesCollectionDoc = speciesCollectionDoc || {speciesList: []};
 
                 // search for species in speciesCollectionDoc
-                var prevSpeciesDoc = _.find(speciesCollectionDoc.speciesList, {name: species.getSpeciesName()}),
+                var prevSpeciesDoc = _.find(speciesCollectionDoc.speciesList, {speciesName: species.getSpeciesName()}),
                     newSpeciesDoc = species.toMongooseDoc();
 
                 if (prevSpeciesDoc) {
 
                     // update referenced species doc in collection
                     speciesCollectionDoc.speciesList = speciesCollectionDoc.speciesList.map(function (speciesDoc) {
-                        return speciesDoc.name == newSpeciesDoc.name ? newSpeciesDoc : speciesDoc
+                        return speciesDoc.speciesName == newSpeciesDoc.speciesName ? newSpeciesDoc : speciesDoc
                     });
 
                 } else {
@@ -289,7 +289,7 @@ MongoAPIDatabase.prototype = {
                 // db size can become a concern if a species is updated many times
                 var newSpeciesCollectionDoc = _.chain(speciesCollectionDoc)
                     .omit(['_id', '__v']) // remove mongodb-generated properties
-                    .set('speciesList', _.reject(speciesCollectionDoc.speciesList, {name: speciesName}))
+                    .set('speciesList', _.reject(speciesCollectionDoc.speciesList, {speciesName: speciesName}))
                     .value();
 
                 self.SpeciesCollectionDB.create(newSpeciesCollectionDoc, {

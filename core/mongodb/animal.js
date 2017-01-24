@@ -210,7 +210,8 @@ AnimalDatabase.prototype = {
     saveAnimal: function (animal, options) {
         var self = this,
             _options = _.defaults(options, self._config.queryOptions),
-            query = animal.toQuery(),
+            animalQuery = new AnimalQuery(animal.toObject()),
+            query = animalQuery.toMongoQuery(),
             animalDocData = animal.toMongooseDoc();
 
         this.exec(function () {
