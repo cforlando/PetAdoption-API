@@ -74,7 +74,7 @@ describe("Formatter", function () {
     });
 
 
-    describe.only("formatDB()", function () {
+    describe("formatDB()", function () {
         var apiDatabase;
 
         before(function (done) {
