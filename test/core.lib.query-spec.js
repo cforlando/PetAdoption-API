@@ -1,5 +1,7 @@
+var expect = require('expect.js');
+
 describe("AnimalQuery", function(){
-    var AnimalQuery = require('../../../core/lib/query');
+    var AnimalQuery = require('../core/lib/query');
 
     it("accepts an array of props", function(){
         var testQueryProps = [
@@ -15,9 +17,9 @@ describe("AnimalQuery", function(){
                 }
             ],
             testQuery = new AnimalQuery(testQueryProps),
-            testQueryData = testQuery.toObject();
+            testQueryData = testQuery.toFormattedObject();
 
-        expect('testValue').toMatch(testQueryData.propName);
-        expect(testQueryData.anotherPropName).toEqual(2);
+        expect(testQueryData.propName.val).to.match(/testValue/);
+        expect(testQueryData.anotherPropName.val).to.equal(2);
     });
 });

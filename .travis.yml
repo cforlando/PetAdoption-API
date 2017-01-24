@@ -1,10 +1,10 @@
 language: node_js
 before_script:
-  - npm install -g jasmine
+  - npm install -g mocha
   - sleep 15
   - mongo mydb_test --eval 'db.addUser("travis", "test");'
 node_js:
-  - "4.3.1"
+  - "4.3.2"
 addons:
   apt:
     sources:

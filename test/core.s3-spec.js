@@ -3,17 +3,18 @@ var fs = require('fs'),
     Buffer = require('buffer').Buffer,
 
     MemoryStream = require('memorystream'),
+    expect = require('expect.js'),
 
-    config = require('../../../core/config');
+    config = require('../core/config');
 
-describe("S3Bucket", function () {
-    pending('internet connection required');
-    var S3Bucket = require('../../../core/s3'),
+describe.skip("S3Bucket", function () {
+    console.error('internet connection required');
+    var S3Bucket = require('../core/s3'),
         testS3Bucket,
         testFileName = 'dog.png',
-        testFilePath = path.join(__dirname, testFileName);
+        testFilePath = path.join(__dirname, 's3/', testFileName);
 
-    beforeAll(function () {
+    before(function () {
         testS3Bucket = new S3Bucket(config.S3_TEST_BUCKET_NAME);
     });
 
@@ -24,15 +25,15 @@ describe("S3Bucket", function () {
 
             testS3Bucket.saveReadableStream(fileReadStream, fileKey, function (err, result) {
                 if (err) throw err;
-                expect(result).not.toBeUndefined();
-                expect(result.Location).not.toBeUndefined();
+                expect(result).not.to.be(undefined);
+                expect(result.Location).not.to.be(undefined);
                 done();
             });
         })
     });
 
     describe("getReadableStream", function () {
-        beforeAll(function (done) {
+        before(function (done) {
             testS3Bucket.saveReadableStream(fs.createReadStream(testFilePath), testFileName, function (err, result) {
                 if (err) throw err;
                 done();
@@ -57,7 +58,7 @@ describe("S3Bucket", function () {
                     .on('finish', function () {
                         var originalFileSize = fs.statSync(testFilePath).size,
                             savedFileSize = fileBuffer.length;
-                        expect(originalFileSize).toEqual(savedFileSize);
+                        expect(originalFileSize).to.equal(savedFileSize);
                         done();
                     });
             });

@@ -8,28 +8,32 @@ Nobody likes to see animals be put down due to overcrowding at animal control ce
 
 ## Installation
 
-run `npm install`
+`npm install` or `yarn install`
 
-## Docker Services
+## Docker 
 
 If you are new to containers, run through the Docker hello world here: https://docs.docker.com/engine/tutorials/dockerizing/
 
 To use Docker Compose to run the PetApi and Mongo services together:
 
-1. `./start_services.sh` or `docker-compose up --build -d`
-2. `./stop_services.sh` or `docker-compose stop`
+1.  Look at the instructions in [`DEPLOY.md`](DEPLOY.md).
+2. `./start_services.sh` or `docker-compose up --build -d`
+    - `./stop_services.sh` or `docker-compose stop`
+
+or 
+
+1. `npm run start-auto-update`
+    - `npm run stop-auto-update` to stop auto-updates
+2. `npm run docker`
 
 **TODO / Warning** - the mongo container is being started without the `--auth` flag, which probably makes it less secure than you want.
 
-## Deployment
-
-Look at the instructions in `DEPLOY.md`.
-
 ## API Reference
 
-Current API location: http://cfo-pet-adoption-server.eastus.cloudapp.azure.com/api/v1/
-
-Current API location: http://cfo-pet-adoption-server.eastus.cloudapp.azure.com/api/v2/ (for reduced response data)
+Current API location: 
+- [pets.codefororlando.com/api/v1/](http://pets.codefororlando.com)
+- [pets.codefororlando.com/api/v2/](http://pets.codefororlando.com) (for reduced response data)
+- The subdomain (***pets***.codefororlando.com) will change in the upcoming weeks to: [***petadoption***.codefororlando.com](http://petadoption.codefororlando.com)
 
 :xxxxx = dynamic field that must be specified within the endpoint itself
 
@@ -76,15 +80,8 @@ properties     | (String) Array  | Will only supply fields specified in array. e
 
 ###### More Notes
 
-`api/v2` will only send values for request animals. `api/v1` will send the value for an animal property as well as an example, default value, type, etc. as available.
-
-## Tests
-
-Execute `npm run test`
-
-#####TODO*
-- [ ] More tests could always be helpful
-- [ ] Web interface could use more UX consistency. Suggestions are welcome.
+- `api/v2` will only send values for request animals. 
+- `api/v1` will send the value for an animal property as well as an example, default value, type, etc. as available.
 
 
 ## Developer Notes
@@ -94,6 +91,7 @@ Execute `npm run test`
         - `gulp build-webpack` (for compiling web-interface js)
         - `gulp pug-html` (for angular template files)
         - `gulp stylus` (for style overrides)
+- To run the tests, `npm run test`
 
 ## Contributors
 

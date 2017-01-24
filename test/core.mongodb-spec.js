@@ -3,10 +3,13 @@ var util = require('util'),
     _ = require('lodash'),
     async = require('async'),
     moment = require('moment'),
+    expect = require('expect.js'),
 
-    MongoAPIDatabase = require('../../../core/mongodb'),
+    MongoAPIDatabase = require('../core/mongodb'),
 
-    dbImages = require('../../test-db-images');
+    TestHelper = require('./helper')._global,
+
+    dbImages = TestHelper.getTestDBImages();
 
 describe("MongoAPIDatabase", function () {
     var apiDatabase,
@@ -48,32 +51,34 @@ describe("MongoAPIDatabase", function () {
         val: 'theValue'
     });
 
-    beforeAll(function (done) {
+    before(function (done) {
         apiDatabase = new MongoAPIDatabase({
             collectionNamePrefix: 'test_mongodb_',
             preset: [],
             debugTag: 'test_mongo_api_database: '
         });
 
-        apiDatabase.clearAnimals(function () {
-            apiDatabase.uploadDBImages(dbImages, function () {
+        apiDatabase.uploadDBImages(dbImages)
+            .then(function(){
+                // wrap function to ignore arguments
                 done();
             })
-        });
+            .catch(done)
     });
 
-    afterAll(function (done) {
-        apiDatabase.stop(done);
+    after(function (done) {
+        apiDatabase.stop()
+            .then(done)
     });
 
     it("initializes with data passed through options.preset", function (done) {
-        if (dbImages.length > 0) {
+        if (dbImages.length) {
             async.each(dbImages,
                 function each(dbImage, onDBImageChecked) {
                     apiDatabase.findAnimals({species: dbImage.getSpeciesName()}, {
                         complete: function (err, animals) {
                             if (err) throw err;
-                            expect(animals.length >= dbImage.getAnimals().length).toBe(true, 'number of animals should be at least as large as db image');
+                            expect(animals.length >= dbImage.getAnimals().length).to.be(true, 'number of animals should be at least as large as db image');
                             onDBImageChecked();
                         }
                     });
@@ -81,7 +86,7 @@ describe("MongoAPIDatabase", function () {
                     done();
                 });
         } else {
-            pending("couldn't verify preset option");
+            throw new Error("No test dbImages specified to test against");
         }
     });
 
@@ -96,14 +101,14 @@ describe("MongoAPIDatabase", function () {
                     apiDatabase.saveSpecies(newSpeciesName, speciesProps, {
                         complete: function (err, newSpeciesData) {
                             if (err) throw err;
-                            expect(newSpeciesData).not.toBeUndefined();
+                            expect(newSpeciesData).not.to.be(undefined);
                             _.forEach(speciesProps, function (propData) {
-                                expect(_.find(newSpeciesData.props, {key: propData.key})).toEqual(propData);
+                                expect(_.find(newSpeciesData.props, {key: propData.key})).to.equal(propData);
                             });
                             apiDatabase.getSpeciesList({
                                 complete: function (err, speciesList) {
                                     if (err) throw err;
-                                    expect(_.includes(speciesList, newSpeciesName)).toBe(true, 'new species should be found in speciesList');
+                                    expect(_.includes(speciesList, newSpeciesName)).to.be(true, 'new species should be found in speciesList');
                                     done();
                                 }
                             })
@@ -115,7 +120,7 @@ describe("MongoAPIDatabase", function () {
     });
 
     describe("saveAnimal()", function () {
-        beforeAll(function (done) {
+        before(function (done) {
             apiDatabase.saveSpecies(newSpeciesName, speciesProps, {
                 complete: function (err, species) {
                     if (err) throw err;
@@ -135,9 +140,9 @@ describe("MongoAPIDatabase", function () {
                         isV1Format: false,
                         complete: function (err, animals) {
                             if (err) throw err;
-                            expect(animals.length > 0).toBe(true, 'there should be at least one saved  animal');
+                            expect(animals.length > 0).to.be(true, 'there should be at least one saved  animal');
                             _.forEach(animals, function (animalProps) {
-                                expect(animalProps.species).toEqual(newSpeciesName);
+                                expect(animalProps.species).to.equal(newSpeciesName);
                             });
                             done();
                         }
@@ -148,7 +153,7 @@ describe("MongoAPIDatabase", function () {
     });
 
     describe("saveSpecies()", function () {
-        beforeAll(function (done) {
+        before(function (done) {
             apiDatabase.saveSpecies(newSpeciesName, speciesProps, {
                 complete: function (err, species) {
                     if (err) throw err;
@@ -182,9 +187,9 @@ describe("MongoAPIDatabase", function () {
             apiDatabase.saveSpecies(newSpeciesName, newPresetSpeciesProps, {
                 complete: function (err, savedSpeciesData) {
                     if (err) throw err;
-                    expect(savedSpeciesData).not.toBeUndefined();
+                    expect(savedSpeciesData).not.to.be(undefined);
                     _.forEach(newPresetSpeciesProps, function (preSavedNewSpeciesProp) {
-                        expect(_.find(savedSpeciesData.props, {key: preSavedNewSpeciesProp.key})).toEqual(preSavedNewSpeciesProp)
+                        expect(_.find(savedSpeciesData.props, {key: preSavedNewSpeciesProp.key})).to.equal(preSavedNewSpeciesProp)
                     });
                     var newPropKeys = savedSpeciesData.props.map(function (propData) {
                         return propData.key
@@ -194,10 +199,10 @@ describe("MongoAPIDatabase", function () {
                         complete: function (err, animal) {
                             if (err) throw err;
                             _.forEach(animal, function (animalPropVal, animalPropName) {
-                                expect(_.includes(newPropKeys, animalPropName)).toBe(true, util.format('new animal props (%j) shouldn\'t contain %s', newPropKeys, animalPropName));
+                                expect(_.includes(newPropKeys, animalPropName)).to.be(true, util.format('new animal props (%j) shouldn\'t contain %s', newPropKeys, animalPropName));
                             });
                             _.forEach(newSpeciesTestAnimalProps, function (newSpeciesTestAnimalProp, newSpeciesTestAnimalPropName) {
-                                expect(animal[newSpeciesTestAnimalPropName]).toEqual(newSpeciesTestAnimalProp, 'the returned values should match the new original values');
+                                expect(animal[newSpeciesTestAnimalPropName]).to.equal(newSpeciesTestAnimalProp, 'the returned values should match the new original values');
                             });
                             done();
                         }
@@ -211,7 +216,7 @@ describe("MongoAPIDatabase", function () {
 
     describe("deleteSpecies()", function () {
 
-        beforeAll(function (done) {
+        before(function (done) {
             apiDatabase.saveSpecies(newSpeciesName, speciesProps, {
                 complete: function (err, species) {
                     if (err) throw err;
@@ -225,16 +230,16 @@ describe("MongoAPIDatabase", function () {
                 complete: function (err, speciesList) {
                     if (err) throw err;
                     var initialList = speciesList;
-                    expect(_.includes(speciesList, newSpeciesName)).toBe(true, "initial species list should contain to be removed species");
+                    expect(_.includes(speciesList, newSpeciesName)).to.be(true, "initial species list should contain to be removed species");
                     apiDatabase.deleteSpecies(newSpeciesName, {
                         complete: function (err, result) {
                             if (err) throw err;
-                            expect(result).toBe(true, "the callback is provided with a boolean response");
+                            expect(result).to.be(true, "the callback is provided with a boolean response");
                             apiDatabase.getSpeciesList({
                                 complete: function (err, newSpeciesList) {
                                     if (err) throw err;
-                                    expect(_.includes(newSpeciesList, newSpeciesName)).toBe(false, "species list should not contain removed species");
-                                    expect(newSpeciesList.length).toEqual(initialList.length - 1, "new species list should contain one less entry than the initial species list");
+                                    expect(_.includes(newSpeciesList, newSpeciesName)).to.be(false, "species list should not contain removed species");
+                                    expect(newSpeciesList.length).to.equal(initialList.length - 1, "new species list should contain one less entry than the initial species list");
                                     done();
                                 }
                             });
@@ -253,11 +258,11 @@ describe("MongoAPIDatabase", function () {
                 complete: function (err, userData) {
                     if (err) throw err;
                     savedTestUserData = userData;
-                    expect(savedTestUserData).not.toBeUndefined();
-                    expect(savedTestUserData.id).not.toBeUndefined();
+                    expect(savedTestUserData).not.to.be(undefined);
+                    expect(savedTestUserData.id).not.to.be(undefined);
                     _.forEach(testUserData.defaults, function (defaultProp, index) {
-                        expect(savedTestUserData.defaults[index].key).toEqual(defaultProp.key);
-                        expect(savedTestUserData.defaults[index].val).toEqual(defaultProp.val);
+                        expect(savedTestUserData.defaults[index].key).to.equal(defaultProp.key);
+                        expect(savedTestUserData.defaults[index].val).to.equal(defaultProp.val);
                     });
                     done();
                 }
@@ -265,18 +270,18 @@ describe("MongoAPIDatabase", function () {
         });
 
         it("can update a user", function (done) {
-            expect(v2TestUserData.defaults.length).toEqual(2, 'there should be 2 default values');
+            expect(v2TestUserData.defaults.length).to.equal(2, 'there should be 2 default values');
             apiDatabase.saveUser(v2TestUserData, {
                 complete: function (err, userData) {
                     if (err) throw err;
                     v2SavedUserData = userData;
-                    expect(v2SavedUserData).not.toBeUndefined();
-                    expect(v2SavedUserData.id).toEqual(savedTestUserData.id);
-                    expect(v2SavedUserData.firstName).toEqual(v2TestUserData.firstName);
-                    expect(v2SavedUserData.defaults.length).toEqual(2, 'there should be 2 default values');
+                    expect(v2SavedUserData).not.to.be(undefined);
+                    expect(v2SavedUserData.id).to.equal(savedTestUserData.id);
+                    expect(v2SavedUserData.firstName).to.equal(v2TestUserData.firstName);
+                    expect(v2SavedUserData.defaults.length).to.equal(2, 'there should be 2 default values');
                     _.forEach(v2TestUserData.defaults, function (defaultProp, index) {
-                        expect(v2TestUserData.defaults[index].key).toEqual(defaultProp.key);
-                        expect(v2TestUserData.defaults[index].val).toEqual(defaultProp.val);
+                        expect(v2TestUserData.defaults[index].key).to.equal(defaultProp.key);
+                        expect(v2TestUserData.defaults[index].val).to.equal(defaultProp.val);
                     });
                     done();
                 }
@@ -286,7 +291,7 @@ describe("MongoAPIDatabase", function () {
     });
 
     describe("findUser()", function () {
-        beforeAll(function (done) {
+        before(function (done) {
             if (!v2SavedUserData) {
                 apiDatabase.saveUser(v2TestUserData, {
                     complete: function (err, userData) {
@@ -304,13 +309,13 @@ describe("MongoAPIDatabase", function () {
             apiDatabase.findUser({id: v2SavedUserData.id}, {
                 complete: function (err, userData) {
                     if (err) throw err;
-                    expect(userData).not.toBeUndefined();
-                    expect(userData.id).toEqual(v2SavedUserData.id);
-                    expect(userData.firstName).toEqual(v2SavedUserData.firstName);
-                    expect(userData.defaults.length).toEqual(2, 'there should be 2 default values');
+                    expect(userData).not.to.be(undefined);
+                    expect(userData.id).to.equal(v2SavedUserData.id);
+                    expect(userData.firstName).to.equal(v2SavedUserData.firstName);
+                    expect(userData.defaults.length).to.equal(2, 'there should be 2 default values');
                     _.forEach(v2TestUserData.defaults, function (defaultProp, index) {
-                        expect(userData.defaults[index].key).toEqual(defaultProp.key);
-                        expect(userData.defaults[index].val).toEqual(defaultProp.val);
+                        expect(userData.defaults[index].key).to.equal(defaultProp.key);
+                        expect(userData.defaults[index].val).to.equal(defaultProp.val);
                     });
                     done();
                 }

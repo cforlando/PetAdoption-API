@@ -1,21 +1,22 @@
 var _ = require('lodash'),
+    expect = require('expect.js'),
 
-    Species = require('../../../core/lib/species');
+    Species = require('../core/lib/species');
 
 describe("Species", function () {
 
     it("has a baseProps property", function () {
         var aTestSpecies = new Species('testSpecies');
-        expect(aTestSpecies.baseProps).not.toBeUndefined('baseProps should be defined');
+        expect(aTestSpecies.baseProps).not.to.be(undefined, 'baseProps should be defined');
     });
 
     it("initializes with base properties", function () {
         var dTestSpecies = new Species('testSpecies');
         _.forEach(dTestSpecies.baseProps, function (basePropData) {
-            expect(basePropData).toEqual(dTestSpecies.getProp(basePropData.key));
+            expect(basePropData).to.equal(dTestSpecies.getProp(basePropData.key));
         });
 
-        expect(dTestSpecies.getProps().length).not.toBeLessThan(dTestSpecies.baseProps.length);
+        expect(dTestSpecies.getProps().length).not.to.be.lessThan(dTestSpecies.baseProps.length);
     });
 
     it("initializes with passed properties", function () {
@@ -29,7 +30,7 @@ describe("Species", function () {
             ],
             dTestSpecies = new Species('aSpecies', testProps);
 
-        expect(dTestSpecies.getProp(aTestProp2Name)).toEqual(testProps[0]);
+        expect(dTestSpecies.getProp(aTestProp2Name)).to.equal(testProps[0]);
     });
 
     it("initializes props with a json string", function () {
@@ -43,7 +44,7 @@ describe("Species", function () {
             ],
             dTestSpecies = new Species('aSpecies', JSON.stringify(testProps));
 
-        expect(dTestSpecies.getProp(aTestProp2Name)).toEqual(testProps[0]);
+        expect(dTestSpecies.getProp(aTestProp2Name)).to.eql(testProps[0]);
     });
 
     describe("getSpeciesName()", function(){
@@ -51,7 +52,7 @@ describe("Species", function () {
             someSpecies = new Species(speciesName);
 
         it("returns the species name", function(){
-            expect(someSpecies.getSpeciesName()).toEqual(speciesName);
+            expect(someSpecies.getSpeciesName()).to.equal(speciesName);
         });
     });
 
@@ -68,8 +69,8 @@ describe("Species", function () {
         it("sets the species' props", function () {
             var beforePropsLength = bTestSpecies.getProps().length;
             bTestSpecies.setProps(testProps);
-            expect(bTestSpecies.getProps().length).toEqual(beforePropsLength + 1, 'there should be one additional prop');
-            expect(bTestSpecies.getProp(newTestPropName)).not.toBeUndefined();
+            expect(bTestSpecies.getProps().length).to.equal(beforePropsLength + 1, 'there should be one additional prop');
+            expect(bTestSpecies.getProp(newTestPropName)).not.to.be(undefined);
         })
     });
 
@@ -83,19 +84,19 @@ describe("Species", function () {
                 }
             ];
 
-        beforeAll(function () {
+        before(function () {
             cTestSpecies.setProps(testProps);
         });
 
         it("returns a specific prop per a provided key", function () {
             var testProp = cTestSpecies.getProp(newTestPropName);
-            expect(testProp).toEqual(testProps[0]);
+            expect(testProp).to.equal(testProps[0]);
         })
     });
 
     describe("getProps()", function () {
         var newTestPropName = 'aTestProp',
-            eTestSpecies = new Species('testSpecies'),
+            aTestSpecies = new Species('testSpecies'),
             testProps = [
                 {
                     key: newTestPropName,
@@ -103,12 +104,12 @@ describe("Species", function () {
                 }
             ];
 
-        beforeAll(function () {
-            eTestSpecies.setProps(testProps);
+        before(function () {
+            aTestSpecies.setProps(testProps);
         });
 
         it("is an an array", function () {
-            expect(_.isArray(eTestSpecies.getProps())).toBe(true, 'result should be an array');
+            expect(_.isArray(aTestSpecies.getProps())).to.be(true, 'result should be an array');
         })
     });
 });

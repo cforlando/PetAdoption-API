@@ -1,12 +1,14 @@
-var Database = require('../../../core/mongodb/default'),
-    Collection = require('../../../core/mongodb/lib/collection'),
-    Debuggable = require('../../../core/lib/debuggable');
+var expect = require('expect.js'),
 
-describe('Database', function () {
+    Database = require('../core/mongodb/default'),
+    Collection = require('../core/mongodb/lib/collection'),
+    Debuggable = require('../core/lib/debuggable');
+
+describe.only('Database', function () {
     var dbInstance,
         TestSchema = {test: String};
 
-    beforeAll(function () {
+    before(function () {
         dbInstance = new Database(new Collection('test', TestSchema));
     });
 

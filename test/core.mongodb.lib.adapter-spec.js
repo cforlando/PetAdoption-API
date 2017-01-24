@@ -1,19 +1,21 @@
-var Debuggable = require('../../../../../core/lib/debuggable'),
-    MongoDBAdapter = require('../../../../../core/mongodb/lib/adapter');
+var expect = require('expect.js'),
+
+    Debuggable = require('../core/lib/debuggable'),
+    MongoDBAdapter = require('../core/mongodb/lib/adapter');
 
 describe('Adapter', function () {
     var dbAdapter;
 
-    beforeAll(function () {
+    beforeEach(function () {
         dbAdapter = new MongoDBAdapter({
             debugLevel: Debuggable.PROD
         });
     });
 
     afterEach(function (done) {
-        dbAdapter.close(function () {
-            done();
-        })
+        dbAdapter.close()
+            .then(done)
+            .catch(done)
     });
 
 
@@ -34,7 +36,7 @@ describe('Adapter', function () {
             this.success = 'success';
             dbAdapter.connect({
                 onSuccess: function () {
-                    expect(this.success).toBe('success');
+                    expect(this.success).to.eql('success');
                     done()
                 },
                 onFailure: function (err) {
@@ -54,18 +56,12 @@ describe('Adapter', function () {
 
     });
 
-/*
-    describe("getMongoose()", function () {
-        var tDBAdapter = new MongoDBAdapter();
-    });
-*/
-
     it('returns the proper states', function (done) {
 
-        expect(dbAdapter.isConnected()).toBe(false);
+        expect(dbAdapter.isConnected()).to.be(false);
         dbAdapter.connect({
             onSuccess: function () {
-                expect(dbAdapter.isConnected()).toBe(true);
+                expect(dbAdapter.isConnected()).to.be(true);
                 done();
             }
         })

@@ -1,7 +1,9 @@
-var MongooseModel = require('../../../../core/mongodb/lib/collection'),
-    Debuggable = require('../../../../core/lib/debuggable'),
-    UserSchema = require('../../../../core/mongodb/schemas/user'),
-    MongoDBAdapter = require('../../../../core/mongodb/lib/adapter');
+var expect = require('expect.js'),
+
+    MongooseModel = require('../core/mongodb/lib/collection'),
+    Debuggable = require('../core/lib/debuggable'),
+    UserSchema = require('../core/mongodb/schemas/user'),
+    MongoDBAdapter = require('../core/mongodb/lib/adapter');
 
 describe("Collection", function () {
     var dbAdapter,
@@ -10,7 +12,7 @@ describe("Collection", function () {
         aUser,
         UserModel;
 
-    beforeAll(function (done) {
+    before(function (done) {
         dbAdapter = new MongoDBAdapter({
             debugLevel: Debuggable.PROD
         });
@@ -31,7 +33,7 @@ describe("Collection", function () {
         })
     });
 
-    afterAll(function (done) {
+    after(function (done) {
         UserModel.remove({}, function () {
             dbAdapter.close(function () {
                 done();
@@ -46,9 +48,9 @@ describe("Collection", function () {
             tUser.save(function (err, savedUser) {
                 if (err) throw err;
                 aUser = savedUser;
-                expect(aUser).not.toBeUndefined('No user was returned on save');
-                expect(aUser.firstName).toEqual(tUserProps.firstName, 'The firstName was not correctly return in the saved user');
-                expect(aUser.id).not.toBeUndefined('The ID was not defined in the saved user');
+                expect(aUser).not.to.be(undefined, 'No user was returned on save');
+                expect(aUser.firstName).to.equal(tUserProps.firstName, 'The firstName was not correctly return in the saved user');
+                expect(aUser.id).not.to.be(undefined, 'The ID was not defined in the saved user');
                 done();
             });
         })
@@ -60,9 +62,9 @@ describe("Collection", function () {
                 .lean()
                 .exec(function (err, foundUser) {
                     if (err) throw err;
-                    expect(foundUser).not.toBeUndefined('No user was found');
-                    expect(foundUser.firstName).toEqual(tUserProps.firstName, 'The firstName was not correctly return in the found user');
-                    expect(foundUser.id).not.toBeUndefined('The ID was not defined in the found user');
+                    expect(foundUser).not.to.be(undefined, 'No user was found');
+                    expect(foundUser.firstName).to.equal(tUserProps.firstName, 'The firstName was not correctly return in the found user');
+                    expect(foundUser.id).not.to.be(undefined, 'The ID was not defined in the found user');
                     done()
                 });
 
