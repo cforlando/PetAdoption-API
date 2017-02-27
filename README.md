@@ -92,7 +92,7 @@ properties     | (String) Array  | Will only supply fields specified in array. e
         - `gulp pug-html` (for angular template files)
         - `gulp stylus` (for style overrides)
 - To run the tests, `npm run test`
-- See [CONTRIBUTING.md](https://github.com/cforlando.com/PetAdoption-API/https://github.com/cforlando/PetAdoption-API/blob/master/CONTRIBUTING.md) for contribution guidelines
+- See [CONTRIBUTING.md](https://github.com/cforlando/PetAdoption-API/blob/master/CONTRIBUTING.md) for contribution guidelines
 
 ## Contributors
 
