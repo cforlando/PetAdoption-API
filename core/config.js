@@ -29,6 +29,7 @@ var localJSON = (function () {
  * @property {String} S3_TEST_BUCKET_NAME
  *
  * @property {String} GOOGLE_CLIENT_ID
+ * @property {String} GOOGLE_AUTH_CALLBACK
  * @property {String} GOOGLE_CLIENT_SECRET
  *
  * @property {String} MONGODB_URI
@@ -50,6 +51,7 @@ var config = {
 
     GOOGLE_CLIENT_ID : process.env.GOOGLE_CLIENT_ID || localJSON.GOOGLE_CLIENT_ID || 'n/a',
     GOOGLE_CLIENT_SECRET : process.env.GOOGLE_CLIENT_SECRET || localJSON.GOOGLE_CLIENT_SECRET || 'n/a',
+    GOOGLE_AUTH_CALLBACK : process.env.GOOGLE_AUTH_CALLBACK || localJSON.GOOGLE_AUTH_CALLBACK || 'localhost:8080/auth/google/callback',
     GOOGLE_MAPS_KEY : process.env.GOOGLE_MAPS_KEY || localJSON.GOOGLE_MAPS_KEY || '',
 
     MONGODB_URI: process.env.MONGODB_URI || localJSON.MONGODB_URI || 'mongodb://127.0.0.1/local'

@@ -55,7 +55,7 @@ function AuthController(database, options) {
     this.passport.use(new GoogleStrategy({
         clientID: this.credentials.web.client_id,
         clientSecret: this.credentials.web.client_secret,
-        callbackURL: url.resolve(config.DOMAIN, "/auth/google/callback")
+        callbackURL: config.GOOGLE_AUTH_CALLBACK
     }, this.onLoginRequest()));
 
     this.passport.serializeUser(function (user, done) {
