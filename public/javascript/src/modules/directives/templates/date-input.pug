@@ -1,0 +1,5 @@
+include _auto-generated/_-all
+include includes/_mixins
++form-input('date')
+    label.input__label {{propData.fieldLabel}}
+    md-datepicker(ng-model="propData.val" ng-change="setAnimalProperty(propData.key, propData)")

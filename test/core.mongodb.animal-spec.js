@@ -1,68 +1,62 @@
-var _ = require('lodash'),
-    moment = require('moment'),
-    expect = require('expect.js'),
+var _ = require('lodash');
+var moment = require('moment');
+var chai = require('chai');
 
-    Debuggable = require('../core/lib/debuggable'),
-    Species = require('../core/lib/species'),
-    Animal = require('../core/lib/animal'),
-    AnimalDatabase = require('../core/mongodb/animal'),
+var Debuggable = require('../core/lib/debuggable');
+var Species = require('../core/lib/species');
+var Animal = require('../core/lib/animal');
+var AnimalDatabase = require('../core/mongodb/animal');
 
-    tHelper = require('./helper')._global;
+var tHelper = require('./helper')._global;
+var expect = chai.expect;
 
 describe("AnimalDatabase", function () {
-    var testData = tHelper.getTestDBImages(),
-        tSpeciesProps = testData[0].getSpeciesProps(),
-        animalDB,
-        tSpecies = new Species('animal_db_test_species', tSpeciesProps),
-        tAnimalProps = {
-            petName: 'hello world',
-            intakeDate: moment().subtract(5, 'days').toDate()
-        };
+    var testData = tHelper.getTestDbImages();
+    var tSpeciesProps = testData[0].getSpeciesProps();
+    var tSpecies = new Species('animal_db_test_species', tSpeciesProps);
+    var tAnimalProps = {
+        petName: 'hello world',
+        intakeDate: moment().subtract(5, 'days').toDate()
+    };
+    var animalDb;
 
-    before(function (done) {
-        animalDB = new AnimalDatabase({
-            debugLevel: Debuggable.PROD
-        });
-        done();
+    before(function () {
+        animalDb = new AnimalDatabase({debugLevel: Debuggable.PROD});
     });
 
-    after(function (done) {
-        animalDB.stop()
-            .then(done)
-            .catch(done)
+    after(function () {
+        return animalDb.stop();
     });
 
     describe("saveAnimal()", function () {
-        var tSavedAnimalProps;
 
-        it('saves an animal', function (done) {
+        it('saves an animal', function () {
             var tAnimal = new Animal(tSpecies, tAnimalProps);
+            var tSavedAnimal;
 
-            animalDB.saveAnimal(tAnimal, {
-                isV1Format: false,
-                complete: function (err, animalProps) {
-                    if (err) throw err;
-                    tSavedAnimalProps = animalProps;
-                    expect(tSavedAnimalProps).not.to.be(undefined);
-                    var tSavedAnimal = new Animal(tSpecies, tSavedAnimalProps);
-                    expect(tSavedAnimal.getValue('petName')).to.equal(tAnimalProps.petName);
-                    done();
-                }
-            })
+            return animalDb.saveAnimal(tAnimal, {isV1Format: false})
+                .then(function (animalProps) {
+
+                    expect(animalProps).to.exist;
+
+                    tSavedAnimal = new Animal(tSpecies, animalProps);
+
+                    expect(tSavedAnimal.getValue('petName')).to.eql(tAnimalProps.petName);
+
+                    return Promise.resolve();
+                })
         });
 
-        it('assigns a petId to the animal', function (done) {
+        it('assigns a petId to the animal', function () {
             var tAnimal = new Animal(tSpecies, tAnimalProps);
 
-            animalDB.saveAnimal(tAnimal, {
-                isV1Format: false,
-                complete: function (err, animalProps) {
-                    if (err) throw err;
-                    tSavedAnimalProps = animalProps;
-                    expect(tSavedAnimalProps.petId).not.to.be(undefined);
-                    done();
-                }
-            })
+            return animalDb.saveAnimal(tAnimal, {isV1Format: false})
+                .then(function (animalProps) {
+
+                    expect(animalProps.petId).to.exist;
+
+                    return Promise.resolve();
+                })
 
         })
     });
@@ -70,119 +64,110 @@ describe("AnimalDatabase", function () {
     describe("findAnimals()", function () {
         var animals;
 
-        before(function(done){
+        before(function () {
             var tAnimal = new Animal(tSpecies, tAnimalProps);
 
-            animalDB.saveAnimal(tAnimal, {
-                isV1Format: false,
-                complete: done
-            });
+            return animalDb.saveAnimal(tAnimal, {isV1Format: false});
         });
 
-        it("returns previously saved animals", function (done) {
-            animalDB.findAnimals(tAnimalProps, {
-                isV1Format: false,
-                complete: function (err, result) {
-                    if (err) throw err;
-                    animals = result;
-                    expect(animals.length).to.be.greaterThan(0);
-                    animals.forEach(function(animalData){
-                        expect(animalData.petId).not.to.be(undefined, 'each animal in responseFormat should have a defined petId');
-                        expect(animalData.petName).to.equal(tAnimalProps.petName);
-                        expect(animalData.intakeDate).to.equal(tAnimalProps.intakeDate.toISOString());
+        it("returns previously saved animals", function () {
+
+            return animalDb.findAnimals(tAnimalProps, {isV1Format: false})
+                .then(function (animals) {
+                    expect(animals).to.have.length.above(0);
+
+                    animals.forEach(function (animalData) {
+
+                        expect(animalData.petId).to.exist;
+                        expect(animalData.petName).to.eql(tAnimalProps.petName);
+                        expect(animalData.intakeDate).to.eql(tAnimalProps.intakeDate.toISOString());
+
                     });
-                    done();
-                }
-            });
+
+                    return Promise.resolve();
+                });
         });
 
-        it("does not return previously saved animals that don't match query", function (done) {
-            animalDB.findAnimals({
-                intakeDate: new Date()
-            }, {
-                isV1Format: false,
-                complete: function (err, result) {
-                    if (err) throw err;
-                    expect(result.length === 0).to.be(true);
-                    done();
-                }
-            })
+        it("does not return previously saved animals that don't match query", function () {
+
+            return animalDb.findAnimals({intakeDate: new Date()}, {isV1Format: false})
+                .then(function (result) {
+
+                    expect(result).to.have.lengthOf(0);
+
+                    return Promise.resolve();
+                })
         });
     });
 
-    describe("find, edit, and save task sequence", function(){
+    describe("find, edit, and save task sequence", function () {
         var tSavedAnimalProps;
 
-        before(function(done){
+        before(function () {
             var tAnimal = new Animal(tSpecies, tAnimalProps);
 
-            animalDB.saveAnimal(tAnimal, {
-                isV1Format: false,
-                complete: function (err, animalProps) {
-                    if (err) throw err;
+            return animalDb.saveAnimal(tAnimal, {isV1Format: false})
+                .then(function (animalProps) {
+
                     tSavedAnimalProps = animalProps;
-                    done();
-                }
-            });
+
+                    return Promise.resolve();
+                });
         });
 
-        it("completes successfully", function (done) {
-            animalDB.findAnimals(tAnimalProps, {
-                isV1Format: false,
-                complete: function (err, animals) {
-                    if (err) throw err;
-                    expect(animals.length).to.be.greaterThan(0);
+        it("completes successfully", function () {
+
+            return animalDb.findAnimals(tAnimalProps, {isV1Format: false})
+                .then(function (animals) {
+                    expect(animals).to.have.length.above(0);
+
                     var aAnimal = new Animal(tSpecies, animals[0]);
+
                     aAnimal.setValue('sex', 'female');
 
-                    animalDB.saveAnimal(aAnimal, {
-                        isV1Format: false,
-                        complete: function (err, savedAnimal) {
-                            if (err) throw err;
-                            expect(savedAnimal.sex).to.match(/female/);
-                            done();
-                        }
-                    })
-                }
-            });
+                    return animalDb.saveAnimal(aAnimal, {isV1Format: false})
+                })
+                .then(function (savedAnimal) {
+
+                    expect(savedAnimal.sex).to.match(/female/);
+
+                    return Promise.resolve();
+                })
         });
     });
 
     describe("removeAnimal()", function () {
         var tSavedAnimalProps;
 
-        before(function(done){
+        before(function () {
             var tAnimal = new Animal(tSpecies, tAnimalProps);
 
-            animalDB.saveAnimal(tAnimal, {
-                isV1Format: false,
-                complete: function (err, animalProps) {
-                    if (err) throw err;
+            return animalDb.saveAnimal(tAnimal, {isV1Format: false})
+                .then(function (animalProps) {
                     tSavedAnimalProps = animalProps;
-                    done();
-                }
-            });
+                    return Promise.resolve();
+                });
         });
 
         describe("tests", function () {
 
             it("are initialized correctly", function () {
-                expect(tSavedAnimalProps).not.to.be(undefined, 'animal was not returned after save');
-                expect(tSavedAnimalProps.petId).not.to.be(undefined, 'petId was not set after save');
+                expect(tSavedAnimalProps).to.exist;
+                expect(tSavedAnimalProps.petId).to.exist;
             })
 
         });
 
-        it('removes an animal', function (done) {
+        it('removes an animal', function () {
             var tAnimal = new Animal(tSpecies, tSavedAnimalProps);
 
-            animalDB.removeAnimal(tAnimal, {
-                complete: function (err, removeData) {
-                    if (err) throw err;
+            return animalDb.removeAnimal(tAnimal)
+                .then(function (removeData) {
+
                     expect(removeData.result).to.match(/success/);
-                    done();
-                }
-            })
+
+                    return Promise.resolve();
+                })
         })
     });
 

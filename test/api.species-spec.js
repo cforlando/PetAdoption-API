@@ -1,43 +1,37 @@
-var request = require('supertest'),
-    _ = require('lodash'),
-    expect = require('expect.js'),
+var supertest = require('supertest');
+var _ = require('lodash');
+var chai = require('chai');
 
-    TestHelper = require('./helper'),
+var TestHelper = require('./helper');
 
-    tHelper = new TestHelper(),
-
-    speciesDBImages = tHelper.getTestDBImages(),
-    buildEndpoint = tHelper.buildEndpoint,
-    buildJasmineRequestCallback = tHelper.buildJasmineRequestCallback,
-    server;
+var expect = chai.expect;
+var request;
 
 describe("/species", function(){
+    var tHelper = new TestHelper();
+    var speciesDbImages = tHelper.getTestDbImages();
 
-    before(function(done){
-        tHelper.beforeAPI()
+    before(function(){
+        return tHelper.beforeAPI()
             .then(function(testComponents){
-                server = testComponents.server;
+                request = supertest(testComponents.server);
+                return Promise.resolve();
             })
-            .then(done)
-            .catch(done)
     });
 
-    after(function(done){
-        tHelper.afterAPI()
-            .then(done)
-            .catch(done)
+    after(function(){
+        return tHelper.afterAPI()
     });
 
-    it("returns an array of available species", function (done) {
+    it("returns an array of available species", function () {
 
-        request(server)
-            .get(buildEndpoint('species'))
+        return request.get(tHelper.buildEndpoint('species'))
             .set('Accept', 'application/json')
             .expect('Content-Type', /json/)
             .expect(function (res) {
-                expect(_.isArray(res.body)).to.be(true, 'response is an array');
-                expect(res.body.length).to.equal(speciesDBImages.length, 'response is an array');
+                expect(_.isArray(res.body)).to.eql(true, 'response is an array');
+                expect(res.body.length).to.eql(speciesDbImages.length, 'response is an array');
             })
-            .expect(200, buildJasmineRequestCallback(done))
+            .expect(200)
     });
 });

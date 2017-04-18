@@ -1,89 +1,90 @@
-define([
-    'require',
-    'underscore',
-    'text!modules/directives/views/file-input.html',
-    'ngApp'
-], function () {
-    var _ = require('underscore'),
-        ngApp = require('ngApp');
+var _ = require('lodash');
+var ngApp = require('ngApp');
 
-    ngApp.directive('fileInput', function () {
-        return {
-            restrict: 'EC',
-            scope: true,
-            template: require('text!modules/directives/views/file-input.html'),
-            controller: ['$scope', '$element', '$timeout',
-                function ($scope, $element, $timeout) {
-                    console.log("init fileInput @ %o", $element);
-                    $scope.namespaces = [];
-                    $scope.get$inputs = function () {
-                        return $element.find("input[type='file']");
-                    };
-                    $scope.$inputs = $scope.get$inputs();
+module.exports = ngApp.directive('fileInput', function () {
+    return {
+        restrict: 'EC',
+        scope: {
+            onFileInputChangeCallback: '&onFileInputChange'
+        },
+        transclude: true,
+        template: require('raw!./templates/file-input.html'),
+        controller: function ($scope, $element, $timeout) {
+            console.log("init fileInput @ %o", $element);
+            $scope.namespaces = [];
+            $scope.get$inputs = function () {
+                return $element.find("input[type='file']");
+            };
+            $scope.$inputs = $scope.get$inputs();
 
-                    $scope.clear = function(){
-                        $scope.namespaces = [];
+            $scope.clear = function () {
+                $scope.namespaces = [];
+            };
+
+            /**
+             * @param {Object} [options]
+             * @param {Boolean} [options.inputLimit=1]
+             */
+            $scope.upload = function (options) {
+                var opts = _.defaults(options, {
+                    inputLimit: 1
+                });
+                var $lastInput = $scope.$inputs.last();
+
+                if ($lastInput.length > 0) {
+                    if ($lastInput.val() && $lastInput.length >= opts.inputLimit) {
+                        // create a new dom input element
+                        $scope.namespaces.push(opts.namespace || 'uploads-' + $scope.namespaces.length);
+                    } else {
+                        // don't create anything new and use last input dom element as is
                     }
+                } else {
+                    // skip checks and create a new dom input element
+                    $scope.namespaces.push(opts.namespace || 'uploads-' + $scope.namespaces.length);
+                }
 
-                    /**
-                     * @param {Object} [options]
-                     * @param {Boolean} [options.isSingle=false]
-                     */
-                    $scope.upload = function (options) {
-                        var _options = _.defaults(options, {
-                                isSingle: false
-                            }),
-                            $lastInput = $scope.$inputs.last();
-                        if ($lastInput.length > 0) {
-                            if ($lastInput.val() && !_options.isSingle) {
-                                // create a new dom input element
-                                $scope.namespaces.push(_options.namespace || 'uploads-' + $scope.namespaces.length);
-                            } else {
-                                // don't create anything new and use last input dom element as is
-                            }
-                        } else {
-                            // skip checks and create a new dom input element
-                            $scope.namespaces.push(_options.namespace || 'uploads-' + $scope.namespaces.length);
-                        }
-                        $timeout(function () {
-                            $scope.reloadInputs();
-                            $scope.$inputs.last().click();
-                        })
-                    };
+                $timeout(function () {
+                    $scope.reloadFileInputs();
+                    $scope.$inputs.last().click();
+                })
+            };
 
-                    $scope.onFileInputChange = function () {
-                        $scope.$emit('file-input:change', $scope);
-                    };
+            $scope.removeUploadByIndex = function (uploadIdx) {
+                $scope.namespaces.splice(uploadIdx, 1);
+                $scope.onFileInputChange({action: 'remove', idx: uploadIdx});
+            };
 
-                    $scope.addInputListeners = function () {
-                        $scope.$inputs = $scope.get$inputs();
-                        $scope.$inputs.on('change', $scope.onFileInputChange);
-                    };
+            $scope.onFileInputChange = function (evt) {
+                $scope.$emit('file-input:change', $scope);
+                $scope.onFileInputChangeCallback()(evt, $scope.get$inputs(), $scope);
+            };
 
-                    $scope.removeInputListeners = function () {
-                        $scope.$inputs.off('change', null, $scope.onFileInputChange);
-                    };
+            $scope.addFileInputListeners = function () {
+                $scope.$inputs = $scope.get$inputs();
+                $scope.$inputs.on('change', $scope.onFileInputChange);
+            };
 
-                    $scope.reloadInputs = function () {
-                        $scope.removeInputListeners();
-                        $scope.addInputListeners();
-                    };
+            $scope.removeFileInputListeners = function () {
+                $scope.$inputs.off('change', null, $scope.onFileInputChange);
+            };
 
-                    $scope.onDestroy = function () {
-                        $scope.removeInputListeners();
-                    }
+            $scope.reloadFileInputs = function () {
+                $scope.removeFileInputListeners();
+                $scope.addFileInputListeners();
+            };
 
-                    function init() {
-                        if ($scope.registerMediaScope) $scope.registerMediaScope($scope);
-                    }
+            $scope.onDestroy = function () {
+                $scope.removeFileInputListeners();
+            };
 
-                    init();
-                }],
-            link: function (scope, element, attributes) {
-                // When the destroy event is triggered, check to see if the above
-                // data is still available.
-                if (scope.onDestroy) scope.$on("$destroy", scope.onDestroy);
-            }
+            (function init() {
+                if ($scope.registerMediaScope) $scope.registerMediaScope($scope);
+            })();
+        },
+        link: function (scope, element, attributes) {
+            // When the destroy event is triggered, check to see if the above
+            // data is still available.
+            if (scope.onDestroy) scope.$on("$destroy", scope.onDestroy);
         }
-    })
-});
+    }
+})

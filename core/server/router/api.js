@@ -1,6 +1,5 @@
 var Express = require('express');
 
-
 /**
  *
  * @augments Express.Router
@@ -32,7 +31,7 @@ function APIRouter(controller) {
     // save an animal
     router.post('/save/:species',
         controller.verifyAuth(),
-        controller.uploader.array('uploads'),
+        controller.uploader.array('images'),
         controller.onSaveAnimalForm());
 
     // delete an animal
@@ -48,7 +47,7 @@ function APIRouter(controller) {
     // save a species placeholder image
     router.post('/save/:species/placeholder',
         controller.verifyAuth(),
-        controller.uploader.single('uploads'),
+        controller.uploader.single('placeholder'),
         controller.onSaveSpeciesPlaceholder());
 
     // create a species
@@ -69,8 +68,9 @@ function APIRouter(controller) {
         controller.verifyAuth(),
         controller.onUserRetrieve());
 
-    router.get('/formatdb/', controller.onFormatDB());
+    router.get('/formatdb/', controller.onFormatDb());
     router.get('/reset', controller.onReset());
+
     return router;
 }
 

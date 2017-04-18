@@ -1,53 +1,46 @@
-var url = require('url'),
-    util = require('util'),
-    fs = require('fs'),
+var url = require('url');
+var util = require('util');
+var fs = require('fs');
 
-    request = require('supertest'),
-    async = require('async'),
-    _ = require('lodash'),
-    expect = require('expect.js'),
+var supertest = require('supertest');
+var async = require('async');
+var _ = require('lodash');
+var chai = require('chai');
 
+var TestHelper = require('./helper');
 
-    TestHelper = require('./helper'),
-
-    tHelper = new TestHelper(),
-
-    // Functions
-    sprintf = tHelper.sprintf,
-    buildEndpoint = tHelper.buildEndpoint,
-    buildJasmineRequestCallback = tHelper.buildJasmineRequestCallback;
+var tHelper = new TestHelper();
+var sprintf = tHelper.sprintf;
+var expect = chai.expect;
 
 describe("/options", function () {
-    var speciesDBImages = tHelper.getTestDBImages(),
-        server;
+    var speciesDbImages = tHelper.getTestDbImages();
+    var request;
 
-    before(function (done) {
+    before(function () {
         this.timeout(20 * 1000);
-        tHelper.buildGlobalServer()
+
+        return tHelper.buildGlobalServer()
             .then(function (testServer) {
-                server = testServer;
-                done();
+                request = supertest(testServer);
+                return Promise.resolve();
             })
-            .catch(done)
     });
 
-    after(function (done) {
-        tHelper.afterAPI()
-            .then(done)
-            .catch(done)
+    after(function () {
+        return tHelper.afterAPI()
     });
 
-    speciesDBImages.forEach(function (dbImage) {
+    speciesDbImages.forEach(function (dbImage) {
         var speciesName = dbImage.getSpeciesName(),
             optionsData = _.reduce(dbImage.getSpeciesProps(), function (collection, propData) {
                 collection[propData.key] = propData.options || [];
                 return collection;
             }, {});
 
-        it(sprintf("returns a JSON array of all options for %s species", speciesName), function (done) {
+        it(sprintf("returns a JSON array of all options for %s species", speciesName), function () {
 
-            request(server)
-                .get(buildEndpoint('options', speciesName))
+            return request.get(tHelper.buildEndpoint('options', speciesName))
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
                 .expect(function (res) {
@@ -60,17 +53,16 @@ describe("/options", function () {
                         })
                     })
                 })
-                .expect(200, buildJasmineRequestCallback(done))
+                .expect(200)
         });
 
         describe("/:optionName", function () {
 
             _.forEach(optionsData, function (optionList, optionName) {
 
-                it(sprintf("returns JSON array of options for %s", optionName), function (done) {
+                it(sprintf("returns JSON array of options for %s", optionName), function () {
 
-                    request(server)
-                        .get(buildEndpoint('options', speciesName, optionName))
+                    request.get(tHelper.buildEndpoint('options', speciesName, optionName))
                         .set('Accept', 'application/json')
                         .expect('Content-Type', /json/)
                         .expect(function (res) {
@@ -78,7 +70,7 @@ describe("/options", function () {
                                 expect(res.body).to.contain(option);
                             })
                         })
-                        .expect(200, buildJasmineRequestCallback(done))
+                        .expect(200)
                 });
             })
         });

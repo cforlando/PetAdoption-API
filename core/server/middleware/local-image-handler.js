@@ -1,9 +1,9 @@
-var fs = require('fs'),
-    path = require('path'),
+var fs = require('fs');
+var path = require('path');
 
-    _ = require('lodash');
+var _ = require('lodash');
 
-module.exports = function(options) {
+module.exports = function (options) {
     var _options = _.defaults(options, {
         placeholderDir: path.join(process.cwd(), 'public/images/placeholders/'),
         defaultPlaceholderPath: path.join(process.cwd(), 'public/images/placeholders/default.png')
@@ -15,27 +15,32 @@ module.exports = function(options) {
                 if (err) {
                     // file not found
                     var placeholderImgPath = _options.defaultPlaceholderPath;
-                    if(req.params.species){
+
+                    if (req.params.species) {
                         placeholderImgPath = path.join(_options.placeholderDir, req.params.species + '.png');
-                    } else if(req.path.match(/cat/)){
+                    } else if (req.path.match(/cat/i)) {
                         placeholderImgPath = path.join(_options.placeholderDir, 'cat.png');
-                    } else if(req.path.match(/dog/)){
+                    } else if (req.path.match(/dog/i)) {
                         placeholderImgPath = path.join(_options.placeholderDir, 'dog.png');
                     }
+
                     fs.access(placeholderImgPath, function (err) {
                         if (err) {
                             // placeholder not found
                             next(err);
-                        } else {
-                            res.sendFile(placeholderImgPath);
+                            return;
                         }
-                    })
-                } else {
-                    next();
+
+                        res.sendFile(placeholderImgPath);
+                    });
+                    return;
                 }
+
+                next();
             });
-        } else {
-            next();
+            return;
         }
+
+        next();
     }
 };

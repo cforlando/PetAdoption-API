@@ -1,7 +1,7 @@
-*.env.json
+.env
 aws*.json
-.gitignore
 /data
+/build
 !/data/dataset.json
 !/data/dataset.dog.json
 !/data/props.dog.json
@@ -183,3 +183,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+.ropeproject
+.github-todos

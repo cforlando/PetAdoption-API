@@ -1,62 +1,53 @@
-var util = require('util'),
-    path = require('path'),
-    fs = require('fs'),
-    Events = require('events'),
+var util = require('util');
+var path = require('path');
+var Events = require('events');
 
-    mongoose = require('mongoose'),
-    _ = require('lodash'),
+var log = require('debug')('pet-api:adapter');
+var mongoose = require('mongoose');
+var _ = require('lodash');
 
-    config = require('../../../config'),
-    Debuggable = require('../../../lib/debuggable');
+var config = require('../../../config');
 
 // prevent mongoose promise warning
 mongoose.Promise = require('q').Promise;
 
 /**
  *
- * @extends Debuggable
- * @class MongoDBAdapter
+ * @class MongoDbAdapter
  * @param [options]
- * @param {String} [options.debugTag]
- * @param {DebugLevel} [options.debugLevel]
  * @param [options.mongoConnectionURL]
  * @param [options.context]
  * @param {Function} [options.onSuccess]
  * @param {Function} [options.onFailure]
- * @param {Function} [options.onFatal]
- * @returns {MongoDBAdapter}
+ * @returns {MongoDbAdapter}
  * @constructor
  */
-function MongoDBAdapter(options) {
-    var _options = _.defaults(options, {
-        debugTag: 'MongoDBAdapter: ',
-        debugLevel: Debuggable.PROD,
-        mongoConnectionURI: config.MONGODB_URI,
+function MongoDbAdapter(options) {
+    var opts = _.defaults(options, {
+        mongoConnectionURI: config.MONGODb_URI,
         context: null,
         onFailure: function () {
             console.error.apply(console, arguments);
         }
     });
 
-    this.setDebugTag(_options.debugTag);
-    this.setDebugLevel(_options.debugLevel);
+    this.log = log;
 
-    this._config = _options;
+    this._config = opts;
 
     this._callbacks = {
-        beforeConnect: _options.beforeConnect,
-        onSuccess: _options.onSuccess,
-        onFailure: _options.onFailure,
-        onFatal: _options.onFatal
+        beforeConnect: opts.beforeConnect,
+        onSuccess: opts.onSuccess,
+        onFailure: opts.onFailure
     };
 
-    this._mongoose = mongoose.createConnection(_options.mongoConnectionURI);
+    this._mongoose = mongoose.createConnection(opts.mongoConnectionURI);
 
     this.connect();
     return this;
 }
 
-MongoDBAdapter.prototype = {
+MongoDbAdapter.prototype = {
 
     /**
      *
@@ -64,7 +55,6 @@ MongoDBAdapter.prototype = {
      * @param [options.beforeConnect]
      * @param [options.onSuccess]
      * @param [options.onFailure]
-     * @param [options.onFatal]
      * @param [options.context]
      */
     connect: function (options) {
@@ -85,7 +75,7 @@ MongoDBAdapter.prototype = {
 
         if (callbacks.beforeConnect) callbacks.beforeConnect.call(context);
 
-        this.log(Debuggable.LOW, 'mongoose is connecting to %s', mongoConnectionURI);
+        this.log('mongoose is connecting to %s', mongoConnectionURI);
 
         this._mongoose.on('error', function (err) {
             self.emit('error', err);
@@ -94,15 +84,11 @@ MongoDBAdapter.prototype = {
 
         this.on('error', function (err) {
             // catch error events so node.js doesn't throw an error itself
-            this.error('err: %s', err);
+            console.error('core.mongodb.lib.adapter: %s', err);
         });
 
-        this._mongoose.on('connecting', function(){
+        this._mongoose.on('connecting', function () {
             self.onConnecting.apply(self, arguments)
-        });
-
-        this._mongoose.on('connected', function(){
-            self.onConnected.call(self, callbacks.onSuccess, context)
         });
 
         this._mongoose.on('disconnecting', function () {
@@ -113,23 +99,23 @@ MongoDBAdapter.prototype = {
             self.emit('close');
         });
 
-        if (this.isConnecting()) {
-            this.onConnecting();
-        } else if (this.isConnected()) {
-            this.onConnected(callbacks.onSuccess, context);
-        } else {
+        this._mongoose.on('connected', function () {
+            self.onConnected.call(self, callbacks.onSuccess, context)
+        });
+
+        if (!(this.isConnected() || this.isConnecting())) {
             this._mongoose.open(_options.mongoConnectionURI)
         }
     },
     onConnecting: function (callback, context) {
-        this.log(Debuggable.LOW, 'mongoose is connecting');
+        this.log('mongoose is connecting');
         this.emit('connecting');
         if (callback) callback.call(context);
         // delete callbacks.onSuccess;
     },
 
     onConnected: function (callback, context) {
-        this.log(Debuggable.LOW, 'mongoose is connected');
+        this.log('mongoose is connected');
         this.emit('connected');
         if (callback) callback.call(context);
         // delete callbacks.onSuccess;
@@ -141,9 +127,9 @@ MongoDBAdapter.prototype = {
      */
     close: function (callback) {
         var self = this;
-        return new Promise(function(resolve, reject){
+        return new Promise(function (resolve, reject) {
             if (!self._mongoose) return resolve();
-            self._mongoose.close(function(){
+            self._mongoose.close(function () {
                 if (callback) callback();
                 resolve();
             });
@@ -192,7 +178,7 @@ MongoDBAdapter.prototype = {
 
 };
 
-_.extend(MongoDBAdapter.prototype, Events.prototype, Debuggable.prototype);
+MongoDbAdapter.prototype = Object.assign({}, Events.prototype, MongoDbAdapter.prototype);
 
-module.exports = MongoDBAdapter;
+module.exports = MongoDbAdapter;
 

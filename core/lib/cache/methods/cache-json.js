@@ -8,7 +8,7 @@ var fs = require('fs'),
  * @class JSONCache
  * @constructor
  */
-function JSONCache(){
+function JSONCache() {
 
     /**
      *
@@ -17,22 +17,24 @@ function JSONCache(){
      * @param [options.dir] absolute path directory to save JSON file
      * @param [options.name] the name of the JSON file
      */
-    this.save = function(data, options){
+    this.save = function (data, options) {
         var _options = _.defaults(options, {
-            dir : path.resolve(process.cwd(), '/data'),
-            name : 'cache'
-        }),
-            filename = util.format('%s.json', _options.name),
-            content = JSON.stringify(data);
+            dir: path.resolve(process.cwd(), '/data'),
+            name: 'cache'
+        });
+        var filename = util.format('%s.json', _options.name);
+        var content = JSON.stringify(data);
 
-        if (_options.done){
-            fs.writeFile(path.join(_options.dir, filename), content, function(err){
-                _options.done(err);
+        return new Promise(function (resolve, reject) {
+            fs.writeFile(path.join(_options.dir, filename), content, function (err) {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                resolve();
             });
-        } else{
-            fs.writeFileSync(path.join(_options.dir, filename), content);
-        }
-
+        })
     }
 }
 

@@ -2,7 +2,7 @@ var path = require('path'),
 
     _ = require('lodash');
 
-    JSONCache = require('./methods/cache-json');
+JSONCache = require('./methods/cache-json');
 
 /**
  *
@@ -10,7 +10,12 @@ var path = require('path'),
  * @returns {Cache}
  * @constructor
  */
-function Cache(){
+function Cache() {
+    // alias save method as cahce
+    this.cache = this.save;
+}
+
+Cache.prototype = {
 
     /**
      *
@@ -21,29 +26,24 @@ function Cache(){
      * @param {String} [options.dir] absolute path to save cache file (if applicable)
      * @param {Function} [options.done]
      */
-    this.save = function(method, data, options){
+    save: function (method, data, options) {
         var _options = _.defaults(options, {
-            name : 'cache',
-            dir : path.join(process.cwd(), '/data')
+            name: 'cache',
+            dir: path.join(process.cwd(), '/data')
         });
 
         switch (method) {
             case 'json':
                 var jsonCache = new JSONCache();
-                jsonCache.save(data, {
+                var jsonSaveOptions = {
                     name: _options.name,
-                    dir: _options.dir,
-                    done: _options.done
-                });
-                break;
+                    dir: _options.dir
+                };
+                return jsonCache.save(data, jsonSaveOptions);
             default:
-                throw new Error('Invalid Cache Method used');
-                break;
+                return Promise.reject(new Error('invalid save option (' + method + ')selected'));
         }
-    };
-
-    this.cache = this.save;
-    return this;
+    }
 }
 
 module.exports = Cache;

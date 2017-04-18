@@ -1,43 +1,28 @@
-var fs = require('fs'),
-    util = require('util'),
-    path = require('path'),
-    url = require('url'),
+var fs = require('fs');
+var util = require('util');
+var path = require('path');
+var url = require('url');
 
-    _ = require('lodash'),
+var _ = require('lodash');
+var chai = require('chai');
 
-    Debuggable = require('../core/lib/debuggable'),
-    APIDatabase = require('../core/mongodb'),
-    APIDatabaseFormatter = require('../core/server/utils/formatter'),
-    Server = require('../core/server'),
+var Debuggable = require('../core/lib/debuggable');
+var APIDatabase = require('../core/mongodb');
+var APIDatabaseFormatter = require('../core/server/utils/formatter');
+var SpeciesDbImage = require('../core/mongodb/lib/species-db-image');
+var Server = require('../core/server');
+var Species = require('../core/lib/species');
 
-    Species = require('../core/lib/species'),
-    SpeciesDBImage = require('../core/mongodb/lib/species-db-image');
+var expect = chai.expect;
 
 function Helper() {
     this.opts = {
         printResponses: false
     };
     this.server = null;
-    this.testAPIDatabase = null;
     this.dbFormatter = new APIDatabaseFormatter();
-    this.testDBImages = this.getTestDBImages();
+    this.testDbImages = this.getTestDbImages();
     this.dbInstanceStack = [];
-    this.scopedMethods = [
-        'buildAnimalTest',
-        'buildEndpoint',
-        'buildJasmineRequestCallback',
-        'buildDatabase',
-        'setupDatabase',
-        'buildServer',
-        'buildGlobalServer',
-        'beforeAPI',
-        'afterAPI'
-    ];
-
-    var self = this;
-    this.scopedMethods.forEach(function (methodName) {
-        self[methodName] = self[methodName].bind(self)
-    });
 };
 
 Helper.prototype = {
@@ -47,7 +32,7 @@ Helper.prototype = {
         return Promise.resolve();
     },
 
-    getTestDBImages: function () {
+    getTestDbImages: function () {
         var catProps = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'data/props.cat.json')), 'utf8'),
             dogProps = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'data/props.dog.json')), 'utf8'),
 
@@ -63,8 +48,8 @@ Helper.prototype = {
                 .value();
 
         return [
-            new SpeciesDBImage('cat', cats, catProps),
-            new SpeciesDBImage('dog', dogs, dogProps)
+            new SpeciesDbImage('cat', cats, catProps),
+            new SpeciesDbImage('dog', dogs, dogProps)
         ];
     },
 
@@ -152,12 +137,14 @@ Helper.prototype = {
         switch (propData.valType) {
             case 'Location':
             case 'Number':
-                if (_.isNumber(result)) {
-                    result = parseFloat(result);
-                } else {
+                if (!_.isNumber(result)) {
                     // TODO implement better handling of invalid number type options
+                    console.warn('found invalid number option for "%s"(%s)', propData.key, propData.valType)
                     result = -1;
+                    break;
                 }
+
+                result = parseFloat(result);
                 break;
             case 'Date':
                 var today = new Date(result);
@@ -165,7 +152,11 @@ Helper.prototype = {
                 break;
             default:
         }
-        if (result === null || result === undefined) throw new Error(this.sprintf("Cannot generate test option for '%j'", propData.key || propData));
+
+        if (result === null || result === undefined) {
+            throw new Error(this.sprintf("Cannot generate test option for '%j'", propData.key || propData));
+        }
+
         return result;
     },
 
@@ -176,216 +167,238 @@ Helper.prototype = {
      * @returns {Function}
      */
     buildAnimalTest: function (queryProps, speciesProps) {
-
+        // define a species with speciesProps to be used for verification of prop types
+        var testSpeciesProp = _.find(speciesProps, {key: 'species'});
+        var testSpecies = new Species(testSpeciesProp.val || 'testSpecies', speciesProps);
         var self = this;
 
         return function (res) {
+            expect(res.body).to.be.an('Array');
 
-            if (!_.isArray(res.body)) {
-
-                throw new Error(this.sprintf("received %s instead of an array", typeof res.body));
-
-            } else if (res.body.length) {
-
-                // define a species with speciesProps to be used for verification of prop types
-                var testSpeciesProp = _.find(speciesProps, {key: 'species'}),
-                    testSpecies = new Species(testSpeciesProp.val || 'testSpecies', speciesProps);
-
-                // responses should always be an array
-                _.forEach(res.body, function (animalData, index) {
-
-                    // match queryProps on animalData
-                    _.forEach(queryProps, function (expectedValue, propName) {
-
-                        // for each prop in the query
-                        // first, check if property exists
-                        if (_.isUndefined(animalData[propName])) {
-                            var errTxt = self.sprintf('(%s/%s) Received undefined actualValue for "%s" (should be %s)', index, res.body.length, propName, expectedValue);
-                            throw new Error(errTxt);
-                        }
-                        var actualValue = animalData[propName].val,
-                            speciesProp = testSpecies.getProp(propName);
-
-                        if (speciesProp.valType === 'String') {
-
-                            // if a string, check if they match regardless of case, (ie case of species)
-                            var testRegex = new RegExp(self.escapeRegExp(expectedValue), 'i');
-                            if (testRegex.test(actualValue)) return;
-
-                        } else if (speciesProp.valType === 'Date') {
-
-                            // if a date,  convert to date and back to iso strings for comparison
-                            var testDate = new Date(expectedValue),
-                                actualDate = new Date(actualValue);
-                            if (actualDate.toISOString() === testDate.toISOString()) return;
-
-                        } else if (speciesProp.valType == 'Boolean') {
-
-                            var expectedBoolValue = (expectedValue === true || /y|yes/i.test(expectedValue));
-                            if (actualValue === expectedBoolValue) return; // all is well this property
-
-                        } else if (actualValue == expectedValue) {
-                            // general comparison if the values are equal without any sanitization
-                            return;
-
-                        } else if (expectedValue.length) {
-                            // make general comparison of each value in expected array
-
-                            expectedValue.forEach(function (val, index) {
-                                if (actualValue[index] != val) throw new Error("");
-                            });
-                            // expected and actual values are equal
-                            return;
-                        }
-
-                        // all successful returns of expected results should have been caught
-                        // Anything else is incorrect
-                        var errText = self.sprintf('(%s/%s) Received incorrect match for "%s"', index, res.body.length, propName);
-                        throw new Error(errText);
-                    });
-                })
-            } else {
-                // throw new Error(self.sprintf("No pets returned for: %s", self.dump(queryProps)));
+            if (res.body.length === 0) {
                 throw new Error(self.sprintf("No pets returned"));
             }
+
+            // responses should always be an array
+            _.forEach(res.body, function (animalData, index) {
+
+                // match queryProps on animalData
+                _.forEach(queryProps, function (expectedValue, propName) {
+                    // for each prop in the query
+                    var actualValue;
+                    var speciesProp;
+
+                    // first, check if property exists
+                    expect(animalData[propName]).to.exist;
+                    actualValue = animalData[propName].val;
+                    speciesProp = testSpecies.getProp(propName);
+
+                    switch (speciesProp.valType) {
+                        case 'String':
+                            // if a string, check if they match regardless of case, (ie case of species)
+                            var testRegex = new RegExp(self.escapeRegExp(expectedValue), 'i');
+
+                            expect(actualValue).to.match(testRegex);
+                            break;
+
+                        case 'Date':
+                            expect(new Date(actualValue)).to.eql(new Date(expectedValue));
+                            break;
+
+                        case 'Boolean':
+                            var expectedBoolValue = (expectedValue === true || /y|yes/i.test(expectedValue));
+
+                            expect(actualValue).to.eql(expectedBoolValue);
+                            break;
+
+                        default:
+                            // general comparison if the values are equal without any sanitization
+                            if (expectedValue.length) {
+                                expect(actualValue).to.have.members(expectedValue);
+                            } else {
+                                expect(actualValue).to.eql(expectedValue);
+                            }
+                    }
+
+                });
+            })
         }
     },
 
+    /**
+     *
+     * @param options
+     * @return {Promise<MongoAPIDatabase>}
+     */
     buildDatabase: function (options) {
-        return Promise.resolve(
-            new APIDatabase(
-                _.defaults(options, {
-                    debugLevel: Debuggable.PROD,
-                    preset: [],
-                    collectionNamePrefix: 'test_api_'
-                })
-            )
-        );
+        var dbDefaults = {
+            debugLevel: Debuggable.PROD,
+            preset: [],
+            collectionNamePrefix: 'test_api_'
+        };
+        var dbOptions = _.defaults(options, dbDefaults);
+
+        return Promise.resolve(new APIDatabase(dbOptions));
     },
 
-    setupDatabase: function (testDB, options) {
+    /**
+     *
+     * @param {MongoAPIDatabase} testDb
+     * @param {Object} [options]
+     * @param {SpeciesDbImage[]} [options.testDbImages]
+     * @returns {Promise}
+     */
+    setupDatabase: function (testDb, options) {
+        var self = this;
+        var opts = _.defaults(options, {
+            testDbImages: self.testDbImages
+        });
+        var formatOptions = {
+            createMissingFields: true,
+            populateEmptyFields: true
+        };
 
-        var self = this,
-            opts = _.defaults(options, {
-                testDBImages: self.testDBImages
-            });
-
-        return testDB.uploadDBImages(opts.testDBImages)
+        return testDb.uploadDbImages(opts.testDbImages)
             .then(function () {
-                return new Promise(function(resolve, reject){
-                    self.dbFormatter.formatDB(testDB, {
-                        createMissingFields: true,
-                        populateEmptyFields: true,
-                        complete: function (err) {
-                            if (err) return reject(err);
-                            resolve(testDB);
-                        }
-                    });
-                })
+                return self.dbFormatter.formatDb(testDb, formatOptions);
+            })
+            .then(function () {
+                return Promise.resolve(testDb);
             })
     },
 
+    /**
+     *
+     * @param database
+     * @return {Promise<Server>}
+     */
     buildServer: function (database) {
         var self = this;
-        return new Promise(function (resolve, reject) {
+        var server;
 
-            if (!database) {
-                self.buildDatabase()
-                    .then(function (newTestDB) {
-                        var server = new Server(newTestDB, {debugLevel: Debuggable.PROD});
-                        resolve(server);
-                    })
-                    .catch(this.onError)
-            } else {
+        if (!database) {
+            return self.buildDatabase()
+                .then(function (newTestDb) {
+                    var server = new Server(newTestDb, {debugLevel: Debuggable.PROD});
+                    return Promise.resolve(server);
+                })
+                .catch(function (err) {
+                    return self.onError(err);
+                })
+        }
 
-                // pass formatted database to server
-                var server = new Server(database, {debugLevel: Debuggable.PROD});
-                resolve(server);
-            }
-        });
+        // pass formatted database to server
+        server = new Server(database, {debugLevel: Debuggable.PROD});
 
+        return Promise.resolve(server);
     },
 
+    /**
+     *
+     * @return {Promise}
+     */
     buildGlobalServer: function () {
         var self = this;
         if (this.server) return Promise.resolve(this.server);
+        // ensure we actually only init once
         if (this.init) return this.init;
 
         this.init = this.buildDatabase()
-            .then(this.setupDatabase)
+            .then(function (database) {
+                return self.setupDatabase(database)
+            })
             .then(function (database) {
                 self.database = database;
-                return Promise.resolve(self.database);
+                return self.buildServer(database)
             })
-            .then(this.buildServer)
             .then(function (server) {
                 self.server = server;
                 return Promise.resolve(self.server);
             })
-            .catch(this.onError);
+            .catch(function (err) {
+                return self.onError(err)
+            });
 
         return this.init;
     },
 
+    /**
+     *
+     * @param options
+     * @returns {Promise}
+     */
     beforeAPI: function (options) {
-        var self = this,
-            opts = _.defaults(options, {
-                server: null,
-                database: null
-            });
+        var self = this;
+        var opts = _.defaults(options, {
+            server: null,
+            database: null
+        });
 
         if (!opts.database) {
 
             return this.buildDatabase()
-                .then(this.setupDatabase)
+                .then(function (database) {
+                    return self.setupDatabase(database)
+                })
                 .then(function (database) {
                     opts.database = database;
                     self.dbInstanceStack.push(database);
-                    return Promise.resolve(opts.database)
+                    return self.buildServer(opts.database)
                 })
-                .then(this.buildServer)
                 .then(function (server) {
                     return Promise.resolve({server: server, database: opts.database})
                 })
-                .catch(this.onError);
-
-        } else if (!opts.server) {
-
-            return this.setupDatabase(opts.database)
-                .then(this.buildServer)
-                .then(function (server) {
-                    return Promise.resolve({server: server, database: opts.database})
-                })
-                .catch(this.onError);
-
-        } else {
-
-            return this.setupDatabase(opts.database)
-                .then(function () {
-                    return Promise.resolve({server: opts.server, database: opts.database})
-                })
-                .catch(this.onError);
+                .catch(function (err) {
+                    return self.onError(err)
+                });
         }
+
+        if (!opts.server) {
+
+            return this.setupDatabase(opts.database)
+                .then(function (database) {
+                    opts.database = database;
+                    return self.buildServer(opts.database);
+                })
+                .then(function (server) {
+                    return Promise.resolve({server: server, database: opts.database})
+                })
+                .catch(function (err) {
+                    return self.onError(err)
+                });
+        }
+
+        return this.setupDatabase(opts.database)
+            .then(function () {
+                return Promise.resolve({server: opts.server, database: opts.database})
+            })
+            .catch(function (err) {
+                return self.onError(err)
+            });
 
     },
 
+    /**
+     *
+     * @param testAPIDatabase
+     * @returns {Promise}
+     */
     afterAPI: function (testAPIDatabase) {
         var self = this;
+        var db = testAPIDatabase || self.dbInstanceStack.pop() || self.database;
 
-        return new Promise(function (resolve, reject) {
-            var db;
+        if (!db) {
+            return Promise.reject(new Error('no db to test on'));
+        }
 
-            if (db = testAPIDatabase || self.dbInstanceStack.pop() || self.database) {
-                db.clearAnimals(function (err) {
-                    if (err) return reject(err);
-
-                    db.stop().then(resolve, reject);
-                });
-            } else {
-                reject(new Error('no db to test on'));
-            }
-
-        })
+        return db.clearAnimals()
+            .then(function () {
+                return db.stop()
+            })
+            .catch(function (err) {
+                console.error(err);
+                return Promise.reject(err);
+            });
     }
 };
 

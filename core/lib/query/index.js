@@ -9,11 +9,11 @@ var _ = require('lodash');
  */
 function Query(props, species) {
 
-    var self = this,
-        metaPropNames = ['matchStartFor', 'matchEndFor', 'ignoreCase', 'ignoreCaseFor', 'properties'],
-        rawQueryMetaProps = _.isArray(props) ? _.filter(props, function (propData, index) {
-                return propData && _.includes(metaPropNames, propData.key)
-            }) : _.pick(props, metaPropNames);
+    var self = this;
+    var metaPropNames = ['matchStartFor', 'matchEndFor', 'ignoreCase', 'ignoreCaseFor', 'properties'];
+    var rawQueryMetaProps = _.isArray(props) ? _.filter(props, function (propData, index) {
+        return propData && _.includes(metaPropNames, propData.key)
+    }) : _.pick(props, metaPropNames);
 
     this.metaPropNames = metaPropNames;
     this.species = species;
@@ -33,59 +33,37 @@ Query.prototype = {
     toFormattedObject: function () {
         var self = this;
         return _.reduce(this.toObject(), function (collection, propData, propIdx) {
-            var propName = propData.key ? propData.key : propIdx,
-                propValue = propData.key ? propData.val : propData,
-                propType = (function () {
-                    if (self.species && self.species.getProp(propName)) {
-                        return self.species.getProp(propName).valType;
-                    } else if (propData.valType) {
-                        return propData.valType;
-                    } else if (_.isDate(propValue)) {
-                        return 'Date'
-                    } else if (_.isFinite(propValue)) {
-                        return 'Number';
-                    } else if (_.isNumber(propValue)) {
-                        return 'Float';
-                    } else if (propValue !== undefined
-                        && propValue !== null
-                        && /^\s*(y|yes|true|n|no|false)\s*$/i.test(propValue.toString())
-                    ) {
-                        return 'Boolean';
-                    } else {
-                        return null;
-                    }
-                })();
+            var propName = propData.key ? propData.key : propIdx;
+            var propValue = propData.key ? propData.val : propData;
+            var propType = self.getPropType(propName, propData);
+            var speciesProp = {};
 
-            if (propValue == undefined
-                || propValue == null
-                || (self.species && !_.find(self.species.getSpeciesProps(), {key: propName}))
-            ) {
-                // ignore invalid props
-            } else {
-
-                switch (propType) {
-                    case 'Boolean':
-                        propValue = /^\s*(y|yes|true)\s*$/i.test(propValue.toString());
-                        break;
-                    case 'Number':
-                        propValue = parseInt(propValue);
-                        break;
-                    case 'Date':
-                        propValue = propValue.toISOString ? propValue.toISOString() : propValue;
-                        break;
-                    case 'Float':
-                        propValue = parseFloat(propValue);
-                        break;
-                }
-
+            if (self.species) {
+                speciesProp = _.find(self.species.getSpeciesProps(), {key: propName});
             }
-            collection[propName] = {
+
+            switch (propType) {
+                case 'Boolean':
+                    propValue = /^\s*(y|yes|true)\s*$/i.test(propValue);
+                    break;
+                case 'Number':
+                    propValue = parseInt(propValue);
+                    break;
+                case 'Date':
+                    propValue = propValue.toISOString ? propValue.toISOString() : propValue;
+                    break;
+                case 'Float':
+                    propValue = parseFloat(propValue);
+                    break;
+            }
+
+            collection[propName] = _.defaults({
                 key: propName,
                 valType: propType,
                 val: propValue
-            };
-            return collection;
+            }, speciesProp);
 
+            return collection;
         }, {});
     },
 
@@ -168,6 +146,32 @@ Query.prototype = {
         }
 
         return query;
+    },
+
+    getPropType: function (propName, propData) {
+        var propValue = propData.key ? propData.val : propData;
+
+        if (this.species && this.species.getProp(propName)) {
+            return this.species.getProp(propName).valType;
+
+        } else if (propData.valType) {
+            return propData.valType;
+
+        } else if (_.isDate(propValue)) {
+            return 'Date'
+
+        } else if (_.isFinite(propValue)) {
+            return 'Number';
+
+        } else if (_.isNumber(propValue)) {
+            return 'Float';
+
+        } else if (propValue && /^\s*(y|yes|true|n|no|false)\s*$/i.test(propValue.toString())) {
+            return 'Boolean';
+
+        } else {
+            return null;
+        }
     },
 
     isPropRegex: function (propData) {

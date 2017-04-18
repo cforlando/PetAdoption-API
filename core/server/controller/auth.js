@@ -1,32 +1,21 @@
-var fs = require('fs'),
-    path = require('path'),
-    url = require('url'),
+var fs = require('fs');
 
-    _ = require('lodash'),
-    passport = require('passport'),
-    GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
-    session = require('express-session'),
+var _ = require('lodash');
+var passport = require('passport');
+var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+var session = require('express-session');
 
-    Debuggable = require('../../lib/debuggable'),
-    config = require('../../config');
+var config = require('../../config');
 
 /**
- * @extends Debuggable
  * @class AuthController
- * @param {MongoAPIDatabase} [database]
- * @param {Object} [options]
- * @param {DebugLevel} [options.debugLevel]
+ * @param {MongoAPIDatabase} database
  * @constructor
  */
-function AuthController(database, options) {
-    this.setDebugTag('AuthController: ');
+function AuthController(database) {
     var self = this;
 
     this.database = this.database || database;
-
-    this._authOptions = _.defaults(options, {
-        debugLevel: Debuggable.PROD
-    });
 
     this.credentials = {
         web: {
@@ -35,16 +24,18 @@ function AuthController(database, options) {
         }
     };
 
-    this.userSession = session({
+    this.sessionOptions = {
         secret: config.SERVER_SESSION_SECRET,
         saveUninitialized: true,
         resave: true
-    });
+    };
 
     /**
      * @type {Passport}
      */
     this.passport = passport;
+
+    this.userSession = session(this.sessionOptions);
 
     /**
      * Use the GoogleStrategy within Passport.
@@ -55,7 +46,7 @@ function AuthController(database, options) {
     this.passport.use(new GoogleStrategy({
         clientID: this.credentials.web.client_id,
         clientSecret: this.credentials.web.client_secret,
-        callbackURL: url.resolve(config.DOMAIN, "/auth/google/callback")
+        callbackURL: config.GOOGLE_AUTH_CALLBACK
     }, this.onLoginRequest()));
 
     this.passport.serializeUser(function (user, done) {
@@ -63,18 +54,16 @@ function AuthController(database, options) {
     });
 
     this.passport.deserializeUser(function (userId, done) {
-        self.database.findUser({id: userId}, {
-            complete: function (err, foundUser) {
-                var deserializationError;
-                if (err || !foundUser.id) {
-                    deserializationError = err || new Error("Could not deserialize user");
+        self.database.findUser({id: userId})
+            .then(function (foundUser) {
+                if (!foundUser.id) {
+                    return Promise.reject(new Error("Could not deserialize user"));
                 }
-                done(deserializationError, foundUser);
-            }
-        })
+
+                done(null, foundUser);
+            })
+            .catch(done)
     });
-    this.log(Debuggable.MED, 'APIController() = %s', this.dump());
-    return this;
 }
 
 AuthController.prototype = {
@@ -83,28 +72,25 @@ AuthController.prototype = {
         var self = this;
 
         return function (accessToken, refreshToken, profile, done) {
-            self.database.findUser({id: profile.id}, {
-                debug: self._authOptions.debugLevel,
-                complete: function (err, user) {
-                    if (err || !user.id) {
-                        var userData = {
-                            id: profile.id,
-                            privilege: 0,
-                            firstName: profile.name.givenName,
-                            lastName: profile.name.familyName
-                        };
-                        if (profile.photos.length > 0) userData.photo = profile.photos[0].value;
-                        self.database.saveUser(userData, {
-                            debug: self._authOptions.debugLevel,
-                            complete: function (err, user) {
-                                done(err, user)
-                            }
-                        })
-                    } else {
-                        return done(err, user);
+            self.database.findUser({id: profile.id})
+                .catch(function (err) {
+                    console.error(err);
+                    var userData = {
+                        id: profile.id,
+                        privilege: 0,
+                        firstName: profile.name.givenName,
+                        lastName: profile.name.familyName
+                    };
+
+                    if (profile.photos.length > 0) {
+                        userData.photo = profile.photos[0].value;
                     }
-                }
-            });
+
+                    return self.database.saveUser(userData)
+                })
+                .then(function (user) {
+                    return done(null, user);
+                })
         }
     },
 
@@ -115,27 +101,26 @@ AuthController.prototype = {
         }
     },
 
+    session: function(){
+      return this.userSession;
+    },
+
     verifyAuth: function () {
         return [
-            this.userSession,
+            this.session(),
             this.passport.initialize(),
             this.passport.session(),
             function (req, res, next) {
-                if (req.isAuthenticated()) {
-                    next();
-                } else {
+                if (!req.isAuthenticated()) {
                     var err = new Error("Not authenticated");
-                    res.status(401);
-                    res.render('error', {
-                        message: err.message,
-                        error: err,
-                        DEVELOPMENT_ENV: config.DEVELOPMENT_ENV
-                    });
+                    err.status = 401;
+                    next(err);
+                    return;
                 }
+
+                next();
             }]
     }
 };
-
-_.extend(AuthController.prototype, Debuggable.prototype);
 
 module.exports = AuthController;

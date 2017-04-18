@@ -1,33 +1,29 @@
-var request = require('supertest'),
-    expect = require('expect.js'),
+var supertest = require('supertest');
+var chai = require('chai');
 
-    TestHelper = require('./helper'),
+var TestHelper = require('./helper');
 
-    tHelper = new TestHelper(),
-    buildEndpoint = tHelper.buildEndpoint,
-    buildJasmineRequestCallback = tHelper.buildJasmineRequestCallback,
-    server;
+var tHelper = new TestHelper();
+var expect = chai.expect;
+var request;
 
 describe("/user", function () {
 
-    before(function(done){
-        tHelper.buildGlobalServer()
-            .then(function(testServer){
-                server = testServer;
-                done();
+    before(function () {
+        return tHelper.buildGlobalServer()
+            .then(function (testServer) {
+                request = supertest(testServer);
+                return Promise.resolve();
             })
     });
 
-    after(function(done){
-        tHelper.afterAPI()
-            .then(done)
-            .catch(done)
+    after(function () {
+        return tHelper.afterAPI()
     });
 
-    it("returns 401 when unauthorized user request made", function (done) {
-        request(server)
-            .get(buildEndpoint('user'))
+    it("returns 401 when unauthorized user request made", function () {
+        return request.get(tHelper.buildEndpoint('user'))
             .set('Accept', 'application/json')
-            .expect(401, buildJasmineRequestCallback(done))
+            .expect(401)
     });
 });

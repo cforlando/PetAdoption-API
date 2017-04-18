@@ -1,27 +1,24 @@
-var fs = require('fs'),
-    path = require('path'),
-    util = require('util'),
-    url = require('url'),
+var path = require('path');
+var util = require('util');
+var url = require('url');
 
-    csv = require('csv'),
-    _ = require('lodash'),
+var fs = require('mz/fs');
+var csv = require('csv');
+var _ = require('lodash');
+var log = require('debug')('pet-api:csv-importer:reader:dataset');
 
-    config = require('../../config'),
-    Cache = require('../../lib/cache'),
+var config = require('../../config');
+var Cache = require('../../lib/cache');
 
-    defaults = {
-        done: function () {
-            console.warn('parse() complete - No callback provided.')
-        },
-        context: null,
-        readPath: path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_Test_Dataset - Sheet1.csv'),
-        writeDir: path.resolve(process.cwd(), 'data/'),
-        cacheName: 'dataset'
-    };
+var defaults = {
+    readPath: path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_Test_Dataset - Sheet1.csv'),
+    writeDir: path.resolve(process.cwd(), 'data/'),
+    cacheName: 'dataset'
+};
 
 
 function parseCSVDataset(csvData) {
-    console.log('sanitizing dataset');
+    log('sanitizing dataset');
 
     // imagesPath could be url such http://server.com/images/ (url must have trailing slash)
     var imagesPath,
@@ -81,7 +78,7 @@ function parseCSVDataset(csvData) {
         pets.push(animalProps);
     });
 
-    console.log('sanitized dataset');
+    log('sanitized dataset');
     return pets;
 }
 
@@ -89,38 +86,49 @@ module.exports = {
     /**
      *
      * @param options
-     * @param {ParsedCallback} options.done
-     * @param {Object} options.context
      * @param {Object} options.readPath
      * @param {Object} options.writePath
      */
     parse: function (options) {
-        console.log('dataset parsing');
-        var _options = _.defaults(options, defaults),
-            cache = new Cache();
+        log('dataset parsing');
+        var _options = _.defaults(options, defaults);
+        var cache = new Cache();
+        var animalDataset;
 
         // _options.writePath = path.resolve(_options.writeDir, util.format('%s.json', _options.cacheName));
 
-        fs.readFile(_options.readPath, {encoding: 'utf8'}, function (readErr, petTestDataText) {
-            if (readErr) throw readErr;
-            csv.parse(petTestDataText, function (err, petTestCSVData) {
-                var animalDataset = parseCSVDataset(petTestCSVData);
+        return fs.readFile(_options.readPath, 'utf8')
+            .then(function (petTestDataText) {
+                return new Promise(function (resolve, reject) {
+                    csv.parse(petTestDataText, function (err, petTestCSVData) {
+                        if (err) {
+                            reject(err);
+                            return;
+                        }
+                        resolve(petTestCSVData);
+                    })
+                });
+            })
+            .then(function (petTestCSVData) {
+                animalDataset = parseCSVDataset(petTestCSVData);
 
-                console.log('dataset parsed');
+                log('dataset parsed');
+
                 if (_options.cache === true) {
                     cache.save('json', animalDataset, {
-                        dir: _options.writeDir,
-                        name: _options.cacheName,
-                        done: function () {
-                            console.log('dataset saved');
-                            _options.done.apply(_options.context, [animalDataset, _options]);
-                        }
-                    });
-                } else {
-                    _options.done.apply(_options.context, [animalDataset, _options]);
+                            dir: _options.writeDir,
+                            name: _options.cacheName
+                        })
+                        .then(function(){
+                            log('dataset saved');
+                        })
+                        .catch(function (err) {
+                            console.error(err);
+                        })
                 }
+            })
+            .then(function () {
+                return animalDataset;
             });
-        });
-
     }
 };

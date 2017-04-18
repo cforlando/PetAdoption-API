@@ -19,19 +19,20 @@ function ViewRouter(controller) {
     var router = Express.Router();
 
     router.get('/',
-        controller.userSession,
+        controller.session(),
         controller.passport.initialize(),
         controller.passport.session(),
         function (req, res) {
             res.render('index', {
                 user: req.user,
-                GOOGLE_MAPS_KEY: config.GOOGLE_MAPS_KEY || "",
-                title: 'Pet Data Entry'
+                GOOGLE_MAPS_KEY: config.GOOGLE_MAPS_KEY,
+                title: 'Pet Data Entry',
+                env:  process.env
             });
         });
 
     router.get('/auth/google/',
-        controller.userSession,
+        controller.session(),
         controller.passport.initialize(),
         controller.passport.authenticate('google', {
             scope: [
@@ -40,7 +41,7 @@ function ViewRouter(controller) {
         }));
 
     router.get('/auth/google/callback/',
-        controller.userSession,
+        controller.session(),
         controller.passport.initialize(),
         controller.passport.authenticate('google', {
             failureRedirect: '/'

@@ -1,9 +1,2 @@
 include _auto-generated/_-all
-.pet-data-form(ng-controller="petFormController")
-    //.batch-edit-list(ng-if="isBatchMode()")
-    //    .batch-edit-list__content
-    //        .pet-thumbnail(ng-repeat="pet in $parent.selectedPetsDataCollection")
-    //            .pet-thumbnail__placeholder(ng-style!="background:url('{{pet.images.val[0]}}')")
-    .fields
-        .field(class="field--{{propData.key}}", ng-repeat="propData in properties")
-            .auto-input
+.pet-form

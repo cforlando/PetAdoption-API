@@ -2,11 +2,13 @@ var _ = require('lodash');
 
 /**
  * @class Species
- * @param speciesName
- * @param props
+ * @param {String} speciesName
+ * @param {Object[]|String} data
  * @constructor
  */
-function Species(speciesName, props) {
+function Species(speciesName, data) {
+    var parsedData;
+
     this.speciesName = speciesName;
     this.baseProps = [
         {
@@ -17,7 +19,7 @@ function Species(speciesName, props) {
             defaultVal: [],
             description: 'identifier',
             note: '',
-            required: 'Yes',
+            required: true,
             options: []
         },
         {
@@ -28,7 +30,7 @@ function Species(speciesName, props) {
             defaultVal: speciesName,
             description: 'Species of the animal',
             note: '',
-            required: 'Yes',
+            required: true,
             options: [speciesName]
         },
         {
@@ -39,60 +41,114 @@ function Species(speciesName, props) {
             defaultVal: [],
             description: 'Images of the animal',
             note: '',
-            required: 'No',
+            required: false,
             options: []
         },
         {
             key: 'petName',
             valType: 'String',
-            fieldLabel: "Pet's name",
+            fieldLabel: 'Pet\'s name',
             example: 'Fido',
             defaultVal: '',
-            description: '',
+            description: 'Pet\'s name',
             note: '',
-            required: 'No',
+            required: false,
             options: []
         }
     ];
     this.props = this.baseProps.slice();
-    if (props) this.setProps(_.isString(props) ? JSON.parse(props) : props);
+
+    if (data) {
+        if (_.isString(parsedData)) {
+            parsedData = JSON.parse(data);
+        } else {
+            parsedData = data;
+        }
+
+        this.setProps(parsedData.props || parsedData);
+
+        if (parsedData.speciesName) {
+            this.speciesName = parsedData.speciesName;
+        }
+    }
 }
 
 Species.prototype = {
 
+    /**
+     *
+     * @returns {String} - name of the species
+     */
     getSpeciesName: function () {
         return this.speciesName
     },
 
+    /**
+     *
+     * @param {Object[]} props - an array of properties to overwrite/insert
+     */
     setProps: function (props) {
-        if (props) {
-            this.props = _.chain(props)
-                .concat(this.props)
-                .uniqBy(function (propData) {
-                    return propData.key
-                })
-                .value()
+        var self = this;
+        if (!props) {
+            console.error('[%o].setProps() received invalid props', this);
+            return;
         }
-    },
+        props.forEach(function (propData) {
+            var prevPropIndex = _.findIndex(self.props, {key: propData.key});
+            if (prevPropIndex >= 0) {
+                self.props[prevPropIndex] = _.defaults({}, propData, self.props[prevPropIndex]);
+                return;
+            }
 
-    removeProp: function(propName){
-        this.props = _.reject(this.props, function(propData){
-            return propData.key == propName;
+            // NOTE Object.assign is to add copy rather than reference of propData
+            self.props.push(Object.assign({}, propData));
         });
     },
 
+    /**
+     *
+     * @param {String|Number} propIndex - key name or index of property to remove
+     */
+    removeProp: function (propIndex) {
+        this.props = _.reject(this.props, function (propData, idx) {
+            if (_.isString(propIndex)) {
+                return propData.key === propIndex;
+            }
+
+            if (_.isNumber(propIndex)) {
+                return idx === propIndex;
+            }
+
+            return false;
+        });
+    },
+
+    /**
+     *
+     * @param {String} propName - key name of the species property
+     * @returns {Object} - the specified species property object
+     */
     getProp: function (propName) {
         return _.find(this.props, {key: propName});
     },
 
+    /**
+     *
+     * @param {Object} [options]
+     * @param {Boolean} [options.removesValues=false] - whether to remove values from properties
+     * @returns {Object[]} - an array containing the animal's properties
+     */
     getProps: function (options) {
-        var _options = _.defaults(options, {removeValues: false});
+        var opts = _.defaults(options, {removeValues: false});
+
         return _.chain(this.props)
             .reduce(function (props, speciesPropData) {
-                if (speciesPropData.valType == 'Location' && !_.isNumber(speciesPropData.defaultVal)) {
-                    // fix for bad default values
+                // fix for bad default location values
+                if (speciesPropData.valType === 'Location' && !_.isNumber(speciesPropData.defaultVal)) {
                     speciesPropData.defaultVal = -1;
                 }
+
+                // remove any duplicate options
                 if (speciesPropData.options) {
                     speciesPropData.options = _.chain(speciesPropData.options)
                         .uniq()
@@ -106,14 +162,21 @@ Species.prototype = {
                 return props
             }, [])
             .map(function (propData) {
-                return (_options.removeValues) ? _.omit(propData, ['val']) : propData;
+                return opts.removeValues ? _.omit(propData, ['val']) : propData;
             })
             .sortBy(function (propData) {
-                if (propData.key == 'petId') return '0';
-                if (propData.key == 'images') return '1';
-                if (propData.key == 'petName') return '2';
-                if (propData.key == 'species') return '3';
-                return propData.key;
+                switch (propData.key) {
+                    case 'petId':
+                        return 0;
+                    case 'images':
+                        return 1;
+                    case 'petName':
+                        return 2;
+                    case 'species':
+                        return 3;
+                    default:
+                        return propData.key;
+                }
             })
             .value();
     },
@@ -122,10 +185,16 @@ Species.prototype = {
         return this.getProps({removeValues: true});
     },
 
-    toMongooseDoc: function () {
+    /**
+     *
+     * @param {Object} [options]
+     * @param {Boolean} [options.removesValues=false] - whether to remove values from properties
+     * @returns {{speciesName: (String), props: (Object[])}} - an object formatted for saving in mongodb
+     */
+    toMongooseDoc: function (options) {
         return {
             speciesName: this.getSpeciesName(),
-            props: this.getProps()
+            props: this.getProps(options)
         }
     }
 };

@@ -1,60 +1,57 @@
-var url = require('url'),
-    util = require('util'),
-    path = require('path'),
-    fs = require('fs'),
+var url = require('url');
+var util = require('util');
+var path = require('path');
+var fs = require('fs');
 
-    request = require('supertest'),
-    async = require('async'),
-    _ = require('lodash'),
-    expect = require('expect.js'),
+var supertest = require('supertest');
+var async = require('async');
+var _ = require('lodash');
+var chai = require('chai');
 
+var TestHelper = require('./helper');
 
-    TestHelper = require('./helper'),
-
-    tHelper = new TestHelper();
+var expect = chai.expect;
+var tHelper = new TestHelper();
+var sprintf = tHelper.sprintf;
+var request;
 
 describe("/api", function () {
+    var dbImage = tHelper.getTestDbImages()[0];
+    var speciesName = dbImage.getSpeciesName();
 
-    var dump = tHelper.dump,
-        sprintf = tHelper.sprintf,
-        buildEndpoint = tHelper.buildEndpoint,
-        buildJasmineRequestCallback = tHelper.buildJasmineRequestCallback,
-
-        dbImage = tHelper.getTestDBImages()[0],
-        speciesName = dbImage.getSpeciesName(),
-        server;
-
-    before(function (done) {
+    before(function () {
         this.timeout(20 * 1000);
-        tHelper.beforeAPI()
+
+        return tHelper.beforeAPI()
             .then(function (testComponents) {
-                server = testComponents.server;
-                done();
+                request = supertest(testComponents.server);
+                return Promise.resolve();
             })
-            .catch(done)
     });
 
-    after(function (done) {
-        tHelper.afterAPI()
-            .then(done)
-            .catch(done)
+    after(function () {
+        return tHelper.afterAPI();
     });
 
     describe("/v2", function () {
-        it(sprintf("returns values without meta data for %s properties", speciesName), function (done) {
-            request(server)
-                .get(buildEndpoint('list', speciesName, {base: '/api/v2/'}))
+
+        it(sprintf("returns values without meta data for %s properties", speciesName), function () {
+
+            return request.get(tHelper.buildEndpoint('list', speciesName, {base: '/api/v2/'}))
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
+                .expect(200)
                 .expect(function (res) {
-                    expect(res.body.length).to.be.greaterThan(0);
+
+                    expect(res.body).to.have.length.above(0);
+
                     _.forEach(res.body, function (animalProps) {
-                        _.forEach(animalProps, function (propData, propName) {
-                            if (_.isPlainObject(propData))  throw new Error(sprintf("a %s returned an object for %s", speciesName, propName))
+
+                        _.forEach(animalProps, function (propValue, propName) {
+                            expect(propValue).to.not.be.undefined;
                         });
                     })
                 })
-                .expect(200, buildJasmineRequestCallback(done))
         })
     });
 

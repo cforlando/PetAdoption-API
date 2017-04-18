@@ -1,14 +1,14 @@
 doctype html
 html
     head
-        title= title
+        title=title
         meta(name="viewport", content="width=device-width, initial-scale=1")
 
         //link(rel='stylesheet', href="/stylesheets/angular-material.min.css")
         //link(rel="stylesheet", href="/stylesheets/material-icons.css")
 
-        link(rel='stylesheet', href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css")
-        link(href="//fonts.googleapis.com/icon?family=Material+Icons", rel="stylesheet")
+        link(rel='stylesheet' href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css")
+        link(rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons")
 
         link(rel='stylesheet', href='/stylesheets/style.min.css')
 
@@ -16,9 +16,9 @@ html
     body(ng-controller='appController')
         .loading-screen(layout="row", layout-sm="column", layout-align="center center", ng-show="loadingQueue.length > 0")
             md-progress-circular(md-mode="indeterminate")
-        .user-view(ng-controller='userController', layout='column', layout-fill, ng-cloak)
-            if user
-                div.main-view(layout="column" layout-fill ng-controller='dataController')
+        .user-view(layout='column', layout-fill, ng-cloak)
+            if user || env && env.DEVELOPMENT_ENV
+                div.main-view(layout="column" layout-fill)
                     md-toolbar
                         .md-toolbar-tools
                             md-button(class="md-icon-button" aria-label="Side Nav Toggle" ng-click="toggleSidebar()")
@@ -35,10 +35,10 @@ html
                                 md-list-item(ng-click="showAnimalEditForm()") Add New Pet
                                 md-list-item(ng-click="showSpeciesSearch()") Edit Species
                         ng-view(flex, layout-fill, layout='column')
-                    .action-menu
             else
                 .view.view--login(layout-fill, layout='column')
                     .view__content
                         md-button.btn.btn--login.md-primary.md-raised(ng-click!='login()') Login
         h1.loading-text(style!='text-align: center;') Loading...
+        script(src="./javascript/vendor.app.js")
         script(src="./javascript/app.js")

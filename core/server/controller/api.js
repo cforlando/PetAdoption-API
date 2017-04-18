@@ -1,44 +1,36 @@
-var fs = require('fs'),
-    path = require('path'),
-    url = require('url'),
-    util = require('util'),
-    stream = require('stream'),
+var fs = require('fs');
+var path = require('path');
+var url = require('url');
+var util = require('util');
+var stream = require('stream');
 
-    _ = require('lodash'),
-    async = require('async'),
-    multer = require('multer'),
-    sharp = require('sharp'),
+var _ = require('lodash');
+var async = require('async');
+var multer = require('multer');
+var sharp = require('sharp');
 
-    config = require('../../config'),
-    S3Bucket = require('../../s3'),
-    Debuggable = require('../../lib/debuggable'),
-    DBFormatter = require('../utils/formatter'),
-    CSVImporter = require('../../csv-importer');
+var config = require('../../config');
+var S3Bucket = require('../../s3');
+var DbFormatter = require('../utils/formatter');
+var CSVImporter = require('../../csv-importer');
 
 /**
- * @extends Debuggable
  * @class APIController
  * @param {MongoAPIDatabase} [database]
  * @param {Object} [options]
- * @param {DebugLevel} [options.debugLevel]
  * @param {Number} [options.pageSize]
  * @param {Number} [options.maxImageHeight]
  * @param {Object} [options.paths]
  * @param {String} [options.paths.localRoot]
  * @param {String} [options.paths.images]
  * @param {String} [options.paths.placeholders]
- * @param {DebugLevel} [options.debugLevel=Debuggable.PROD]
  * @constructor
  */
 function APIController(database, options) {
-    this.setDebugTag('APIController: ');
-
     var self = this;
 
     this.database = this.database || database; // inherit database if already defined
     this._apiOptions = _.defaults(options, {
-        debugLevel: Debuggable.PROD,
-        debugTag: "APIController: ",
         pageSize: 10,
         maxImageHeight: 1080,
         paths: {
@@ -48,23 +40,17 @@ function APIController(database, options) {
         }
     });
 
-    this.setDebugTag(this._apiOptions.debugTag);
-    this.setDebugLevel(this._apiOptions.debugLevel);
-
     this.s3 = new S3Bucket(config.DEVELOPMENT_ENV ? config.S3_DEV_BUCKET_NAME : config.S3_PROD_BUCKET_NAME);
     this.storage = multer.memoryStorage();
 
     this.uploader = multer({storage: this.storage});
-    this.log(Debuggable.LOW, 'APIController() = %s', this.dump());
     return this;
 }
 
 APIController.prototype = {
 
-    getSpeciesList: function (callback) {
-        this.database.getSpeciesList({
-            complete: callback
-        })
+    getSpeciesList: function () {
+        return this.database.getSpeciesList()
     },
 
     onUserUpdate: function () {
@@ -74,16 +60,16 @@ APIController.prototype = {
                 var unauthorizedErr = new Error('User id not provided');
                 unauthorizedErr.code = 400;
                 next(unauthorizedErr);
-            } else {
-                self.database.saveUser(req.body, {
-                    complete: function (err, user) {
-                        if (err) return next(err);
-                        res.locals.simplifiedFormat = false;
-                        res.locals.data = user;
-                        next();
-                    }
-                })
+                return;
             }
+
+            self.database.saveUser(req.body)
+                .then(function (user) {
+                    res.locals.simplifiedFormat = false;
+                    res.locals.data = user;
+                    next();
+                })
+                .catch(next);
         }
     },
 
@@ -91,82 +77,73 @@ APIController.prototype = {
         var self = this;
         return function (req, res, next) {
             var userId = (req.user) ? req.user.id : false;
+
             if (!userId) {
                 var unauthorizedErr = new Error('Unauthorized');
                 unauthorizedErr.status = 401;
                 next(unauthorizedErr);
-            } else {
-                self.database.findUser({
-                    id: userId
-                }, {
-                    complete: function (err, user) {
-                        if (err) return next(err);
-                        res.locals.simplifiedFormat = false;
-                        res.locals.data = user;
-                        next();
-                    }
-                })
+                return;
             }
+
+            self.database.findUser({id: userId})
+                .then(function (user) {
+
+                    res.locals.simplifiedFormat = false;
+                    res.locals.data = user;
+
+                    next();
+                })
+                .catch(next);
         }
     },
 
     onSpeciesListRequest: function () {
         var self = this;
         return function (req, res, next) {
-            self.database.getSpeciesList({
-                complete: function (err, speciesList) {
-                    if (err) {
-                        self.error(err);
-                        next(err);
-                    } else {
-                        res.json(speciesList);
-                    }
-                }
-            });
+            self.database.getSpeciesList()
+                .then(function (speciesList) {
+                    res.json(speciesList);
+                })
+                .catch(next);
         }
     },
 
     onListSpeciesRequest: function () {
         var self = this;
+
         return function (req, res, next) {
 
             res.locals.pageNumber = req.params['pageNumber'];
 
-            self.log(Debuggable.MED, 'onListRequeset()');
-            self.database.findAnimals({species: req.params.species},
-                {
-                    debug: self._apiOptions.debugLevel,
-                    complete: function (err, animals) {
-                        if (err) {
-                            next(err);
-                        } else if (_.isArray(animals)) {
-                            res.locals.data = animals;
-                            next();
-                        } else {
-                            res.locals.data = [];
-                            next();
-                        }
+            self.database.findAnimals({species: req.params.species})
+                .then(function (animals) {
+
+                    res.locals.data = [];
+
+                    if (_.isArray(animals)) {
+                        res.locals.data = animals;
                     }
-                });
+
+                    next();
+                })
+                .catch(next);
         }
     },
 
     onListAllRequest: function () {
         var self = this;
+
         return function (req, res, next) {
             res.locals.pageNumber = req.params['pageNumber'];
 
-            self.database.findAnimals({}, {
-                debug: self._apiOptions.debugLevel,
-                complete: function (err, animals) {
-                    if (err) {
-                        next(err);
-                    } else {
-                        res.locals.data = animals;
-                        next();
-                    }
-                }
-            });
+            self.database.findAnimals({})
+                .then(function (animals) {
+
+                    res.locals.data = animals || [];
+
+                    next();
+                })
+                .catch(next);
         }
     },
 
@@ -174,86 +151,81 @@ APIController.prototype = {
         var self = this;
         return function (req, res, next) {
             var queryData = req.body;
+
             res.locals.pageNumber = req.params['pageNumber'];
 
-            self.database.findAnimals(queryData, {
-                debug: self._apiOptions.debugLevel,
-                complete: function (err, animals) {
-                    if (err) {
-                        next(err);
-                    } else if (animals && animals.length > 0) {
+            self.database.findAnimals(queryData)
+                .then(function (animals) {
+
+                    res.locals.data = [];
+
+                    if (animals && animals.length > 0) {
                         res.locals.data = animals;
-                        next();
-                    } else {
-                        res.locals.data = [];
-                        next();
                     }
-                }
-            });
+
+                    next();
+                })
+                .catch(next);
 
         }
     },
 
     onOptionsRequest: function () {
         var self = this;
-        return function (req, res, next) {
-            var species = req.params['species'];
 
-            self.database.findSpecies(species, {
-                complete: function (err, speciesData) {
-                    if (err) {
-                        next(err);
-                    } else {
-                        res.locals.simplifiedFormat = false;
-                        res.locals.data = _.reduce(speciesData.props, function (collection, propData) {
-                            if (propData) collection[propData.key] = propData.options;
-                            return collection;
-                        }, {});
-                        next();
-                    }
-                }
-            });
+        return function (req, res, next) {
+            var species = req.params.species;
+
+            self.database.findSpecies(species)
+                .then(function (speciesData) {
+
+                    res.locals.simplifiedFormat = false;
+                    res.locals.data = _.reduce(speciesData.props, function (collection, propData) {
+                        if (propData) collection[propData.key] = propData.options;
+                        return collection;
+                    }, {});
+
+                    next();
+                })
+                .catch(next);
         }
     },
 
     onSingleOptionRequest: function () {
         var self = this;
+
         return function (req, res, next) {
-            var species = req.params['species'],
-                optionName = req.params['option'];
+            var species = req.params.species;
+            var optionName = req.params.option;
 
+            self.database.findSpecies(species)
+                .then(function (speciesData) {
+                    var speciesPropData;
 
-            self.database.findSpecies(species, {
-                complete: function (err, speciesData) {
-                    if (err) {
-                        next(err);
-                    } else {
-                        res.locals.simplifiedFormat = false;
-                        var speciesPropData = _.find(speciesData.props, {key: optionName});
-                        res.locals.data = (speciesPropData) ? speciesPropData.options : [];
-                        next();
-                    }
-                }
-            });
+                    speciesPropData = _.find(speciesData.props, {key: optionName});
+                    res.locals.simplifiedFormat = false;
+                    res.locals.data = (speciesPropData) ? speciesPropData.options : [];
+
+                    next();
+                })
+                .catch(next);
         }
     },
 
     onRetrieveSpecies: function () {
         var self = this;
+
         return function (req, res, next) {
 
-            self.database.findSpecies(req.params.species, {
-                debug: self._apiOptions.debugLevel,
-                complete: function (err, speciesData) {
-                    if (err) {
-                        next(err)
-                    } else {
-                        res.locals.simplifiedFormat = false;
-                        res.locals.data = speciesData.props;
-                        next();
-                    }
-                }
-            })
+            self.database.findSpecies(req.params.species)
+                .then(function (speciesData) {
+
+                    res.locals.simplifiedFormat = false;
+                    res.locals.data = speciesData.props;
+
+                    next();
+                })
+                .catch(next);
         }
     },
 
@@ -261,18 +233,11 @@ APIController.prototype = {
         var self = this;
         return function (req, res, next) {
 
-            self.database.removeAnimal(
-                req.params.species,
-                req.body, {
-                    debug: self._apiOptions.debugLevel,
-                    complete: function (err, result) {
-                        if (err) {
-                            next(err);
-                        } else {
-                            res.json(result)
-                        }
-                    }
+            self.database.removeAnimal(req.params.species, req.body)
+                .then(function (result) {
+                    res.json(result)
                 })
+                .catch(next);
         }
     },
 
@@ -280,92 +245,78 @@ APIController.prototype = {
         var self = this;
         return function (req, res, next) {
 
-            self.database.saveAnimal(
-                req.params.species,
-                req.body, {
-                    debug: this._apiOptions.debugLevel,
-                    complete: function (err, newAnimal) {
-                        if (err) {
-                            next(err);
-                        } else {
-                            res.locals.simplifiedFormat = false;
-                            res.locals.data = newAnimal;
-                            next();
-                        }
-                    }
-                });
+            self.database.saveAnimal(req.params.species, req.body)
+                .then(function (newAnimal) {
+                    res.locals.simplifiedFormat = false;
+                    res.locals.data = newAnimal;
+                    next();
+                })
+                .catch(next);
         }
     },
+
+    saveSpeciesPlaceHolder: function (species, fileMeta) {
+        var bufferStream = new stream.PassThrough();
+        var publicPath = path.join(this._apiOptions.paths.images, (species + '/'), fileMeta.originalname);
+        var imageFormatter = sharp()
+            .resize(null, this._apiOptions.maxImageHeight)
+            .withoutEnlargement();
+        var formattedBufferStream = bufferStream.pipe(imageFormatter);
+
+        bufferStream.end(fileMeta.buffer);
+
+        return this.s3.saveReadableStream(formattedBufferStream, publicPath)
+            .then(function (result) {
+                return Promise.resolve(result.Location);
+            });
+    },
+
 
     onSaveAnimalForm: function () {
         var self = this;
         return function (req, res, next) {
-            var props = req.body,
-                imagesValue = props.images || '';
+            var animalData = req.body;
+            var imagesValue = animalData.images || '';
+            var saveImageOps = req.files.map(function (fileMeta) {
+                return self.saveSpeciesPlaceHolder(req.params.species, fileMeta)
+            });
 
-            props.images = imagesValue.split(',');
+            Promise.all(saveImageOps)
+                .then(function (newImageUrls) {
 
-            async.each(req.files,
-                function each(fileMeta, done) {
-                    var bufferStream = new stream.PassThrough(),
-                        publicPath = path.join(self._apiOptions.paths.images, (req.params.species + '/'), fileMeta.originalname);
+                    animalData.images = _.chain(newImageUrls)
+                        .concat(imagesValue.split(','))
+                        .reject(function (url) {
+                            // only truthy values
+                            return !url;
+                        })
+                        .value();
 
-                    bufferStream.end(fileMeta.buffer);
+                    return self.database.saveAnimal(req.params.species, animalData)
+                })
+                .then(function (newAnimal) {
+                    res.locals.simplifiedFormat = false;
+                    res.locals.data = newAnimal;
 
-                    var imageFormatter = sharp()
-                        .resize(null, self._apiOptions.maxImageHeight)
-                        .withoutEnlargement();
-
-                    var formattedBufferStream = bufferStream.pipe(imageFormatter);
-
-                    self.s3.saveReadableStream(formattedBufferStream, publicPath, function (err, result) {
-                        if (err) return done(err);
-                        props.images.push(result.Location);
-                        done();
-                    });
-                },
-                function complete(err) {
-                    if (err) return next(err);
-                    props.images = _.reject(props.images, function (url) {
-                        // only truthy values
-                        return !url;
-                    });
-                    self.database.saveAnimal(
-                        req.params.species,
-                        props, {
-                            debug: self._apiOptions.debugLevel,
-                            complete: function (err, newAnimal) {
-                                if (err) {
-                                    next(err);
-                                } else {
-                                    res.locals.simplifiedFormat = false;
-                                    res.locals.data = newAnimal;
-                                    next()
-                                }
-                            }
-                        });
-                });
-
+                    next()
+                })
+                .catch(next)
         }
     },
 
     onSaveSpecies: function () {
         var self = this;
+
         return function (req, res, next) {
-            self.database.saveSpecies(
-                req.params.species,
-                req.body, {
-                    debug: self._apiOptions.debugLevel,
-                    complete: function (err, updatedSpecies) {
-                        if (err) {
-                            next(err);
-                        } else {
-                            res.locals.simplifiedFormat = false;
-                            res.locals.data = updatedSpecies;
-                            next();
-                        }
-                    }
-                });
+            self.database.saveSpecies(req.params.species, req.body)
+                .then(function (updatedSpecies) {
+
+                    res.locals.simplifiedFormat = false;
+                    res.locals.data = updatedSpecies;
+
+                    next();
+                })
+                .catch(next);
         }
     },
 
@@ -385,115 +336,88 @@ APIController.prototype = {
 
             var formattedBufferStream = bufferStream.pipe(imageFormatter);
 
-            self.s3.saveReadableStream(formattedBufferStream, publicPath, function (err, result) {
-                if (err) return next(err);
-                res.json({result: "success", location: result.Location});
-            });
+            self.s3.saveReadableStream(formattedBufferStream, publicPath)
+                .then(function (result) {
+                    res.json({result: "success", location: result.Location});
+                })
+                .catch(next);
         }
     },
 
     onCreateSpecies: function () {
         var self = this;
-        return function (req, res, next) {
 
-            self.database.saveSpecies(
-                req.params.species,
-                req.body, {
-                    debug: self._apiOptions.debugLevel,
-                    complete: function (err, newSpecies) {
-                        if (err) {
-                            next(err);
-                        } else {
-                            res.locals.simplifiedFormat = false;
-                            res.locals.data = newSpecies;
-                            next();
-                        }
-                    }
-                });
+        return function (req, res, next) {
+            self.database.saveSpecies(req.params.species, req.body)
+                .then(function (newSpecies) {
+                    res.locals.simplifiedFormat = false;
+                    res.locals.data = newSpecies;
+
+                    next();
+                })
+                .catch(next)
         }
     },
 
     onDeleteSpecies: function () {
         var self = this;
-        return function (req, res, next) {
 
-            self.database.deleteSpecies(
-                req.params.species, {
-                    debug: self._apiOptions.debugLevel,
-                    complete: function (err) {
-                        if (err) {
-                            next(err);
-                        } else {
-                            res.json({result: 'success'})
-                        }
-                    }
-                });
+        return function (req, res, next) {
+            self.database.deleteSpecies(req.params.species)
+                .then(function () {
+                    res.json({result: 'success'})
+                })
+                .catch(next);
         }
     },
 
-    onFormatDB: function () {
+    onFormatDb: function () {
         var self = this;
-        return function (req, res, next) {
 
-            var dbFormatter = new DBFormatter();
-            dbFormatter.formatDB(self.database, {
-                complete: function (err) {
-                    if (err) return next(err);
+        return function (req, res, next) {
+            var dbFormatter = new DbFormatter();
+
+            dbFormatter.formatDb(self.database)
+                .then(function () {
                     res.send({result: 'success'})
-                }
-            });
+                })
+                .catch(next)
         }
     },
 
     onReset: function () {
-        var self = this,
-            csvImporter = new CSVImporter();
+        var self = this;
+        var csvImporter = new CSVImporter();
 
         return function (req, res, next) {
 
-            self.database.clearAnimals(function () {
-
-                csvImporter.run(function (petCollection) {
+            self.database.clearAnimals()
+                .then(function () {
+                    return csvImporter.run()
+                })
+                .then(function (pets) {
 
                     self.log('dataset parsed');
-                    var numOfPets = petCollection.length,
-                        savedPetCount = 1;
 
-                    async.each(petCollection,
-                        function each(petData, done) {
-                            self.log(Debuggable.MED, 'saving pet %j', petData);
-                            self.database.saveAnimal(petData.species || 'dog',
-                                petData,
-                                {
-                                    debug: self._apiOptions.debugLevel,
-                                    complete: function (err) {
-                                        if (err) {
-                                            self.error(self.dump(err));
-                                            done(err);
-                                        } else {
-                                            self.log(Debuggable.LOW, 'saved %s/%s pets', savedPetCount++, numOfPets);
-                                            done();
-                                        }
-                                    }
-                                });
-                        },
-                        function done(err) {
-                            if (err) {
-                                next(err);
-                            } else {
-                                // execute db formatting as well
-                                self.onFormatDB()(req, res, next);
-                            }
-                        });
+                    return Promise.all(pets.map(function (petData, idx) {
+                        self.log('parsing %s/%s', idx + 1, pets.length);
+                        return self.database.saveAnimal(petData.species || 'dog', petData)
+                            .catch(function (err) {
+                                console.error(err);
+                            });
+                    }))
 
+                })
+                .then(function () {
+                    // execute db formatting as well
+                    return self.onFormatDb()(req, res, next);
+                })
+                .catch(function (err) {
+                    next(err);
                 });
-            });
-
         }
     }
 
 };
-
-_.extend(APIController.prototype, Debuggable.prototype);
 
 module.exports = APIController;

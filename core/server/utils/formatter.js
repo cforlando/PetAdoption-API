@@ -1,19 +1,16 @@
-var util = require('util'),
-    fs = require('fs'),
-    path = require('path'),
-    url = require('url'),
+var util = require('util');
+var path = require('path');
+var url = require('url');
 
-    async = require('async'),
-    _ = require('lodash'),
+var async = require('async');
+var _ = require('lodash');
+var log = require('debug')('pet-api:formatter');
 
-    Debuggable = require('../../lib/debuggable'),
-    Species = require('../../lib/species'),
-    Animal = require('../../lib/animal'),
-    config = require('../../config');
+var Species = require('../../lib/species');
+var config = require('../../config');
 
 /**
  *
- * @extends Debuggable
  * @class DataFormatter
  * @param {Object} [options]
  * @param {Boolean} [options.createMissingFields=false]
@@ -22,14 +19,9 @@ var util = require('util'),
  */
 function DataFormatter(options) {
     var _options = _.defaults(options, {
-        debugTag: 'DataFormatter: ',
-        debugLevel: Debuggable.PROD,
         createMissingFields: false,
         populateEmptyFields: false
     });
-
-    this.setDebugLevel(_options.debugLevel);
-    this.setDebugTag(_options.debugTag);
 
     this._config = _options;
     this.speciesCache = {};
@@ -56,24 +48,18 @@ DataFormatter.prototype = {
      * @param {MongoAPIDatabase} database
      * @param {Object} animalProps
      * @param {Object} [options]
+     * @returns {Promise}
      */
     _saveAnimal: function (database, animalProps, options) {
-        var _options = _.defaults(options, {}),
-            reducedAnimalProps = _.reduce(animalProps, function (collection, propData, propName) {
-                collection[propName] = propData.val;
-                return collection;
-            }, {});
+        var _options = _.defaults(options, {});
+        var reducedAnimalProps = _.reduce(animalProps, function (collection, propData, propName) {
+            collection[propName] = propData.val;
+            return collection;
+        }, {});
 
-        this.log(Debuggable.MED, 'saving %j', reducedAnimalProps);
+        log('saving %j', reducedAnimalProps);
 
-        database.saveAnimal(reducedAnimalProps.species, reducedAnimalProps, {
-            debugLevel: _options.debugLevel,
-            species: _options.species,
-            complete: function (err, newAnimal) {
-                if (err) console.error(err);
-                if (_options.complete) _options.complete.apply(_options.context, [null, newAnimal])
-            }
-        });
+        return database.saveAnimal(reducedAnimalProps.species, reducedAnimalProps);
     },
 
 
@@ -83,67 +69,63 @@ DataFormatter.prototype = {
      * @param {Object} [options]
      * @param {Boolean} [options.createMissingFields=false]
      * @param {Boolean} [options.populateEmptyFields=false]
-     * @param {Function} [options.complete]
+     * @returns {Promise}
      */
-    formatDB: function (database, options) {
+    formatDb: function (database, options) {
         var self = this,
             _options = _.defaults(options, this._config);
 
-        database.getSpeciesList({
-            complete: function (err, speciesList) {
+        return database.getSpeciesList()
+            .then(function (speciesList) {
                 // get list of species
-
-                async.eachSeries(speciesList,
-                    function each(speciesName, onSpeciesFetched) {
-
-                        // save each species data to speciesCache
-                        database.findSpecies(speciesName, {
-                            complete: function (err, speciesData) {
-                                if (err) return onSpeciesFetched(err);
-                                self.speciesCache[speciesName] = new Species(speciesName, speciesData.props);
-                                onSpeciesFetched()
+                return new Promise(function (resolve, reject) {
+                    async.eachSeries(speciesList,
+                        function each(speciesName, onSpeciesFetched) {
+                            // save each species data to speciesCache
+                            database.findSpecies(speciesName)
+                                .then(function (speciesData) {
+                                    self.speciesCache[speciesName] = new Species(speciesName, speciesData.props);
+                                    onSpeciesFetched()
+                                })
+                                .catch(onSpeciesFetched)
+                        },
+                        function complete(err) {
+                            if (err) {
+                                reject(err);
+                                return;
                             }
+
+                            resolve();
                         })
-                    },
-                    function complete() {
+                });
+            })
+            .then(function () {
+                // find all animals
+                return database.findAnimals({})
+            })
+            .then(function (animals) {
 
-                        // find all animals
-                        database.findAnimals({}, {
-                            debugLevel: _options.debugLevel,
-                            complete: function (err, animals) {
+                // format each animal
+                return Promise.all(animals.map(function each(animalProps, index, onAnimalFormatted) {
+                    var species = self.speciesCache[animalProps.species.val];
+                    var formattedAnimalProps;
 
-                                // format each animal
-                                async.eachOf(animals,
-                                    function each(animalProps, index, onAnimalFormatted) {
-                                        var species = self.speciesCache[animalProps.species.val];
-                                        if (species) {
-                                            // format if species found in cache
-                                            var formattedAnimalProps = self.formatAnimal(species.getSpeciesProps(), animalProps, {
-                                                createMissingFields: _options.createMissingFields,
-                                                populateEmptyFields: _options.populateEmptyFields
-                                            });
+                    if (!species) {
+                        console.error(new Error('Could not save animal @ idx:' + index));
+                        return Promise.resolve();
+                    }
 
-                                            // save formatted animal
-                                            self._saveAnimal(database, formattedAnimalProps, {
-                                                species: species,
-                                                complete: function (err) {
-                                                    onAnimalFormatted(err);
-                                                }
-                                            });
-                                        } else {
-                                            // skip if no species data found
-                                            onAnimalFormatted();
-                                        }
+                    // format if species found in cache
+                    formattedAnimalProps = self.formatAnimal(species.getSpeciesProps(), animalProps, {
+                        createMissingFields: _options.createMissingFields,
+                        populateEmptyFields: _options.populateEmptyFields
+                    });
 
-                                    },
-                                    function complete() {
-                                        if (_options.complete) _options.complete.apply(_options.context);
-                                    });
-                            }
-                        });
-                    })
-            }
-        });
+                    // save formatted animal
+                    return self._saveAnimal(database, formattedAnimalProps, {species: species});
+
+                }))
+            })
     },
 
     /**
@@ -161,7 +143,7 @@ DataFormatter.prototype = {
             // use example because of how data was unfortunately formatted initially
             species = _.find(speciesProps, {key: 'species'}).example.toLowerCase();
 
-        this.log(Debuggable.LOW, 'formatting a %s', species);
+        log('formatting a %s', species);
         _.forEach(speciesProps, function (speciesPropData) {
             switch (speciesPropData.key) {
                 case 'petId':
@@ -197,7 +179,7 @@ DataFormatter.prototype = {
 
     formatImagesArray: function (imagesArr, options) {
         var _options = _.defaults({species: 'dog'}, options);
-        this.log(Debuggable.LOW, "formatting %s images", imagesArr.length);
+        log("formatting %s images", imagesArr.length);
 
         return imagesArr.map(function formatImgURL(imageURL) {
             var fileBaseName = path.basename(imageURL),
@@ -206,8 +188,5 @@ DataFormatter.prototype = {
         });
     }
 };
-
-_.extend(DataFormatter.prototype, Debuggable.prototype);
-
 
 module.exports = DataFormatter;

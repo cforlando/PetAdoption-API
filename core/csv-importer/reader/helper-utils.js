@@ -1,38 +1,44 @@
-var fs = require('fs'),
-    
-    _ = require('lodash'),
-    request = require('request');
+var fs = require('mz/fs');
+
+var _ = require('lodash');
+var request = require('superagent');
 
 module.exports = {
     /**
-     * 
+     *
      * @param {String} filePath
-     * @param {Function} callback
-     * @param {Object} [options]
-     * @param {Object} [options.context]
+     * @returns {Promise.<String>}
      */
-    download : function(filePath, callback, options){
-        var _options = _.defaults(options, {});
+    download: function (filePath, options) {
+        var opts = _.defaults(options, {});
+
         if (filePath.match(/^http/)) {
-            request({
-                method: 'GET',
-                uri: filePath
-            }, function (err, response, body) {
-                callback.apply(_options.context, [err, body]);
-            });
-        } else {
-            fs.readFile(filePath, {encoding: 'utf8'}, function (err, fileContent) {
-                callback.apply(_options.context, [err, fileContent]);
-            });
+            return request.get(filePath)
+                .then(function (response) {
+                    return response.body;
+                });
         }
+
+        return fs.readFile(filePath, 'utf8')
+            .catch(function (err) {
+                console.error(err)
+            });
     },
-    getTypeFromPath: function (data) {
-        var types = ['bird', 'cat', 'dog', 'rabbit', 'reptile', 'small animal'],
-            result = 'default';
-        _.forEach(types, function (type, index, collection) {
-            var typeRegex = new RegExp(type, 'ig');
-            if (typeRegex.test(data)) {
-                result = _.camelCase(type);
+
+    /**
+     * generates speciesName accoring to a full file path
+     * @param fileFullPath
+     * @returns {string}
+     */
+    getSpeciesNameFromPath: function (fileFullPath) {
+        var speciesNames = ['bird', 'cat', 'dog', 'rabbit', 'reptile', 'small animal'];
+        var result = 'default';
+
+        _.forEach(speciesNames, function (speciesName) {
+            var typeRegex = new RegExp(speciesName, 'ig');
+            if (typeRegex.test(fileFullPath)) {
+                result = _.camelCase(speciesName);
+                // quit early
                 return false;
             }
         });

@@ -4,8 +4,8 @@
   "tasks": [
     {
       "name": "pug-html",
-      "input": "public/javascript/src/modules/directives/views/",
-      "output": "public/javascript/src/modules/directives/views/"
+      "input": "public/javascript/src/modules/directives/templates/",
+      "output": "public/javascript/src/modules/directives/templates/"
     },
     {
       "name": "pug-html",

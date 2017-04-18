@@ -1,5 +1,5 @@
-module.exports = function(options){
-    return function(req, res, next){
+module.exports = function (options) {
+    return function (req, res, next) {
         //     res.header("Cache-Control", util.format("max-age=%s", (60 * 60))); // 60 seconds * 60 minutes
 
         //CORS access

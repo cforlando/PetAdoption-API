@@ -1,26 +1,20 @@
-define([
-    'require',
-    'underscore',
-    'species',
-    'ngApp'
-], function (require) {
-    var ngApp = require('ngApp'),
-        Species = require('species'),
-        _ = require('underscore');
+var ngApp = require('ngApp');
+var Species = require('species');
+var _ = require('lodash');
 
-    return ngApp.service('speciesFactory', function () {
+ngApp.service('speciesFactory', function () {
 
-        function SpeciesFactory() {
+    function SpeciesFactory() {
 
+    }
+
+    SpeciesFactory.prototype = {
+        createTemplate: function (speciesName, props) {
+            return new Species(speciesName, props);
         }
+    };
 
-        SpeciesFactory.prototype = {
-            createTemplate: function (speciesName) {
-                return new Species(speciesName);
-            }
-        };
-
-        return new SpeciesFactory();
-    });
-
+    return new SpeciesFactory();
 });
+
+module.exports = ngApp;

@@ -3,6 +3,6 @@ var mongoose = require("mongoose"),
 
 module.exports = {
     speciesName: String,
-    timestamp : Date,
+    timestamp: Date,
     props: [SpeciesProp]
 };

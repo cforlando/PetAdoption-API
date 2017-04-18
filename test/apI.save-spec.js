@@ -1,53 +1,50 @@
-var request = require('supertest'),
-    async = require('async'),
-    _ = require('lodash'),
-    expect = require('expect.js'),
+var supertest = require('supertest');
+var async = require('async');
+var _ = require('lodash');
+var chai = require('chai');
 
-    TestHelper = require('./helper'),
+var TestHelper = require('./helper');
 
-    tHelper = new TestHelper(),
-    sprintf = tHelper.sprintf,
-    buildEndpoint = tHelper.buildEndpoint,
-    buildJasmineRequestCallback = tHelper.buildJasmineRequestCallback,
-    isValidID = tHelper.isValidID;
+var tHelper = new TestHelper();
+var expect = chai.expect;
+var sprintf = tHelper.sprintf;
+var buildJasmineRequestCallback = tHelper.buildJasmineRequestCallback;
+var isValidID = tHelper.isValidID;
+var request;
 
 describe("/save", function () {
-    var speciesDBImages = tHelper.getTestDBImages(),
-        dbImage = speciesDBImages[0],
-        speciesName = dbImage.getSpeciesName(),
-        testPetDataWithIDSansSpecies = {
-            petName: 'erred pet',
-            age: '10 years',
-            petId: 'daskljfasdkljfasdasdf'
-        },
-        testPetData = {
-            petName: 'success pet',
-            species: speciesName,
-            age: '10 years'
-        },
-        server;
+    var speciesDbImages = tHelper.getTestDbImages();
+    var dbImage = speciesDbImages[0];
+    var speciesName = dbImage.getSpeciesName();
+    var testPetDataWithIDSansSpecies = {
+        petName: 'erred pet',
+        age: '10 years',
+        petId: 'daskljfasdkljfasdasdf'
+    };
+    var testPetData = {
+        petName: 'success pet',
+        species: speciesName,
+        age: '10 years'
+    };
 
-    before(function (done) {
-        tHelper.beforeAPI()
+    before(function () {
+        return tHelper.beforeAPI()
             .then(function (testComponents) {
-                server = testComponents.server;
+                request = supertest(testComponents.server);
+                return Promise.resolve();
             })
-            .then(done)
-            .catch(done)
     });
 
-    after(function (done) {
-        tHelper.afterAPI()
-            .then(done)
-            .catch(done)
+    after(function () {
+        return tHelper.afterAPI()
     });
 
     describe.skip(sprintf("POST save/%s/ and POST remove/%s/", speciesName, speciesName), function () {
         console.error("Authentication required");
 
-        it(sprintf("can save and delete a %s", speciesName), function (done) {
-            request(server)
-                .post(buildEndpoint('save', speciesName))
+        it(sprintf("can save and delete a %s", speciesName), function () {
+
+            return request.post(tHelper.buildEndpoint('save', speciesName))
                 .type('form')
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
@@ -61,16 +58,16 @@ describe("/save", function () {
                     });
                 })
                 .expect(200, function (response) {
-                    if (!response.body.petId) throw new Error(sprintf("%s was not saved", speciesName));
-                    request(server)
-                        .post(buildEndpoint('remove', speciesName))
+                    expect(response.body.petId).to.exist;
+
+                    return request.post(tHelper.buildEndpoint('remove', speciesName))
                         .set('Accept', 'application/json')
                         .expect('Content-Type', /json/)
                         .send({
                             species: speciesName,
                             petId: response.body.petId.val
                         })
-                        .expect(200, buildJasmineRequestCallback(done))
+                        .expect(200)
                 })
         })
     });
@@ -78,27 +75,25 @@ describe("/save", function () {
 
     describe(sprintf("POST save/%s/model", speciesName), function () {
 
-        it("returns 401 when unauthorized save species request made", function (done) {
+        it("returns 401 when unauthorized save species request made", function () {
 
-            request(server)
-                .post(buildEndpoint('save', speciesName))
+            return request.post(tHelper.buildEndpoint('save', speciesName))
                 .type('form')
                 .set('Accept', 'application/json')
                 .send(testPetDataWithIDSansSpecies)
-                .expect(401, buildJasmineRequestCallback(done))
+                .expect(401)
         });
     });
 
     describe(sprintf("POST save/%s", speciesName), function () {
 
-        it("returns 401 when unauthorized save animal request made", function (done) {
+        it("returns 401 when unauthorized save animal request made", function () {
 
-            request(server)
-                .post(buildEndpoint('save', speciesName))
+            return request.post(tHelper.buildEndpoint('save', speciesName))
                 .type('form')
                 .set('Accept', 'application/json')
                 .send(testPetDataWithIDSansSpecies)
-                .expect(401, buildJasmineRequestCallback(done))
+                .expect(401)
         });
     });
 

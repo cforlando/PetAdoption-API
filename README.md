@@ -1,16 +1,20 @@
 ## Synopsis
 
-The Pet Adoption API is a project using the MEAN stack. The database and API are currently hosted in Azure Platform (via Mlab and Bitnami). Image assests are stored with Amazon S3.
+The Pet Adoption API is a project using the MEAN stack. 
+The database and API are currently hosted in Azure Platform (via Mlab and Bitnami). 
+Image assests are stored with Amazon S3.
 
 ## Motivation
 
-Nobody likes to see animals be put down due to overcrowding at animal control centers and shelters.  We would like to see animals at these facilities be adopted at a much higher rate, and for those animals who were lost and found, for their rightful owners to be reunited with them once more.  We would like to thank the City of Lady Lake for their wonderful contribution to the project, as they are the project's pilot city.  For that, we are ever grateful!
+Nobody likes to see animals be put down due to overcrowding at animal control centers and shelters. 
+We would like to see animals at these facilities be adopted at a much higher rate, 
+and for those animals who were lost and found, for their rightful owners to be reunited with them once more. 
+We would like to thank the City of Lady Lake for their wonderful contribution to the project, as they are the project's pilot city. 
+For that, we are ever grateful!
 
 ## Installation
 
-`npm install` or `yarn install`
-
-## Docker 
+### via Docker 
 
 If you are new to containers, run through the Docker hello world here: https://docs.docker.com/engine/tutorials/dockerizing/
 
@@ -27,6 +31,60 @@ or
 2. `npm run docker`
 
 **TODO / Warning** - the mongo container is being started without the `--auth` flag, which probably makes it less secure than you want.
+
+### Manually
+
+#### 1. `git clone https://github.com/cforlando/PetAdoption-API.git && cd ./PetAdoption-API`
+
+#### 2. Setup Environment
+To really utilize all the features, you'll need to defined all of the environment variables.
+The high of amount of dependencies was intended to allow the app to be configured and hosted in the most cost effective manner.
+As of right now, the bare minimum required is: 
+- `MONGODB_URI`. This can be remote (ie [mlab](http://mlab.com)) or local
+
+##### Setup MongoDB
+on Linux, `sudo apt-get install mongodb` or you can use a free service such as [mlab](https://mlab.com)
+
+##### create an `.env` file
+You can also create an `.env` file in the project directory. 
+Feel free to ask me for my `.env` file for an example.
+It should look similar to the following. You can also set these environment variables by any other means:
+```
+DOMAIN=http://localhost:8080
+DEVELOPMENT_ENV=true
+PORT=8080
+HTTPS_PORT=8443
+SERVER_SESSION_SECRET=cfo-petadoption-api
+
+MONGODB_URI=localhost
+
+# feel free to change this to your domain (ie the url of the uploads directory)
+# 
+ASSETS_DOMAIN=https://dev-cfo.s3.amazonaws.com
+
+# As of now, you'll need this if you intend on uploading images
+AWS_ACCESS_KEY_ID= XXXXXXXXXXXXXXXXXXXX
+AWS_SECRET_ACCESS_KEY= XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+# and you'll need to define the buckets that you'll want to use 
+S3_PROD_BUCKET_NAME=XXXXXXX
+S3_DEV_BUCKET_NAME=dev-cfo
+S3_TEST_BUCKET_NAME=test-cfo
+
+# You can find this via https://console.developers.google.com/apis/dashboard
+# This is used for preferences/settings on a per basis user and minimal authentication
+GOOGLE_CLIENT_ID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+GOOGLE_CLIENT_SECRET=XXXXXXXXXXXXXXXXXXXXXXXX
+
+# You can find this via https://console.developers.google.com/apis/dashboard
+# This is used for front-end map input functionality
+GOOGLE_MAPS_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+```
+
+
+#### 3. Install repo
+Run `npm install` or `yarn` 
+After this, the server should be ready go (`npm start`)
 
 ## API Reference
 

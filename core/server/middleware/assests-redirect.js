@@ -1,9 +1,8 @@
-var url = require('url'),
+var url = require('url');
+var config = require('../../config');
 
-    config = require('../../config');
-
-module.exports = function(){
-    return function(req, res){
+module.exports = function () {
+    return function (req, res) {
         res.redirect(303, url.resolve(config.ASSETS_DOMAIN, url.parse(req.originalUrl).path));
     }
 };

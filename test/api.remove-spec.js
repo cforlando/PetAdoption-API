@@ -1,44 +1,40 @@
-var request = require('supertest'),
-    expect = require('expect.js'),
+var supertest = require('supertest');
+var chai = require('chai');
 
-    TestHelper = require('./helper'),
+var TestHelper = require('./helper');
+var expect = chai.expect;
 
-    tHelper = new TestHelper(),
-    speciesDBImages = tHelper.getTestDBImages(),
-    sprintf = tHelper.sprintf,
-    buildEndpoint = tHelper.buildEndpoint,
-    buildJasmineRequestCallback = tHelper.buildJasmineRequestCallback,
-    server;
+var tHelper = new TestHelper();
+var speciesDbImages = tHelper.getTestDbImages();
+var sprintf = tHelper.sprintf;
 
 describe(sprintf("/remove"), function () {
-    console.error("Authentication required");
+    var request;
 
-    before(function(done){
-        tHelper.beforeAPI()
+
+    before(function(){
+        console.error("Authentication required");
+        return tHelper.beforeAPI()
             .then(function(testComponents){
-                server = testComponents.server;
+                request = supertest(testComponents.server);
+                return Promise.resolve();
             })
-            .then(done)
-            .catch(done)
     });
 
-    after(function(done){
-        tHelper.afterAPI()
-            .then(done)
-            .catch(done)
+    after(function(){
+        return tHelper.afterAPI()
     });
 
-    speciesDBImages.forEach(function(dbImage){
+    speciesDbImages.forEach(function(dbImage){
         var speciesName = dbImage.getSpeciesName();
 
-        it(sprintf("returns error on invalid request to delete a %s", speciesName), function (done) {
-            request(server)
-                .post(buildEndpoint('remove', speciesName))
+        it(sprintf("returns error on invalid request to delete a %s", speciesName), function () {
+            request.post(tHelper.buildEndpoint('remove', speciesName))
                 .send({
                     species: speciesName,
                     petId: 'asdfa90sdfdsfajsdl'
                 })
-                .expect(401, buildJasmineRequestCallback(done))
+                .expect(401)
         });
     })
 

@@ -1,31 +1,33 @@
-var _ = require('lodash'),
-expect = require('expect.js');
+var _ = require('lodash');
+var chai = require('chai');
+
+var expect = chai.expect;
 
 describe("Server Utils", function () {
     var serverUtils = require('../core/server/utils');
     it("can parse an array string", function () {
         var testStrings = [
-                "['test','hell']",
-                "'test','hell'",
-                "test,hell"
-            ],
-            result = ['test', 'hell'];
+            "['test','hell']",
+            "'test','hell'",
+            "test,hell"
+        ];
+        var expectedResult = ['test', 'hell'];
 
         testStrings.forEach(function (testString) {
             var resultArray = serverUtils.parseArrayStr(testString);
-            expect(_.isArray(resultArray)).to.be(true);
-            result.forEach(function(option){
-                expect(_.includes(resultArray, option));
-            });
+            expect(resultArray).to.be.an('Array');
+            expectedResult.forEach(function (expectedResultMember) {
+                expect(resultArray).to.include(expectedResultMember);
+            })
         });
 
     });
 
-    it("can parse a single string", function(){
-        var testString = 'test_success',
-            result = serverUtils.parseArrayStr(testString);
+    it("can parse a single string", function () {
+        var testString = 'test_success';
+        var result = serverUtils.parseArrayStr(testString);
 
-        expect(_.isArray(result)).to.be(true, 'result should be an array');
-        expect(_.includes(result, testString));
+        expect(result).to.be.an('Array');
+        expect(result).to.include(testString);
     });
 });

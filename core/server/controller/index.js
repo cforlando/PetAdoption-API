@@ -1,8 +1,5 @@
-var _ = require('lodash'),
-
-    Debuggable = require('../../lib/debuggable'),
-    AuthController = require('./auth'),
-    APIController = require('./api');
+var AuthController = require('./auth');
+var APIController = require('./api');
 /**
  *
  * @extends AuthController
@@ -10,18 +7,14 @@ var _ = require('lodash'),
  * @class AppController
  * @param {MongoAPIDatabase} database
  * @param {Object} [options]
- * @param {DebugLevel} [options.debugLevel=Debuggable.PROD]
  * @returns {AppController}
  * @constructor
  */
-function AppController(database, options){
-    this.setDebugTag('AppController: ');
+function AppController(database, options) {
     AuthController.apply(this, arguments);
     APIController.apply(this, arguments);
-    this.log(Debuggable.MED, 'AppController()');
-    return this;
 }
 
-_.extend(AppController.prototype, AuthController.prototype, APIController.prototype);
+AppController.prototype = Object.assign({}, AuthController.prototype, APIController.prototype);
 
 module.exports = AppController;

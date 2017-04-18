@@ -1,62 +1,50 @@
-var url = require('url'),
-    util = require('util'),
-    path = require('path'),
-    fs = require('fs'),
+var supertest = require('supertest');
+var _ = require('lodash');
+var chai = require('chai');
 
-    request = require('supertest'),
-    async = require('async'),
-    _ = require('lodash'),
-    expect = require('expect.js'),
+var Species = require('../core/lib/species');
+var TestHelper = require('./helper');
 
-    Species = require('../core/lib/species'),
-
-    TestHelper = require('./helper'),
-
-    tHelper = new TestHelper(),
-    speciesDBImages = tHelper.getTestDBImages(),
-    str = tHelper.sprintf,
-    alterCase = tHelper.alterCase,
-    buildEndpoint = tHelper.buildEndpoint,
-    buildJasmineRequestCallback = tHelper.buildJasmineRequestCallback,
-    buildAnimalTest = tHelper.buildAnimalTest,
-    getRandomOptionValue = tHelper.getRandomOptionValue,
-
-    database,
-    server;
+var expect = chai.expect;
+var tHelper = new TestHelper();
+var speciesDbImages = tHelper.getTestDbImages();
+var fmt = tHelper.sprintf;
+var alterCase = tHelper.alterCase;
+var getRandomOptionValue = tHelper.getRandomOptionValue;
+var database;
 
 describe("/query", function () {
+    var request;
 
-    before(function (done) {
+    before(function () {
         this.timeout(20 * 1000);
-        tHelper.beforeAPI()
+
+        return tHelper.beforeAPI()
             .then(function (testComponents) {
-                server = testComponents.server;
+                request = supertest(testComponents.server);
                 database = testComponents.database;
-                done();
+                return Promise.resolve();
             })
-            .catch(done)
     });
 
-    after(function (done) {
-        tHelper.afterAPI()
-            .then(done)
-            .catch(done)
+    after(function () {
+        return tHelper.afterAPI()
     });
 
-    it("accepts query when species field not provided", function (done) {
+    it("accepts query when species field not provided", function () {
         var queryProps = {
             color: "White"
         };
-        request(server)
-            .post(buildEndpoint('query'))
+
+        return request.post(tHelper.buildEndpoint('query'))
             .set('Accept', 'application/json')
             .send(queryProps)
-            .expect(200, buildJasmineRequestCallback(done))
+            .expect(200)
     });
 
     describe('for each species', function () {
 
-        speciesDBImages.forEach(function (dbImage) {
+        speciesDbImages.forEach(function (dbImage) {
 
             var testSpecies = new Species('testSpecies', dbImage.getSpeciesProps()),
                 speciesName = dbImage.getSpeciesName(),
@@ -89,58 +77,40 @@ describe("/query", function () {
 
                 queryProps[tSpeciesPropName] = getRandomOptionValue(tSpeciesPropData);
 
-                it(str("returns JSON of all %s species with provided %s prop", speciesName, tSpeciesPropName), function (done) {
+                it(fmt("returns JSON of all %s species with provided %s prop", speciesName, tSpeciesPropName), function () {
 
-                    database.saveAnimal(speciesName, queryProps).then(function () {
-                        request(server)
-                            .post(buildEndpoint('query'))
-                            .send(queryProps)
-                            .set('Accept', 'application/json')
-                            .expect('Content-Type', /json/)
-                            .expect(buildAnimalTest(queryProps, speciesTestProps))
-                            .expect(200, buildJasmineRequestCallback(done))
-                    });
+                    return database.saveAnimal(speciesName, queryProps)
+                        .then(function () {
+                            return request.post(tHelper.buildEndpoint('query'))
+                                .send(queryProps)
+                                .set('Accept', 'application/json')
+                                .expect('Content-Type', /json/)
+                                .expect(tHelper.buildAnimalTest(queryProps, speciesTestProps))
+                                .expect(200)
+                        });
                 });
 
-                it("returns only requested properties when 'properties' key is defined", function (done) {
-                    var properties = ['species', 'petId'],
-                        queryWithProperties = Object.assign({properties: properties}, queryProps);
+                it("returns only requested properties when 'properties' key is defined", function () {
+                    var queryProperties = ['species', 'petId'];
+                    var animalQuery = Object.assign({properties: queryProperties}, queryProps);
 
-                    database.saveAnimal(speciesName, Object.assign({petName: "test-pet-" + index}, queryProps)).then(function (animalData) {
-                        request(server)
-                            .post(buildEndpoint('query'))
-                            .set('Accept', 'application/json')
-                            .expect('Content-Type', /json/)
-                            .send(queryWithProperties)
-                            .expect(buildAnimalTest(_.pick(queryWithProperties, properties), speciesTestProps))
-                            .expect(function (res) {
-                                if (res.body.length) {
-                                    // test response data
-                                    var expectedNumOfProperties = properties.length;
+                    return database.saveAnimal(speciesName, Object.assign({petName: "test-pet-" + index}, queryProps))
+                        .then(function (animalData) {
+                            return request.post(tHelper.buildEndpoint('query'))
+                                .set('Accept', 'application/json')
+                                .expect('Content-Type', /json/)
+                                .send(animalQuery)
+                                .expect(tHelper.buildAnimalTest(_.pick(animalQuery, queryProperties), speciesTestProps))
+                                .expect(function (res) {
+                                    expect(res.body).to.be.an('array');
+                                    expect(res.body).to.have.length.above(0);
 
                                     res.body.forEach(function (petData) {
-
-                                        var responsePetDataKeys = Object.keys(petData);
-
-                                        if (responsePetDataKeys.length != expectedNumOfProperties) {
-                                            throw new Error(str("Received incorrect number of properties %s != %s (%s)", responsePetDataKeys.length, expectedNumOfProperties, properties))
-                                        }
-
-                                        responsePetDataKeys.forEach(function (propName) {
-                                            if (!_.includes(properties, propName)) throw new Error("Received incorrect prop: " + propName);
-                                        });
+                                        expect(petData).to.have.all.keys(queryProperties);
                                     });
-                                } else {
-                                    // investigate further and throw err
-                                    if (!_.isArray(res.body)) {
-                                        throw new Error(str("list/%s did not return array", speciesName));
-                                    } else {
-                                        throw new Error(str("list/%s did not return any pets", speciesName));
-                                    }
-                                }
-                            })
-                            .expect(200, buildJasmineRequestCallback(done))
-                    });
+                                })
+                                .expect(200)
+                        });
                 });
 
             });
@@ -149,22 +119,23 @@ describe("/query", function () {
                 var queryProps = {species: speciesName};
 
                 speciesTestProps.forEach(function (tSpeciesPropData) {
-
-                    // add on to query with test iteration
                     var testInstanceProps = {};
+
                     testInstanceProps[tSpeciesPropData.key] = getRandomOptionValue(tSpeciesPropData);
                     queryProps = Object.assign(testInstanceProps, queryProps);
-                    it(str("returns JSON of all %s species with provided '%s' props", speciesName, Object.keys(queryProps).join(", ")), function (done) {
-                        database.saveAnimal(speciesName, queryProps).then(function () {
 
-                            request(server)
-                                .post(buildEndpoint('query'))
-                                .send(queryProps)
-                                .set('Accept', 'application/json')
-                                .expect('Content-Type', /json/)
-                                .expect(buildAnimalTest(queryProps, speciesTestProps))
-                                .expect(200, buildJasmineRequestCallback(done))
-                        })
+                    it(fmt("returns JSON of all %s species with provided '%s' props", speciesName, Object.keys(queryProps).join(", ")), function () {
+
+                        return database.saveAnimal(speciesName, queryProps)
+                            .then(function () {
+
+                                return request.post(tHelper.buildEndpoint('query'))
+                                    .send(queryProps)
+                                    .set('Accept', 'application/json')
+                                    .expect('Content-Type', /json/)
+                                    .expect(tHelper.buildAnimalTest(queryProps, speciesTestProps))
+                                    .expect(200)
+                            })
                     })
                 })
             });
@@ -172,25 +143,28 @@ describe("/query", function () {
             describe("when ignoreCase flag is set", function () {
 
                 speciesTestProps.forEach(function (tSpeciesPropData) {
+                    var tSpeciesPropName = tSpeciesPropData.key;
+
                     //skip non-string values
-                    if (tSpeciesPropData.valType.toLowerCase() != 'string') return;
+                    if (tSpeciesPropData.valType.toLowerCase() !== 'string') {
+                        return;
+                    }
 
-                    var tSpeciesPropName = tSpeciesPropData.key,
-                        queryProps = {species: speciesName, ignoreCase: [tSpeciesPropName]},
-                        randOption = getRandomOptionValue(tSpeciesPropData);
+                    it(fmt("returns JSON of all %s species with provided '%s' prop regardless of Case", speciesName, tSpeciesPropName), function () {
+                        var queryProps = {species: speciesName, ignoreCase: [tSpeciesPropName]};
+                        var randOption = getRandomOptionValue(tSpeciesPropData);
 
-                    queryProps[tSpeciesPropName] = alterCase(randOption);
+                        queryProps[tSpeciesPropName] = alterCase(randOption);
 
-                    it(str("returns JSON of all %s species with provided '%s' prop regardless of Case", speciesName, tSpeciesPropName), function (done) {
-                        database.saveAnimal(speciesName, queryProps).then(function () {
-                            request(server)
-                                .post(buildEndpoint('query'))
-                                .send(queryProps)
-                                .set('Accept', 'application/json')
-                                .expect('Content-Type', /json/)
-                                .expect(buildAnimalTest(_.omit(queryProps, ['ignoreCase']), speciesTestProps))
-                                .expect(200, buildJasmineRequestCallback(done))
-                        })
+                        return database.saveAnimal(speciesName, queryProps)
+                            .then(function () {
+                                return request.post(tHelper.buildEndpoint('query'))
+                                    .send(queryProps)
+                                    .set('Accept', 'application/json')
+                                    .expect('Content-Type', /json/)
+                                    .expect(tHelper.buildAnimalTest(_.omit(queryProps, ['ignoreCase']), speciesTestProps))
+                                    .expect(200)
+                            })
                     });
                 })
             });

@@ -1,11 +1,12 @@
-var _ = require('lodash'),
-    expect = require('expect.js'),
+var _ = require('lodash');
+var chai = require('chai');
 
 
-    TestHelper = require('./helper'),
+var TestHelper = require('./helper');
 
-    tHelper = new TestHelper();
+var expect = chai.expect;
+var tHelper = new TestHelper();
 
-describe("Router.API", function () {
+describe("ServerRouter.API", function () {
 
 });

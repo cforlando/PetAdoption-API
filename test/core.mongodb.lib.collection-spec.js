@@ -1,40 +1,41 @@
-var expect = require('expect.js'),
+var chai = require('chai');
 
-    MongooseModel = require('../core/mongodb/lib/collection'),
-    Debuggable = require('../core/lib/debuggable'),
-    UserSchema = require('../core/mongodb/schemas/user'),
-    MongoDBAdapter = require('../core/mongodb/lib/adapter');
+var Collection = require('../core/mongodb/lib/collection');
+var Debuggable = require('../core/lib/debuggable');
+var UserSchema = require('../core/mongodb/schemas/user');
+var MongoDbAdapter = require('../core/mongodb/lib/adapter');
+
+var expect = chai.expect;
 
 describe("Collection", function () {
-    var dbAdapter,
-        tUserProps = {id: 'test', firstName: 'hello', lastName: 'world'},
-        user,
-        aUser,
-        UserModel;
+    var dbAdapter;
+    var tUserProps = {id: 'test', firstName: 'hello', lastName: 'world'};
+    var user;
+    var aUser;
+    var TestUserModel;
 
     before(function (done) {
-        dbAdapter = new MongoDBAdapter({
+        dbAdapter = new MongoDbAdapter({
             debugLevel: Debuggable.PROD
         });
         dbAdapter.connect({
             onSuccess: function () {
-                user = new MongooseModel('test_model_factory',
-                    UserSchema,
-                    {
+                var collectionOpts = {
                     debugTag: 'aSpecies: ',
                     debugLevel: Debuggable.PROD
-                });
-                UserModel = user.toMongooseModel(dbAdapter);
+                };
+                user = new Collection('test_model_factory', UserSchema, collectionOpts);
+                TestUserModel = user.toMongooseModel(dbAdapter);
                 done();
             },
             onFailure: function () {
-                throw new Error("Could not connect to DB")
+                throw new Error("Could not connect to Db")
             }
         })
     });
 
     after(function (done) {
-        UserModel.remove({}, function () {
+        TestUserModel.remove({}, function () {
             dbAdapter.close(function () {
                 done();
             });
@@ -44,13 +45,13 @@ describe("Collection", function () {
     describe("save()", function () {
 
         it("saves an object", function (done) {
-            var tUser = new UserModel(tUserProps);
+            var tUser = new TestUserModel(tUserProps);
             tUser.save(function (err, savedUser) {
                 if (err) throw err;
                 aUser = savedUser;
-                expect(aUser).not.to.be(undefined, 'No user was returned on save');
-                expect(aUser.firstName).to.equal(tUserProps.firstName, 'The firstName was not correctly return in the saved user');
-                expect(aUser.id).not.to.be(undefined, 'The ID was not defined in the saved user');
+                expect(aUser).to.exist;
+                expect(aUser.firstName).to.eql(tUserProps.firstName, 'The firstName was not correctly return in the saved user');
+                expect(aUser.id).to.exist;
                 done();
             });
         })
@@ -58,13 +59,13 @@ describe("Collection", function () {
 
     describe("findOne()", function () {
         it("returns a previously saved object", function (done) {
-            UserModel.findOne({id: aUser.id})
+            TestUserModel.findOne({id: aUser.id})
                 .lean()
                 .exec(function (err, foundUser) {
                     if (err) throw err;
-                    expect(foundUser).not.to.be(undefined, 'No user was found');
-                    expect(foundUser.firstName).to.equal(tUserProps.firstName, 'The firstName was not correctly return in the found user');
-                    expect(foundUser.id).not.to.be(undefined, 'The ID was not defined in the found user');
+                    expect(foundUser).to.exist;
+                    expect(foundUser.firstName).to.eql(tUserProps.firstName, 'The firstName was not correctly return in the found user');
+                    expect(foundUser.id).to.exist;
                     done()
                 });
 

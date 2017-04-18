@@ -1,51 +1,47 @@
-var fs = require('fs'),
-    path = require('path'),
-    util = require('util'),
+var fs = require('fs');
+var path = require('path');
+var util = require('util');
 
-    logger = require('morgan'),
-    bodyParser = require('body-parser'),
-    Express = require('express'),
-    cookieParser = require('cookie-parser'),
-    config = require('../config'),
-    _ = require('lodash'),
-    async = require('async'),
-    compression = require('compression'),
+var logger = require('morgan');
+var bodyParser = require('body-parser');
+var Express = require('express');
+var cookieParser = require('cookie-parser');
+var config = require('../config');
+var _ = require('lodash');
+var async = require('async');
+var compression = require('compression');
+var log = require('debug')('pet-api:server');
 
-    Debuggable = require('../lib/debuggable'),
-    Router = require('./router'),
+var ServerRouter = require('./router');
 
-    assetsRedirect = require('./middleware/assests-redirect'),
-    flags = require('./middleware/flags'),
-    headers = require('./middleware/headers'),
-    pagination = require('./middleware/pagination'),
-    dataFormatter = require('./middleware/data-formatter'),
-    localImageHandler = require('./middleware/local-image-handler');
+var assetsRedirect = require('./middleware/assests-redirect');
+var flags = require('./middleware/flags');
+var headers = require('./middleware/headers');
+var pagination = require('./middleware/pagination');
+var dataFormatter = require('./middleware/data-formatter');
+var localImageHandler = require('./middleware/local-image-handler');
 
 /**
  * @class Server
  * @param {MongoAPIDatabase} database
  * @param {Object} [options]
- * @param {DebugLevel|Number} [options.debugLevel]
  * @returns {Express}
  * @constructor
  */
 function Server(database, options) {
-    var server = Express(),
-        _options = _.defaults(options, {
-            debugTag: 'Server: ',
-            publicDir: path.join(process.cwd(), 'public/')
-        }),
-        router = new Router(database, options);
+    var server = Express();
+    var opts = _.defaults(options, {
+        publicDir: path.join(process.cwd(), 'public/')
+    });
+    var router = new ServerRouter(database, options);
 
-    this.setDebugTag(_options.debugTag);
-    this.setDebugLevel(_options.debugLevel);
-    this.log(Debuggable.LOW, 'Server()');
+    log('initializing');
 
     // view engine setup
     server.set('views', path.resolve(__dirname, 'views'));
     server.set('view engine', 'pug');
 
-    server.use(logger('dev'));
+    server.use(logger(process.env.LOG || 'combined'));
     server.use(cookieParser());
     server.use(bodyParser.json());
     server.use(bodyParser.urlencoded({extended: false}));
@@ -56,7 +52,7 @@ function Server(database, options) {
     // redirect images to s3 resource
     server.use('/images', assetsRedirect());
 
-    server.use(Express.static(_options.publicDir));
+    server.use(Express.static(opts.publicDir));
 
 
     server.use(flags());
@@ -72,26 +68,27 @@ function Server(database, options) {
     // format and send data
     server.use(dataFormatter());
 
-    // send placeholder 404 images
-    // only works if serving images locally
+    /**
+     * send placeholder 404 images
+     * only works if serving images locally
+     */
     // server.use(localImageHandler());
 
     // express error handlers
     server.use(function (err, req, res, next) {
-        console.error('error: %s', err);
+        console.error('core.server error:', err);
         res.status(err.status || 500);
         res.render('error', {
             message: err.message,
             error: config.DEVELOPMENT_ENV ? err : {},
-            DEVELOPMENT_ENV: config.DEVELOPMENT_ENV
+            isDevelopment: config.DEVELOPMENT_ENV
         });
     });
 
+    log('server initialized');
+
     return server;
 }
-
-
-Server.prototype = Debuggable.prototype;
 
 
 module.exports = Server;
