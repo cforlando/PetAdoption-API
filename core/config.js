@@ -24,7 +24,7 @@ dotenv.config();
  * @property {String} GOOGLE_AUTH_CALLBACK
  * @property {String} GOOGLE_CLIENT_SECRET
  *
- * @property {String} MONGODb_URI
+ * @property {String} MONGODB_URI
  */
 var config = {
     DOMAIN: process.env.DOMAIN || "http://localhost:8080",

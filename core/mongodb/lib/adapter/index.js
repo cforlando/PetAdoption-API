@@ -24,7 +24,7 @@ mongoose.Promise = require('q').Promise;
  */
 function MongoDbAdapter(options) {
     var opts = _.defaults(options, {
-        mongoConnectionURI: config.MONGODb_URI,
+        mongoConnectionURI: config.MONGODB_URI,
         context: null,
         onFailure: function () {
             console.error.apply(console, arguments);
