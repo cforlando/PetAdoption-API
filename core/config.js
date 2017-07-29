@@ -46,7 +46,7 @@ var config = {
     GOOGLE_AUTH_CALLBACK: process.env.GOOGLE_AUTH_CALLBACK || 'http://localhost:8080/auth/google/callback',
     GOOGLE_MAPS_KEY: process.env.GOOGLE_MAPS_KEY || '',
 
-    MONGODb_URI: process.env.MONGODb_URI || 'mongodb://127.0.0.1/local'
+    MONGODB_URI: process.env.MONGODB_URI || 'mongodb://127.0.0.1/local'
 };
 
 
