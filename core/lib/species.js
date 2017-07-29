@@ -59,7 +59,7 @@ function Species(speciesName, data) {
     this.props = this.baseProps.slice();
 
     if (data) {
-        if (_.isString(parsedData)) {
+        if (_.isString(data)) {
             parsedData = JSON.parse(data);
         } else {
             parsedData = data;
