@@ -1,6 +1,6 @@
 {
   "name": "pet-adoption-server",
-  "version": "0.6.7",
+  "version": "0.6.8",
   "bin": {
     "pet-adoption-api-server": "bin/start-server.js"
   },
@@ -15,13 +15,9 @@
     "doc": "jsdoc ./core -r -c ./jsdoc.conf.json -d ./docs",
     "setup:data": "node bin/parse-csv-data.js",
     "setup:dev": "dp-setup",
-    "test:init": "jasmine init",
     "generate-ssl": "mkdir ssl; openssl genrsa 1024 > ./ssl/server.key; chmod 400 ./ssl/server.key; openssl req -new -x509 -nodes -sha1 -days 365 -key ./ssl/server.key -out ./ssl/server.crt",
     "test": "node bin/test",
-    "test:verbose": "jasmine JASMINE_CONFIG_PATH=spec/support/jasmine.json LCB_OPTIONS=\"detailed_errcodes=1\" LCB_LOGLEVEL=5",
-    "production": "NODE_ENV=production; node ./bin/start-server.js",
-    "submodules:init": "git submodule init && git submodule update",
-    "submodules:update": "git submodule foreach git-reset --hard origin/master && git submodule foreach git checkout master && git submodule foreach git-pull origin master"
+    "production": "NODE_ENV=production; node ./bin/start-server.js"
   },
   "dependencies": {
     "async": "^2.0.0-rc.4",
