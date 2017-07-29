@@ -135,17 +135,19 @@ module.exports = ngApp.directive('speciesForm', function () {
                         }
                     }]
                 };
+                var propName;
 
                 return $mdDialog.show(newPropDialogConfig)
                     .catch(function onCancel(err) {
                         console.log('cancelled: %o', arguments);
                     })
-                    .then(function onConfirm(propName) {
+                    .then(function onConfirm(newPropName) {
+                        propName = newPropName;
                         console.log('confirmed: %o', arguments);
                         return speciesDataService.createSpeciesProp($scope.speciesName, propName);
                     })
                     .then(function () {
-                        $location.path('species/' + $scope.speciesName + '/' + propName);
+                        $location.path('/species/' + $scope.speciesName + '/property/' + propName);
                         return Promise.resolve();
                     });
 

@@ -865,7 +865,7 @@ webpackJsonp([0],[
 	    this.props = this.baseProps.slice();
 
 	    if (data) {
-	        if (_.isString(parsedData)) {
+	        if (_.isString(data)) {
 	            parsedData = JSON.parse(data);
 	        } else {
 	            parsedData = data;
@@ -1017,7 +1017,7 @@ webpackJsonp([0],[
 
 	var Species = __webpack_require__(37);
 
-	module.exports = ngApp.service('speciesDataService', function (request) {
+	module.exports = ngApp.service('speciesDataService', function (request, speciesFactory) {
 	    var self = this;
 	    this.animalSpecies = {};
 
@@ -1120,7 +1120,6 @@ webpackJsonp([0],[
 	            .then(function success(response) {
 	                var speciesProps = response.data;
 
-	                self.hideLoading();
 	                self.animalSpecies[sanitizedSpeciesName] = new Species(speciesProps);
 	                self.getSpeciesList()
 	                    .catch(function (err) {
@@ -1202,6 +1201,7 @@ webpackJsonp([0],[
 	     * @param {String} speciesName
 	     * @param {String} propName
 	     * @param {Object} options
+	     * @returns {Promise}
 	     */
 	    this.createSpeciesProp = function (speciesName, propName, options) {
 	        var species = this.animalSpecies[speciesName];
@@ -1222,7 +1222,7 @@ webpackJsonp([0],[
 
 	        species.setProps([propData]);
 
-	        return propData;
+	        return self.saveSpecies(species);
 	    };
 
 	    /**
@@ -3597,17 +3597,19 @@ webpackJsonp([0],[
 	                        }
 	                    }]
 	                };
+	                var propName;
 
 	                return $mdDialog.show(newPropDialogConfig)
 	                    .catch(function onCancel(err) {
 	                        console.log('cancelled: %o', arguments);
 	                    })
-	                    .then(function onConfirm(propName) {
+	                    .then(function onConfirm(newPropName) {
+	                        propName = newPropName;
 	                        console.log('confirmed: %o', arguments);
 	                        return speciesDataService.createSpeciesProp($scope.speciesName, propName);
 	                    })
 	                    .then(function () {
-	                        $location.path('species/' + $scope.speciesName + '/' + propName);
+	                        $location.path('/species/' + $scope.speciesName + '/property/' + propName);
 	                        return Promise.resolve();
 	                    });
 
@@ -3843,7 +3845,7 @@ webpackJsonp([0],[
 	                                valTypes.push(speciesProp.valType);
 	                            }
 	                            return valTypes;
-	                        }, []);
+	                        }, ['Number', 'String', 'Date', 'Boolean']);
 
 	                        if (!$scope.activeSpecies.getProp($scope.propName)) {
 	                            $scope.showError("Property not valid");
@@ -4028,7 +4030,7 @@ webpackJsonp([0],[
 	                    .then(function onConfirm(speciesName) {
 	                        console.log('confirmed: %o', arguments);
 	                        newSpeciesName = speciesName;
-	                        return $scope.createSpecies(newSpeciesName);
+	                        return speciesDataService.createSpecies(newSpeciesName);
 	                    })
 	                    .then(function () {
 	                        $location.path('species/' + newSpeciesName);

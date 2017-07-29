@@ -3,7 +3,7 @@ var ngApp = require('ngApp');
 
 var Species = require('core/lib/species');
 
-module.exports = ngApp.service('speciesDataService', function (request) {
+module.exports = ngApp.service('speciesDataService', function (request, speciesFactory) {
     var self = this;
     this.animalSpecies = {};
 
@@ -106,7 +106,6 @@ module.exports = ngApp.service('speciesDataService', function (request) {
             .then(function success(response) {
                 var speciesProps = response.data;
 
-                self.hideLoading();
                 self.animalSpecies[sanitizedSpeciesName] = new Species(speciesProps);
                 self.getSpeciesList()
                     .catch(function (err) {
@@ -188,6 +187,7 @@ module.exports = ngApp.service('speciesDataService', function (request) {
      * @param {String} speciesName
      * @param {String} propName
      * @param {Object} options
+     * @returns {Promise}
      */
     this.createSpeciesProp = function (speciesName, propName, options) {
         var species = this.animalSpecies[speciesName];
@@ -208,7 +208,7 @@ module.exports = ngApp.service('speciesDataService', function (request) {
 
         species.setProps([propData]);
 
-        return propData;
+        return self.saveSpecies(species);
     };
 
     /**

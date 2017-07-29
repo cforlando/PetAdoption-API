@@ -135,7 +135,7 @@ ngApp.directive('speciesPropForm', function () {
                                 valTypes.push(speciesProp.valType);
                             }
                             return valTypes;
-                        }, []);
+                        }, ['Number', 'String', 'Date', 'Boolean']);
 
                         if (!$scope.activeSpecies.getProp($scope.propName)) {
                             $scope.showError("Property not valid");

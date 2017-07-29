@@ -30,7 +30,7 @@ module.exports = ngApp.directive('speciesList', function () {
                     .then(function onConfirm(speciesName) {
                         console.log('confirmed: %o', arguments);
                         newSpeciesName = speciesName;
-                        return $scope.createSpecies(newSpeciesName);
+                        return speciesDataService.createSpecies(newSpeciesName);
                     })
                     .then(function () {
                         $location.path('species/' + newSpeciesName);
