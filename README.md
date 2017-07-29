@@ -89,10 +89,14 @@ After this, the server should be ready go (`npm start`)
 
 ## API Reference
 
-Current API location: 
-- [pets.codefororlando.com/api/v1/](http://pets.codefororlando.com)
-- [pets.codefororlando.com/api/v2/](http://pets.codefororlando.com) (for reduced response data)
-- The subdomain (***pets***.codefororlando.com) will change in the upcoming weeks to: [***petadoption***.codefororlando.com](http://petadoption.codefororlando.com)
+Current API locations: 
+- [pet-adoption-server.herokuapp.com](https://pet-adoption-server.herokuapp.com)
+    - [https://pet-adoption-server.herokuapp.com/api/v1](https://pet-adoption-server.herokuapp.com)
+    - [https://pet-adoption-server.herokuapp.com/api/v2](https://pet-adoption-server.herokuapp.com) (for reduced response data)
+- [pets.codefororlando.com](http://pets.codefororlando.com)
+    - [pets.codefororlando.com/api/v1/](http://pets.codefororlando.com)
+    - [pets.codefororlando.com/api/v2/](http://pets.codefororlando.com) (for reduced response data)
+    - The subdomain (***pets***.codefororlando.com) will change in the upcoming weeks to: [***petadoption***.codefororlando.com](http://petadoption.codefororlando.com)
 
 :xxxxx = dynamic field that must be specified within the endpoint itself
 
