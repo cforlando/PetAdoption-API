@@ -37,8 +37,15 @@ html
                         ng-view(flex, layout-fill, layout='column')
             else
                 .view.view--login(layout-fill, layout='column')
-                    .view__content
-                        md-button.btn.btn--login.md-primary.md-raised(ng-click!='login()') Login
+                    .view__content(flex-sm=100 flex-gt-sm=50 layout="row" layout-align="center center")
+                        md-card
+                            md-card-title
+                                md-card-title-text
+                                    span.md-headline Welcome
+                            md-card-content
+                                p Logging in with Google Plus allows for user preferences. Only public information is stored.
+                            md-card-actions(layout="row" layout-align="center center")
+                                md-button.btn.btn--login.md-primary.md-raised(ng-click!='login()' aria-label="login") Login
         h1.loading-text(style!='text-align: center;') Loading...
         script(src="./javascript/vendor.app.js")
         script(src="./javascript/app.js")
