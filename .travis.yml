@@ -5,7 +5,7 @@ before_script:
   - sleep 15
   - mongo mydb_test --eval 'db.addUser("travis", "test");'
 node_js:
-  - "6.0.0"
+  - "6.9.0"
 addons:
   apt:
     sources:
