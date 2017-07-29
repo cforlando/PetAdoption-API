@@ -25,13 +25,13 @@ ngApp.service('request', function ($http, $mdToast) {
                 clearTimeout(timeoutId);
                 switch (statusCode) {
                     case 401:
-                        location.href = '/auth/google';
+                        // location.href = '/auth/google';
+                        $mdToast.show($mdToast.simple().textContent("User not authorized"));
                         break;
-                }
-
-                if (statusCode >= 400) {
-                    $mdToast.show($mdToast.simple().textContent("Cannot connect to server"));
-                    return Promise.reject(response);
+                    default:
+                        if (statusCode >= 400) {
+                            $mdToast.show($mdToast.simple().textContent("Cannot connect to server"));
+                        }
                 }
 
                 return Promise.reject(response);

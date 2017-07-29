@@ -97,6 +97,11 @@ AuthController.prototype = {
             this.passport.initialize(),
             this.passport.session(),
             function (req, res, next) {
+                if (process.env.DEVELOPMENT_ENV) {
+                    next();
+                    return;
+                }
+
                 if (!req.isAuthenticated()) {
                     var err = new Error("Not authenticated");
                     err.status = 401;

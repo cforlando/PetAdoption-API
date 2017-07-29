@@ -74,7 +74,16 @@ APIController.prototype = {
     onUserRetrieve: function () {
         var self = this;
         return function (req, res, next) {
-            var userId = (req.user) ? req.user.id : false;
+            var userId = req.user && req.user.id;
+
+            if (process.env.DEVELOPMENT_ENV) {
+                res.locals.data = {
+                    id: 'dev',
+                    meta: []
+                };
+                next();
+                return;
+            }
 
             if (!userId) {
                 var unauthorizedErr = new Error('Unauthorized');

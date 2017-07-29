@@ -27,34 +27,42 @@ webpackJsonp([0],[
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
+	var angular = __webpack_require__(1);
 	var ngApp = __webpack_require__(8);
 
-	ngApp.config([
-	    "$routeProvider", "$locationProvider",
-	    function ($routeProvider, $locationProvider) {
-	        $locationProvider.html5Mode(false);
+	ngApp.config(function ($routeProvider, $locationProvider) {
+	    $locationProvider.html5Mode(false);
 
-	        $routeProvider
-	            .when('/pets', {
-	                template: __webpack_require__(26)
-	            })
-	            .when('/pets/edit/:speciesName/:petId', {
-	                template: __webpack_require__(27)
-	            })
-	            .when('/pets/new', {
-	                template: __webpack_require__(27)
-	            })
-	            .when('/species', {
-	                template: __webpack_require__(28)
-	            })
-	            .when('/species/:speciesName', {
-	                template: __webpack_require__(29)
-	            })
-	            .when('/species/:speciesName/property/:propName', {
-	                template: __webpack_require__(30)
-	            })
-	            .otherwise({redirectTo: "/pets"})
-	    }]);
+	    $routeProvider
+	        .when('/pets', {
+	            template: __webpack_require__(26)
+	        })
+	        .when('/pets/edit/:speciesName/:petId', {
+	            template: __webpack_require__(27)
+	        })
+	        .when('/pets/new', {
+	            template: __webpack_require__(27)
+	        })
+	        .when('/species', {
+	            template: __webpack_require__(28)
+	        })
+	        .when('/species/:speciesName', {
+	            template: __webpack_require__(29)
+	        })
+	        .when('/species/:speciesName/property/:propName', {
+	            template: __webpack_require__(30)
+	        })
+	        .otherwise({
+	            redirectTo: function () {
+	                // roundabout way of determining if user is logged in
+	                if (angular.element('.main-view').length > 0) {
+	                    return '/pets';
+	                }
+
+	                return '/';
+	            }
+	        })
+	});
 
 	module.exports = ngApp;
 
@@ -1626,13 +1634,13 @@ webpackJsonp([0],[
 	                clearTimeout(timeoutId);
 	                switch (statusCode) {
 	                    case 401:
-	                        location.href = '/auth/google';
+	                        // location.href = '/auth/google';
+	                        $mdToast.show($mdToast.simple().textContent("User not authorized"));
 	                        break;
-	                }
-
-	                if (statusCode >= 400) {
-	                    $mdToast.show($mdToast.simple().textContent("Cannot connect to server"));
-	                    return Promise.reject(response);
+	                    default:
+	                        if (statusCode >= 400) {
+	                            $mdToast.show($mdToast.simple().textContent("Cannot connect to server"));
+	                        }
 	                }
 
 	                return Promise.reject(response);
