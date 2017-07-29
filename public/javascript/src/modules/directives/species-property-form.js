@@ -8,6 +8,7 @@ ngApp.directive('speciesPropForm', function () {
         restrict: 'C',
         template: require('raw!./templates/species-property-form.html'),
         controller: function ($scope, $routeParams, $location, $mdDialog, $controller, speciesDataService, userService) {
+            angular.extend(this, $controller('formController', {$scope: $scope}));
 
             $scope.speciesName = $routeParams.speciesName;
             $scope.propName = $routeParams.propName;

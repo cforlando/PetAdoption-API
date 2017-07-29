@@ -41,7 +41,7 @@ function Server(database, options) {
     server.set('views', path.resolve(__dirname, 'views'));
     server.set('view engine', 'pug');
 
-    server.use(logger(process.env.LOG || 'combined'));
+    server.use(logger(process.env.LOG || 'dev'));
     server.use(cookieParser());
     server.use(bodyParser.json());
     server.use(bodyParser.urlencoded({extended: false}));

@@ -1,10 +1,10 @@
-var path = require('path'),
-    fs = require('fs'),
-    util = require('util'),
+var path = require('path');
+var fs = require('fs');
+var util = require('util');
 
-    Express = require('express'),
+var Express = require('express');
 
-    config = require('../../config');
+var config = require('../../config');
 
 
 /**
@@ -19,9 +19,9 @@ function ViewRouter(controller) {
     var router = Express.Router();
 
     router.get('/',
-        controller.session(),
-        controller.passport.initialize(),
-        controller.passport.session(),
+        controller.auth.session(),
+        controller.auth.passport.initialize(),
+        controller.auth.passport.session(),
         function (req, res) {
             res.render('index', {
                 user: req.user,
@@ -31,22 +31,22 @@ function ViewRouter(controller) {
             });
         });
 
-    router.get('/auth/google/',
-        controller.session(),
-        controller.passport.initialize(),
-        controller.passport.authenticate('google', {
+    router.get('/auth/google',
+        controller.auth.session(),
+        controller.auth.passport.initialize(),
+        controller.auth.passport.authenticate('google', {
             scope: [
                 'https://www.googleapis.com/auth/plus.login'
             ]
         }));
 
-    router.get('/auth/google/callback/',
-        controller.session(),
-        controller.passport.initialize(),
-        controller.passport.authenticate('google', {
+    router.get('/auth/google/callback',
+        controller.auth.session(),
+        controller.auth.passport.initialize(),
+        controller.auth.passport.authenticate('google', {
             failureRedirect: '/'
         }),
-        controller.onLoginSuccess());
+        controller.auth.onLoginSuccess());
 
     return router;
 }

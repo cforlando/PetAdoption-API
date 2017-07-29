@@ -50,7 +50,7 @@ TimestampedDatabase.prototype = {
                     .exec(function (err, doc) {
                         if (err || !doc) {
                             err = new DbError(err || "No docs found");
-                            self.error(err);
+                            console.error(err);
                             reject(err);
                             return;
                         }

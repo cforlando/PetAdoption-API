@@ -14,28 +14,25 @@ var config = require('../../config');
  */
 function AuthController(database) {
     var self = this;
-
-    this.database = this.database || database;
-
-    this.credentials = {
-        web: {
-            client_id: config.GOOGLE_CLIENT_ID,
-            client_secret: config.GOOGLE_CLIENT_SECRET
-        }
+    var googleAuthParams = {
+        clientID: config.GOOGLE_CLIENT_ID,
+        clientSecret: config.GOOGLE_CLIENT_SECRET,
+        callbackURL: config.GOOGLE_AUTH_CALLBACK
     };
-
-    this.sessionOptions = {
+    var sessionParams = {
         secret: config.SERVER_SESSION_SECRET,
         saveUninitialized: true,
         resave: true
     };
+
+    this.database = database;
 
     /**
      * @type {Passport}
      */
     this.passport = passport;
 
-    this.userSession = session(this.sessionOptions);
+    this.userSession = session(sessionParams);
 
     /**
      * Use the GoogleStrategy within Passport.
@@ -43,11 +40,27 @@ function AuthController(database) {
      * credentials (in this case, a token, tokenSecret, and Google profile), and
      * invoke a callback with a user object.
      */
-    this.passport.use(new GoogleStrategy({
-        clientID: this.credentials.web.client_id,
-        clientSecret: this.credentials.web.client_secret,
-        callbackURL: config.GOOGLE_AUTH_CALLBACK
-    }, this.onLoginRequest()));
+    this.passport.use(new GoogleStrategy(googleAuthParams, function (accessToken, refreshToken, profile, done) {
+        self.database.findUser({id: profile.id})
+            .catch(function (err) {
+                console.error(err);
+                var userData = {
+                    id: profile.id,
+                    privilege: 0,
+                    firstName: profile.name.givenName,
+                    lastName: profile.name.familyName
+                };
+
+                if (profile.photos.length > 0) {
+                    userData.photo = profile.photos[0].value;
+                }
+
+                return self.database.saveUser(userData)
+            })
+            .then(function (user) {
+                return done(null, user);
+            })
+    }));
 
     this.passport.serializeUser(function (user, done) {
         done(null, user.id);
@@ -55,45 +68,18 @@ function AuthController(database) {
 
     this.passport.deserializeUser(function (userId, done) {
         self.database.findUser({id: userId})
-            .then(function (foundUser) {
-                if (!foundUser.id) {
+            .then(function (user) {
+                if (!user.id) {
                     return Promise.reject(new Error("Could not deserialize user"));
                 }
 
-                done(null, foundUser);
+                done(null, user);
             })
             .catch(done)
     });
 }
 
 AuthController.prototype = {
-
-    onLoginRequest: function () {
-        var self = this;
-
-        return function (accessToken, refreshToken, profile, done) {
-            self.database.findUser({id: profile.id})
-                .catch(function (err) {
-                    console.error(err);
-                    var userData = {
-                        id: profile.id,
-                        privilege: 0,
-                        firstName: profile.name.givenName,
-                        lastName: profile.name.familyName
-                    };
-
-                    if (profile.photos.length > 0) {
-                        userData.photo = profile.photos[0].value;
-                    }
-
-                    return self.database.saveUser(userData)
-                })
-                .then(function (user) {
-                    return done(null, user);
-                })
-        }
-    },
-
 
     onLoginSuccess: function () {
         return function (req, res, next) {

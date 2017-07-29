@@ -27,8 +27,6 @@ var CSVImporter = require('../../csv-importer');
  * @constructor
  */
 function APIController(database, options) {
-    var self = this;
-
     this.database = this.database || database; // inherit database if already defined
     this._apiOptions = _.defaults(options, {
         pageSize: 10,

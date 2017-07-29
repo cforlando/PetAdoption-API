@@ -18,12 +18,10 @@ var config = require('../../config');
  * @constructor
  */
 function DataFormatter(options) {
-    var _options = _.defaults(options, {
+    this._config = _.defaults(options, {
         createMissingFields: false,
         populateEmptyFields: false
     });
-
-    this._config = _options;
     this.speciesCache = {};
 }
 
@@ -72,8 +70,8 @@ DataFormatter.prototype = {
      * @returns {Promise}
      */
     formatDb: function (database, options) {
-        var self = this,
-            _options = _.defaults(options, this._config);
+        var self = this;
+        var opts = _.defaults(options, this._config);
 
         return database.getSpeciesList()
             .then(function (speciesList) {
@@ -106,7 +104,7 @@ DataFormatter.prototype = {
             .then(function (animals) {
 
                 // format each animal
-                return Promise.all(animals.map(function each(animalProps, index, onAnimalFormatted) {
+                return Promise.all(animals.map(function each(animalProps, index) {
                     var species = self.speciesCache[animalProps.species.val];
                     var formattedAnimalProps;
 
@@ -117,8 +115,8 @@ DataFormatter.prototype = {
 
                     // format if species found in cache
                     formattedAnimalProps = self.formatAnimal(species.getSpeciesProps(), animalProps, {
-                        createMissingFields: _options.createMissingFields,
-                        populateEmptyFields: _options.populateEmptyFields
+                        createMissingFields: opts.createMissingFields,
+                        populateEmptyFields: opts.populateEmptyFields
                     });
 
                     // save formatted animal
@@ -138,10 +136,11 @@ DataFormatter.prototype = {
      * @returns {Object} animalProps
      */
     formatAnimal: function (speciesProps, animalProps, options) {
-        var self = this,
-            _options = _.defaults(options, this._config),
-            // use example because of how data was unfortunately formatted initially
-            species = _.find(speciesProps, {key: 'species'}).example.toLowerCase();
+        var self = this;
+        var opts = _.defaults(options, this._config);
+
+        // use example because of how data was unfortunately formatted initially
+        var species = _.find(speciesProps, {key: 'species'}).example.toLowerCase();
 
         log('formatting a %s', species);
         _.forEach(speciesProps, function (speciesPropData) {
@@ -160,7 +159,7 @@ DataFormatter.prototype = {
                     animalProps[speciesPropData.key] = _.defaults({val: species}, animalProps[speciesPropData.key] || speciesPropData);
                     break;
                 default:
-                    if (_options.createMissingFields) {
+                    if (opts.createMissingFields) {
                         // assign values for all possible fields
                         animalProps[speciesPropData.key] = _.defaults(animalProps[speciesPropData.key], speciesPropData);
                     } else if (animalProps[speciesPropData.key]) {
@@ -168,7 +167,7 @@ DataFormatter.prototype = {
                         animalProps[speciesPropData.key] = _.defaults(animalProps[speciesPropData.key], speciesPropData);
                     }
 
-                    if (_options.populateEmptyFields && animalProps[speciesPropData.key] && _.isUndefined(animalProps[speciesPropData.key].val)) {
+                    if (opts.populateEmptyFields && animalProps[speciesPropData.key] && animalProps[speciesPropData.key].val === undefined) {
                         // chose a random value for a field
                         animalProps[speciesPropData.key].val = self._pickRandomOption(speciesPropData.options) || animalProps[speciesPropData.key].val || speciesPropData.example || speciesPropData.defaultVal;
                     }
@@ -178,12 +177,12 @@ DataFormatter.prototype = {
     },
 
     formatImagesArray: function (imagesArr, options) {
-        var _options = _.defaults({species: 'dog'}, options);
+        var opts = _.defaults({species: 'dog'}, options);
         log("formatting %s images", imagesArr.length);
 
         return imagesArr.map(function formatImgURL(imageURL) {
-            var fileBaseName = path.basename(imageURL),
-                relativeImagePath = util.format('/images/pet/%s/', _options.species);
+            var fileBaseName = path.basename(imageURL);
+            var relativeImagePath = util.format('/images/pet/%s/', opts.species);
             return url.resolve(config.ASSETS_DOMAIN, path.join(relativeImagePath, fileBaseName));
         });
     }

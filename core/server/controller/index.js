@@ -11,10 +11,8 @@ var APIController = require('./api');
  * @constructor
  */
 function AppController(database, options) {
-    AuthController.apply(this, arguments);
-    APIController.apply(this, arguments);
+    this.api = new APIController(database, options);
+    this.auth = new AuthController(database, options)
 }
-
-AppController.prototype = Object.assign({}, AuthController.prototype, APIController.prototype);
 
 module.exports = AppController;

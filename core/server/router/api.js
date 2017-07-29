@@ -11,65 +11,65 @@ var Express = require('express');
 function APIRouter(controller) {
     var router = Express.Router();
 
-    router.get('/options/:species', controller.onOptionsRequest());
-    router.get('/options/:species/:option', controller.onSingleOptionRequest());
-    router.get('/options/:species/:option/:pageNumber', controller.onSingleOptionRequest());
-    router.get('/model/:species', controller.onRetrieveSpecies());
-    router.get('/list', controller.onListAllRequest());
-    router.get('/list/:species', controller.onListSpeciesRequest());
-    router.get('/list/:species/:pageNumber', controller.onListSpeciesRequest());
-    router.get('/species', controller.onSpeciesListRequest());
+    router.get('/options/:species', controller.api.onOptionsRequest());
+    router.get('/options/:species/:option', controller.api.onSingleOptionRequest());
+    router.get('/options/:species/:option/:pageNumber', controller.api.onSingleOptionRequest());
+    router.get('/model/:species', controller.api.onRetrieveSpecies());
+    router.get('/list', controller.api.onListAllRequest());
+    router.get('/list/:species', controller.api.onListSpeciesRequest());
+    router.get('/list/:species/:pageNumber', controller.api.onListSpeciesRequest());
+    router.get('/species', controller.api.onSpeciesListRequest());
 
-    router.post('/query/:pageNumber', controller.onQueryRequest());
-    router.post('/query', controller.onQueryRequest());
+    router.post('/query/:pageNumber', controller.api.onQueryRequest());
+    router.post('/query', controller.api.onQueryRequest());
 
     // save a json of an animal
     router.post('/save/:species/json',
-        controller.verifyAuth(),
-        controller.onSaveAnimalJSON());
+        controller.auth.verifyAuth(),
+        controller.api.onSaveAnimalJSON());
 
     // save an animal
     router.post('/save/:species',
-        controller.verifyAuth(),
-        controller.uploader.array('images'),
-        controller.onSaveAnimalForm());
+        controller.auth.verifyAuth(),
+        controller.api.uploader.array('images'),
+        controller.api.onSaveAnimalForm());
 
     // delete an animal
     router.post('/remove/:species',
-        controller.verifyAuth(),
-        controller.onDeleteAnimal());
+        controller.auth.verifyAuth(),
+        controller.api.onDeleteAnimal());
 
     // save a species
     router.post('/save/:species/model',
-        controller.verifyAuth(),
-        controller.onSaveSpecies());
+        controller.auth.verifyAuth(),
+        controller.api.onSaveSpecies());
 
     // save a species placeholder image
     router.post('/save/:species/placeholder',
-        controller.verifyAuth(),
-        controller.uploader.single('placeholder'),
-        controller.onSaveSpeciesPlaceholder());
+        controller.auth.verifyAuth(),
+        controller.api.uploader.single('placeholder'),
+        controller.api.onSaveSpeciesPlaceholder());
 
     // create a species
     router.post('/create/:species/model',
-        controller.verifyAuth(),
-        controller.onCreateSpecies());
+        controller.auth.verifyAuth(),
+        controller.api.onCreateSpecies());
 
     // create a species
     router.post('/remove/:species/model',
-        controller.verifyAuth(),
-        controller.onDeleteSpecies());
+        controller.auth.verifyAuth(),
+        controller.api.onDeleteSpecies());
 
     router.post('/user/save',
-        controller.verifyAuth(),
-        controller.onUserUpdate());
+        controller.auth.verifyAuth(),
+        controller.api.onUserUpdate());
 
     router.get('/user',
-        controller.verifyAuth(),
-        controller.onUserRetrieve());
+        controller.auth.verifyAuth(),
+        controller.api.onUserRetrieve());
 
-    router.get('/formatdb/', controller.onFormatDb());
-    router.get('/reset', controller.onReset());
+    router.get('/formatdb/', controller.api.onFormatDb());
+    router.get('/reset', controller.api.onReset());
 
     return router;
 }

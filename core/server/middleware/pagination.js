@@ -7,22 +7,13 @@ module.exports = function (options) {
 
     return function (req, res, next) {
         var pageSize = parseInt(req.query.pageSize || req.body.pageSize || opts.pageSize);
-        var pageNum;
-        var startIndex;
+        var pageNumber = parseInt(res.locals.pageNumber);
+        var arrayStartIndex;
 
-        if (_.isFinite(parseInt(res.locals.pageNumber)) && _.isArray(res.locals.data) && res.locals.data.length > pageSize) {
-            pageNum = (function () {
-                var parsedPageNum = (parseInt(res.locals.pageNumber) || 1) - 1; // page numbers start at 1
+        if (_.isFinite(pageNumber) && _.isArray(res.locals.data) && res.locals.data.length > pageSize) {
+            arrayStartIndex = pageNumber > 0 ? 0 : (pageNumber - 1) * pageSize;
 
-                if (parsedPageNum < 0) {
-                    return 0;
-                }
-
-                return parsedPageNum;
-            })();
-            startIndex = pageNum * pageSize;
-
-            res.locals.data = res.locals.data.slice(startIndex, startIndex + pageSize);
+            res.locals.data = res.locals.data.slice(arrayStartIndex, arrayStartIndex + pageSize);
         }
 
         next();

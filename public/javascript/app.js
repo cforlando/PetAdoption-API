@@ -2437,12 +2437,10 @@ webpackJsonp([0],[
 
 	            $scope.setLatLng = function (lat, lng) {
 	                console.log('$scope.setLatLng(%s, %s)', lat, lng);
-	                var latKey = $scope['propData']['Lat'].key,
-	                    lngKey = $scope['propData']['Lon'].key;
 	                $scope['propData']['Lat'].val = parseFloat(lat);
 	                $scope['propData']['Lon'].val = parseFloat(lng);
-	                $scope.setAnimalProperty(latKey, $scope['propData']['Lat']);
-	                $scope.setAnimalProperty(lngKey, $scope['propData']['Lon']);
+	                $scope.setAnimalProperty($scope['propData']['Lat'].key, $scope['propData']['Lat']);
+	                $scope.setAnimalProperty($scope['propData']['Lon'].key, $scope['propData']['Lon']);
 	            };
 
 	            $scope.generateLocation = function () {
@@ -2477,8 +2475,8 @@ webpackJsonp([0],[
 
 	                $scope.updateMapView = function () {
 	                    var loc = $scope.generateLocation();
-	                    console.log('$scope.updateMapView(%o, %o)', loc.lat, loc.lng);
 	                    var newCenter = new google.maps.LatLng(loc.lat, loc.lng);
+	                    console.log('$scope.updateMapView(%o, %o)', loc.lat, loc.lng);
 	                    $scope.markerObj.setPosition(newCenter);
 	                    $scope.mapObj.panTo(newCenter);
 	                };
@@ -3710,6 +3708,7 @@ webpackJsonp([0],[
 	        restrict: 'C',
 	        template: __webpack_require__(206),
 	        controller: function ($scope, $routeParams, $location, $mdDialog, $controller, speciesDataService, userService) {
+	            angular.extend(this, $controller('formController', {$scope: $scope}));
 
 	            $scope.speciesName = $routeParams.speciesName;
 	            $scope.propName = $routeParams.propName;
@@ -3983,7 +3982,7 @@ webpackJsonp([0],[
 /* 206 */
 /***/ (function(module, exports) {
 
-	module.exports = "<div class=\"section section--edit-propData\" ng-controller=\"formController\"><div class=\"section__content\"><md-card><md-card-title><md-card-title-text><span class=\"md-headline\">{{propData.key}}</span></md-card-title-text></md-card-title><md-card-content><div class=\"propData-field propData-field--fieldLabel\"><md-input-container><label>Field Label</label><textarea ng-model=\"propData.fieldLabel\" rows=\"1\" max-rows=\"8\" md-select-on-focus></textarea></md-input-container></div><div class=\"propData-field propData-field--valType\"><md-input-container><label>Type</label><md-select ng-model=\"propData.valType\"><md-option ng-repeat=\"type in valTypes\" ng-value=\"type\">{{type}}</md-option></md-select></md-input-container></div><div class=\"propData-field propData-field--defaultVal\"><div class=\"default-species-prop-input\"></div></div><md-chips ng-model=\"propData.options\" placeholder=\"Option\" ng-if=\"hasEditableOptions()\" md-removable md-enable-chip-edit=\"true\"></md-chips></md-card-content><md-card-actions layout=\"row\" layout-align=\"end\"><md-button class=\"md-icon-button\" ng-click=\"saveSpeciesProperty()\"><md-icon class=\"material-icons\">save</md-icon></md-button><md-button class=\"md-icon-button\" ng-click=\"deleteSpeciesProperty()\"><md-icon class=\"material-icons\">delete_forever</md-icon></md-button></md-card-actions></md-card></div></div>"
+	module.exports = "<div class=\"section section--edit-propData\"><div class=\"section__content\"><md-card><md-card-title><md-card-title-text><span class=\"md-headline\">{{propData.key}}</span></md-card-title-text></md-card-title><md-card-content><div class=\"propData-field propData-field--fieldLabel\"><md-input-container><label>Field Label</label><textarea ng-model=\"propData.fieldLabel\" rows=\"1\" max-rows=\"8\" md-select-on-focus></textarea></md-input-container></div><div class=\"propData-field propData-field--valType\"><md-input-container><label>Type</label><md-select ng-model=\"propData.valType\"><md-option ng-repeat=\"type in valTypes\" ng-value=\"type\">{{type}}</md-option></md-select></md-input-container></div><div class=\"propData-field propData-field--defaultVal\"><div class=\"default-species-prop-input\"></div></div><md-chips ng-model=\"propData.options\" placeholder=\"Option\" ng-if=\"hasEditableOptions()\" md-removable md-enable-chip-edit=\"true\"></md-chips></md-card-content><md-card-actions layout=\"row\" layout-align=\"end\"><md-button class=\"md-icon-button\" ng-click=\"saveSpeciesProperty()\"><md-icon class=\"material-icons\">save</md-icon></md-button><md-button class=\"md-icon-button\" ng-click=\"deleteSpeciesProperty()\"><md-icon class=\"material-icons\">delete_forever</md-icon></md-button></md-card-actions></md-card></div></div>"
 
 /***/ }),
 /* 207 */
