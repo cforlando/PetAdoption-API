@@ -51,6 +51,7 @@ Feel free to ask me for my `.env` file for an example.
 It should look similar to the following. You can also set these environment variables by any other means:
 ```
 DOMAIN=http://localhost:8080
+# `DEVELOPMENT_ENV` flag allows login bypass
 DEVELOPMENT_ENV=true
 PORT=8080
 HTTPS_PORT=8443
