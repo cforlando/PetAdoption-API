@@ -45,6 +45,7 @@
     "passport-http": "^0.3.0",
     "passport-local": "^1.0.0",
     "pug": "^2.0.0-beta4",
+    "q": "^1.5.0",
     "serve-favicon": "~2.3.0",
     "sharp": "^0.17.1",
     "superagent": "^3.5.2",
