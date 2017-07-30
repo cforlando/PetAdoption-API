@@ -345,7 +345,7 @@ webpackJsonp([0],[
 	                $inputs.each(function () {
 	                    var fileInputEl = this;
 
-	                    _.forEach(fileInputEl.files, function (file, index) {
+	                    _.forEach(fileInputEl.files, function (file) {
 	                        formData.append(key, file);
 	                        // TODO only append if filename is saved in props
 	                    });
@@ -358,6 +358,11 @@ webpackJsonp([0],[
 	        // assign animal values to form data
 	        _.forEach(animal.getProps(), function (propData) {
 	            if (propData.val !== undefined && propData.val !== null) {
+
+	                if (!propData.key || propData.key === 'undefined'){
+	                    console.error('invalid property saved in animal: %o', animal);
+	                    throw new Error('attempted to save invalid property');
+	                }
 
 	                if (propData.valType === '[Image]') {
 	                    // remove temporary images that will be added on upload
@@ -2116,7 +2121,7 @@ webpackJsonp([0],[
 	        scope: {
 	            onFileInputChangeCallback: '&onFileInputChange',
 	            upload: '=trigger',
-	            inputLimit: '&'
+	            inputLimit: '@'
 	        },
 	        transclude: true,
 	        template: __webpack_require__(65),
@@ -2810,6 +2815,12 @@ webpackJsonp([0],[
 	                                    }
 	                                });
 
+	                                $parentScope.killSpeciesPrompt = function(){
+	                                    delete $parentScope.killSpeciesPrompt;
+	                                    speciesWatchHandler();
+	                                    $mdDialog.cancel();
+	                                };
+
 	                            },
 	                            template: __webpack_require__(83),
 	                            parent: angular.element('.pet--form'),
@@ -2832,6 +2843,7 @@ webpackJsonp([0],[
 	             * @param {Object} propData
 	             */
 	            $scope.setAnimalProperty = function (propName, propData) {
+	                propData.key = propData.key || propName;
 	                $scope.activeAnimal.setProps([propData]);
 	            };
 
@@ -2926,6 +2938,7 @@ webpackJsonp([0],[
 	             * @param {Boolean} [options.updatePetList=true]
 	             * @param {Boolean} [options.syncShelterMap=true]
 	             * @param {Boolean} [options.visibleNotification=false]
+	             * @param {Boolean} [options.successRedirect=false]
 	             * @return {Promise<Animal>}
 	             */
 	            $scope.savePet = function (options) {
@@ -3140,7 +3153,7 @@ webpackJsonp([0],[
 	                        },
 	                        {
 	                            onClick: function () {
-	                                $scope.savePet({visibleNotification: true})
+	                                $scope.savePet({visibleNotification: true, successRedirect: true})
 	                            },
 	                            label: 'save',
 	                            icon: 'save'
@@ -3198,6 +3211,7 @@ webpackJsonp([0],[
 	                    var formDestroyHandler = $scope.$on('$destroy', function () {
 	                        animalSpeciesWatchHandler();
 	                        formDestroyHandler();
+	                        if ($scope.killSpeciesPrompt) $scope.killSpeciesPrompt();
 	                    });
 	                });
 

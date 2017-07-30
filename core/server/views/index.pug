@@ -19,7 +19,7 @@ html
         .user-view(layout='column', layout-fill, ng-cloak)
             if user || env && env.DEVELOPMENT_ENV
                 div.main-view(layout="column" layout-fill)
-                    md-toolbar
+                    md-toolbar.main-view__header
                         .md-toolbar-tools
                             md-button(class="md-icon-button" aria-label="Side Nav Toggle" ng-click="toggleSidebar()")
                                 md-icon.material-icons menu

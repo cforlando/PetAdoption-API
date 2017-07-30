@@ -95,7 +95,7 @@ module.exports = ngApp.service('animalDataService', function (request) {
                 $inputs.each(function () {
                     var fileInputEl = this;
 
-                    _.forEach(fileInputEl.files, function (file, index) {
+                    _.forEach(fileInputEl.files, function (file) {
                         formData.append(key, file);
                         // TODO only append if filename is saved in props
                     });
@@ -108,6 +108,11 @@ module.exports = ngApp.service('animalDataService', function (request) {
         // assign animal values to form data
         _.forEach(animal.getProps(), function (propData) {
             if (propData.val !== undefined && propData.val !== null) {
+
+                if (!propData.key || propData.key === 'undefined'){
+                    console.error('invalid property saved in animal: %o', animal);
+                    throw new Error('attempted to save invalid property');
+                }
 
                 if (propData.valType === '[Image]') {
                     // remove temporary images that will be added on upload

@@ -7,7 +7,7 @@ module.exports = ngApp.directive('fileInput', function () {
         scope: {
             onFileInputChangeCallback: '&onFileInputChange',
             upload: '=trigger',
-            inputLimit: '&'
+            inputLimit: '@'
         },
         transclude: true,
         template: require('raw!./templates/file-input.html'),

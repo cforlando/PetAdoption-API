@@ -76,19 +76,19 @@ APIController.prototype = {
         return function (req, res, next) {
             var userId = req.user && req.user.id;
 
-            if (process.env.DEVELOPMENT_ENV) {
-                res.locals.data = {
-                    id: 'dev',
-                    meta: []
-                };
-                next();
-                return;
-            }
 
             if (!userId) {
-                var unauthorizedErr = new Error('Unauthorized');
-                unauthorizedErr.status = 401;
-                next(unauthorizedErr);
+                if (process.env.DEVELOPMENT_ENV) {
+                    res.locals.data = {
+                        id: 'dev',
+                        defaults: [],
+                        meta: []
+                    };
+                    next();
+                    return;
+                }
+
+                next(Object.assign(new Error('Unauthorized'), {status: 401}));
                 return;
             }
 

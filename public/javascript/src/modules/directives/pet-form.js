@@ -154,6 +154,12 @@ module.exports = ngApp.directive('petForm', function () {
                                     }
                                 });
 
+                                $parentScope.killSpeciesPrompt = function(){
+                                    delete $parentScope.killSpeciesPrompt;
+                                    speciesWatchHandler();
+                                    $mdDialog.cancel();
+                                };
+
                             },
                             template: require('raw!modules/views/dialogs/new-animal.html'),
                             parent: angular.element('.pet--form'),
@@ -176,6 +182,7 @@ module.exports = ngApp.directive('petForm', function () {
              * @param {Object} propData
              */
             $scope.setAnimalProperty = function (propName, propData) {
+                propData.key = propData.key || propName;
                 $scope.activeAnimal.setProps([propData]);
             };
 
@@ -270,6 +277,7 @@ module.exports = ngApp.directive('petForm', function () {
              * @param {Boolean} [options.updatePetList=true]
              * @param {Boolean} [options.syncShelterMap=true]
              * @param {Boolean} [options.visibleNotification=false]
+             * @param {Boolean} [options.successRedirect=false]
              * @return {Promise<Animal>}
              */
             $scope.savePet = function (options) {
@@ -484,7 +492,7 @@ module.exports = ngApp.directive('petForm', function () {
                         },
                         {
                             onClick: function () {
-                                $scope.savePet({visibleNotification: true})
+                                $scope.savePet({visibleNotification: true, successRedirect: true})
                             },
                             label: 'save',
                             icon: 'save'
@@ -542,6 +550,7 @@ module.exports = ngApp.directive('petForm', function () {
                     var formDestroyHandler = $scope.$on('$destroy', function () {
                         animalSpeciesWatchHandler();
                         formDestroyHandler();
+                        if ($scope.killSpeciesPrompt) $scope.killSpeciesPrompt();
                     });
                 });
 

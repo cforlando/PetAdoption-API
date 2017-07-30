@@ -511,6 +511,9 @@ md-sidenav {
   overflow-y: auto;
   overflow-x: hidden;
 }
+.main-view__header {
+  z-index: 81;
+}
 .view--species md-content {
   padding-bottom: 7em;
 }
