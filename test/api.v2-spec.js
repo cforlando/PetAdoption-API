@@ -37,7 +37,7 @@ describe("/api", function () {
 
         it(sprintf("returns values without meta data for %s properties", speciesName), function () {
 
-            return request.get(tHelper.buildEndpoint('list', speciesName, {base: '/api/v2/'}))
+            return request.get(tHelper.buildEndpoint('species', speciesName, 'animals', 'list', {base: '/api/v2/'}))
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
                 .expect(200)

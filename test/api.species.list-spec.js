@@ -25,7 +25,7 @@ describe("/species", function(){
 
     it("returns an array of available species", function () {
 
-        return request.get(tHelper.buildEndpoint('species'))
+        return request.get(tHelper.buildEndpoint('species', 'all', 'list'))
             .set('Accept', 'application/json')
             .expect('Content-Type', /json/)
             .expect(function (res) {

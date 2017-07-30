@@ -40,7 +40,7 @@ describe("/options", function () {
 
         it(sprintf("returns a JSON array of all options for %s species", speciesName), function () {
 
-            return request.get(tHelper.buildEndpoint('options', speciesName))
+            return request.get(tHelper.buildEndpoint('species', speciesName, 'options'))
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
                 .expect(function (res) {
@@ -62,7 +62,7 @@ describe("/options", function () {
 
                 it(sprintf("returns JSON array of options for %s", optionName), function () {
 
-                    request.get(tHelper.buildEndpoint('options', speciesName, optionName))
+                    request.get(tHelper.buildEndpoint('species', speciesName, 'options', optionName))
                         .set('Accept', 'application/json')
                         .expect('Content-Type', /json/)
                         .expect(function (res) {

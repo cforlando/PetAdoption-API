@@ -36,7 +36,7 @@ describe("/query", function () {
             color: "White"
         };
 
-        return request.post(tHelper.buildEndpoint('query'))
+        return request.post(tHelper.buildEndpoint('species', 'all', 'query'))
             .set('Accept', 'application/json')
             .send(queryProps)
             .expect(200)
@@ -81,7 +81,7 @@ describe("/query", function () {
 
                     return database.saveAnimal(speciesName, queryProps)
                         .then(function () {
-                            return request.post(tHelper.buildEndpoint('query'))
+                            return request.post(tHelper.buildEndpoint('species', 'all', 'query'))
                                 .send(queryProps)
                                 .set('Accept', 'application/json')
                                 .expect('Content-Type', /json/)
@@ -96,7 +96,7 @@ describe("/query", function () {
 
                     return database.saveAnimal(speciesName, Object.assign({petName: "test-pet-" + index}, queryProps))
                         .then(function (animalData) {
-                            return request.post(tHelper.buildEndpoint('query'))
+                            return request.post(tHelper.buildEndpoint('species', 'all', 'query'))
                                 .set('Accept', 'application/json')
                                 .expect('Content-Type', /json/)
                                 .send(animalQuery)
@@ -129,7 +129,7 @@ describe("/query", function () {
                         return database.saveAnimal(speciesName, queryProps)
                             .then(function () {
 
-                                return request.post(tHelper.buildEndpoint('query'))
+                                return request.post(tHelper.buildEndpoint('species', 'all', 'query'))
                                     .send(queryProps)
                                     .set('Accept', 'application/json')
                                     .expect('Content-Type', /json/)
@@ -158,7 +158,7 @@ describe("/query", function () {
 
                         return database.saveAnimal(speciesName, queryProps)
                             .then(function () {
-                                return request.post(tHelper.buildEndpoint('query'))
+                                return request.post(tHelper.buildEndpoint('species', 'all', 'query'))
                                     .send(queryProps)
                                     .set('Accept', 'application/json')
                                     .expect('Content-Type', /json/)

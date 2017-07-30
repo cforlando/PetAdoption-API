@@ -37,7 +37,7 @@ describe("/list", function () {
         var speciesName = dbImage.getSpeciesName();
 
         it(sprintf("returns JSON of all %s species", speciesName), function () {
-            return request.get(tHelper.buildEndpoint('list', speciesName))
+            return request.get(tHelper.buildEndpoint('species', speciesName, 'animals', 'list'))
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
                 .expect(200)
@@ -53,7 +53,7 @@ describe("/list", function () {
         it(sprintf("returns a paged JSON of all %s species", speciesName), function () {
             var pageSize;
 
-            return request.get(tHelper.buildEndpoint('list', speciesName))
+            return request.get(tHelper.buildEndpoint('species', speciesName, 'animals', 'list'))
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
                 .expect(200)
@@ -64,7 +64,7 @@ describe("/list", function () {
                     // use half of entire size as page size limit
                     pageSize = parseInt(fullListResponse.body.length / 2);
 
-                    return request.get(tHelper.buildEndpoint('list', speciesName, 1, {pageSize: pageSize}))
+                    return request.get(tHelper.buildEndpoint('species', speciesName, 'animals', 'list', 1, {pageSize: pageSize}))
                         .set('Accept', 'application/json')
                         .expect('Content-Type', /json/)
                         .expect(200)
@@ -84,7 +84,7 @@ describe("/list", function () {
         it("returns only request parameters when 'properties' key provided", function () {
             var properties = ['species', 'petName'];
 
-            return request.get(tHelper.buildEndpoint('list', speciesName, {properties: properties}))
+            return request.get(tHelper.buildEndpoint('species', speciesName, 'animals', 'list', {properties: properties}))
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
                 .expect(200)
