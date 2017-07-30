@@ -12,6 +12,18 @@ var testSpecies = new Species(testSpeciesImage.getSpeciesName(), testSpeciesImag
 describe("Animal", function () {
     var Animal = require('../core/lib/animal');
 
+    it('accepts an object containing species property key-value pairs', function(){
+        var testAnimalProps = {
+            petName: 'constructor-test',
+            images: ['./hello/world']
+        };
+        var testAnimal = new Animal(testSpecies, testAnimalProps);
+
+        Object.keys(testAnimalProps).forEach(function(propName){
+            expect(testAnimal.getValue(propName)).to.eql(testAnimalProps[propName]);
+        })
+    });
+
     describe("toObject()", function () {
 
         it("returns an object of values", function () {

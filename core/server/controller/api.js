@@ -78,7 +78,7 @@ APIController.prototype = {
 
 
             if (!userId) {
-                if (process.env.DEVELOPMENT_ENV) {
+                if (config.DEVELOPMENT_ENV) {
                     res.locals.data = {
                         id: 'dev',
                         defaults: [],
@@ -120,9 +120,9 @@ APIController.prototype = {
 
         return function (req, res, next) {
 
-            res.locals.pageNumber = req.params['pageNumber'];
+            res.locals.pageNumber = req.params.pageNumber;
 
-            self.database.findAnimals({species: req.params.species})
+            self.database.findAnimals({species: req.params.speciesName})
                 .then(function (animals) {
 
                     res.locals.data = [];
@@ -141,7 +141,7 @@ APIController.prototype = {
         var self = this;
 
         return function (req, res, next) {
-            res.locals.pageNumber = req.params['pageNumber'];
+            res.locals.pageNumber = req.params.pageNumber;
 
             self.database.findAnimals({})
                 .then(function (animals) {
@@ -159,7 +159,7 @@ APIController.prototype = {
         return function (req, res, next) {
             var queryData = req.body;
 
-            res.locals.pageNumber = req.params['pageNumber'];
+            res.locals.pageNumber = req.params.pageNumber;
 
             self.database.findAnimals(queryData)
                 .then(function (animals) {
@@ -181,7 +181,7 @@ APIController.prototype = {
         var self = this;
 
         return function (req, res, next) {
-            var species = req.params.species;
+            var species = req.params.speciesName;
 
             self.database.findSpecies(species)
                 .then(function (speciesData) {
@@ -202,7 +202,7 @@ APIController.prototype = {
         var self = this;
 
         return function (req, res, next) {
-            var species = req.params.species;
+            var species = req.params.speciesName;
             var optionName = req.params.option;
 
             self.database.findSpecies(species)
@@ -224,7 +224,7 @@ APIController.prototype = {
 
         return function (req, res, next) {
 
-            self.database.findSpecies(req.params.species)
+            self.database.findSpecies(req.params.speciesName)
                 .then(function (speciesData) {
 
                     res.locals.simplifiedFormat = false;
@@ -240,7 +240,7 @@ APIController.prototype = {
         var self = this;
         return function (req, res, next) {
 
-            self.database.removeAnimal(req.params.species, req.body)
+            self.database.removeAnimal(req.params.speciesName, req.body)
                 .then(function (result) {
                     res.json(result)
                 })
@@ -252,7 +252,7 @@ APIController.prototype = {
         var self = this;
         return function (req, res, next) {
 
-            self.database.saveAnimal(req.params.species, req.body)
+            self.database.saveAnimal(req.params.speciesName, req.body)
                 .then(function (newAnimal) {
                     res.locals.simplifiedFormat = false;
                     res.locals.data = newAnimal;
@@ -262,7 +262,7 @@ APIController.prototype = {
         }
     },
 
-    saveSpeciesPlaceHolder: function (species, fileMeta) {
+    saveSpeciesImage: function (species, fileMeta) {
         var bufferStream = new stream.PassThrough();
         var publicPath = path.join(this._apiOptions.paths.images, (species + '/'), fileMeta.originalname);
         var imageFormatter = sharp()
@@ -284,22 +284,23 @@ APIController.prototype = {
         return function (req, res, next) {
             var animalData = req.body;
             var imagesValue = animalData.images || '';
-            var saveImageOps = req.files.map(function (fileMeta) {
-                return self.saveSpeciesPlaceHolder(req.params.species, fileMeta)
+            var files = req.files || [];
+            var fileUploads = files.map(function (fileMeta) {
+                return self.saveSpeciesImage(req.params.speciesName, fileMeta)
             });
 
-            Promise.all(saveImageOps)
+            Promise.all(fileUploads)
                 .then(function (newImageUrls) {
 
                     animalData.images = _.chain(newImageUrls)
                         .concat(imagesValue.split(','))
                         .reject(function (url) {
-                            // only truthy values
-                            return !url;
+                            // reject falsey values and data images
+                            return !url || url.match(/^data:/);
                         })
                         .value();
 
-                    return self.database.saveAnimal(req.params.species, animalData)
+                    return self.database.saveAnimal(req.params.speciesName, animalData)
                 })
                 .then(function (newAnimal) {
                     res.locals.simplifiedFormat = false;
@@ -315,7 +316,7 @@ APIController.prototype = {
         var self = this;
 
         return function (req, res, next) {
-            self.database.saveSpecies(req.params.species, req.body)
+            self.database.saveSpecies(req.params.speciesName, req.body)
                 .then(function (updatedSpecies) {
 
                     res.locals.simplifiedFormat = false;
@@ -330,7 +331,7 @@ APIController.prototype = {
     onSaveSpeciesPlaceholder: function () {
         var self = this;
         return function (req, res, next) {
-            var species = req.params.species,
+            var species = req.params.speciesName,
                 bufferStream = new stream.PassThrough(),
                 publicPath = path.join(self._apiOptions.paths.placeholders, species + '.png');
             // TODO determine and use proper file extension
@@ -355,7 +356,7 @@ APIController.prototype = {
         var self = this;
 
         return function (req, res, next) {
-            self.database.saveSpecies(req.params.species, req.body)
+            self.database.saveSpecies(req.params.speciesName, req.body)
                 .then(function (newSpecies) {
                     res.locals.simplifiedFormat = false;
                     res.locals.data = newSpecies;
@@ -370,7 +371,7 @@ APIController.prototype = {
         var self = this;
 
         return function (req, res, next) {
-            self.database.deleteSpecies(req.params.species)
+            self.database.deleteSpecies(req.params.speciesName)
                 .then(function () {
                     res.json({result: 'success'})
                 })

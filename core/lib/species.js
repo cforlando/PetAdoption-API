@@ -62,7 +62,10 @@ function Species(speciesName, data) {
         if (_.isString(data)) {
             parsedData = JSON.parse(data);
         } else {
-            parsedData = data;
+            // sanitize data as an array
+            parsedData = Object.keys(data).map(function(propIndex){
+                return data[propIndex];
+            });
         }
 
         this.setProps(parsedData.props || parsedData);

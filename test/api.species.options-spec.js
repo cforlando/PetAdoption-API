@@ -13,7 +13,7 @@ var tHelper = new TestHelper();
 var sprintf = tHelper.sprintf;
 var expect = chai.expect;
 
-describe("/options", function () {
+describe("/species/:speciesName/options", function () {
     var speciesDbImages = tHelper.getTestDbImages();
     var request;
 
@@ -56,7 +56,7 @@ describe("/options", function () {
                 .expect(200)
         });
 
-        describe("/:optionName", function () {
+        describe(sprintf("/species/%s/options/:optionName", speciesName), function () {
 
             _.forEach(optionsData, function (optionList, optionName) {
 

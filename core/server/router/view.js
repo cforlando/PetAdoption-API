@@ -25,9 +25,8 @@ function ViewRouter(controller) {
         function (req, res) {
             res.render('index', {
                 user: req.user,
-                GOOGLE_MAPS_KEY: config.GOOGLE_MAPS_KEY,
                 title: 'Pet Data Entry',
-                env:  process.env
+                config:  config
             });
         });
 

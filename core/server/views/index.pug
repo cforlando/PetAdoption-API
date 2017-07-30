@@ -12,12 +12,12 @@ html
 
         link(rel='stylesheet', href='/stylesheets/style.min.css')
 
-        script(src="//maps.googleapis.com/maps/api/js?key=" + GOOGLE_MAPS_KEY)
+        script(src="//maps.googleapis.com/maps/api/js?key=" + config.GOOGLE_MAPS_KEY)
     body(ng-controller='appController')
         .loading-screen(layout="row", layout-sm="column", layout-align="center center", ng-show="loadingQueue.length > 0")
             md-progress-circular(md-mode="indeterminate")
         .user-view(layout='column', layout-fill, ng-cloak)
-            if user || env && env.DEVELOPMENT_ENV
+            if user || config.DEVELOPMENT_ENV
                 div.main-view(layout="column" layout-fill)
                     md-toolbar.main-view__header
                         .md-toolbar-tools

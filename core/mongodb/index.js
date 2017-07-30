@@ -228,7 +228,7 @@ MongoAPIDatabase.prototype = {
             })
             .then(function (speciesCollectionDoc) {
                 // only pass the species object that was saved
-                return Promise.resolve(_.find(speciesCollectionDoc.speciesList, {speciesName: speciesName}))
+                return _.find(speciesCollectionDoc.speciesList, {speciesName: speciesName});
             })
     },
 
@@ -317,6 +317,13 @@ MongoAPIDatabase.prototype = {
      */
     clearAnimals: function () {
         return this.AnimalDb.clear()
+    },
+    /**
+     *
+     * @returns {Promise}
+     */
+    clearSpecies: function () {
+        return this.SpeciesCollectionDb.clear()
     },
 
     /**

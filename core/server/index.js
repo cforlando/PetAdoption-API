@@ -44,7 +44,7 @@ function Server(database, options) {
     server.use(logger(process.env.LOG || 'dev'));
     server.use(cookieParser());
     server.use(bodyParser.json());
-    server.use(bodyParser.urlencoded({extended: false}));
+    server.use(bodyParser.urlencoded({extended: true}));
     server.use(compression());
 
     server.set('trust proxy', 1); // trust first proxy hop

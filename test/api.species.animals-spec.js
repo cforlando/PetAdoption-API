@@ -12,6 +12,7 @@ var expect = chai.expect;
 var sprintf = tHelper.sprintf;
 var isValidID = tHelper.isValidID;
 var request;
+var testDb;
 
 describe("/species/:speciesName/animals/save", function () {
     var speciesDbImages = tHelper.getTestDbImages();
@@ -34,6 +35,7 @@ describe("/species/:speciesName/animals/save", function () {
         return tHelper.beforeAPI()
             .then(function (testComponents) {
                 request = supertest(testComponents.server);
+                testDb = testComponents.database;
             })
     });
 
@@ -42,7 +44,8 @@ describe("/species/:speciesName/animals/save", function () {
         return tHelper.afterAPI()
     });
 
-    describe(sprintf("POST /species/%s/animals/save and POST /species/%s/animals/remove", speciesName, speciesName), function () {
+    describe(sprintf("POST /species/%s/animals/save", speciesName), function () {
+        var saveTestPetId;
 
         before(function () {
             config.DEVELOPMENT_ENV = true;
@@ -50,13 +53,11 @@ describe("/species/:speciesName/animals/save", function () {
 
         after(function () {
             config.DEVELOPMENT_ENV = devEnvFlag;
+            return testDb.removeAnimal(speciesName, {petId: saveTestPetId});
         });
 
-        it(sprintf("can save and delete a %s", speciesName), function () {
-            var petId;
-            var endpoint = tHelper.buildEndpoint('species', speciesName, 'animals', 'save');
-
-            return request.post(endpoint)
+        it(sprintf("can save a %s", speciesName), function () {
+            return request.post(tHelper.buildEndpoint('species', speciesName, 'animals', 'save'))
                 .type('form')
                 .set('Accept', 'application/json')
                 .send(testPetData)
@@ -66,10 +67,10 @@ describe("/species/:speciesName/animals/save", function () {
 
                     expect(response.body.petId).to.exist;
 
-                    petId = response.body.petId.val;
+                    saveTestPetId = response.body.petId.val;
 
-                    if (!isValidID(petId)) {
-                        throw new Error(sprintf("Save '%s' produced an invalid id: %s", speciesName, petId));
+                    if (!isValidID(saveTestPetId)) {
+                        throw new Error(sprintf("Save '%s' produced an invalid id: %s", speciesName, saveTestPetId));
                     }
 
                     _.forEach(testPetData, function (propVal, propName) {
@@ -79,16 +80,34 @@ describe("/species/:speciesName/animals/save", function () {
                         }
                     });
                 })
-                .then(function () {
-                    return request.post(tHelper.buildEndpoint('species', speciesName, 'animals', 'remove'))
-                        .set('Accept', 'application/json')
-                        .send({
-                            species: speciesName,
-                            petId: petId
-                        })
-                        .expect('Content-Type', /json/)
-                        .expect(200)
+        })
+    });
+
+    describe(sprintf("POST /species/%s/animals/remove", speciesName), function () {
+        var deleteTestPetId;
+
+        before(function () {
+            config.DEVELOPMENT_ENV = true;
+            return testDb.saveAnimal(speciesName, testPetData)
+                .then(function(animalData){
+                    deleteTestPetId = animalData.petId.val || animalData.petId;
                 })
+        });
+
+        after(function () {
+            config.DEVELOPMENT_ENV = devEnvFlag;
+        });
+
+        it(sprintf("can delete a %s", speciesName), function () {
+
+            return request.post(tHelper.buildEndpoint('species', speciesName, 'animals', 'remove'))
+                .set('Accept', 'application/json')
+                .send({
+                    species: speciesName,
+                    petId: deleteTestPetId
+                })
+                .expect('Content-Type', /json/)
+                .expect(200)
         })
     });
 

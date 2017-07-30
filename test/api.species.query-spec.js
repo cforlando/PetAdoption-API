@@ -13,7 +13,7 @@ var alterCase = tHelper.alterCase;
 var getRandomOptionValue = tHelper.getRandomOptionValue;
 var database;
 
-describe("/query", function () {
+describe("/species/all/query", function () {
     var request;
 
     before(function () {

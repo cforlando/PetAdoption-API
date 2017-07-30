@@ -16,7 +16,7 @@ var expect = chai.expect;
 var request;
 
 
-describe("/list", function () {
+describe("/species/all/animals/list", function () {
     var speciesDbImages = tHelper.getTestDbImages();
 
     before(function () {

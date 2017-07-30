@@ -32,8 +32,7 @@ function Animal(species, values) {
 
     if (_.isArray(values)) {
         this.setProps(values);
-    }
-    if (_.isPlainObject(values)) {
+    } else if (typeof values === 'object') {
         this.setValues(values);
     }
 

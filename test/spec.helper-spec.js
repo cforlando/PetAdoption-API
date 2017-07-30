@@ -7,7 +7,7 @@ var expect = chai.expect;
 var tHelper = new Helper();
 var speciesDbImages = tHelper.testDbImages;
 
-describe("tHelper", function () {
+describe("Helper (for tests)", function () {
     var tHelper = new Helper();
 
     describe("buildEndpoint()", function () {

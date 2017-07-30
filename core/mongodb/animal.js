@@ -209,22 +209,6 @@ AnimalDatabase.prototype = {
             });
         })
     },
-
-    /**
-     *
-     * @returns {Promise}
-     */
-    clear: function () {
-        var self = this;
-
-        return new Promise(function (resolve, reject) {
-            self.exec(function () {
-                self.MongooseModel.remove({}, function (err) {
-                    err ? reject(err) : resolve();
-                });
-            })
-        });
-    }
 };
 
 AnimalDatabase.prototype = Object.assign({}, BaseDatabase.prototype, AnimalDatabase.prototype);

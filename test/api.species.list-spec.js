@@ -7,7 +7,7 @@ var TestHelper = require('./helper');
 var expect = chai.expect;
 var request;
 
-describe("/species", function(){
+describe("/species/:speciesName/list", function(){
     var tHelper = new TestHelper();
     var speciesDbImages = tHelper.getTestDbImages();
 

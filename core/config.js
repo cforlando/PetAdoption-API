@@ -28,7 +28,7 @@ dotenv.config();
  */
 var config = {
     DOMAIN: process.env.DOMAIN || "http://localhost:8080",
-    DEVELOPMENT_ENV: !!process.env.DEVELOPMENT_ENV || false,
+    DEVELOPMENT_ENV: process.env.DEVELOPMENT_ENV || false,
     PORT: process.env.PORT || '8080',
     HTTPS_PORT: process.env.HTTPS_PORT || '8443',
     SERVER_SESSION_SECRET: process.env.SERVER_SESSION_SECRET || 'pet-api',

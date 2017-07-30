@@ -97,7 +97,7 @@ AuthController.prototype = {
             this.passport.initialize(),
             this.passport.session(),
             function (req, res, next) {
-                if (process.env.DEVELOPMENT_ENV) {
+                if (config.DEVELOPMENT_ENV) {
                     next();
                     return;
                 }

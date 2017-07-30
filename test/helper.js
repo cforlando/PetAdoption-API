@@ -66,28 +66,25 @@ Helper.prototype = {
 
     /**
      *
-     * @param {...String} [path]
+     * @param {...String} [pathname]
      * @param {Object} [options]
      * @param {String|Number} [options.pageSize]
      * @param {String[]} [options.properties]
      * @param {String} [options.base='/api/v1/']
      * @returns {string}
      */
-    buildEndpoint: function () {
-        var lastArg = Array.prototype.slice.call(arguments, -1)[0],
-            options = _.isPlainObject(lastArg) ? lastArg : null,
-            opts = _.defaults(options, {
-                base: '/api/v1'
-            }),
-            paths = _.isPlainObject(lastArg) ? Array.prototype.slice.call(arguments, 0, -1) : arguments,
+    buildEndpoint: function (pathname, options) {
+        var lastArg = Array.prototype.slice.call(arguments, -1)[0];
+        var opts = _.defaults(_.isPlainObject(lastArg) ? lastArg : {}, {base: '/api/v1'});
+        var paths = _.isPlainObject(lastArg) ? Array.prototype.slice.call(arguments, 0, -1) : arguments;
 
-            // iterate through arguments and append paths
-            pathname = _.reduce(paths, function (fullpath, partialPath) {
-                fullpath = path.join(fullpath.replace(/^\/?/, ''), String(partialPath).replace(/\/+$/, '/'));
-                return fullpath;
-            }, ''),
+        // iterate through arguments and append pathnames
+        var pathname = _.reduce(paths, function (fullpath, partialPath) {
+            fullpath = path.join(fullpath.replace(/^\/?/, ''), String(partialPath).replace(/\/+$/, '/'));
+            return fullpath;
+        }, '');
 
-            queryProps = _.defaults({}, _.pick(opts, ['pageSize', 'properties']));
+        var queryProps = _.defaults({}, _.pick(opts, ['pageSize', 'properties']));
 
 
         // append formatted query args if provided
@@ -103,18 +100,6 @@ Helper.prototype = {
         }
 
         return this.sprintf("%s/%s", opts.base.replace(/\/+$/, ''), pathname);
-    },
-
-    buildJasmineRequestCallback: function (done) {
-        var self = this;
-        return function (err, response) {
-            if (err) {
-                if (self.opts.printResponses && response) {
-                    console.error('response.body: %s', self.dump(response.body));
-                }
-            }
-            done(err)
-        }
     },
 
     isValidID: function (petId) {
@@ -258,12 +243,18 @@ Helper.prototype = {
             populateEmptyFields: true
         };
 
-        return testDb.uploadDbImages(opts.testDbImages)
+        return testDb.clearAnimals()
+            .then(function () {
+                return testDb.clearSpecies()
+            })
+            .then(function () {
+                return testDb.uploadDbImages(opts.testDbImages)
+            })
             .then(function () {
                 return self.dbFormatter.formatDb(testDb, formatOptions);
             })
             .then(function () {
-                return Promise.resolve(testDb);
+                return testDb;
             })
     },
 
@@ -280,7 +271,7 @@ Helper.prototype = {
             return self.buildDatabase()
                 .then(function (newTestDb) {
                     var server = new Server(newTestDb, {debugLevel: Debuggable.PROD});
-                    return Promise.resolve(server);
+                    return server;
                 })
                 .catch(function (err) {
                     return self.onError(err);
@@ -299,9 +290,13 @@ Helper.prototype = {
      */
     buildGlobalServer: function () {
         var self = this;
-        if (this.server) return Promise.resolve(this.server);
+        if (this.server) {
+            return Promise.resolve(this.server);
+        }
         // ensure we actually only init once
-        if (this.init) return this.init;
+        if (this.init) {
+            return this.init;
+        }
 
         this.init = this.buildDatabase()
             .then(function (database) {
@@ -313,7 +308,7 @@ Helper.prototype = {
             })
             .then(function (server) {
                 self.server = server;
-                return Promise.resolve(self.server);
+                return self.server;
             })
             .catch(function (err) {
                 return self.onError(err)
@@ -346,7 +341,7 @@ Helper.prototype = {
                     return self.buildServer(opts.database)
                 })
                 .then(function (server) {
-                    return Promise.resolve({server: server, database: opts.database})
+                    return {server: server, database: opts.database};
                 })
                 .catch(function (err) {
                     return self.onError(err)
@@ -361,7 +356,7 @@ Helper.prototype = {
                     return self.buildServer(opts.database);
                 })
                 .then(function (server) {
-                    return Promise.resolve({server: server, database: opts.database})
+                    return {server: server, database: opts.database};
                 })
                 .catch(function (err) {
                     return self.onError(err)
@@ -370,7 +365,7 @@ Helper.prototype = {
 
         return this.setupDatabase(opts.database)
             .then(function () {
-                return Promise.resolve({server: opts.server, database: opts.database})
+                return {server: opts.server, database: opts.database}
             })
             .catch(function (err) {
                 return self.onError(err)
