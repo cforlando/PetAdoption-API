@@ -41,6 +41,8 @@ To really utilize all the features, you'll need to defined all of the environmen
 The high of amount of dependencies was intended to allow the app to be configured and hosted in the most cost effective manner.
 As of right now, the bare minimum required is: 
 - `MONGODB_URI`. This can be remote (ie [mlab](http://mlab.com)) or local
+    - The URL should look something like `username:user_pw@database_domain:port/db_name`
+    
 
 ##### Setup MongoDB
 on Linux, `sudo apt-get install mongodb` or you can use a free service such as [mlab](https://mlab.com)
