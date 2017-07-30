@@ -59,6 +59,8 @@ ngApp.directive('speciesPropForm', function () {
                     $scope.propData.defaultVal = angular.copy($scope.propData.val);
                 }
 
+                $scope.formatDefaultVal();
+
                 switch ($scope.propData.valType) {
                     case 'Date':
                     case 'Number':
@@ -96,9 +98,10 @@ ngApp.directive('speciesPropForm', function () {
 
             /**
              *
-             * @param {String} propType
+             * @param {String} [defaultValType]
              */
-            $scope.formatDataByType = function (propType) {
+            $scope.formatDefaultVal = function (defaultValType) {
+                var propType = defaultValType || $scope.propData.valType;
                 console.log('setting prop type to %s', propType);
                 switch (propType) {
                     case 'Date':
@@ -106,7 +109,7 @@ ngApp.directive('speciesPropForm', function () {
                         break;
                     case 'Number':
                         if (!_.isNumber($scope.propData.defaultVal)) {
-                            $scope.propData.defaultVal = 0;
+                            $scope.propData.defaultVal = parseFloat($scope.propData.defaultVal) || 0;
                         }
                         break;
                     case 'Boolean':
@@ -144,7 +147,7 @@ ngApp.directive('speciesPropForm', function () {
                         }
 
                         propTypeWatchHandler = $scope.$watch("propData.valType", function (valType) {
-                            $scope.formatDataByType(valType);
+                            $scope.formatDefaultVal(valType);
                         });
 
                         destroyWatchHandler = $scope.$on('$destroy', function () {

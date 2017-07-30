@@ -10,6 +10,7 @@ module.exports = [
     require('modules/directives/images-input'),
     require('modules/directives/image-placeholder'),
     require('modules/directives/location-input'),
+    require('modules/directives/number-input'),
     require('modules/directives/select-input'),
     require('modules/directives/textarea-input'),
     require('modules/directives/pet-form'),

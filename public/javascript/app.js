@@ -1962,10 +1962,11 @@ webpackJsonp([0],[
 	    __webpack_require__(75),
 	    __webpack_require__(77),
 	    __webpack_require__(79),
-	    __webpack_require__(82),
-	    __webpack_require__(85),
-	    __webpack_require__(88),
-	    __webpack_require__(207)
+	    __webpack_require__(81),
+	    __webpack_require__(84),
+	    __webpack_require__(87),
+	    __webpack_require__(90),
+	    __webpack_require__(209)
 	];
 
 
@@ -2063,7 +2064,7 @@ webpackJsonp([0],[
 /* 61 */
 /***/ (function(module, exports) {
 
-	module.exports = "<div class=\"auto-input__content\" ng-switch=\"getType()\"><div class=\"images-input gallery\" ng-switch-when=\"gallery\"></div><div class=\"date-input\" ng-switch-when=\"date\"></div><div class=\"location-input\" ng-switch-when=\"location\"></div><div class=\"textarea-input\" ng-switch-when=\"textarea\"></div><div class=\"autocomplete-input\" ng-switch-when=\"string\"></div><div class=\"select-input\" ng-switch-when=\"select\"></div><div class=\"select-input\" ng-switch-when=\"boolean\"></div><div class=\"button button--set-default\" ng-if=\"isResetable()\" ng-click=\"setUserDefault(propData)\"></div></div>"
+	module.exports = "<div class=\"auto-input__content\" ng-switch=\"getType()\"><div class=\"images-input gallery\" ng-switch-when=\"gallery\"></div><div class=\"date-input\" ng-switch-when=\"date\"></div><div class=\"location-input\" ng-switch-when=\"location\"></div><div class=\"textarea-input\" ng-switch-when=\"textarea\"></div><div class=\"autocomplete-input\" ng-switch-when=\"string\"></div><div class=\"select-input\" ng-switch-when=\"select\"></div><div class=\"select-input\" ng-switch-when=\"boolean\"></div><div class=\"number-input\" ng-switch-when=\"number\"></div><div class=\"button button--set-default\" ng-if=\"isResetable()\" ng-click=\"setUserDefault(propData)\"></div></div>"
 
 /***/ }),
 /* 62 */
@@ -2565,10 +2566,31 @@ webpackJsonp([0],[
 	var _ = __webpack_require__(24);
 	var ngApp = __webpack_require__(8);
 
+	module.exports = ngApp.directive('numberInput', function () {
+	    return {
+	        restrict: 'C',
+	        template: __webpack_require__(76)
+	    };
+	});
+
+
+/***/ }),
+/* 76 */
+/***/ (function(module, exports) {
+
+	module.exports = "<div class=\"input input--select {{isDefaultAllowed(propData) ? '' : 'input--no-default'}}\"><div class=\"input__input\"><md-input-container class=\"md-block\"><label>{{propData.fieldLabel}}</label><input ng-model=\"propData.val\" ng-change=\"setAnimalProperty(propData.key, propData)\" type=\"number\"></md-input-container></div><div class=\"input__menu\" ng-if=\"isDefaultAllowed(propData)\"><md-menu><md-button class=\"md-icon-button\" ng-click=\"$mdOpenMenu($event)\"><md-icon class=\"material-icons\">more_vert</md-icon></md-button><md-menu-content><md-menu-item class=\"action action--set-default\"><md-button class=\"action__button\" ng-click=\"setAsDefault(propData)\">Set As Default</md-button></md-menu-item><md-menu-item class=\"action action--set-default\"><md-button class=\"action__button\" ng-click=\"resetFromDefault(propData)\">Reset To Default</md-button></md-menu-item></md-menu-content></md-menu></div></div>"
+
+/***/ }),
+/* 77 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(24);
+	var ngApp = __webpack_require__(8);
+
 	module.exports = ngApp.directive('selectInput', function () {
 	    return {
 	        restrict: 'C',
-	        template: __webpack_require__(76),
+	        template: __webpack_require__(78),
 	        controller: function ($scope, $element, speciesDataService) {
 
 	            if ($scope['propData'].valType === 'Boolean' && $scope['propData'].options.length === 0) {
@@ -2589,13 +2611,13 @@ webpackJsonp([0],[
 
 
 /***/ }),
-/* 76 */
+/* 78 */
 /***/ (function(module, exports) {
 
 	module.exports = "<div class=\"input input--select {{isDefaultAllowed(propData) ? '' : 'input--no-default'}}\"><div class=\"input__input\"><md-input-container class=\"md-block\"><label>{{propData.fieldLabel}}</label><md-select ng-model=\"propData.val\" ng-change=\"setAnimalProperty(propData.key, propData)\"><md-option ng-value=\"option\" ng-repeat=\"option in propData.options\">{{getSelectOptionLabel(option)}}</md-option></md-select></md-input-container></div><div class=\"input__menu\" ng-if=\"isDefaultAllowed(propData)\"><md-menu><md-button class=\"md-icon-button\" ng-click=\"$mdOpenMenu($event)\"><md-icon class=\"material-icons\">more_vert</md-icon></md-button><md-menu-content><md-menu-item class=\"action action--set-default\"><md-button class=\"action__button\" ng-click=\"setAsDefault(propData)\">Set As Default</md-button></md-menu-item><md-menu-item class=\"action action--set-default\"><md-button class=\"action__button\" ng-click=\"resetFromDefault(propData)\">Reset To Default</md-button></md-menu-item></md-menu-content></md-menu></div></div>"
 
 /***/ }),
-/* 77 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(24),
@@ -2604,19 +2626,19 @@ webpackJsonp([0],[
 	module.exports = ngApp.directive('textareaInput', function () {
 	    return {
 	        restrict: 'C',
-	        template: __webpack_require__(78)
+	        template: __webpack_require__(80)
 	    };
 	});
 
 
 /***/ }),
-/* 78 */
+/* 80 */
 /***/ (function(module, exports) {
 
 	module.exports = "<div class=\"input input--text {{isDefaultAllowed(propData) ? '' : 'input--no-default'}}\"><div class=\"input__input\"><md-input-container class=\"md-block\"><label>{{propData.fieldLabel}}</label><textarea md-select-on-focus ng-model=\"propData.val\" max-rows=\"8\" ng-change=\"setAnimalProperty(propData.key, propData)\"></textarea></md-input-container></div><div class=\"input__menu\" ng-if=\"isDefaultAllowed(propData)\"><md-menu><md-button class=\"md-icon-button\" ng-click=\"$mdOpenMenu($event)\"><md-icon class=\"material-icons\">more_vert</md-icon></md-button><md-menu-content><md-menu-item class=\"action action--set-default\"><md-button class=\"action__button\" ng-click=\"setAsDefault(propData)\">Set As Default</md-button></md-menu-item><md-menu-item class=\"action action--set-default\"><md-button class=\"action__button\" ng-click=\"resetFromDefault(propData)\">Reset To Default</md-button></md-menu-item></md-menu-content></md-menu></div></div>"
 
 /***/ }),
-/* 79 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Promise) {var angular = __webpack_require__(1);
@@ -2631,7 +2653,7 @@ webpackJsonp([0],[
 	module.exports = ngApp.directive('petForm', function () {
 	    return {
 	        restrict: 'C',
-	        template: __webpack_require__(80),
+	        template: __webpack_require__(82),
 	        controller: function ($scope, $element, $mdDialog, $routeParams, $controller, speciesFactory, addressFinderService, animalDataService, speciesDataService, userService) {
 	            console.log('init petForm.controller');
 	            angular.extend(this, $controller('formController', {$scope: $scope}));
@@ -2776,7 +2798,7 @@ webpackJsonp([0],[
 	                                });
 
 	                            },
-	                            template: __webpack_require__(81),
+	                            template: __webpack_require__(83),
 	                            parent: angular.element('.pet--form'),
 	                            clickOutsideToClose: false,
 	                            escapeToClose: false
@@ -3174,19 +3196,19 @@ webpackJsonp([0],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 80 */
+/* 82 */
 /***/ (function(module, exports) {
 
 	module.exports = "<!--.batch-edit-list(ng-if=\"isBatchMode()\")--><!--    .batch-edit-list__content--><!--        .pet-thumbnail(ng-repeat=\"pet in $parent.selectedPetsDataCollection\")--><!--            .pet-thumbnail__placeholder(ng-style!=\"background:url('{{pet.images.val[0]}}')\")--><div><div class=\"fields\"><div class=\"field field--{{propData.key}}\" ng-repeat=\"propData in formRenderData\"><div class=\"auto-input\"></div></div></div><md-fab-speed-dial class=\"md-scale md-fab-bottom-right\" md-open=\"menu.isOpen\" md-direction=\"up\"><md-fab-trigger><md-button class=\"md-fab md-primary\" aria-label=\"menu\"><md-icon class=\"material-icons\">menu</md-icon></md-button></md-fab-trigger><md-fab-actions><md-button class=\"md-fab md-raised md-mini\" ng-repeat=\"action in menu.actions\" ng-click=\"action.onClick()\"><md-tooltip md-direction=\"left\" md-visible=\"menu.isOpen\">{{action.label}}</md-tooltip><md-icon class=\"material-icons\">{{action.icon}}</md-icon></md-button></md-fab-actions></md-fab-speed-dial></div>"
 
 /***/ }),
-/* 81 */
+/* 83 */
 /***/ (function(module, exports) {
 
 	module.exports = "<div class=\"md-dialog-container\" id=\"new-animal-dialog\"><md-dialog aria-label=\"New Animal Dialog\"><md-toolbar><div class=\"md-toolbar-tools\"><h2>Add New</h2></div></md-toolbar><md-dialog-content><md-list><md-list-item ng-repeat=\"species in speciesList\" ng-click=\"selectSpecies(species)\">{{species}}</md-list-item></md-list></md-dialog-content></md-dialog></div>"
 
 /***/ }),
-/* 82 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Promise) {var ngApp = __webpack_require__(8);
@@ -3196,7 +3218,7 @@ webpackJsonp([0],[
 	    return {
 	        restrict: 'C',
 	        replace: true,
-	        template: __webpack_require__(83),
+	        template: __webpack_require__(85),
 	        controller: function ($scope, $mdDialog, animalDataService, speciesDataService) {
 	            $scope.currentSpeciesIndex = 0;
 	            $scope.animals = {};
@@ -3319,7 +3341,7 @@ webpackJsonp([0],[
 	                                $mdDialog.hide();
 	                            }
 	                        },
-	                        template: __webpack_require__(84),
+	                        template: __webpack_require__(86),
 	                        parent: angular.element(document.body),
 	                        targetEvent: ev,
 	                        scope: $scope,
@@ -3445,19 +3467,19 @@ webpackJsonp([0],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 83 */
+/* 85 */
 /***/ (function(module, exports) {
 
 	module.exports = "<div class=\"list\" layout-fill layout=\"column\"><md-content><md-tabs md-selected=\"currentSpeciesIndex\" md-dynamic-height md-border-bottom md-autoselect md-stretch-tabs=\"auto\"><md-tab ng-repeat=\"speciesName in speciesList\" label=\"{{speciesName}} ({{animals[speciesName].length}})\"><md-grid-list md-row-height=\"1:1\" md-cols-xs=\"2\" md-cols-sm=\"3\" md-cols-md=\"4\" md-cols-lg=\"8\" md-cols-gt-lg=\"12\"><md-grid-tile ng-repeat=\"pet in animals[speciesName]\" ng-style=\"{ 'background': 'url('+pet.getValue('images')[0]+') center', 'background-size': 'cover' }\"><md-checkbox class=\"checkbox\" ng-checked=\"selectedPets[pet.getId()]\" ng-click=\"togglePetSelection(pet)\" aria-label=\"selected?\"></md-checkbox><md-grid-tile-footer class=\"tile-footer\" ng-click=\"editPet(pet);\"><h3>{{pet.getName() || pet.getId() || 'n/a'}}</h3></md-grid-tile-footer></md-grid-tile></md-grid-list></md-tab></md-tabs></md-content><md-fab-speed-dial class=\"md-fab-bottom-right md-scale pet-list-menu\" ng-show=\"isBatchEditActive()\" md-direction=\"up\" md-open=\"isPetListMenuOpen\" ng-click=\"isPetListMenuOpen!=isPetListMenuOpen\"><md-fab-trigger><md-button class=\"md-fab\"><md-icon class=\"material-icons\">menu</md-icon></md-button></md-fab-trigger><md-fab-actions><md-button class=\"md-fab md-mini md-raised\" ng-click=\"batchEdit($event)\"><md-icon class=\"material-icons\">edit</md-icon></md-button></md-fab-actions></md-fab-speed-dial></div>"
 
 /***/ }),
-/* 84 */
+/* 86 */
 /***/ (function(module, exports) {
 
 	module.exports = "<div class=\"md-dialog-container\" id=\"batch-edit-dialog\"><md-dialog aria-label=\"Batch Edit dialog\"><md-toolbar><div class=\"md-toolbar-tools\"><h2>Batch Edit</h2><span flex></span><md-button class=\"md-icon-button\" ng-click=\"close()\"><md-icon class=\"material-icons\">close</md-icon></md-button></div></md-toolbar><md-dialog-content layout-padding><div class=\"batch-form\" ng-if=\"isBatchEditActive()\" ng-controller=\"formController\"><div class=\"fields\"><div class=\"field field--{{propData.key}}\" ng-repeat=\"propData in batchProperties\"><div class=\"auto-input\"></div></div></div><div class=\"nav\"><md-input-container><md-button class=\"btn-submit md-primary md-raised\" ng-click=\"save()\">Save</md-button><md-button class=\"btn-remove md-warn md-raised\" ng-click=\"delete() &amp;&amp; close()\">Delete</md-button></md-input-container></div></div></md-dialog-content></md-dialog></div>"
 
 /***/ }),
-/* 85 */
+/* 87 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Promise) {var angular = __webpack_require__(1);
@@ -3471,7 +3493,7 @@ webpackJsonp([0],[
 	module.exports = ngApp.directive('speciesForm', function () {
 	    return {
 	        restrict: 'C',
-	        template: __webpack_require__(86),
+	        template: __webpack_require__(88),
 	        controller: function ($scope, $routeParams, $location, $mdDialog, $controller, request, speciesDataService, userService) {
 	            angular.extend(this, $controller('formController', {$scope: $scope}));
 	            $scope.valTypes = ['String', 'Date', 'Number', 'Boolean'];
@@ -3583,7 +3605,7 @@ webpackJsonp([0],[
 	             */
 	            $scope.createNewProp = function (evt) {
 	                var newPropDialogConfig = {
-	                    template: __webpack_require__(87),
+	                    template: __webpack_require__(89),
 	                    targetEvent: evt,
 	                    clickOutsideToClose: true,
 	                    controller: ['$scope', '$mdDialog', function ($scope, $mdDialog) {
@@ -3693,30 +3715,30 @@ webpackJsonp([0],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 86 */
+/* 88 */
 /***/ (function(module, exports) {
 
 	module.exports = "<div class=\"view view--species\" layout=\"column\"><div class=\"species-upload-form species-upload-form--hidden file-input\"></div><div class=\"file-input\" on-file-input-change=\"onFileMediaChange\"><md-content><md-subheader class=\"md-primary\">{{speciesName}}</md-subheader><md-divider></md-divider><div flex><md-card md-3-line ng-if=\"isVisibleProp(speciesProp)\" ng-repeat=\"speciesProp in speciesProps\" data-drop=\"true\" data-drag=\"true\" ng-model=\"speciesProps\" jqyoui-droppable=\"{index: {{$index}}, onDrop: 'onDragDrop'}\" jqyoui-draggable=\"{index: {{$index}}, animate:true, insertInline: true}\" data-jqyoui-options=\"{revert: 'invalid', handle: 'md-card-title .md-headline'}\"><md-card-title><md-card-title-text><span class=\"md-headline\">{{speciesProp.fieldLabel}}</span><span class=\"md-subhead\">{{speciesProp.key}}</span></md-card-title-text></md-card-title><md-card-content layout=\"column\"><p>{{speciesProp.description}}</p></md-card-content><md-card-actions layout=\"row\" layout-align=\"end\"><md-button class=\"md-icon-button\" ng-click=\"editProp(speciesName, speciesProp)\" ng-if=\"isEditableProp(speciesProp)\"><md-icon class=\"material-icons\">mode_edit</md-icon></md-button><md-button class=\"md-icon-button\" ng-click=\"deleteSpeciesProp(speciesProp)\"><md-icon class=\"material-icons\">delete_forever</md-icon></md-button></md-card-actions></md-card></div></md-content></div><md-button class=\"button button--create-prop md-fab md-primary md-fab-bottom-right\" aria-label=\"Add species\" ng-click=\"createNewProp($event)\"><md-icon class=\"material-icons\">add</md-icon></md-button></div>"
 
 /***/ }),
-/* 87 */
+/* 89 */
 /***/ (function(module, exports) {
 
 	module.exports = "<div class=\"md-dialog-container\" id=\"new-species-prop-dialog\"><md-dialog aria-label=\"New Species Property Dialog\"><md-toolbar><div class=\"md-toolbar-tools\"><h2>Add New Property</h2></div></md-toolbar><md-dialog-content><div class=\"md-dialog-content\"><md-input-container><label>Name</label><input ng-model=\"propName\"></md-input-container></div><div class=\"actions\"><md-button ng-click=\"hide()\">Cancel</md-button><md-button ng-click=\"save($event)\">Create</md-button></div></md-dialog-content></md-dialog></div>"
 
 /***/ }),
-/* 88 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Promise) {var angular = __webpack_require__(1);
 	var ngApp = __webpack_require__(8);
-	var moment = __webpack_require__(89);
+	var moment = __webpack_require__(91);
 	var _ = __webpack_require__(24);
 
 	ngApp.directive('speciesPropForm', function () {
 	    return {
 	        restrict: 'C',
-	        template: __webpack_require__(206),
+	        template: __webpack_require__(208),
 	        controller: function ($scope, $routeParams, $location, $mdDialog, $controller, speciesDataService, userService) {
 	            angular.extend(this, $controller('formController', {$scope: $scope}));
 
@@ -3769,6 +3791,8 @@ webpackJsonp([0],[
 	                    $scope.propData.defaultVal = angular.copy($scope.propData.val);
 	                }
 
+	                $scope.formatDefaultVal();
+
 	                switch ($scope.propData.valType) {
 	                    case 'Date':
 	                    case 'Number':
@@ -3806,9 +3830,10 @@ webpackJsonp([0],[
 
 	            /**
 	             *
-	             * @param {String} propType
+	             * @param {String} [defaultValType]
 	             */
-	            $scope.formatDataByType = function (propType) {
+	            $scope.formatDefaultVal = function (defaultValType) {
+	                var propType = defaultValType || $scope.propData.valType;
 	                console.log('setting prop type to %s', propType);
 	                switch (propType) {
 	                    case 'Date':
@@ -3816,7 +3841,7 @@ webpackJsonp([0],[
 	                        break;
 	                    case 'Number':
 	                        if (!_.isNumber($scope.propData.defaultVal)) {
-	                            $scope.propData.defaultVal = 0;
+	                            $scope.propData.defaultVal = parseFloat($scope.propData.defaultVal) || 0;
 	                        }
 	                        break;
 	                    case 'Boolean':
@@ -3854,7 +3879,7 @@ webpackJsonp([0],[
 	                        }
 
 	                        propTypeWatchHandler = $scope.$watch("propData.valType", function (valType) {
-	                            $scope.formatDataByType(valType);
+	                            $scope.formatDefaultVal(valType);
 	                        });
 
 	                        destroyWatchHandler = $scope.$on('$destroy', function () {
@@ -3872,8 +3897,6 @@ webpackJsonp([0],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 89 */,
-/* 90 */,
 /* 91 */,
 /* 92 */,
 /* 93 */,
@@ -3989,13 +4012,15 @@ webpackJsonp([0],[
 /* 203 */,
 /* 204 */,
 /* 205 */,
-/* 206 */
+/* 206 */,
+/* 207 */,
+/* 208 */
 /***/ (function(module, exports) {
 
 	module.exports = "<div class=\"section section--edit-propData\"><div class=\"section__content\"><md-card><md-card-title><md-card-title-text><span class=\"md-headline\">{{propData.key}}</span></md-card-title-text></md-card-title><md-card-content><div class=\"propData-field propData-field--fieldLabel\"><md-input-container><label>Field Label</label><textarea ng-model=\"propData.fieldLabel\" rows=\"1\" max-rows=\"8\" md-select-on-focus></textarea></md-input-container></div><div class=\"propData-field propData-field--valType\"><md-input-container><label>Type</label><md-select ng-model=\"propData.valType\"><md-option ng-repeat=\"type in valTypes\" ng-value=\"type\">{{type}}</md-option></md-select></md-input-container></div><div class=\"propData-field propData-field--defaultVal\"><div class=\"default-species-prop-input\"></div></div><md-chips ng-model=\"propData.options\" placeholder=\"Option\" ng-if=\"hasEditableOptions()\" md-removable md-enable-chip-edit=\"true\"></md-chips></md-card-content><md-card-actions layout=\"row\" layout-align=\"end\"><md-button class=\"md-icon-button\" ng-click=\"saveSpeciesProperty()\"><md-icon class=\"material-icons\">save</md-icon></md-button><md-button class=\"md-icon-button\" ng-click=\"deleteSpeciesProperty()\"><md-icon class=\"material-icons\">delete_forever</md-icon></md-button></md-card-actions></md-card></div></div>"
 
 /***/ }),
-/* 207 */
+/* 209 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Promise) {var ngApp = __webpack_require__(8);
@@ -4004,13 +4029,13 @@ webpackJsonp([0],[
 	module.exports = ngApp.directive('speciesList', function () {
 	    return {
 	        restrict: 'C',
-	        template: __webpack_require__(208),
+	        template: __webpack_require__(210),
 	        controller: function ($scope, $mdDialog, $location, speciesDataService) {
 
 
 	            $scope.createNewSpecies = function (evt) {
 	                var newSpeciesDialogParams = {
-	                    template: __webpack_require__(209),
+	                    template: __webpack_require__(211),
 	                    targetEvent: evt,
 	                    clickOutsideToClose: true,
 	                    controller: ['$scope', '$mdDialog', function ($scope, $mdDialog) {
@@ -4058,13 +4083,13 @@ webpackJsonp([0],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 208 */
+/* 210 */
 /***/ (function(module, exports) {
 
 	module.exports = "<div class=\"view view--species-list\" layout=\"column\"><md-content><md-grid-list md-row-height=\"1:1\" md-cols-xs=\"2\" md-cols-sm=\"3\" md-cols-md=\"4\" md-cols-lg=\"8\" md-cols-gt-lg=\"12\"><md-grid-tile ng-repeat=\"species in speciesList\" ng-click=\"showSpecies(species)\" ng-style=\"{ 'background': 'url(&quot;/images/placeholders/'+species+'.png&quot;) center', 'background-size': 'cover'}\"><md-grid-tile-footer class=\"tile-footer\"><h3>{{species}}</h3></md-grid-tile-footer></md-grid-tile></md-grid-list></md-content><md-button class=\"md-fab md-primary md-fab-bottom-right\" aria-label=\"Add species\" ng-click=\"createNewSpecies($event)\"><md-icon class=\"material-icons\">add</md-icon></md-button></div>"
 
 /***/ }),
-/* 209 */
+/* 211 */
 /***/ (function(module, exports) {
 
 	module.exports = "<div class=\"md-dialog-container\" id=\"new-species-dialog\"><md-dialog aria-label=\"New Species Dialog\"><md-toolbar><div class=\"md-toolbar-tools\"><h2>Add New Species</h2></div></md-toolbar><md-dialog-content><div class=\"md-dialog-content\"><md-input-container><label>Species Name</label><input ng-model=\"speciesName\"></md-input-container></div><div class=\"actions\"><md-button ng-click=\"hide()\">Cancel</md-button><md-button ng-click=\"save($event)\">Create</md-button></div></md-dialog-content></md-dialog></div>"
