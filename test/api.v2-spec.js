@@ -49,6 +49,9 @@ describe("/api", function () {
 
                         _.forEach(animalProps, function (propValue, propName) {
                             expect(propValue).to.not.be.undefined;
+                            if (propValue !== null){
+                                expect(propValue.key).to.be.undefined;
+                            }
                         });
                     })
                 })

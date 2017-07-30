@@ -5,7 +5,7 @@ var ServerUtils = require('../utils');
 module.exports = function () {
     return function (req, res, next) {
         // set simplifiedFormat flag
-        res.locals.simplifiedFormat = /^\/api\/v2\/(list|query)/.test(req.originalUrl);
+        res.locals.simplifiedFormat = /^\/api\/v2/.test(req.originalUrl);
 
         // set reduceOutput flag
         switch (req.method) {

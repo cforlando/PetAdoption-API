@@ -31,7 +31,7 @@ function MongoAPIDatabase(options) {
     var _options = _.defaults(options, {
         collectionNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_ ',
         // TODO this should probably be removed
-        preset: (function () {
+        preset: process.env.DEMO && (function () {
 
             var catProps = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'data/props.cat.json')), 'utf8'),
                 dogProps = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'data/props.dog.json')), 'utf8'),
