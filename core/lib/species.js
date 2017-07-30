@@ -8,6 +8,7 @@ var _ = require('lodash');
  */
 function Species(speciesName, data) {
     var parsedData;
+    var parsedProps;
 
     this.speciesName = speciesName;
     this.baseProps = [
@@ -59,20 +60,21 @@ function Species(speciesName, data) {
     this.props = this.baseProps.slice();
 
     if (data) {
-        if (_.isString(data)) {
-            parsedData = JSON.parse(data);
-        } else {
-            // sanitize data as an array
-            parsedData = Object.keys(data).map(function(propIndex){
-                return data[propIndex];
-            });
-        }
-
-        this.setProps(parsedData.props || parsedData);
+        parsedData = _.isString(data) ? JSON.parse(data) : data;
 
         if (parsedData.speciesName) {
             this.speciesName = parsedData.speciesName;
         }
+
+        // sanitize props as an array
+        parsedProps  = _.reduce(parsedData.props || parsedData, function (collection, propData) {
+            if (propData && propData.key) {
+                collection.push(propData);
+            }
+            return collection;
+        }, []);
+
+        this.setProps(parsedProps);
     }
 }
 

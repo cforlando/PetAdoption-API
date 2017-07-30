@@ -23,7 +23,7 @@ module.exports = ngApp.service('animalDataService', function (request) {
             return Promise.resolve(self.animals[speciesName])
         }
 
-        return request.get("/api/v1/list/" + speciesName + "?properties=['petId','petName','species','images']")
+        return request.get("/api/v1/species/" + speciesName + "/animals/list?properties=['petId','petName','species','images']")
             .then(function success(response) {
 
                 self.animals[speciesName] = response.data.map(function (animalData) {
@@ -41,7 +41,7 @@ module.exports = ngApp.service('animalDataService', function (request) {
      * @returns {Promise}
      */
     this.deleteAnimal = function (animal) {
-        return request.post('/api/v1/remove/' + animal.getSpeciesName(), animal.toMongooseDoc())
+        return request.post('/api/v1/species/' + animal.getSpeciesName() + '/animals/remove', animal.toMongooseDoc())
     };
 
     /**
@@ -51,7 +51,7 @@ module.exports = ngApp.service('animalDataService', function (request) {
      * @returns {Promise.<Animal>}
      */
     this.fetchAnimal = function (animal, options) {
-        return request.post('/api/v1/query/', animal.toQuery())
+        return request.post('/api/v1/species/all/query', animal.toQuery())
             .then(function success(response) {
                 var fetchedAnimalData = response.data[0];
                 var fetchedAnimal;
@@ -125,7 +125,7 @@ module.exports = ngApp.service('animalDataService', function (request) {
             }
         });
 
-        return request.post('/api/v1/save/' + animal.getSpeciesName(), formData, {
+        return request.post('/api/v1/species/' + animal.getSpeciesName() + '/animals/save', formData, {
                 headers: {
                     // hackish fix for $http to send data with correct format
                     "Content-Type": undefined

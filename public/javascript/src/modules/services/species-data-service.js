@@ -23,7 +23,7 @@ module.exports = ngApp.service('speciesDataService', function (request, speciesF
             return Promise.resolve(this.speciesList);
         }
 
-        return request.get('/api/v1/species/')
+        return request.get('/api/v1/species/all/list')
             .then(function success(response) {
                 self.speciesList = response.data;
                 return Promise.resolve(self.speciesList);
@@ -52,7 +52,7 @@ module.exports = ngApp.service('speciesDataService', function (request, speciesF
             return Promise.resolve(new Species(cachedSpecies.getSpeciesName(), cachedSpecies.getSpeciesProps()));
         }
 
-        return request.get('/api/v1/model/' + speciesName)
+        return request.get('/api/v1/species/' + speciesName + '/model')
             .then(function success(response) {
 
                 self.animalSpecies[speciesName] = new Species(speciesName, response.data);
@@ -71,7 +71,7 @@ module.exports = ngApp.service('speciesDataService', function (request, speciesF
         var _options = _.defaults(options, {});
         var speciesName = species.getSpeciesName();
 
-        return request.post('/api/v1/save/' + speciesName + '/model/', species.toMongooseDoc({removeValues: true}))
+        return request.post('/api/v1/species/' + speciesName + '/model/update', species.toMongooseDoc({removeValues: true}))
             .then(function (response) {
                 var speciesData = response.data;
 
@@ -102,7 +102,7 @@ module.exports = ngApp.service('speciesDataService', function (request, speciesF
         newSpecies = speciesFactory.createTemplate(sanitizedSpeciesName, opts.speciesProps);
 
 
-        return request.post('/api/v1/create/' + newSpecies.getSpeciesName() + '/model', newSpecies.getSpeciesProps())
+        return request.post('/api/v1/species/' + newSpecies.getSpeciesName() + '/model/create', newSpecies.getSpeciesProps())
             .then(function success(response) {
                 var speciesProps = response.data;
 
@@ -128,7 +128,7 @@ module.exports = ngApp.service('speciesDataService', function (request, speciesF
             updateSpeciesList: true
         });
 
-        return request.post('/api/v1/remove/' + speciesName + '/model')
+        return request.post('/api/v1/species/' + speciesName + '/model/remove')
             .then(function success(response) {
 
                 if (opts.updateSpeciesList) {
@@ -167,7 +167,6 @@ module.exports = ngApp.service('speciesDataService', function (request, speciesF
      * @param {Object} propData
      */
     this.setSpeciesProp = function (speciesName, propData) {
-        debugger;
         this.animalSpecies[speciesName].setProps([propData])
     };
 
@@ -203,7 +202,7 @@ module.exports = ngApp.service('speciesDataService', function (request, speciesF
         });
 
         if (species.getProp(speciesName, propName)) {
-            return false;
+            return Promise.reject(new Error('property exists'));
         }
 
         species.setProps([propData]);
@@ -232,7 +231,7 @@ module.exports = ngApp.service('speciesDataService', function (request, speciesF
             formData.append("placeholder", file);
         });
 
-        return request.post('/api/v1/save/' + speciesName + '/placeholder', formData, requestParams)
+        return request.post('/api/v1/species/' + speciesName + '/placeholder', formData, requestParams)
             .catch(function failure(err) {
                 var errMessage = "Could not save placeholder";
 

@@ -178,11 +178,11 @@ module.exports = ngApp.directive('petList', function () {
             /**
              *
              * @param {Object} [options]
-             * @param {String} [options.showNotification=true]
+             * @param {String} [options.visibleNotification=true]
              */
             $scope.save = function (options) {
                 var opts = _.defaults(options, {
-                    showNotification: true
+                    visibleNotification: true
                 });
 
                 $scope.showLoading();
@@ -206,16 +206,16 @@ module.exports = ngApp.directive('petList', function () {
                                     })
                             })
                             .catch(function (err) {
-                                if (opts.showNotification) $scope.showError('Could not save pet');
+                                if (opts.visibleNotification) $scope.showError('Could not save pet');
                                 console.error(err);
                             })
                     }))
                     .then(function () {
-                        if (opts.showNotification) $scope.showMessage('All pets saved');
+                        if (opts.visibleNotification) $scope.showMessage('All pets saved');
                     })
                     .catch(function (err) {
                         console.error(err);
-                        if (opts.showNotification) $scope.showError('Failed to save all pets');
+                        if (opts.visibleNotification) $scope.showError('Failed to save all pets');
                     })
                     .then(function () {
                         $scope.hideLoading();
@@ -230,11 +230,11 @@ module.exports = ngApp.directive('petList', function () {
                         return animalDataService.deleteAnimal($scope.selectedPets[selectedPetId])
                     }))
                     .then(function () {
-                        if ($scope.showNotification) $scope.showMessage('All pets deleted');
+                        if ($scope.visibleNotification) $scope.showMessage('All pets deleted');
                     })
                     .catch(function (err) {
                         console.error(err);
-                        if ($scope.showNotification) $scope.showError('Could not delete all pets');
+                        if ($scope.visibleNotification) $scope.showError('Could not delete all pets');
                     })
                     .then(function () {
                         $scope.hideLoading();

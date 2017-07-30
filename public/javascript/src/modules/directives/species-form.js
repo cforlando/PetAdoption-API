@@ -87,7 +87,7 @@ module.exports = ngApp.directive('speciesForm', function () {
              * @param {Object} propData
              * @return {Promise}
              */
-            $scope.deleteProp = function (propData) {
+            $scope.deleteProp = function (propData, options) {
                 console.log('deleting %s', propData.key);
                 var confirmationDialog = $mdDialog.confirm()
                     .title("Delete Confirmation")
@@ -103,11 +103,15 @@ module.exports = ngApp.directive('speciesForm', function () {
                         console.log('cancelled');
                     })
                     .then(function () {
-                        return $scope.showMessage("Deleted '" + propData.key + "'")
+                        $scope.showLoading();
+                        return $scope.updateForm();
                     })
                     .then(function () {
-                        $location.path('/species/' + $scope.speciesName);
-                        return Promise.resolve();
+                        $scope.hideLoading();
+                        return $scope.showMessage("Deleted '" + propData.key + "'")
+                    })
+                    .catch(function(){
+                        $scope.hideLoading();
                     })
             };
 
@@ -183,8 +187,8 @@ module.exports = ngApp.directive('speciesForm', function () {
                 return true;
             };
 
-            (function init() {
-                speciesDataService.getSpecies($scope.speciesName, {useCache: true})
+            $scope.updateForm = function(){
+                return speciesDataService.getSpecies($scope.speciesName, {useCache: true})
                     .then(function (species) {
                         var activeSpecies = species;
                         var defaultPropPriorities = {
@@ -215,6 +219,10 @@ module.exports = ngApp.directive('speciesForm', function () {
                         });
 
                     })
+            };
+
+            (function init() {
+                $scope.updateForm()
                     .catch(function (err) {
                         console.error(err);
                         $scope.showError("Could not load '" + $scope.speciesName + "'")

@@ -273,7 +273,7 @@ webpackJsonp([0],[
 	            return Promise.resolve(self.animals[speciesName])
 	        }
 
-	        return request.get("/api/v1/list/" + speciesName + "?properties=['petId','petName','species','images']")
+	        return request.get("/api/v1/species/" + speciesName + "/animals/list?properties=['petId','petName','species','images']")
 	            .then(function success(response) {
 
 	                self.animals[speciesName] = response.data.map(function (animalData) {
@@ -291,7 +291,7 @@ webpackJsonp([0],[
 	     * @returns {Promise}
 	     */
 	    this.deleteAnimal = function (animal) {
-	        return request.post('/api/v1/remove/' + animal.getSpeciesName(), animal.toMongooseDoc())
+	        return request.post('/api/v1/species/' + animal.getSpeciesName() + '/animals/remove', animal.toMongooseDoc())
 	    };
 
 	    /**
@@ -301,7 +301,7 @@ webpackJsonp([0],[
 	     * @returns {Promise.<Animal>}
 	     */
 	    this.fetchAnimal = function (animal, options) {
-	        return request.post('/api/v1/query/', animal.toQuery())
+	        return request.post('/api/v1/species/all/query', animal.toQuery())
 	            .then(function success(response) {
 	                var fetchedAnimalData = response.data[0];
 	                var fetchedAnimal;
@@ -375,7 +375,7 @@ webpackJsonp([0],[
 	            }
 	        });
 
-	        return request.post('/api/v1/save/' + animal.getSpeciesName(), formData, {
+	        return request.post('/api/v1/species/' + animal.getSpeciesName() + '/animals/save', formData, {
 	                headers: {
 	                    // hackish fix for $http to send data with correct format
 	                    "Content-Type": undefined
@@ -429,8 +429,7 @@ webpackJsonp([0],[
 
 	    if (_.isArray(values)) {
 	        this.setProps(values);
-	    }
-	    if (_.isPlainObject(values)) {
+	    } else if (typeof values === 'object') {
 	        this.setValues(values);
 	    }
 
@@ -457,7 +456,7 @@ webpackJsonp([0],[
 
 	    setValue: function (propName, propValue) {
 	        var prop;
-	        if (propValue.val !== undefined) {
+	        if (propValue && propValue.val !== undefined) {
 	            // propValue is v1 format and contains metadata
 	            prop = this.getProp(propName) || propValue;
 	            prop.val = propValue.val;
@@ -819,6 +818,7 @@ webpackJsonp([0],[
 	 */
 	function Species(speciesName, data) {
 	    var parsedData;
+	    var parsedProps;
 
 	    this.speciesName = speciesName;
 	    this.baseProps = [
@@ -870,17 +870,21 @@ webpackJsonp([0],[
 	    this.props = this.baseProps.slice();
 
 	    if (data) {
-	        if (_.isString(data)) {
-	            parsedData = JSON.parse(data);
-	        } else {
-	            parsedData = data;
-	        }
-
-	        this.setProps(parsedData.props || parsedData);
+	        parsedData = _.isString(data) ? JSON.parse(data) : data;
 
 	        if (parsedData.speciesName) {
 	            this.speciesName = parsedData.speciesName;
 	        }
+
+	        // sanitize props as an array
+	        parsedProps  = _.reduce(parsedData.props || parsedData, function (collection, propData) {
+	            if (propData && propData.key) {
+	                collection.push(propData);
+	            }
+	            return collection;
+	        }, []);
+
+	        this.setProps(parsedProps);
 	    }
 	}
 
@@ -1042,7 +1046,7 @@ webpackJsonp([0],[
 	            return Promise.resolve(this.speciesList);
 	        }
 
-	        return request.get('/api/v1/species/')
+	        return request.get('/api/v1/species/all/list')
 	            .then(function success(response) {
 	                self.speciesList = response.data;
 	                return Promise.resolve(self.speciesList);
@@ -1071,7 +1075,7 @@ webpackJsonp([0],[
 	            return Promise.resolve(new Species(cachedSpecies.getSpeciesName(), cachedSpecies.getSpeciesProps()));
 	        }
 
-	        return request.get('/api/v1/model/' + speciesName)
+	        return request.get('/api/v1/species/' + speciesName + '/model')
 	            .then(function success(response) {
 
 	                self.animalSpecies[speciesName] = new Species(speciesName, response.data);
@@ -1090,7 +1094,7 @@ webpackJsonp([0],[
 	        var _options = _.defaults(options, {});
 	        var speciesName = species.getSpeciesName();
 
-	        return request.post('/api/v1/save/' + speciesName + '/model/', species.toMongooseDoc({removeValues: true}))
+	        return request.post('/api/v1/species/' + speciesName + '/model/update', species.toMongooseDoc({removeValues: true}))
 	            .then(function (response) {
 	                var speciesData = response.data;
 
@@ -1121,7 +1125,7 @@ webpackJsonp([0],[
 	        newSpecies = speciesFactory.createTemplate(sanitizedSpeciesName, opts.speciesProps);
 
 
-	        return request.post('/api/v1/create/' + newSpecies.getSpeciesName() + '/model', newSpecies.getSpeciesProps())
+	        return request.post('/api/v1/species/' + newSpecies.getSpeciesName() + '/model/create', newSpecies.getSpeciesProps())
 	            .then(function success(response) {
 	                var speciesProps = response.data;
 
@@ -1147,7 +1151,7 @@ webpackJsonp([0],[
 	            updateSpeciesList: true
 	        });
 
-	        return request.post('/api/v1/remove/' + speciesName + '/model')
+	        return request.post('/api/v1/species/' + speciesName + '/model/remove')
 	            .then(function success(response) {
 
 	                if (opts.updateSpeciesList) {
@@ -1186,7 +1190,6 @@ webpackJsonp([0],[
 	     * @param {Object} propData
 	     */
 	    this.setSpeciesProp = function (speciesName, propData) {
-	        debugger;
 	        this.animalSpecies[speciesName].setProps([propData])
 	    };
 
@@ -1222,7 +1225,7 @@ webpackJsonp([0],[
 	        });
 
 	        if (species.getProp(speciesName, propName)) {
-	            return false;
+	            return Promise.reject(new Error('property exists'));
 	        }
 
 	        species.setProps([propData]);
@@ -1251,7 +1254,7 @@ webpackJsonp([0],[
 	            formData.append("placeholder", file);
 	        });
 
-	        return request.post('/api/v1/save/' + speciesName + '/placeholder', formData, requestParams)
+	        return request.post('/api/v1/species/' + speciesName + '/placeholder', formData, requestParams)
 	            .catch(function failure(err) {
 	                var errMessage = "Could not save placeholder";
 
@@ -2963,6 +2966,7 @@ webpackJsonp([0],[
 
 	                return beforeSave()
 	                    .then(function () {
+	                        $scope.showLoading();
 	                        // avoid polluting the form's data
 	                        $scope.sanitizePetMediaValues();
 
@@ -2997,35 +3001,42 @@ webpackJsonp([0],[
 
 	            /*
 	             * @param {Object} [options]
-	             * @param {Boolean} [options.showNotification=true]
+	             * @param {Boolean} [options.visibleNotification=true]
+	             * @param {Boolean} [options.successRedirect=false]
 	             * @returns {Promise}
 	             */
 	            $scope.deletePet = function (options) {
-	                var _options = _.defaults(options, {
-	                    showNotifications: true
+	                var opts = _.defaults(options, {
+	                    showNotifications: true,
+	                    successRedirect: false
 	                });
+	                var speciesName = $scope.activeAnimal.getSpeciesName();
 
 	                return animalDataService.deleteAnimal($scope.activeAnimal)
 	                    .then(function () {
 	                        $scope.clearPetValues();
 	                        // non-blocking
-	                        animalDataService.getAnimals()
+	                        animalDataService.getAnimalsBySpecies(speciesName)
 	                            .then(function () {
 
 	                                $scope.showAnimalSearch();
-	                                if (_options.showNotification) {
+	                                if (opts.visibleNotification) {
 	                                    $scope.showMessage('Updated pet list');
 	                                }
 	                            })
 	                            .catch(function (err) {
 
-	                                if (_options.showNotification) {
+	                                if (opts.visibleNotification) {
 	                                    $scope.showError('Could not update pet list');
 	                                }
 
 	                                return Promise.reject(err);
 	                            });
-	                    });
+
+	                        if (opts.successRedirect){
+	                            $scope.showAnimalSearch()
+	                        }
+	                    })
 	            };
 
 	            /**
@@ -3091,7 +3102,7 @@ webpackJsonp([0],[
 	             */
 	            $scope.setAsDefault = function (propData, options) {
 	                var opts = _.defaults(options, {
-	                    showNotification: true
+	                    visibleNotification: true
 	                });
 
 	                $scope.showLoading();
@@ -3101,7 +3112,7 @@ webpackJsonp([0],[
 	                    .then(function () {
 	                        $scope.hideLoading();
 
-	                        if (opts.showNotification) {
+	                        if (opts.visibleNotification) {
 	                            $scope.showMessage("Saved default for '" + propData.key + "'");
 	                        }
 	                    })
@@ -3139,7 +3150,7 @@ webpackJsonp([0],[
 	                    actions: [
 	                        {
 	                            onClick: function () {
-	                                $scope.deletePet()
+	                                $scope.deletePet({successRedirect: true})
 	                            },
 	                            label: 'delete',
 	                            icon: 'delete_forever'
@@ -3418,11 +3429,11 @@ webpackJsonp([0],[
 	            /**
 	             *
 	             * @param {Object} [options]
-	             * @param {String} [options.showNotification=true]
+	             * @param {String} [options.visibleNotification=true]
 	             */
 	            $scope.save = function (options) {
 	                var opts = _.defaults(options, {
-	                    showNotification: true
+	                    visibleNotification: true
 	                });
 
 	                $scope.showLoading();
@@ -3446,16 +3457,16 @@ webpackJsonp([0],[
 	                                    })
 	                            })
 	                            .catch(function (err) {
-	                                if (opts.showNotification) $scope.showError('Could not save pet');
+	                                if (opts.visibleNotification) $scope.showError('Could not save pet');
 	                                console.error(err);
 	                            })
 	                    }))
 	                    .then(function () {
-	                        if (opts.showNotification) $scope.showMessage('All pets saved');
+	                        if (opts.visibleNotification) $scope.showMessage('All pets saved');
 	                    })
 	                    .catch(function (err) {
 	                        console.error(err);
-	                        if (opts.showNotification) $scope.showError('Failed to save all pets');
+	                        if (opts.visibleNotification) $scope.showError('Failed to save all pets');
 	                    })
 	                    .then(function () {
 	                        $scope.hideLoading();
@@ -3470,11 +3481,11 @@ webpackJsonp([0],[
 	                        return animalDataService.deleteAnimal($scope.selectedPets[selectedPetId])
 	                    }))
 	                    .then(function () {
-	                        if ($scope.showNotification) $scope.showMessage('All pets deleted');
+	                        if ($scope.visibleNotification) $scope.showMessage('All pets deleted');
 	                    })
 	                    .catch(function (err) {
 	                        console.error(err);
-	                        if ($scope.showNotification) $scope.showError('Could not delete all pets');
+	                        if ($scope.visibleNotification) $scope.showError('Could not delete all pets');
 	                    })
 	                    .then(function () {
 	                        $scope.hideLoading();
@@ -3598,7 +3609,7 @@ webpackJsonp([0],[
 	             * @param {Object} propData
 	             * @return {Promise}
 	             */
-	            $scope.deleteProp = function (propData) {
+	            $scope.deleteProp = function (propData, options) {
 	                console.log('deleting %s', propData.key);
 	                var confirmationDialog = $mdDialog.confirm()
 	                    .title("Delete Confirmation")
@@ -3614,11 +3625,15 @@ webpackJsonp([0],[
 	                        console.log('cancelled');
 	                    })
 	                    .then(function () {
-	                        return $scope.showMessage("Deleted '" + propData.key + "'")
+	                        $scope.showLoading();
+	                        return $scope.updateForm();
 	                    })
 	                    .then(function () {
-	                        $location.path('/species/' + $scope.speciesName);
-	                        return Promise.resolve();
+	                        $scope.hideLoading();
+	                        return $scope.showMessage("Deleted '" + propData.key + "'")
+	                    })
+	                    .catch(function(){
+	                        $scope.hideLoading();
 	                    })
 	            };
 
@@ -3694,8 +3709,8 @@ webpackJsonp([0],[
 	                return true;
 	            };
 
-	            (function init() {
-	                speciesDataService.getSpecies($scope.speciesName, {useCache: true})
+	            $scope.updateForm = function(){
+	                return speciesDataService.getSpecies($scope.speciesName, {useCache: true})
 	                    .then(function (species) {
 	                        var activeSpecies = species;
 	                        var defaultPropPriorities = {
@@ -3726,6 +3741,10 @@ webpackJsonp([0],[
 	                        });
 
 	                    })
+	            };
+
+	            (function init() {
+	                $scope.updateForm()
 	                    .catch(function (err) {
 	                        console.error(err);
 	                        $scope.showError("Could not load '" + $scope.speciesName + "'")
@@ -3742,7 +3761,7 @@ webpackJsonp([0],[
 /* 88 */
 /***/ (function(module, exports) {
 
-	module.exports = "<div class=\"view view--species\" layout=\"column\"><div class=\"file-input\" on-file-input-change=\"onFileMediaChange\" trigger=\"uploadPhoto\"><md-content><md-subheader class=\"md-primary\">{{speciesName}}</md-subheader><md-divider></md-divider><div flex><md-card md-3-line ng-if=\"isVisibleProp(speciesProp)\" ng-repeat=\"speciesProp in speciesProps\" data-drop=\"true\" data-drag=\"true\" ng-model=\"speciesProps\" jqyoui-droppable=\"{index: {{$index}}, onDrop: 'onDragDrop'}\" jqyoui-draggable=\"{index: {{$index}}, animate:true, insertInline: true}\" data-jqyoui-options=\"{revert: 'invalid', handle: 'md-card-title .md-headline'}\"><md-card-title><md-card-title-text><span class=\"md-headline\">{{speciesProp.fieldLabel}}</span><span class=\"md-subhead\">{{speciesProp.key}}</span></md-card-title-text></md-card-title><md-card-content layout=\"column\"><p>{{speciesProp.description}}</p></md-card-content><md-card-actions layout=\"row\" layout-align=\"end\"><md-button class=\"md-icon-button\" ng-click=\"editProp(speciesName, speciesProp)\" ng-if=\"isEditableProp(speciesProp)\"><md-icon class=\"material-icons\">mode_edit</md-icon></md-button><md-button class=\"md-icon-button\" ng-click=\"deleteSpeciesProp(speciesProp)\"><md-icon class=\"material-icons\">delete_forever</md-icon></md-button></md-card-actions></md-card></div></md-content></div><md-button class=\"button button--create-prop md-fab md-primary md-fab-bottom-right\" aria-label=\"Add species\" ng-click=\"createNewProp($event)\"><md-icon class=\"material-icons\">add</md-icon></md-button></div>"
+	module.exports = "<div class=\"view view--species\" layout=\"column\"><div class=\"file-input\" on-file-input-change=\"onFileMediaChange\" trigger=\"uploadPhoto\"><md-content><md-subheader class=\"md-primary\">{{speciesName}}</md-subheader><md-divider></md-divider><div flex><md-card md-3-line ng-if=\"isVisibleProp(speciesProp)\" ng-repeat=\"speciesProp in speciesProps\" data-drop=\"true\" data-drag=\"true\" ng-model=\"speciesProps\" jqyoui-droppable=\"{index: {{$index}}, onDrop: 'onDragDrop'}\" jqyoui-draggable=\"{index: {{$index}}, animate:true, insertInline: true}\" data-jqyoui-options=\"{revert: 'invalid', handle: 'md-card-title .md-headline'}\"><md-card-title><md-card-title-text><span class=\"md-headline\">{{speciesProp.fieldLabel}}</span><span class=\"md-subhead\">{{speciesProp.key}}</span></md-card-title-text></md-card-title><md-card-content layout=\"column\"><p>{{speciesProp.description}}</p></md-card-content><md-card-actions layout=\"row\" layout-align=\"end\"><md-button class=\"md-icon-button\" ng-click=\"editProp(speciesName, speciesProp)\" ng-if=\"isEditableProp(speciesProp)\"><md-icon class=\"material-icons\">mode_edit</md-icon></md-button><md-button class=\"md-icon-button\" ng-click=\"deleteProp(speciesProp)\"><md-icon class=\"material-icons\">delete_forever</md-icon></md-button></md-card-actions></md-card></div></md-content></div><md-button class=\"button button--create-prop md-fab md-primary md-fab-bottom-right\" aria-label=\"Add species\" ng-click=\"createNewProp($event)\"><md-icon class=\"material-icons\">add</md-icon></md-button></div>"
 
 /***/ }),
 /* 89 */

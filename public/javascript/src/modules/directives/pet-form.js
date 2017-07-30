@@ -302,6 +302,7 @@ module.exports = ngApp.directive('petForm', function () {
 
                 return beforeSave()
                     .then(function () {
+                        $scope.showLoading();
                         // avoid polluting the form's data
                         $scope.sanitizePetMediaValues();
 
@@ -336,35 +337,42 @@ module.exports = ngApp.directive('petForm', function () {
 
             /*
              * @param {Object} [options]
-             * @param {Boolean} [options.showNotification=true]
+             * @param {Boolean} [options.visibleNotification=true]
+             * @param {Boolean} [options.successRedirect=false]
              * @returns {Promise}
              */
             $scope.deletePet = function (options) {
-                var _options = _.defaults(options, {
-                    showNotifications: true
+                var opts = _.defaults(options, {
+                    showNotifications: true,
+                    successRedirect: false
                 });
+                var speciesName = $scope.activeAnimal.getSpeciesName();
 
                 return animalDataService.deleteAnimal($scope.activeAnimal)
                     .then(function () {
                         $scope.clearPetValues();
                         // non-blocking
-                        animalDataService.getAnimals()
+                        animalDataService.getAnimalsBySpecies(speciesName)
                             .then(function () {
 
                                 $scope.showAnimalSearch();
-                                if (_options.showNotification) {
+                                if (opts.visibleNotification) {
                                     $scope.showMessage('Updated pet list');
                                 }
                             })
                             .catch(function (err) {
 
-                                if (_options.showNotification) {
+                                if (opts.visibleNotification) {
                                     $scope.showError('Could not update pet list');
                                 }
 
                                 return Promise.reject(err);
                             });
-                    });
+
+                        if (opts.successRedirect){
+                            $scope.showAnimalSearch()
+                        }
+                    })
             };
 
             /**
@@ -430,7 +438,7 @@ module.exports = ngApp.directive('petForm', function () {
              */
             $scope.setAsDefault = function (propData, options) {
                 var opts = _.defaults(options, {
-                    showNotification: true
+                    visibleNotification: true
                 });
 
                 $scope.showLoading();
@@ -440,7 +448,7 @@ module.exports = ngApp.directive('petForm', function () {
                     .then(function () {
                         $scope.hideLoading();
 
-                        if (opts.showNotification) {
+                        if (opts.visibleNotification) {
                             $scope.showMessage("Saved default for '" + propData.key + "'");
                         }
                     })
@@ -478,7 +486,7 @@ module.exports = ngApp.directive('petForm', function () {
                     actions: [
                         {
                             onClick: function () {
-                                $scope.deletePet()
+                                $scope.deletePet({successRedirect: true})
                             },
                             label: 'delete',
                             icon: 'delete_forever'

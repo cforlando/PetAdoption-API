@@ -8,7 +8,6 @@ include _auto-generated/_-all
                 md-card(md-3-line
                 ng-if="isVisibleProp(speciesProp)"
                 ng-repeat="speciesProp in speciesProps"
-
                 data-drop="true"
                 data-drag="true"
                 ng-model="speciesProps"
@@ -24,7 +23,7 @@ include _auto-generated/_-all
                     md-card-actions(layout='row', layout-align='end')
                         md-button.md-icon-button(ng-click="editProp(speciesName, speciesProp)", ng-if="isEditableProp(speciesProp)")
                             md-icon.material-icons mode_edit
-                        md-button.md-icon-button(ng-click="deleteSpeciesProp(speciesProp)")
+                        md-button.md-icon-button(ng-click="deleteProp(speciesProp)")
                             md-icon.material-icons delete_forever
     md-button.button.button--create-prop.md-fab.md-primary.md-fab-bottom-right(aria-label!="Add species", ng-click="createNewProp($event)")
         md-icon.material-icons add

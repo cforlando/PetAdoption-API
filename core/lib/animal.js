@@ -59,7 +59,7 @@ Animal.prototype = {
 
     setValue: function (propName, propValue) {
         var prop;
-        if (propValue.val !== undefined) {
+        if (propValue && propValue.val !== undefined) {
             // propValue is v1 format and contains metadata
             prop = this.getProp(propName) || propValue;
             prop.val = propValue.val;
