@@ -15,6 +15,10 @@ module.exports = ngApp.controller('appController', function ($scope, request, $m
         isOpen: false
     };
 
+    $scope.resetActionMenu = function(){
+        $scope.actionMenu = {actions : []};
+    };
+
     $scope.login = function () {
         location.href = '/auth/google';
     };
@@ -112,6 +116,12 @@ module.exports = ngApp.controller('appController', function ($scope, request, $m
 
 
     (function init() {
+        $scope.resetActionMenu();
+
+        $scope.$on('$routeChangeSuccess', function(next, current) {
+            $scope.resetActionMenu();
+        });
+
         userService.getCurrentUser()
             .then(function (user) {
                 $scope.user = user;

@@ -5,7 +5,9 @@ module.exports = ngApp.directive('fileInput', function () {
     return {
         restrict: 'EC',
         scope: {
-            onFileInputChangeCallback: '&onFileInputChange'
+            onFileInputChangeCallback: '&onFileInputChange',
+            upload: '=trigger',
+            inputLimit: '&'
         },
         transclude: true,
         template: require('raw!./templates/file-input.html'),
@@ -27,7 +29,7 @@ module.exports = ngApp.directive('fileInput', function () {
              */
             $scope.upload = function (options) {
                 var opts = _.defaults(options, {
-                    inputLimit: 1
+                    inputLimit: $scope.inputLimit || 1
                 });
                 var $lastInput = $scope.$inputs.last();
 

@@ -216,16 +216,17 @@ module.exports = ngApp.service('speciesDataService', function (request, speciesF
      * @param {String} speciesName
      * @param {HTMLElement} fileInput
      * @param {Object} [options]
+     * @param {Object} [options.headers]
      * @return {Promise}
      */
     this.saveSpeciesPlaceholder = function (speciesName, fileInput, options) {
-        var opts = _.defaults(options, {});
-        var formData = new FormData();
-        var requestParams = {
+        var opts = _.defaults(options, {
             headers: {
                 "Content-Type": undefined
             }
-        };
+        });
+        var formData = new FormData();
+        var requestParams = {headers: opts.headers};
 
         _.forEach(fileInput.files, function (file) {
             formData.append("placeholder", file);

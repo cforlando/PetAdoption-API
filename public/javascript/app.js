@@ -1230,16 +1230,17 @@ webpackJsonp([0],[
 	     * @param {String} speciesName
 	     * @param {HTMLElement} fileInput
 	     * @param {Object} [options]
+	     * @param {Object} [options.headers]
 	     * @return {Promise}
 	     */
 	    this.saveSpeciesPlaceholder = function (speciesName, fileInput, options) {
-	        var opts = _.defaults(options, {});
-	        var formData = new FormData();
-	        var requestParams = {
+	        var opts = _.defaults(options, {
 	            headers: {
 	                "Content-Type": undefined
 	            }
-	        };
+	        });
+	        var formData = new FormData();
+	        var requestParams = {headers: opts.headers};
 
 	        _.forEach(fileInput.files, function (file) {
 	            formData.append("placeholder", file);
@@ -1769,6 +1770,10 @@ webpackJsonp([0],[
 	        isOpen: false
 	    };
 
+	    $scope.resetActionMenu = function(){
+	        $scope.actionMenu = {actions : []};
+	    };
+
 	    $scope.login = function () {
 	        location.href = '/auth/google';
 	    };
@@ -1866,6 +1871,12 @@ webpackJsonp([0],[
 
 
 	    (function init() {
+	        $scope.resetActionMenu();
+
+	        $scope.$on('$routeChangeSuccess', function(next, current) {
+	            $scope.resetActionMenu();
+	        });
+
 	        userService.getCurrentUser()
 	            .then(function (user) {
 	                $scope.user = user;
@@ -2103,7 +2114,9 @@ webpackJsonp([0],[
 	    return {
 	        restrict: 'EC',
 	        scope: {
-	            onFileInputChangeCallback: '&onFileInputChange'
+	            onFileInputChangeCallback: '&onFileInputChange',
+	            upload: '=trigger',
+	            inputLimit: '&'
 	        },
 	        transclude: true,
 	        template: __webpack_require__(65),
@@ -2125,7 +2138,7 @@ webpackJsonp([0],[
 	             */
 	            $scope.upload = function (options) {
 	                var opts = _.defaults(options, {
-	                    inputLimit: 1
+	                    inputLimit: $scope.inputLimit || 1
 	                });
 	                var $lastInput = $scope.$inputs.last();
 
@@ -2386,7 +2399,7 @@ webpackJsonp([0],[
 /* 71 */
 /***/ (function(module, exports) {
 
-	module.exports = "<div class=\"file-input\" on-file-input-change=\"onFileMediaChange\" on-init=\"onFileInputInit\"><div class=\"gallery__wrap\"><div class=\"images-nav\"><div class=\"md-button md-primary md-fab md-mini btn-add\" ng-click=\"$parent.upload()\"><md-icon class=\"material-icons\">add</md-icon></div></div><slick settings=\"slider.options\" ng-if=\"slider.state.isReady\"><div class=\"slide\" ng-repeat=\"(idx, url) in propData.val track by idx\"><img class=\"slide__img\" ng-src=\"{{url}}\" alt=\"{{url}}\"><div class=\"md-button md-primary md-fab md-mini btn-remove\" ng-click=\"removePhotoByIndex(idx)\"><md-icon class=\"material-icons\">clear</md-icon></div></div></slick></div></div>"
+	module.exports = "<div class=\"file-input\" on-file-input-change=\"onFileMediaChange\" trigger=\"uploadPhoto\"><div class=\"gallery__wrap\"><div class=\"images-nav\"><div class=\"md-button md-primary md-fab md-mini btn-add\" ng-click=\"uploadPhoto()\"><md-icon class=\"material-icons\">add</md-icon></div></div><slick settings=\"slider.options\" ng-if=\"slider.state.isReady\"><div class=\"slide\" ng-repeat=\"(idx, url) in propData.val track by idx\"><img class=\"slide__img\" ng-src=\"{{url}}\" alt=\"{{url}}\"><div class=\"md-button md-primary md-fab md-mini btn-remove\" ng-click=\"removePhotoByIndex(idx)\"><md-icon class=\"material-icons\">clear</md-icon></div></div></slick></div></div>"
 
 /***/ }),
 /* 72 */
@@ -3499,28 +3512,25 @@ webpackJsonp([0],[
 	            $scope.valTypes = ['String', 'Date', 'Number', 'Boolean'];
 	            $scope.speciesName = $routeParams.speciesName;
 	            $scope.speciesProps = [];
-	            $scope.menu = {
-	                actions: [
-	                    {
-	                        onClick: function () {
-	                            speciesDataService.deleteSpecies($scope.speciesName, {
-	                                done: function () {
-	                                    $location.path('/species');
-	                                }
+	            $scope.actionMenu.actions = [
+	                {
+	                    onClick: function () {
+	                        speciesDataService.deleteSpecies($scope.speciesName)
+	                            .then(function () {
+	                                $location.path('/species');
 	                            })
-	                        },
-	                        icon: 'delete_forever',
-	                        label: 'Delete'
 	                    },
-	                    {
-	                        onClick: function () {
-	                            $scope.upload({isSingle: true});
-	                        },
-	                        icon: 'photo',
-	                        label: 'Placeholder'
-	                    }
-	                ]
-	            };
+	                    icon: 'delete_forever',
+	                    label: 'Delete'
+	                },
+	                {
+	                    onClick: function () {
+	                        $scope.uploadPhoto();
+	                    },
+	                    icon: 'photo',
+	                    label: 'Placeholder'
+	                }
+	            ];
 
 
 	            /**
@@ -3540,7 +3550,7 @@ webpackJsonp([0],[
 	                    })
 	            };
 
-	            $scope.onFileMediaChange = function (evt, $inputs, $scope) {
+	            $scope.onFileMediaChange = function (evt, $inputs) {
 	                $scope.saveSpeciesPlaceholder($scope.speciesName, $inputs[0]);
 	            };
 
@@ -3555,7 +3565,7 @@ webpackJsonp([0],[
 	                var opts = _.defaults(options, {});
 
 	                $scope.showLoading();
-	                return speciesDataService.saveSpeciesPlaceHolder($scope.speciesName, fileInput, opts)
+	                return speciesDataService.saveSpeciesPlaceholder($scope.speciesName, fileInput, opts)
 	                    .then(function (result) {
 	                        $scope.hideLoading();
 	                        $scope.showMessage("Saved placeholder");
@@ -3718,7 +3728,7 @@ webpackJsonp([0],[
 /* 88 */
 /***/ (function(module, exports) {
 
-	module.exports = "<div class=\"view view--species\" layout=\"column\"><div class=\"species-upload-form species-upload-form--hidden file-input\"></div><div class=\"file-input\" on-file-input-change=\"onFileMediaChange\"><md-content><md-subheader class=\"md-primary\">{{speciesName}}</md-subheader><md-divider></md-divider><div flex><md-card md-3-line ng-if=\"isVisibleProp(speciesProp)\" ng-repeat=\"speciesProp in speciesProps\" data-drop=\"true\" data-drag=\"true\" ng-model=\"speciesProps\" jqyoui-droppable=\"{index: {{$index}}, onDrop: 'onDragDrop'}\" jqyoui-draggable=\"{index: {{$index}}, animate:true, insertInline: true}\" data-jqyoui-options=\"{revert: 'invalid', handle: 'md-card-title .md-headline'}\"><md-card-title><md-card-title-text><span class=\"md-headline\">{{speciesProp.fieldLabel}}</span><span class=\"md-subhead\">{{speciesProp.key}}</span></md-card-title-text></md-card-title><md-card-content layout=\"column\"><p>{{speciesProp.description}}</p></md-card-content><md-card-actions layout=\"row\" layout-align=\"end\"><md-button class=\"md-icon-button\" ng-click=\"editProp(speciesName, speciesProp)\" ng-if=\"isEditableProp(speciesProp)\"><md-icon class=\"material-icons\">mode_edit</md-icon></md-button><md-button class=\"md-icon-button\" ng-click=\"deleteSpeciesProp(speciesProp)\"><md-icon class=\"material-icons\">delete_forever</md-icon></md-button></md-card-actions></md-card></div></md-content></div><md-button class=\"button button--create-prop md-fab md-primary md-fab-bottom-right\" aria-label=\"Add species\" ng-click=\"createNewProp($event)\"><md-icon class=\"material-icons\">add</md-icon></md-button></div>"
+	module.exports = "<div class=\"view view--species\" layout=\"column\"><div class=\"file-input\" on-file-input-change=\"onFileMediaChange\" trigger=\"uploadPhoto\"><md-content><md-subheader class=\"md-primary\">{{speciesName}}</md-subheader><md-divider></md-divider><div flex><md-card md-3-line ng-if=\"isVisibleProp(speciesProp)\" ng-repeat=\"speciesProp in speciesProps\" data-drop=\"true\" data-drag=\"true\" ng-model=\"speciesProps\" jqyoui-droppable=\"{index: {{$index}}, onDrop: 'onDragDrop'}\" jqyoui-draggable=\"{index: {{$index}}, animate:true, insertInline: true}\" data-jqyoui-options=\"{revert: 'invalid', handle: 'md-card-title .md-headline'}\"><md-card-title><md-card-title-text><span class=\"md-headline\">{{speciesProp.fieldLabel}}</span><span class=\"md-subhead\">{{speciesProp.key}}</span></md-card-title-text></md-card-title><md-card-content layout=\"column\"><p>{{speciesProp.description}}</p></md-card-content><md-card-actions layout=\"row\" layout-align=\"end\"><md-button class=\"md-icon-button\" ng-click=\"editProp(speciesName, speciesProp)\" ng-if=\"isEditableProp(speciesProp)\"><md-icon class=\"material-icons\">mode_edit</md-icon></md-button><md-button class=\"md-icon-button\" ng-click=\"deleteSpeciesProp(speciesProp)\"><md-icon class=\"material-icons\">delete_forever</md-icon></md-button></md-card-actions></md-card></div></md-content></div><md-button class=\"button button--create-prop md-fab md-primary md-fab-bottom-right\" aria-label=\"Add species\" ng-click=\"createNewProp($event)\"><md-icon class=\"material-icons\">add</md-icon></md-button></div>"
 
 /***/ }),
 /* 89 */

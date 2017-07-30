@@ -15,28 +15,25 @@ module.exports = ngApp.directive('speciesForm', function () {
             $scope.valTypes = ['String', 'Date', 'Number', 'Boolean'];
             $scope.speciesName = $routeParams.speciesName;
             $scope.speciesProps = [];
-            $scope.menu = {
-                actions: [
-                    {
-                        onClick: function () {
-                            speciesDataService.deleteSpecies($scope.speciesName, {
-                                done: function () {
-                                    $location.path('/species');
-                                }
+            $scope.actionMenu.actions = [
+                {
+                    onClick: function () {
+                        speciesDataService.deleteSpecies($scope.speciesName)
+                            .then(function () {
+                                $location.path('/species');
                             })
-                        },
-                        icon: 'delete_forever',
-                        label: 'Delete'
                     },
-                    {
-                        onClick: function () {
-                            $scope.upload({isSingle: true});
-                        },
-                        icon: 'photo',
-                        label: 'Placeholder'
-                    }
-                ]
-            };
+                    icon: 'delete_forever',
+                    label: 'Delete'
+                },
+                {
+                    onClick: function () {
+                        $scope.uploadPhoto();
+                    },
+                    icon: 'photo',
+                    label: 'Placeholder'
+                }
+            ];
 
 
             /**
@@ -56,7 +53,7 @@ module.exports = ngApp.directive('speciesForm', function () {
                     })
             };
 
-            $scope.onFileMediaChange = function (evt, $inputs, $scope) {
+            $scope.onFileMediaChange = function (evt, $inputs) {
                 $scope.saveSpeciesPlaceholder($scope.speciesName, $inputs[0]);
             };
 
@@ -71,7 +68,7 @@ module.exports = ngApp.directive('speciesForm', function () {
                 var opts = _.defaults(options, {});
 
                 $scope.showLoading();
-                return speciesDataService.saveSpeciesPlaceHolder($scope.speciesName, fileInput, opts)
+                return speciesDataService.saveSpeciesPlaceholder($scope.speciesName, fileInput, opts)
                     .then(function (result) {
                         $scope.hideLoading();
                         $scope.showMessage("Saved placeholder");
