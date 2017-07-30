@@ -4,8 +4,10 @@ module.exports = function (options) {
     return function (req, res, next) {
         var formatter = function (animalProps) {
             return _.reduce(animalProps, function (collection, propData, propName) {
-                // only respond with values requested in properties field
-                if (res.locals.requestedProperties && res.locals.requestedProperties.includes(propName)) {
+                 if (!res.locals.requestedProperties) {
+                    collection[propName] = res.locals.simplifiedFormat ? propData.val : propData;
+                } else if (res.locals.requestedProperties.includes(propName)) {
+                     // only respond with values requested in properties field
                     collection[propName] = res.locals.simplifiedFormat ? propData.val : propData;
                 }
 
