@@ -106,7 +106,7 @@ module.exports = ngApp.service('speciesDataService', function (request, speciesF
             .then(function success(response) {
                 var speciesProps = response.data;
 
-                self.animalSpecies[sanitizedSpeciesName] = new Species(speciesProps);
+                self.animalSpecies[sanitizedSpeciesName] = new Species(sanitizedSpeciesName, speciesProps);
                 self.getSpeciesList()
                     .catch(function (err) {
                         console.error(err);
