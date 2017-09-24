@@ -4,6 +4,6 @@ var _ = require('lodash'),
 module.exports = ngApp.directive('autocompleteInput', function () {
     return {
         restrict: 'C',
-        template: require('raw!./templates/autocomplete-input.html')
+        template: require('raw-loader!./templates/autocomplete-input.html')
     };
 });

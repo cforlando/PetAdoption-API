@@ -4,7 +4,7 @@ var _ = require('lodash'),
 module.exports = ngApp.directive('autoInput', function () {
     return {
         restrict: 'C',
-        template: require('raw!./templates/auto-input.html'),
+        template: require('raw-loader!./templates/auto-input.html'),
         controller: function ($scope) {
 
             $scope.getType = function (propData) {

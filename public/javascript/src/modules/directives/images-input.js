@@ -5,7 +5,7 @@ var ngApp = require('ngApp');
 module.exports = ngApp.directive('imagesInput', [function () {
     return {
         restrict: 'C',
-        template: require('raw!./templates/images-input.html'),
+        template: require('raw-loader!./templates/images-input.html'),
         controller: function ($scope, $element, $timeout) {
             var watcherHandlers = {};
 

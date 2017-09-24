@@ -4,13 +4,13 @@ var _ = require('lodash');
 module.exports = ngApp.directive('speciesList', function () {
     return {
         restrict: 'C',
-        template: require('raw!./templates/species-list.html'),
+        template: require('raw-loader!./templates/species-list.html'),
         controller: function ($scope, $mdDialog, $location, speciesDataService) {
 
 
             $scope.createNewSpecies = function (evt) {
                 var newSpeciesDialogParams = {
-                    template: require('raw!modules/views/dialogs/new-species.html'),
+                    template: require('raw-loader!modules/views/dialogs/new-species.html'),
                     targetEvent: evt,
                     clickOutsideToClose: true,
                     controller: ['$scope', '$mdDialog', function ($scope, $mdDialog) {

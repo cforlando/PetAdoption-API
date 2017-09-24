@@ -5,7 +5,7 @@ module.exports = ngApp.directive('petList', function () {
     return {
         restrict: 'C',
         replace: true,
-        template: require('raw!./templates/pet-list.html'),
+        template: require('raw-loader!./templates/pet-list.html'),
         controller: function ($scope, $mdDialog, animalDataService, speciesDataService) {
             $scope.currentSpeciesIndex = 0;
             $scope.animals = {};
@@ -128,7 +128,7 @@ module.exports = ngApp.directive('petList', function () {
                                 $mdDialog.hide();
                             }
                         },
-                        template: require('raw!modules/views/dialogs/batch-edit.html'),
+                        template: require('raw-loader!modules/views/dialogs/batch-edit.html'),
                         parent: angular.element(document.body),
                         targetEvent: ev,
                         scope: $scope,

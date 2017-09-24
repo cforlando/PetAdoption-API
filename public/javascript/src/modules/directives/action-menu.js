@@ -17,7 +17,7 @@ module.exports = ngApp.directive('actionMenu', function () {
 
             $scope.showBottomSheet = function () {
                 $mdBottomSheet.show({
-                    template: require('raw!./templates/action-menu.html'),
+                    template: require('raw-loader!./templates/action-menu.html'),
                     controller: function () {
                         console.log('actionMenu.bottomSheet.controller()', arguments);
                         $scope.state.isVisible = true;

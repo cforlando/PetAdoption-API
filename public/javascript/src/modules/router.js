@@ -6,22 +6,22 @@ ngApp.config(function ($routeProvider, $locationProvider) {
 
     $routeProvider
         .when('/pets', {
-            template: require('raw!modules/views/search-animals.html')
+            template: require('raw-loader!modules/views/search-animals.html')
         })
         .when('/pets/edit/:speciesName/:petId', {
-            template: require('raw!modules/views/edit-animal.html')
+            template: require('raw-loader!modules/views/edit-animal.html')
         })
         .when('/pets/new', {
-            template: require('raw!modules/views/edit-animal.html')
+            template: require('raw-loader!modules/views/edit-animal.html')
         })
         .when('/species', {
-            template: require('raw!modules/views/search-species.html')
+            template: require('raw-loader!modules/views/search-species.html')
         })
         .when('/species/:speciesName', {
-            template: require('raw!modules/views/view-species.html')
+            template: require('raw-loader!modules/views/view-species.html')
         })
         .when('/species/:speciesName/property/:propName', {
-            template: require('raw!modules/views/edit-species-prop.html')
+            template: require('raw-loader!modules/views/edit-species-prop.html')
         })
         .otherwise({
             redirectTo: function () {

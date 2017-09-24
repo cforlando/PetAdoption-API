@@ -5,38 +5,14 @@ var fs = require('fs');
 var webpack = require('webpack');
 
 module.exports = {
-	entry: {
-		app: 'app.js',
-		vendor: [
-			'url',
-			'path',
-			'jquery',
-			'lodash',
-			'jquery-ui',
-			'touch-punch',
-			'angular',
-			'ng-animate',
-			'ng-aria',
-			'ng-material',
-			'ng-messages',
-			'ng-route',
-			'ng-sanitize',
-			'jquery-slick',
-			'angular-slick-carousel',
-			'angular-dragdrop',
-			'underscore',
-			'moment',
-			'async'
-		]
-	},
+    entry: {app: 'app.js'},
 	context: __dirname,
 	output: {
 		path: path.join(process.cwd(), './public/javascript/'),
-		filename: "app.js"
+        filename: "[name].js"
 	},
 	resolve: {
-		root: path.join(__dirname, 'public/javascript/'),
-		modulesDirectories: [
+		modules: [
 			'./',
 			path.join(process.cwd(), 'node_modules/'),
 			path.join(process.cwd(), 'core/lib/')
@@ -80,7 +56,13 @@ module.exports = {
 			'Promise': 'es6-promise' // Thanks Aaron (https://gist.github.com/Couto/b29676dd1ab8714a818f#gistcomment-1584602)
 		}),
 
-		new webpack.optimize.CommonsChunkPlugin("vendor", "vendor.app.js")
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor.app',
+            minChunks: function (module) {
+                const context = module.context;
+                return context && context.indexOf('node_modules') >= 0;
+            }
+        }),
 	],
 	node: {
 		'path': true,

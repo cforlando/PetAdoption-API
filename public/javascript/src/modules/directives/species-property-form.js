@@ -6,7 +6,7 @@ var _ = require('lodash');
 ngApp.directive('speciesPropForm', function () {
     return {
         restrict: 'C',
-        template: require('raw!./templates/species-property-form.html'),
+        template: require('raw-loader!./templates/species-property-form.html'),
         controller: function ($scope, $routeParams, $location, $mdDialog, $controller, speciesDataService, userService) {
             angular.extend(this, $controller('formController', {$scope: $scope}));
 

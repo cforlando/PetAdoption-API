@@ -9,7 +9,7 @@ console.log('loading speciesForm');
 module.exports = ngApp.directive('speciesForm', function () {
     return {
         restrict: 'C',
-        template: require('raw!./templates/species-form.html'),
+        template: require('raw-loader!./templates/species-form.html'),
         controller: function ($scope, $routeParams, $location, $mdDialog, $controller, request, speciesDataService, userService) {
             angular.extend(this, $controller('formController', {$scope: $scope}));
             $scope.valTypes = ['String', 'Date', 'Number', 'Boolean'];
@@ -122,7 +122,7 @@ module.exports = ngApp.directive('speciesForm', function () {
              */
             $scope.createNewProp = function (evt) {
                 var newPropDialogConfig = {
-                    template: require('raw!modules/views/dialogs/new-species-prop.html'),
+                    template: require('raw-loader!modules/views/dialogs/new-species-prop.html'),
                     targetEvent: evt,
                     clickOutsideToClose: true,
                     controller: ['$scope', '$mdDialog', function ($scope, $mdDialog) {

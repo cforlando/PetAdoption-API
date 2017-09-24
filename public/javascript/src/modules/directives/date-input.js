@@ -4,6 +4,6 @@ var _ = require('lodash'),
 module.exports = ngApp.directive('dateInput', function () {
     return {
         restrict: 'C',
-        template: require('raw!./templates/date-input.html')
+        template: require('raw-loader!./templates/date-input.html')
     };
 });

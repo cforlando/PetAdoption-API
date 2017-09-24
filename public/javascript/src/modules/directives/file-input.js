@@ -10,7 +10,7 @@ module.exports = ngApp.directive('fileInput', function () {
             inputLimit: '@'
         },
         transclude: true,
-        template: require('raw!./templates/file-input.html'),
+        template: require('raw-loader!./templates/file-input.html'),
         controller: function ($scope, $element, $timeout) {
             console.log("init fileInput @ %o", $element);
             $scope.namespaces = [];

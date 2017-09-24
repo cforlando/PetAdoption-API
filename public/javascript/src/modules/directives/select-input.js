@@ -4,7 +4,7 @@ var ngApp = require('ngApp');
 module.exports = ngApp.directive('selectInput', function () {
     return {
         restrict: 'C',
-        template: require('raw!./templates/select-input.html'),
+        template: require('raw-loader!./templates/select-input.html'),
         controller: function ($scope, $element, speciesDataService) {
 
             if ($scope['propData'].valType === 'Boolean' && $scope['propData'].options.length === 0) {

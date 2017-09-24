@@ -10,7 +10,7 @@ console.log('loading petFormController');
 module.exports = ngApp.directive('petForm', function () {
     return {
         restrict: 'C',
-        template: require('raw!./templates/pet-form.html'),
+        template: require('raw-loader!./templates/pet-form.html'),
         controller: function ($scope, $element, $mdDialog, $routeParams, $controller, speciesFactory, addressFinderService, animalDataService, speciesDataService, userService) {
             console.log('init petForm.controller');
             angular.extend(this, $controller('formController', {$scope: $scope}));
@@ -161,7 +161,7 @@ module.exports = ngApp.directive('petForm', function () {
                                 };
 
                             },
-                            template: require('raw!modules/views/dialogs/new-animal.html'),
+                            template: require('raw-loader!modules/views/dialogs/new-animal.html'),
                             parent: angular.element('.pet--form'),
                             clickOutsideToClose: false,
                             escapeToClose: false

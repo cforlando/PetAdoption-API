@@ -4,6 +4,6 @@ var _ = require('lodash'),
 module.exports = ngApp.directive('textareaInput', function () {
     return {
         restrict: 'C',
-        template: require('raw!./templates/textarea-input.html')
+        template: require('raw-loader!./templates/textarea-input.html')
     };
 });

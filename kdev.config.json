@@ -17,7 +17,7 @@
       "input": "./"
     },
     {
-      "name": "js-webpack",
+      "name": "webpack",
       "input": "public/javascript/src/webpack.config.js",
       "output": "public/javascript/"
     },

@@ -2,7 +2,7 @@ var ngApp = require('ngApp');
 module.exports = ngApp.directive('locationInput', [function () {
     return {
         restrict: 'C',
-        template: require('raw!./templates/location-input.html'),
+        template: require('raw-loader!./templates/location-input.html'),
         controller: function ($scope, $element, googleService, $timeout) {
             console.log('map.$scope: %o', $scope);
 
