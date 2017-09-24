@@ -1,11 +1,32 @@
 var path = require('path');
-var url = require('url');
-var fs = require('fs');
 
 var webpack = require('webpack');
 
 module.exports = {
-    entry: {app: 'app.js'},
+    entry: {
+    	'app': 'app.js',
+		'vendor.app': [
+			'url',
+			'path',
+			'jquery',
+			'lodash',
+			'jquery-ui',
+			'touch-punch',
+			'angular',
+			'ng-animate',
+			'ng-aria',
+			'ng-material',
+			'ng-messages',
+			'ng-route',
+			'ng-sanitize',
+			'jquery-slick',
+			'angular-slick-carousel',
+			'angular-dragdrop',
+			'underscore',
+			'moment',
+			'async'
+		]
+	},
 	context: __dirname,
 	output: {
 		path: path.join(process.cwd(), './public/javascript/'),
@@ -18,25 +39,26 @@ module.exports = {
 			path.join(process.cwd(), 'core/lib/')
 		],
 		alias: {
+            'jquery-ui': 'vendors/jquery-ui',
+            'touch-punch': 'vendors/jquery.ui.touch-punch',
+            'jquery-file-input-urls': 'vendors/jquery.file-input-urls',
+            'jquery-slick': 'slick-carousel',
+
 			'ngApp': 'modules/ngApp',
 			'species': 'species',
-
 			'ng-controllers': 'modules/controllers',
 			'ng-directives': 'modules/directives',
 			'ng-services': 'modules/services',
 			'ng-filters': 'modules/filters',
 			'ng-router': 'modules/router',
 
-			'jquery-ui': 'vendors/jquery-ui',
-			'touch-punch': 'vendors/jquery.ui.touch-punch',
-			'jquery-file-input-urls': 'vendors/jquery.file-input-urls',
 			'ng-animate': 'angular-animate',
 			'ng-aria': 'angular-aria',
 			'ng-material': 'angular-material',
 			'ng-messages': 'angular-messages',
 			'ng-route': 'angular-route',
 			'ng-sanitize': 'angular-sanitize',
-			'jquery-slick': 'slick-carousel',
+
 			'underscore': 'lodash'
 		}
 	},
@@ -57,12 +79,9 @@ module.exports = {
 		}),
 
         new webpack.optimize.CommonsChunkPlugin({
-            name: 'vendor.app',
-            minChunks: function (module) {
-                const context = module.context;
-                return context && context.indexOf('node_modules') >= 0;
-            }
-        }),
+            names: ['app', 'vendor.app'],
+            minChunks: module => /node_modules|vendors/.test(module.context)
+        })
 	],
 	node: {
 		'path': true,
