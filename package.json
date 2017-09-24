@@ -62,7 +62,7 @@
     "jquery": "^3.1.1",
     "jquery-ui": "^1.12.1",
     "jsdoc": "^3.4.1",
-    "kdev-utils": "git://github.com/khalidhoffman/kdev-utils.git",
+    "kdev-utils": "git+https://github.com/khalidhoffman/kdev-utils.git",
     "memorystream": "^0.3.1",
     "mocha": "^3.2.0",
     "raw-loader": "^0.5.1",
@@ -74,7 +74,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cforlando/PetAdoption-API.git"
+    "url": "https://github.com/cforlando/PetAdoption-API.git"
   },
   "keywords": [
     "codefororlando",
@@ -86,7 +86,7 @@
   "author": "Code For Orlando",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/khalidhoffman/PetAdoption-API/issues"
+    "url": "https://github.com/cforlando/PetAdoption-API/issues"
   },
-  "homepage": "https://github.com/khalidhoffman/PetAdoption-API#readme"
+  "homepage": "https://github.com/cforlando/PetAdoption-API#readme"
 }
