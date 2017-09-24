@@ -34,8 +34,9 @@ S3Bucket.prototype = {
      * @param {ReadStream} readableStream
      * @param {String} key
      * @param {Function} callback
+     * @returns {Promise}
      */
-    saveReadableStream: function (readableStream, key, callback) {
+    saveReadableStream: function (readableStream, key) {
         var s3File = new AWS.S3({
             params: {
                 Bucket: this.bucketName,
@@ -43,21 +44,26 @@ S3Bucket.prototype = {
             }
         });
 
-        s3File.upload({Body: readableStream}).send(callback)
+        return new Promise(function (resolve, reject) {
+            s3File.upload({Body: readableStream}).send(function (err, result) {
+                err ? reject(err) : resolve(result);
+            })
+        })
     },
 
     /**
      *
      * @param {String} key
      * @param {Function} callback
+     * @returns {Promise}
      */
-    getReadableStream: function (key, callback) {
+    getReadableStream: function (key) {
         var readableStream = this.s3.getObject({
             Bucket: this.bucketName,
             Key: key
         }).createReadStream();
 
-        callback(null, readableStream);
+        return new Promise.resolve(readableStream)
     }
 };
 

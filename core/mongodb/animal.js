@@ -1,46 +1,38 @@
-var path = require('path'),
-    fs = require('fs'),
+var path = require('path');
 
-    _ = require('lodash'),
+var _ = require('lodash');
 
-    config = require('../config'),
-    Debuggable = require('../lib/debuggable/index'),
+var config = require('../config');
+var Animal = require('../lib/animal');
+var AnimalQuery = require('../lib/query');
 
-    Database = require('./default'),
-    Collection = require('./lib/collection'),
-    DBError = require('./lib/error'),
-    Animal = require('../lib/animal'),
-    AnimalQuery = require('../lib/query'),
-    AnimalSchema = require('./schemas/animal');
+var BaseDatabase = require('./lib/database');
+var Collection = require('./lib/collection');
+var DbError = require('./lib/error');
+var AnimalSchema = require('./schemas/animal');
 
 /**
  *
- * @extends Database
+ * @extends BaseDatabase
  * @class AnimalDatabase
  * @param {Object} [options]
- * @param {MongoDBAdapter} [options.adapter]
+ * @param {MongoDbAdapter} [options.adapter]
  * @param {Boolean} [options.isDevelopment]
- * @param {DebugLevel} [options.debugLevel]
- * @param {String} [options.debugTag]
  * @param {String} [options.collectionNamePrefix]
  * @param {{complete: Function, isV1Format: Boolean}} [options.queryOptions] default query options
  * @returns {AnimalDatabase}
  * @constructor
  */
 function AnimalDatabase(options) {
-    var self = this,
-        _options = _.defaults(options, {
-            debugLevel: Debuggable.PROD,
-            debugTag: "AnimalDatabase: ",
-            collectionNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_',
-            queryOptions: {
-                complete: function (err) {
-                    if (err) self.warn(err);
-                    return err;
-                },
-                isV1Format: true
-            }
-        });
+    var self = this;
+    var _options = _.defaults(options, {
+        collectionNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_',
+        queryOptions: {
+            isV1Format: true
+        }
+    });
+
+    BaseDatabase.call(this, this.collection);
 
     this.collection = new Collection(_options.collectionNamePrefix + 'animal', AnimalSchema);
 
@@ -48,113 +40,86 @@ function AnimalDatabase(options) {
         // TODO this never gets called
         if (!this.petId) {
             this.petId = this._id.toString();
-            self.log(Debuggable.LOW, 'post.save - updating petId');
             this.save(function (err) {
                 next(err);
             });
         } else {
-            self.log(Debuggable.LOW, 'post.save - setting responseFormat');
             next();
         }
     });
 
     this.collection.addMiddleware('post', 'findOneAndUpdate', function (doc) {
-        self.log(Debuggable.LOW, 'post.save - updating petId');
-
         if (doc && doc._id) doc.petId = doc._id.toString();
     });
 
-    this.collection.addStaticMethod('upsert', function (searchProps, saveData, options, callback) {
-        var hasOptions = _.isPlainObject(options),
-            _options = _.defaults(hasOptions ? options : {}, {
-                upsert: true,
-                new: true
-            }),
-            onComplete = (hasOptions) ? callback : options,
-            doc = this,
-            model = this.model(self.collection.getCollectionName());
+    this.collection.addStaticMethod('upsert', function (searchProps, animalData, options) {
+        var hasOptions = _.isPlainObject(options);
+        var _options = _.defaults(hasOptions ? options : {}, {
+            upsert: true,
+            new: true
+        });
 
-        self.log(Debuggable.LOW, 'upsert() w/ options %s', self.dump(_options));
+        return new Promise(function (resolve, reject) {
+            if (searchProps.petId) {
+                self.MongooseModel.findOneAndUpdate({petId: searchProps.petId}, animalData, _options)
+                    .lean()
+                    .exec(function (err, animal) {
+                        if (err) {
+                            console.error(err);
+                            reject(err);
+                            return;
+                        }
 
-        if (searchProps.petId) {
-            model.findOneAndUpdate({petId: searchProps.petId}, saveData, _options)
-                .lean()
-                .exec(function (err, animal) {
-                    if (err) {
-                        self.error(err);
-                    } else {
-                        self.log(Debuggable.LOW, 'updated animal: %s', animal._id);
-                    }
-                    if (onComplete) onComplete(err, animal);
-                });
-        } else {
-            model.create(saveData, function (err, newAnimal) {
-                if (!err && !newAnimal) err = new Error("Animal could not be created");
+                        resolve(animal);
+                    });
+                return;
+            }
 
-
-                if (onComplete) {
-                    if (err) {
-                        onComplete(err)
-                    } else {
-                        var newAnimalData = newAnimal.toObject();
-                        self.log(Debuggable.LOW, 'created new animal: %s', newAnimal._id);
-                        onComplete(null, newAnimalData);
-                    }
+            self.MongooseModel.create(animalData, function (err, newAnimal) {
+                var newAnimalData;
+                if (err || !newAnimal) {
+                    reject(err || new Error("Animal could not be created"))
                 }
+
+                newAnimalData = newAnimal.toObject();
+
+                resolve(newAnimalData)
             })
-        }
+        });
+
+
     });
-
-    Database.call(this, this.collection);
-
-    this.setDebugLevel(_options.debugLevel);
-    this.setDebugTag(_options.debugTag);
 
     this.setConfig('isDevelopment', _options.DEVELOPMENT_ENV);
     this.setConfig('queryOptions', _options.queryOptions);
+    this.initDatabase();
 }
 
 AnimalDatabase.prototype = {
 
 
     /**
-     * @callback RemoveCallback
-     * @param err
-     * @param resultData
-     * @param {String} resultData.result will be either 'success' or 'failure'
-     */
-    /**
      *
      * @param {Animal} animal
      * @param {Object} options
-     * @param {Boolean} [options.debug] Whether to log debug info
-     * @param {RemoveCallback} options.complete callback on operation completion
-     * @param {Object} [options.context] context for complete function callback
+     * @returns {Promise}
      */
     removeAnimal: function (animal, options) {
-        var self = this,
-            _options = _.defaults(options, self._config.queryOptions);
+        var self = this;
 
-        this.exec(function () {
+        return new Promise(function (resolve, reject) {
+            self.exec(function () {
+                var petId = animal.getValue('petId');
+                self.MongooseModel.remove({_id: petId}, function (err, removeOpInfo) {
+                    if (err || (removeOpInfo.result && removeOpInfo.result.n == 0)) {
+                        reject(new DbError(err || "Could not delete pet"));
+                    }
 
-            var petId = animal.getValue('petId');
-            self.log(Debuggable.MED, 'mongodb.removeAnimal() - searching for: ', petId);
-            self.MongooseModel.remove({_id: petId}, function (err, removeOpInfo) {
-                if (err || (removeOpInfo.result && removeOpInfo.result.n == 0)) {
-                    err = new DBError(err || "Could not delete pet");
-                }
-                self.log(Debuggable.MED, 'removeAnimal() - args: %s', self.dump(arguments));
-                if (_options.complete) _options.complete(err, {result: (err) ? 'failure' : 'success'});
-            })
-        });
+                    resolve({result: 'success'})
+                })
+            });
+        })
     },
-
-    /**
-     * @callback AnimalQueryCallback
-     * @param {DBError} err
-     * @param {Object|Object[]} animals
-     */
-
 
     /**
      *
@@ -162,41 +127,40 @@ AnimalDatabase.prototype = {
      * @param {Object} options
      * @param {Species} [options.species]
      * @param {Boolean} [options.isV1Format] V1 format includes additional metadata
-     * @param {AnimalQueryCallback} options.complete callback on operation completion
      * @param {Boolean} [options.isV1Format=true]
-     * @param {Object} [options.context] context for complete function callback
+     * @returns {Promise}
      */
     findAnimals: function (props, options) {
-        var self = this,
-            _options = _.defaults(options, self._config.queryOptions);
+        var self = this;
+        var opts = _.defaults(options, self._config.queryOptions);
 
-        self.log(Debuggable.MED, 'Received query for %s', self.dump(props));
+        return new Promise(function (resolve, reject) {
+            self.exec(function () {
+                var animalQuery = new AnimalQuery(props, opts.species);
+                var animalMongoQuery = animalQuery.toMongoQuery();
 
-        this.exec(function () {
-            var animalQuery = new AnimalQuery(props, _options.species),
-                query = animalQuery.toMongoQuery();
-
-            self.MongooseModel
-                .find(query)
-                .lean()
-                .exec(function (err, animals) {
-                    if (err) {
-                        var dbErr = new DBError(err);
-                        self.error(dbErr);
-                        if (_options.complete) _options.complete(dbErr);
-                    } else {
-                        self.log(Debuggable.MED, 'findAnimals() - found %s w/ %o', animals.length, query);
-                        self.log(Debuggable.TMI, 'findAnimals() - found animals (preformatted): ', animals);
-                        if (_options.complete) {
-                            _options.complete(null, animals.map(function (animalData) {
-                                var newAnimal = new Animal(animalData.props);
-                                newAnimal.setValue('petId', animalData._id.toString());
-                                return _options.isV1Format ? newAnimal.toObject() : newAnimal.toLeanObject();
-                            }));
+                self.MongooseModel
+                    .find(animalMongoQuery)
+                    .lean()
+                    .exec(function (err, animals) {
+                        if (err) {
+                            var dbErr = new DbError(err);
+                            console.error(dbErr);
+                            reject(dbErr);
+                            return;
                         }
-                    }
-                })
-        });
+
+                        var result = animals.map(function (animalData) {
+                            var newAnimal = new Animal(animalData.props);
+
+                            newAnimal.setValue('petId', animalData._id.toString());
+
+                            return opts.isV1Format ? newAnimal.toObject() : newAnimal.toLeanObject();
+                        });
+                        resolve(result);
+                    })
+            });
+        })
     },
 
     /**
@@ -204,60 +168,49 @@ AnimalDatabase.prototype = {
      * @param {Animal} animal
      * @param {Object} options
      * @param {Boolean} [options.isV1Format] V1 format includes additional metadata
-     * @param {AnimalQueryCallback} options.complete callback on operation completion
-     * @param {Object} [options.context] context for complete function callback
+     * @returns {Promise}
      */
     saveAnimal: function (animal, options) {
-        var self = this,
-            _options = _.defaults(options, self._config.queryOptions),
-            animalQuery = new AnimalQuery(animal.toObject()),
-            query = animalQuery.toMongoQuery(),
-            animalDocData = animal.toMongooseDoc();
-
-        this.exec(function () {
-
-            this.MongooseModel.upsert(
-                query,
-                animalDocData,
-                {
-                    isV1Format: _options.isV1Format
-                },
-                function (err, animalDoc) {
-                    if (err) {
-                        err = new DBError(err);
-                        self.error(err);
-                        if (_options.complete) _options.complete(err);
-                    } else if (animalDoc) {
-                        self.log(Debuggable.MED, 'saved and sending animal: ', animalDoc);
-                        var newAnimal = new Animal(animalDoc.props);
-                        newAnimal.setValue('petId', animalDoc._id.toString());
-                        if (_options.complete) _options.complete(err, _options.isV1Format ? newAnimal.toObject() : newAnimal.toLeanObject());
-                    } else {
-                        var saveErr = new DBError("Animal Not Saved", 500);
-                        self.error(saveErr);
-                        if (_options.complete) _options.complete(saveErr);
-                    }
-                });
-        });
-    },
-
-    /**
-     *
-     * @param {Function} [callback]
-     */
-    clear: function (callback) {
         var self = this;
-        return new Promise(function(resolve, reject){
-            self.exec(function(){
-                self.MongooseModel.remove({}, function (err) {
-                    if (callback) callback(err);
-                    err ? reject(err) : resolve();
-                });
-            })
-        });
-    }
+        var _options = _.defaults(options, self._config.queryOptions);
+        var animalQuery = new AnimalQuery(animal.toObject());
+        var animalMongoQuery = animalQuery.toMongoQuery();
+        var animalDocData = animal.toMongooseDoc();
+
+        return new Promise(function (resolve, reject) {
+
+            self.exec(function () {
+                var upsertOptions = {isV1Format: _options.isV1Format};
+
+                self.MongooseModel.upsert(animalMongoQuery, animalDocData, upsertOptions)
+                    .then(function (animalDoc) {
+                        var newAnimal;
+                        var result;
+
+                        if (!animalDoc) {
+                            err = new DbError("Animal Not Saved", 500);
+                            console.error(err);
+                            reject(err);
+                            return;
+                        }
+
+                        newAnimal = new Animal(animalDoc.props);
+                        newAnimal.setValue('petId', animalDoc._id.toString());
+
+                        result = _options.isV1Format ? newAnimal.toObject() : newAnimal.toLeanObject();
+
+                        resolve(result);
+                    })
+                    .catch(function (err) {
+                        err = new DbError(err);
+                        console.error(err);
+                        reject(err);
+                    });
+            });
+        })
+    },
 };
 
-_.extend(AnimalDatabase.prototype, Database.prototype);
+AnimalDatabase.prototype = Object.assign({}, BaseDatabase.prototype, AnimalDatabase.prototype);
 
 module.exports = AnimalDatabase;

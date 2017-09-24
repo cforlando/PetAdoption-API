@@ -1,13 +1,13 @@
-var expect = require('expect.js'),
+var expect = require('chai').expect;
 
-    Debuggable = require('../core/lib/debuggable'),
-    MongoDBAdapter = require('../core/mongodb/lib/adapter');
+var Debuggable = require('../core/lib/debuggable');
+var MongoDbAdapter = require('../core/mongodb/lib/adapter');
 
 describe('Adapter', function () {
     var dbAdapter;
 
     beforeEach(function () {
-        dbAdapter = new MongoDBAdapter({
+        dbAdapter = new MongoDbAdapter({
             debugLevel: Debuggable.PROD
         });
     });
@@ -58,10 +58,10 @@ describe('Adapter', function () {
 
     it('returns the proper states', function (done) {
 
-        expect(dbAdapter.isConnected()).to.be(false);
+        expect(dbAdapter.isConnected()).to.equal(false);
         dbAdapter.connect({
             onSuccess: function () {
-                expect(dbAdapter.isConnected()).to.be(true);
+                expect(dbAdapter.isConnected()).to.equal(true);
                 done();
             }
         })

@@ -1,9 +1,9 @@
 var DatabaseError = require('./db-error');
 /**
  * @memberOf DatabaseError
- * @class {SpeciesError}
+ * @class {SpeciesDbError}
  * @constructor
  */
-DatabaseError.Species = require('./species-error');
+DatabaseError.Species = require('./species-db-error');
 
 module.exports = DatabaseError;

@@ -1,0 +1,11 @@
+include _auto-generated/_-all
+.file-input(on-file-input-change="onFileMediaChange" trigger="uploadPhoto")
+    .gallery__wrap
+        .images-nav
+            .md-button.md-primary.md-fab.md-mini.btn-add(ng-click="uploadPhoto()")
+                md-icon.material-icons add
+        slick(settings="slider.options" ng-if="slider.state.isReady")
+            .slide(ng-repeat="(idx, url) in propData.val track by idx")
+                img.slide__img(ng-src="{{url}}", alt="{{url}}")
+                .md-button.md-primary.md-fab.md-mini.btn-remove(ng-click="removePhotoByIndex(idx)")
+                    md-icon.material-icons clear

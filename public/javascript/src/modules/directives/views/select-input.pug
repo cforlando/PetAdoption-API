@@ -1,7 +1,0 @@
-include _auto-generated/_-all
-include includes/_mixins
-+form-input('select')
-    md-input-container.md-block
-        label {{propData.fieldLabel}}
-        md-select(ng-model="propData.val")
-            md-option(ng-value="option" ng-repeat="option in propData.options") {{getSelectOptionLabel(option)}}

@@ -1,67 +1,62 @@
-define([
-    'require',
-    'underscore',
-    'async',
-    'ngApp'
-], function (require) {
-    var ngApp = require('ngApp'),
-        async = require('async'),
-        _ = require('underscore');
+var ngApp = require('ngApp');
+var _ = require('lodash');
 
-    return ngApp.controller('formController', [
-        '$scope',
-        function ($scope) {
-            $scope.getPropType = function(propData){
-                if (!propData) return 'invalid';
+ngApp.controller('formController', [
+    '$scope',
+    function ($scope) {
 
-                switch(propData.key){
-                    case 'petId':
-                        return 'hidden';
-                    case 'species':
-                        return 'select';
-                    case 'description':
-                        return 'textarea'
-                    default:
-                        break;
-                }
+        $scope.getPropType = function (propData) {
+            if (!propData) return 'invalid';
 
-                switch(propData.valType){
-                    case 'Location':
-                        return 'location';
-                    case '[Image]':
-                        return 'gallery';
-                    case 'Date':
-                        return 'date';
-                    case 'Number':
-                        return 'number';
-                    case 'Boolean':
-                        return 'boolean'
-                    default:
-                        return 'string'
-                }
+            switch (propData.key) {
+                case 'petId':
+                    return 'hidden';
+                case 'species':
+                    return 'select';
+                case 'description':
+                    return 'textarea';
+                default:
+                    break;
             }
 
-            $scope.isPropResetable = function(propData){
-                switch(propData.valType){
-                    case 'String':
-                    case 'Number':
-                    case 'Date':
-                        return true;
-                    default:
-                        return false;
-                }
+            switch (propData.valType) {
+                case 'Location':
+                    return 'location';
+                case '[Image]':
+                    return 'gallery';
+                case 'Date':
+                    return 'date';
+                case 'Number':
+                    return 'number';
+                case 'Boolean':
+                    return 'boolean';
+                default:
+                    return 'string';
+            }
+        };
+
+        $scope.isPropResetable = function (propData) {
+            switch (propData.valType) {
+                case 'String':
+                case 'Number':
+                case 'Date':
+                    return true;
+                default:
+                    return false;
+            }
+        };
+
+        $scope.getSelectOptionLabel = function (option) {
+            if (option === true) {
+                return 'Yes';
+            } else if (option === false) {
+                return 'No'
+            } else {
+                return option;
             }
 
-            $scope.getSelectOptionLabel = function (option){
-                if(option === true){
-                    return 'Yes';
-                } else if(option === false){
-                    return 'No'
-                } else {
-                    return option;
-                }
+        };
 
-            };
+    }])
 
-        }])
-});
+module.exports = ngApp;

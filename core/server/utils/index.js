@@ -1,7 +1,7 @@
 var _ = require('lodash');
 
 module.exports = {
-    normalizePort : function(val) {
+    normalizePort: function (val) {
         var port = parseInt(val, 10);
 
         if (isNaN(port)) {
@@ -16,7 +16,7 @@ module.exports = {
 
         return false;
     },
-    parseArrayStr : function(str){
+    parseArrayStr: function (str) {
         try {
             var _result = str
                 .replace(/^\[[\'\"]?/, '')
@@ -24,7 +24,7 @@ module.exports = {
                 .replace(/[\'\"]/g, '')
                 .split(',');
             return (_.isArray(_result)) ? _result : false;
-        } catch (err){
+        } catch (err) {
 
         }
         return false;

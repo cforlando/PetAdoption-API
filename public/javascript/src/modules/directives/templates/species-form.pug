@@ -1,0 +1,29 @@
+include _auto-generated/_-all
+.view.view--species(layout='column')
+    .file-input(on-file-input-change="onFileMediaChange" trigger="uploadPhoto")
+        md-content()
+            md-subheader.md-primary!="{{speciesName}}"
+            md-divider
+            div(flex)
+                md-card(md-3-line
+                ng-if="isVisibleProp(speciesProp)"
+                ng-repeat="speciesProp in speciesProps"
+                data-drop="true"
+                data-drag="true"
+                ng-model="speciesProps"
+                jqyoui-droppable="{index: {{$index}}, onDrop: 'onDragDrop'}"
+                jqyoui-draggable="{index: {{$index}}, animate:true, insertInline: true}"
+                data-jqyoui-options="{revert: 'invalid', handle: 'md-card-title .md-headline'}")
+                    md-card-title
+                        md-card-title-text
+                            span.md-headline!="{{speciesProp.fieldLabel}}"
+                            span.md-subhead!="{{speciesProp.key}}"
+                    md-card-content(layout='column')
+                        p!="{{speciesProp.description}}"
+                    md-card-actions(layout='row', layout-align='end')
+                        md-button.md-icon-button(ng-click="editProp(speciesName, speciesProp)", ng-if="isEditableProp(speciesProp)")
+                            md-icon.material-icons mode_edit
+                        md-button.md-icon-button(ng-click="deleteProp(speciesProp)")
+                            md-icon.material-icons delete_forever
+    md-button.button.button--create-prop.md-fab.md-primary.md-fab-bottom-right(aria-label!="Add species", ng-click="createNewProp($event)")
+        md-icon.material-icons add

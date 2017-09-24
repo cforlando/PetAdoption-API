@@ -1,6 +1,6 @@
 var _ = require('lodash'),
 
-    Database = require('./default'),
+    BaseDatabase = require('./lib/database'),
     config = require('../config'),
 
     Collection = require('./lib/collection'),
@@ -8,25 +8,26 @@ var _ = require('lodash'),
 
 /**
  *
- * @extends Database
+ * @extends BaseDatabase
  * @param options
  * @constructor
  */
 function UserDatabase(options) {
     var _options = _.defaults(options, {
-            collectionNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_'
-        }),
-        collectionName = _options.collectionNamePrefix + 'users';
-
-    this.collection = new Collection(collectionName, UserSchema, {
-        debugLevel: this.getDebugLevel(),
+        collectionNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_'
+    });
+    var collectionName = _options.collectionNamePrefix + 'users';
+    var collection = new Collection(collectionName, UserSchema, {
         collectionNamePrefix: _options.collectionNamePrefix
     });
-    Database.call(this, this.collection);
+
+    BaseDatabase.call(this, collection);
+
+    this.initDatabase();
 }
 
 UserDatabase.prototype = {};
 
-_.defaults(UserDatabase.prototype, Database.prototype);
+_.defaults(UserDatabase.prototype, BaseDatabase.prototype);
 
 module.exports = UserDatabase;

@@ -1,0 +1,34 @@
+{
+  "name": "petadoption-api",
+  "basePath": "default",
+  "tasks": [
+    {
+      "name": "pug-html",
+      "input": "public/javascript/src/modules/directives/templates/",
+      "output": "public/javascript/src/modules/directives/templates/"
+    },
+    {
+      "name": "pug-html",
+      "input": "public/javascript/src/modules/views/",
+      "output": "public/javascript/src/modules/views/"
+    },
+    {
+      "name": "js",
+      "input": "./"
+    },
+    {
+      "name": "webpack",
+      "input": "public/javascript/src/webpack.config.js",
+      "output": "public/javascript/"
+    },
+    {
+      "name": "jsx",
+      "input": "public/javascript/src/"
+    },
+    {
+      "name": "stylus",
+      "input": "public/stylesheets/",
+      "output": "public/stylesheets/"
+    }
+  ]
+}

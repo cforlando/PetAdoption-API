@@ -1,79 +1,74 @@
-define([
-    'require',
-    'underscore',
-    'ngApp'
-], function(require){
-    var ngApp = require('ngApp'),
-        _ = require('underscore');
+var ngApp = require('ngApp');
+var _ = require('lodash');
 
-    return ngApp.service('request', ['$http', '$mdToast', function ($http, $mdToast) {
-        function SmartRequestThenable(requestPromise) {
+ngApp.service('request', function ($http, $mdToast) {
+    var timeoutLimit = 10 * 1000;
 
-            this.timeoutLimit = 10 * 1000;
+    Request.onTimeout = function () {
+        $mdToast.show($mdToast.simple().textContent("Poor connection detected"));
+    };
 
-            this.startTimeoutWatch();
+    Request.get = function () {
+        var self = this;
+        var timeoutId = setTimeout(function () {
+            self.onTimeout();
+        }, timeoutLimit);
 
-            requestPromise.then(this.onSuccess.bind(this), this.onFailure.bind(this));
+        return $http.get.apply($http, arguments)
+            .then(function (response) {
+                clearTimeout(timeoutId);
+                return Promise.resolve(response);
+            })
+            .catch(function (response) {
+                var statusCode = parseInt(response.status);
 
-            return {
-                then: this.assignCallbacks.bind(this)
-            };
-        }
-
-        SmartRequestThenable.prototype = {
-            onTimeout: function () {
-                $mdToast.show($mdToast.simple().textContent("Poor connection detected"));
-            },
-
-            startTimeoutWatch: function () {
-                var self = this;
-                this.timeoutId = setTimeout(function(){
-                    self.onTimeout();
-                }, this.timeoutLimit);
-            },
-
-            quitTimeoutWatch: function () {
-                clearTimeout(this.timeoutId);
-            },
-
-            onSuccess: function success(response) {
-                this.quitTimeoutWatch();
-                if (this.successCallback) this.successCallback.apply(null, arguments);
-            },
-
-            onFailure: function (response) {
-                this.quitTimeoutWatch();
-                if(response.status == 401){
-                    location.href = '/auth/google';
-                } else if(response.status == 503){
-                    $mdToast.show($mdToast.simple().textContent("Cannot connect to server"));
-                } else {
-                    if (this.failureCallback) this.failureCallback.apply(null, arguments);
+                clearTimeout(timeoutId);
+                switch (statusCode) {
+                    case 401:
+                        // location.href = '/auth/google';
+                        $mdToast.show($mdToast.simple().textContent("User not authorized"));
+                        break;
+                    default:
+                        if (statusCode >= 400) {
+                            $mdToast.show($mdToast.simple().textContent("Cannot connect to server"));
+                        }
                 }
-            },
 
-            assignCallbacks: function (successCallback, failureCallback) {
-                this.successCallback = successCallback;
-                this.failureCallback = failureCallback;
-            }
-        };
+                return Promise.reject(response);
+            });
+    };
 
-        function Request() {
-            var requestPromise = $http.apply($http, arguments);
-            return new SmartRequestThenable(requestPromise);
-        }
+    Request.post = function () {
+        var self = this;
+        var timeoutId = setTimeout(function () {
+            self.onTimeout();
+        }, timeoutLimit);
 
-        Request.get = function () {
-            var requestPromise = $http.get.apply($http, arguments);
-            return new SmartRequestThenable(requestPromise);
-        };
+        return $http.post.apply($http, arguments)
+            .then(function (response) {
+                clearTimeout(timeoutId);
+                return Promise.resolve(response);
+            })
+            .catch(function (response) {
+                var statusCode = parseInt(response.status);
 
-        Request.post = function () {
-            var requestPromise = $http.post.apply($http, arguments);
-            return new SmartRequestThenable(requestPromise);
-        };
+                clearTimeout(timeoutId);
+                switch (statusCode) {
+                    case 401:
+                        location.href = '/auth/google';
+                        break;
+                }
 
-        return Request;
-    }]);
+                if (statusCode >= 400) {
+                    $mdToast.show($mdToast.simple().textContent("Cannot connect to server"));
+                    return Promise.reject(response);
+                }
+
+                return Promise.reject(response);
+            });
+    };
+
+    return Request;
 });
 
+module.exports = ngApp;

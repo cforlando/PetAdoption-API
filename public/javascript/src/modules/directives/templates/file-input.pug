@@ -1,0 +1,7 @@
+include _auto-generated/_-all
+form.file-input__form(method='post')
+    .file-input__inputs
+        input.file-input__input(type='file' id='{{namespace}}' name='{{namespace}}' ng-repeat="namespace in namespaces")
+    ng-transclude.content
+
+

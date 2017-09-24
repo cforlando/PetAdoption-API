@@ -1,32 +1,38 @@
+var angular = require('angular');
 var ngApp = require('ngApp');
 
-ngApp.config([
-    "$routeProvider", "$locationProvider",
-    function ($routeProvider, $locationProvider) {
-        $locationProvider.html5Mode(false);
+ngApp.config(function ($routeProvider, $locationProvider) {
+    $locationProvider.html5Mode(false);
 
-        $routeProvider
-            .when("/animals", {
-                template: require('text!modules/views/search-animals.html')
-            })
-            .when("/animals/edit/:petSpecies/:petId", {
-                template: require('text!modules/views/edit-animal.html')
-            })
-            .when("/animals/new", {
-                template: require('text!modules/views/edit-animal.html')
-            })
-            .when("/species", {
-                template: require('text!modules/views/search-species.html')
-            })
-            .when("/species/:speciesName", {
-                template: require('text!modules/views/view-species.html')
-            })
-            .when("/species/:speciesName/:propName", {
-                template: require('text!modules/views/edit-species-prop.html')
-            })
-            .otherwise({redirectTo: "/animals"})
-    }]);
+    $routeProvider
+        .when('/pets', {
+            template: require('raw-loader!modules/views/search-animals.html')
+        })
+        .when('/pets/edit/:speciesName/:petId', {
+            template: require('raw-loader!modules/views/edit-animal.html')
+        })
+        .when('/pets/new', {
+            template: require('raw-loader!modules/views/edit-animal.html')
+        })
+        .when('/species', {
+            template: require('raw-loader!modules/views/search-species.html')
+        })
+        .when('/species/:speciesName', {
+            template: require('raw-loader!modules/views/view-species.html')
+        })
+        .when('/species/:speciesName/property/:propName', {
+            template: require('raw-loader!modules/views/edit-species-prop.html')
+        })
+        .otherwise({
+            redirectTo: function () {
+                // roundabout way of determining if user is logged in
+                if (angular.element('.main-view').length > 0) {
+                    return '/pets';
+                }
 
-console.log('init router.');
+                return '/';
+            }
+        })
+});
 
 module.exports = ngApp;

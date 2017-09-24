@@ -1,22 +1,9 @@
-define([
-    'require',
-    'underscore',
-    'text!./views/autocomplete-input.html',
-    'ngApp'
-], function (require) {
-    var _ = require('underscore'),
-        ngApp = require('ngApp');
+var _ = require('lodash'),
+    ngApp = require('ngApp');
 
-    return ngApp.directive('autocompleteInput', function () {
-        return {
-            restrict: 'C',
-            template : require('text!./views/autocomplete-input.html'),
-            controller: ['$scope',
-                function ($scope) {
-                    $scope.saveValue = function(){
-                        $scope.setField($scope.propData.key, $scope.propData);
-                    }
-                }]
-        };
-    });
+module.exports = ngApp.directive('autocompleteInput', function () {
+    return {
+        restrict: 'C',
+        template: require('raw-loader!./templates/autocomplete-input.html')
+    };
 });
