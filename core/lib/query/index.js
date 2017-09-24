@@ -87,8 +87,14 @@ Query.prototype = {
                     case 'species':
                         if (_.isRegExp(propValue)) {
                             mongoQueryProps[propName] = propValue;
+                        } else if (propValue === 'all') {
+                            mongoQueryProps[propName] = /.*/;
                         } else {
-                            mongoQueryProps[propName] = new RegExp(propValue.toString(), 'i');
+                            try {
+                                mongoQueryProps[propName] = new RegExp(propValue.toString(), 'i');
+                            } catch (err) {
+                                console.error(err);
+                            }
                         }
                         break;
                     case 'images':
