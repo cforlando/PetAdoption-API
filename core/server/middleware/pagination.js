@@ -1,21 +1,21 @@
 var _ = require('lodash');
 
-module.exports = function(options){
-    var _options = _.defaults(options, {
+module.exports = function (options) {
+    var opts = _.defaults(options, {
         pageSize: 10
     });
-    return function(request, response, next){
-        var pageNum = (function () {
-                var parsedPageNum = (parseInt(response.locals.pageNumber) || 1) - 1; // page numbers start at 1
-                if (parsedPageNum < 0) return 0;
-                return parsedPageNum;
-            })(),
-            _pageSize = parseInt(request.query['pageSize'] || request.body['pageSize'] || _options.pageSize),
-            _startIndex = pageNum * _pageSize;
 
-        if (_.isFinite(parseInt(response.locals.pageNumber)) && _.isArray(response.locals.data) && response.locals.data.length > _pageSize) {
-            response.locals.data = response.locals.data.slice(_startIndex, _startIndex + _pageSize);
+    return function (req, res, next) {
+        var pageSize = parseInt(req.query.pageSize || req.body.pageSize || opts.pageSize);
+        var pageNumber = parseInt(res.locals.pageNumber);
+        var arrayStartIndex;
+
+        if (_.isFinite(pageNumber) && _.isArray(res.locals.data) && res.locals.data.length > pageSize) {
+            arrayStartIndex = pageNumber > 0 ? 0 : (pageNumber - 1) * pageSize;
+
+            res.locals.data = res.locals.data.slice(arrayStartIndex, arrayStartIndex + pageSize);
         }
+
         next();
     }
 };

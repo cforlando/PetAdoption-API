@@ -1,53 +1,64 @@
-var fs = require('fs'),
-    path = require('path'),
-    util = require('util'),
+var fs = require('fs');
+var path = require('path');
+var util = require('util');
 
-    async = require('async'),
-    csv = require('csv'),
-    _ = require('lodash'),
-    moment = require('moment'),
+var log = require('debug')('pet-api:csv-importer:reader:species-props');
+var async = require('async');
+var csv = require('csv');
+var _ = require('lodash');
+var moment = require('moment');
 
-    helperUtils = require('./helper-utils'),
+var helperUtils = require('./helper-utils');
 
-    __dirname = process.cwd(), //__dirname || path.resolve('./'),
-    cwd = __dirname,
-    defaults = {
-        context: null,
-        readPath: [
-            path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Cats.csv'),
-            path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Dogs.csv')
-        ],
-        writeDir: path.resolve(cwd, 'data/'),
-        cacheName: 'props'
-    };
+var defaults = {
+    context: null,
+    readPath: [
+        path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Cats.csv'),
+        path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Dogs.csv')
+    ],
+    writeDir: path.resolve(process.cwd(), 'data/'),
+    cacheName: 'props'
+};
 
 function parseModelCSV(csvModelData) {
-    console.log('sanitizing model');
-
+    /**
+     * @name speciesProps
+     * @description array of properties as defined by the csv. starts with array containing images property
+     * @type {{key: String, valType: String, defaultVal: *, example: *}[]}
+     */
     var speciesProps = [{
-            key: 'images',
-            valType: '[Image]',
-            defaultVal: ['http://placehold.it/500x500', 'http://placehold.it/720x480', 'http://placehold.it/480x480'],
-            example: ['http://placehold.it/500x500', 'http://placehold.it/720x480', 'http://placehold.it/480x480']
-        }],
-        columnIndices = {
-            key: 1,
-            fieldLabel: 2,
-            valType: 3,
-            description: 4,
-            defaultVal: 5,
-            required: 6,
-            example: 7,
-            note: 8
-        };
+        key: 'images',
+        valType: '[Image]',
+        defaultVal: ['http://placehold.it/500x500', 'http://placehold.it/720x480', 'http://placehold.it/480x480'],
+        example: ['http://placehold.it/500x500', 'http://placehold.it/720x480', 'http://placehold.it/480x480']
+    }];
 
-    console.log('sanitized model');
-    // console.log('sanitized model: %j', newModel);
+    /**
+     * @name columnIndices
+     * @description hardcoded indices as defined by the csv file. used for properly assigning values to each species prop
+     * @type {Object}
+     */
+    var columnIndices = {
+        key: 1,
+        fieldLabel: 2,
+        valType: 3,
+        description: 4,
+        defaultVal: 5,
+        required: 6,
+        example: 7,
+        note: 8
+    };
+
     return _.reduce(csvModelData, function (speciesProps, csvRow, rowIndex) {
-        if (rowIndex == 0) return; //skip the first row which contains field labels
-        if (!(csvRow[columnIndices['key']] && csvRow[columnIndices['valType']])) return; // skip invalid rows
-
         var speciesProp = {};
+        //skip the first row which contains field labels
+        if (rowIndex === 0) {
+            return speciesProps;
+        }
+        // skip invalid rows
+        if (!(csvRow[columnIndices['key']] && csvRow[columnIndices['valType']])) {
+            return speciesProps
+        }
         _.forEach(columnIndices, function (columnIndex, columnIndexName) {
             switch (columnIndexName) {
                 case 'valType':
@@ -68,41 +79,59 @@ function parseModelCSV(csvModelData) {
                     break;
             }
         });
+
+        switch (speciesProp['valType']) {
+            case 'Date':
+                if (!moment(speciesProp['defaultVal']).isValid()) {
+                    speciesProp['defaultVal'] = null;
+                }
+                break;
+            case 'Boolean':
+                speciesProp['options'] = [true, false];
+                if (_.isString(speciesProp['defaultVal'])){
+                    speciesProp['defaultVal'] = /yes|true/i.test(speciesProp['defaultVal'])
+                }
+                if (_.isString(speciesProp['example'])){
+                    speciesProp['example'] = /yes|true/i.test(speciesProp['example'])
+                }
+                break;
+        }
+
         if (speciesProp['key'].match(/(lostGeoL|shelterGeoL)/)) {
             speciesProp['defaultVal'] = csvRow[columnIndices.example] || 'Location';
             speciesProp['valType'] = 'Location';
         }
-        if (speciesProp['valType'] == 'Date') {
-            if (!moment(speciesProp['defaultVal']).isValid()) {
-                speciesProp['defaultVal'] = null;
-            }
+
+        if (_.isString(speciesProp['required'])){
+            speciesProp['required'] = /yes|true/i.test(speciesProp['required'])
         }
+
         speciesProps.push(speciesProp);
-    }, []);
+        return speciesProps;
+    }, speciesProps);
 }
 
 /**
  *
  * @param {Object} speciesDataCollection
  * @param {Object} optionsData
- * @param {Function} callback
  */
-function _mergeOptionsAndModel(speciesDataCollection, optionsData, callback) {
+function mergeSpeciesOptions(speciesDataCollection, optionsData) {
 
     _.forEach(speciesDataCollection, function (speciesProps, speciesName) {
 
         _.forEach(speciesProps, function (speciesProp) {
             if (optionsData[speciesName][speciesProp.key]) {
                 speciesProp.options = optionsData[speciesName][speciesProp.key];
-            } else if (optionsData[speciesName]['breed'] && speciesProp.key.match(/breed/ig)) {
+            } else if (speciesProp.key.match(/breed/ig)) {
                 speciesProp.options = optionsData[speciesName]['breed'].sort();
             } else {
-                speciesProp.options = [];
+                speciesProp.options = speciesProp.options || [];
             }
         });
     });
 
-    callback.call(null, speciesDataCollection);
+    return speciesDataCollection;
 }
 
 module.exports = {
@@ -118,47 +147,44 @@ module.exports = {
         var _options = _.defaults(options, defaults);
 
         var fileList = _.isArray(_options.readPath) ? _options.readPath : [_options.readPath],
-            data = {};
+            speciesSchemaDict = {};
 
-        async.each(fileList,
-            function each(filePath, done) {
+        return Promise.all(fileList.map(function (filePath) {
+                return helperUtils.download(filePath)
+                    .then(function (content) {
+                        return new Promise(function (resolve, reject) {
+                            csv.parse(content, function (err, schemaCSVData) {
+                                if (err) {
+                                    reject(err);
+                                    return;
+                                }
+                                resolve(schemaCSVData)
+                            });
+                        })
+                    })
+                    .then(function (schemaCSVData) {
+                        var namespace = helperUtils.getSpeciesNameFromPath(filePath);
+                        speciesSchemaDict[namespace] = parseModelCSV(schemaCSVData);
+                    });
+            }))
+            .then(function () {
+                // to merge in options
+                return require('./options').parse({cache: true})
+            })
+            .then(function (optionsData) {
+                mergeSpeciesOptions(speciesSchemaDict, optionsData);
 
-                function onParsed(err, schemaCSVData) {
-                    var namespace = helperUtils.getTypeFromPath(filePath);
-                    data[namespace] = parseModelCSV(schemaCSVData);
-                    done();
+                if (_options.cache === true) {
+                    Promise.all(Object.keys(speciesSchemaDict).map(function (speciesName) {
+                            var fileName = util.format('%s.%s.json', _options.cacheName, speciesName);
+                            return fs.writeFile(path.join(_options.writeDir, fileName), JSON.stringify(speciesSchemaDict[speciesName]));
+                        }))
+                        .catch(function (err) {
+                            console.error(err);
+                        })
                 }
 
-                helperUtils.download(filePath, function (err, content) {
-                    if (err) throw err;
-                    csv.parse(content, onParsed);
-                });
-            },
-            function complete(error) {
-                if (error) throw error;
-
-                // merge in options
-
-                require('./options').parse({
-                    cache: true,
-                    done: function (optionsData) {
-                        _mergeOptionsAndModel(data, optionsData, function onMergeComplete(mergedModelsData) {
-                            if (_options.cache === true) {
-                                async.eachOf(mergedModelsData, function (speciesData, speciesName, done) {
-                                    fs.writeFile(path.join(_options.writeDir, util.format('%s.%s.json', _options.cacheName, speciesName)), JSON.stringify(speciesData), function (err) {
-                                        done(err)
-                                    })
-                                }, function (err) {
-                                    if (err) throw err;
-                                    _options.done.apply(_options.context, [mergedModelsData, _options]);
-                                });
-                            } else {
-                                _options.done.apply(_options.context, [mergedModelsData, _options]);
-                            }
-                        });
-                    }
-                });
-
+                return speciesSchemaDict;
             });
 
     }

@@ -1,25 +1,30 @@
-var expect = require('expect.js');
+var chai = require('chai');
+var _ = require('lodash');
 
-describe("AnimalQuery", function(){
-    var AnimalQuery = require('../core/lib/query');
+var expect = chai.expect;
 
-    it("accepts an array of props", function(){
-        var testQueryProps = [
-                {
-                    key: 'propName',
-                    valType: 'String',
-                    val: 'testValue'
-                },
-                {
-                    key: 'anotherPropName',
-                    valType: 'Number',
-                    val: '2'
-                }
-            ],
-            testQuery = new AnimalQuery(testQueryProps),
-            testQueryData = testQuery.toFormattedObject();
+var AnimalQuery = require('../core/lib/query');
+
+describe("AnimalQuery", function () {
+    var testQueryProps = [
+        {
+            key: 'propName',
+            valType: 'String',
+            val: 'testValue'
+        },
+        {
+            key: 'anotherPropName',
+            valType: 'Number',
+            val: '2'
+        }
+    ];
+
+    it("accepts an array of props", function () {
+        var testQuery = new AnimalQuery(testQueryProps);
+        var testQueryData = testQuery.toFormattedObject();
+        var testAnotherPropNameVal = _.find(testQueryProps, {key: 'anotherPropName'}).val;
 
         expect(testQueryData.propName.val).to.match(/testValue/);
-        expect(testQueryData.anotherPropName.val).to.equal(2);
+        expect(testQueryData.anotherPropName.val).to.eql(parseInt(testAnotherPropNameVal));
     });
 });

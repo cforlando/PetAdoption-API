@@ -1,5 +1,4 @@
-
-module.exports  = {
+module.exports = {
     /**
      * @callback ParsedCallback
      * @param data
@@ -15,7 +14,7 @@ module.exports  = {
      * @param {Object} options.readPath
      * @param {Object} options.writePath
      */
-    parseDataset : require('./dataset').parse,
+    parseDataset: require('./dataset').parse,
 
     /**
      *
@@ -25,7 +24,7 @@ module.exports  = {
      * @param {Object} options.readPath
      * @param {Object} options.writePath
      */
-    parseOptions : require('./options').parse,
+    parseOptions: require('./options').parse,
 
 
     /**
@@ -36,5 +35,5 @@ module.exports  = {
      * @param {Object} options.readPath
      * @param {Object} options.writePath
      */
-    parseSpeciesProps : require('./species-props').parse
+    parseSpeciesProps: require('./species-props').parse
 };

@@ -305,10 +305,6 @@ body > md-progress-linear {
   left: 0;
   z-index: 3;
 }
-> .main-view__content {
-  overflow-y: auto;
-  overflow-x: hidden;
-}
 a {
   color: #00b7ff;
 }
@@ -362,7 +358,7 @@ md-sidenav {
   flex: 1 1 1.5em;
 }
 .batch-edit-list .pet-thumbnail__placholder {
-  background-size: 'cover';
+  background-size: cover;
   background-position: center;
   width: 100%;
   height: 100%;
@@ -379,35 +375,42 @@ md-sidenav {
   font-size: 0.75em;
   padding: 0 0.25em;
 }
-.pet-data-form .input {
+.species-form .md-button.button--create-prop {
+  position: fixed;
+}
+.pet-form .input {
   padding: 0 1.5em;
 }
-.pet-data-form .input__label {
+.pet-form .input__label {
   margin: 0 auto;
 }
-.pet-data-form .input--map {
+.pet-form .input--map {
   margin: 0 auto 3em;
 }
-.pet-data-form .input__input {
+.pet-form .input__input {
   width: 75%;
   width: -webkit-calc(100% - 4em);
   width: calc(100% - 4em);
 }
-.pet-data-form--no-default .pet-data-form .input__input {
+.pet-form--no-default .pet-form .input__input {
   width: 83%;
   width: -webkit-calc(100% - 1.5em);
   width: calc(100% - 1.5em);
 }
-.pet-data-form .input__menu {
+.pet-form .input__menu {
   margin-top: 1em;
 }
-.pet-data-form--date .pet-data-form .input__menu {
+.pet-form--date .pet-form .input__menu {
   margin-top: 0.5em;
 }
-.pet-data-form .input__input,
-.pet-data-form .input__menu {
+.pet-form .input__input,
+.pet-form .input__menu {
   display: inline-block;
   vertical-align: top;
+}
+.pet-form md-fab-speed-dial.md-fab-bottom-right,
+.pet-form md-toolbar.md-fab-bottom-right {
+  position: fixed;
 }
 .fab-anchor {
   position: relative;
@@ -494,7 +497,7 @@ md-sidenav {
   bottom: 0.75em;
   z-index: 1;
 }
-.file-input__form {
+.file-input__inputs {
   display: none;
 }
 .slick-slider.slick-dotted {
@@ -503,6 +506,13 @@ md-sidenav {
 .slick-dots {
   bottom: auto;
   top: 0.75em;
+}
+.main-view__content {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.main-view__header {
+  z-index: 81;
 }
 .view--species md-content {
   padding-bottom: 7em;

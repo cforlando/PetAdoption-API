@@ -119,7 +119,7 @@ Debuggable.prototype = {
         }
     },
 
-    _parseInput : function(args){
+    _parseInput: function (args) {
         var logArguments,
             level = args[0];
         if (!_.isNumber(level)) {
@@ -131,7 +131,7 @@ Debuggable.prototype = {
         logArguments[0] = this._debugTag + logArguments[0];
         return {
             args: logArguments,
-            level : level
+            level: level
         };
     },
 

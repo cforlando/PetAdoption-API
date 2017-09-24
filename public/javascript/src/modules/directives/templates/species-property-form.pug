@@ -1,0 +1,26 @@
+include _auto-generated/_-all
+.section.section--edit-propData
+    .section__content()
+        md-card
+            md-card-title
+                md-card-title-text
+                    span.md-headline!="{{propData.key}}"
+            md-card-content
+                .propData-field.propData-field--fieldLabel
+                    md-input-container
+                        label Field Label
+                        textarea(ng-model="propData.fieldLabel", rows="1", max-rows="8", md-select-on-focus)
+                .propData-field.propData-field--valType
+                    md-input-container
+                        label Type
+                        md-select(ng-model="propData.valType")
+                            md-option(ng-repeat="type in valTypes" ng-value="type") {{type}}
+                .propData-field.propData-field--defaultVal
+                    .default-species-prop-input
+                md-chips(ng-model="propData.options", placeholder='Option', ng-if="hasEditableOptions()", readonly=false, md-removable=true md-enable-chip-edit="true")
+            md-card-actions(layout='row', layout-align='end')
+                md-button.md-icon-button(ng-click="saveSpeciesProperty()")
+                    md-icon.material-icons save
+                md-button.md-icon-button(ng-click="deleteSpeciesProperty()")
+                    md-icon.material-icons delete_forever
+

@@ -7,13 +7,13 @@ var _ = require('lodash'),
  *
  * @extends Species
  * @class Animal
- * @param [species]
- * @param [values]
+ * @param {Species|Object[]|Object} [species] - a Species instance, an array of properties, or an object of species property key-value pairs
+ * @param {Object} [values] - the object of species property key-value pairs
  * @constructor
  */
 function Animal(species, values) {
-    var defaultSpeciesName = 'n/a',
-        defaultSpeciesProps = [];
+    var defaultSpeciesName = 'n/a';
+    var defaultSpeciesProps = [];
 
     if (species instanceof Species) {
         Species.call(this, species.getSpeciesName(), species.getSpeciesProps());
@@ -32,7 +32,7 @@ function Animal(species, values) {
 
     if (_.isArray(values)) {
         this.setProps(values);
-    } else if (_.isPlainObject(values)) {
+    } else if (typeof values === 'object') {
         this.setValues(values);
     }
 
@@ -45,29 +45,34 @@ Animal.prototype = {
         return prop ? prop.val : null;
     },
 
-    getId: function(){
-        return this.getValue('id')
+    getId: function () {
+        return this.getValue('petId')
     },
 
-    getSpeciesName: function(){
+    getSpeciesName: function () {
         return this.getValue('species')
     },
 
-    getName: function(){
-        return this.getValue('name')
+    getName: function () {
+        return this.getValue('petName')
     },
 
     setValue: function (propName, propValue) {
         var prop;
-        if (propValue.val === undefined) {
-            prop = this.getProp(propName) || {key: propName};
-            prop.val = propValue;
-        } else {
-            // v1
+        if (propValue && propValue.val !== undefined) {
+            // propValue is v1 format and contains metadata
             prop = this.getProp(propName) || propValue;
             prop.val = propValue.val;
+        } else {
+            prop = this.getProp(propName) || {key: propName};
+            prop.val = propValue;
         }
         this.setProps([prop]);
+
+        // also set speciesName in doc to reflect species change in both places
+        if (propName === 'species') {
+            this.speciesName = prop.val;
+        }
     },
 
     setValues: function (propData) {
@@ -84,6 +89,7 @@ Animal.prototype = {
     toMongooseDoc: function () {
         return {
             petId: this.getValue('petId'),
+            speciesName: this.getSpeciesName(),
             props: this.getProps().map(function (propData) {
                 switch (propData.valType) {
                     case 'Number':
@@ -94,7 +100,7 @@ Animal.prototype = {
                         break;
                     case 'Boolean':
                         if (!_.isBoolean(propData.val)) {
-                            propData.val = /y|yes/i.test(propData.val)
+                            propData.val = /yes|true/i.test(propData.val)
                         }
                         break;
                     case 'Date':
@@ -118,12 +124,13 @@ Animal.prototype = {
         return _.reduce(this.props, function (propCollection, propData) {
             var propValue = propData.val;
             switch (propData.key) {
+                // skip internal mongodb fields
                 case '_id':
                 case '__v':
-                    // skip internal mongodb fields
                     return propCollection;
                     break;
                 case 'petId':
+                    // format animal's mongo ObjectId to string as `petId`
                     if (propData.val) {
                         propValue = propData.val.toString();
                     }
@@ -134,8 +141,9 @@ Animal.prototype = {
 
             switch (propData.valType) {
                 case 'Boolean':
+                    // convert boolean values that are strings to proper boolean value
                     if (_.isString(propData.val)) {
-                        propValue = /y|yes/i.test(propData.val)
+                        propValue = /yes|true/i.test(propData.val)
                     }
                     break;
                 case 'Date':
@@ -149,7 +157,7 @@ Animal.prototype = {
 
             if (!(propValue === undefined || propValue === null)) {
                 propData.val = propValue;
-                propCollection[propData.key] = (_options.isV1Format) ? propData : propValue;
+                propCollection[propData.key] = _options.isV1Format ? propData : propValue;
             }
             return propCollection;
         }, {});
@@ -160,11 +168,19 @@ Animal.prototype = {
     },
 
     toQuery: function (metaProps) {
-        var props = metaProps ? Object.keys(metaProps).reduce(function (mergedProps, propName) {
-                    mergedProps[propName] = metaProps[propName];
-                    return mergedProps;
-                }, this.toObject()) : this.toObject(),
-            animalQuery = new AnimalQuery(props, this);
+        var props = this.toObject();
+        var animalQuery;
+
+        // merge metaProps if passed in
+        if (metaProps) {
+            props = Object.keys(metaProps).reduce(function (mergedProps, propName) {
+                mergedProps[propName] = metaProps[propName];
+                return mergedProps;
+            }, props)
+        }
+
+        animalQuery = new AnimalQuery(props, this);
+
         return animalQuery.toMongoQuery();
     }
 };

@@ -1,22 +1,23 @@
-var _ = require('lodash'),
-    expect = require('expect.js'),
+var _ = require('lodash');
+var chai = require('chai');
 
-    Species = require('../core/lib/species');
+var expect = chai.expect;
+var Species = require('../core/lib/species');
 
 describe("Species", function () {
 
     it("has a baseProps property", function () {
         var aTestSpecies = new Species('testSpecies');
-        expect(aTestSpecies.baseProps).not.to.be(undefined, 'baseProps should be defined');
+        expect(aTestSpecies.baseProps).not.to.be.undefined;
     });
 
     it("initializes with base properties", function () {
         var dTestSpecies = new Species('testSpecies');
         _.forEach(dTestSpecies.baseProps, function (basePropData) {
-            expect(basePropData).to.equal(dTestSpecies.getProp(basePropData.key));
+            expect(basePropData).to.eql(dTestSpecies.getProp(basePropData.key));
         });
 
-        expect(dTestSpecies.getProps().length).not.to.be.lessThan(dTestSpecies.baseProps.length);
+        expect(dTestSpecies.getProps()).to.have.length.of.at.least(dTestSpecies.baseProps.length);
     });
 
     it("initializes with passed properties", function () {
@@ -30,7 +31,7 @@ describe("Species", function () {
             ],
             dTestSpecies = new Species('aSpecies', testProps);
 
-        expect(dTestSpecies.getProp(aTestProp2Name)).to.equal(testProps[0]);
+        expect(dTestSpecies.getProp(aTestProp2Name)).to.eql(testProps[0]);
     });
 
     it("initializes props with a json string", function () {
@@ -47,34 +48,76 @@ describe("Species", function () {
         expect(dTestSpecies.getProp(aTestProp2Name)).to.eql(testProps[0]);
     });
 
-    describe("getSpeciesName()", function(){
+    describe("getSpeciesName()", function () {
         var speciesName = 'cat',
             someSpecies = new Species(speciesName);
 
-        it("returns the species name", function(){
-            expect(someSpecies.getSpeciesName()).to.equal(speciesName);
+        it("returns the species name", function () {
+            expect(someSpecies.getSpeciesName()).to.eql(speciesName);
         });
     });
 
     describe("setProps()", function () {
-        var newTestPropName = 'aTestProp',
-            bTestSpecies = new Species('testSpecies'),
-            testProps = [
-                {
-                    key: newTestPropName,
-                    valType: 'String'
-                }
-            ];
+        var newTestPropName = 'aTestProp';
+        var newTestPropVal = 'aTestPropValue';
+        var bTestSpeciesProps = [
+            {
+                key: 'aPreviouslySavedProp',
+                valType: 'String',
+                val: 'aPreviouslySavedValue'
+            },
+            {
+                key: 'aPreviouslySavedProp2',
+                valType: 'String',
+                val: 'aPreviouslySavedValue2'
+            }
+        ];
+        var bTestSpecies = new Species('testSpecies', bTestSpeciesProps);
+        var newTestProps = [
+            {
+                key: newTestPropName,
+                valType: 'String',
+                val: newTestPropVal
+            }
+        ];
+        var overwrittingTestProps = [Object.assign({}, bTestSpeciesProps[1], {val: 'anOverwrittenSavedValue2'})];
 
-        it("sets the species' props", function () {
-            var beforePropsLength = bTestSpecies.getProps().length;
-            bTestSpecies.setProps(testProps);
-            expect(bTestSpecies.getProps().length).to.equal(beforePropsLength + 1, 'there should be one additional prop');
-            expect(bTestSpecies.getProp(newTestPropName)).not.to.be(undefined);
+        before(function () {
+
+        });
+
+        it("adds to the species' props", function () {
+            var ogSpeciesProps = bTestSpecies.getProps();
+            var newSpeciesProps;
+
+            bTestSpecies.setProps(newTestProps);
+            newSpeciesProps = bTestSpecies.getProps();
+
+            expect(newSpeciesProps).to.have.lengthOf(ogSpeciesProps.length + 1, 'there should be one additional prop');
+            expect(bTestSpecies.getProp(newTestPropName)).to.exist;
+
+            ogSpeciesProps.forEach(function(propData){
+                expect(newSpeciesProps).to.include(propData);
+            })
+        });
+
+        it("overwrites pre-existing species' props", function () {
+            var ogSpeciesProps = bTestSpecies.getProps();
+            var newSpeciesProps;
+
+            bTestSpecies.setProps(overwrittingTestProps);
+            newSpeciesProps = bTestSpecies.getProps();
+
+            expect(newSpeciesProps).to.have.lengthOf(ogSpeciesProps.length, 'there should the number of props');
+            expect(bTestSpecies.getProp(newTestPropName)).to.exist;
+
+            overwrittingTestProps.forEach(function(propData){
+                expect(bTestSpecies.getProps()).to.include(propData);
+            })
         })
     });
 
-    describe("removeProp()", function(){
+    describe("removeProp()", function () {
         var newTestPropName = 'aTestProp',
             anotherTestSpecies = new Species('testSpecies', [
                 {
@@ -86,8 +129,8 @@ describe("Species", function () {
         it("deletes a species' prop", function () {
             var beforePropsLength = anotherTestSpecies.getProps().length;
             anotherTestSpecies.removeProp(newTestPropName);
-            expect(anotherTestSpecies.getProps().length).to.equal(beforePropsLength - 1, 'there should be one less prop');
-            expect(anotherTestSpecies.getProp(newTestPropName)).to.be(undefined);
+            expect(anotherTestSpecies.getProps()).to.have.lengthOf(beforePropsLength - 1, 'there should be one less prop');
+            expect(anotherTestSpecies.getProp(newTestPropName)).to.be.undefined;
         })
     });
 
@@ -107,7 +150,7 @@ describe("Species", function () {
 
         it("returns a specific prop per a provided key", function () {
             var testProp = cTestSpecies.getProp(newTestPropName);
-            expect(testProp).to.equal(testProps[0]);
+            expect(testProp).to.eql(testProps[0]);
         })
     });
 
@@ -126,7 +169,7 @@ describe("Species", function () {
         });
 
         it("is an an array", function () {
-            expect(_.isArray(aTestSpecies.getProps())).to.be(true, 'result should be an array');
+            expect(aTestSpecies.getProps()).to.be.an('Array');
         })
     });
 });

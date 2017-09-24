@@ -1,17 +1,16 @@
-var Controller = require('../controller'),
-    ViewRouter = require('./view'),
-    APIRouter = require('./api');
+var Controller = require('../controller');
+var ViewRouter = require('./view');
+var APIRouter = require('./api');
 
 /**
  *
- * @class Router
+ * @class ServerRouter
  * @param {MongoAPIDatabase} database
  * @param {Object} [options]
- * @param {DebugLevel} [options.debugLevel]
- * @returns {Router}
+ * @returns {ServerRouter}
  * @constructor
  */
-function Router(database, options){
+function ServerRouter(database, options) {
 
     this.controller = new Controller(database, options);
 
@@ -20,4 +19,4 @@ function Router(database, options){
     return this;
 }
 
-module.exports = Router;
+module.exports = ServerRouter;

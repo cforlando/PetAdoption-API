@@ -1,16 +1,24 @@
-var _ = require('lodash'),
-    expect = require('expect.js'),
+var _ = require('lodash');
+var chai = require('chai');
 
-    Helper = require('./helper'),
-    tHelper = new Helper(),
-    speciesDBImages = tHelper.testDBImages;
+var Helper = require('./helper');
 
-describe("tHelper", function () {
+var expect = chai.expect;
+var tHelper = new Helper();
+var speciesDbImages = tHelper.testDbImages;
+
+describe("Helper (for tests)", function () {
     var tHelper = new Helper();
 
     describe("buildEndpoint()", function () {
 
         it("returns correct values", function () {
+            var pagedParamedRequest = tHelper.buildEndpoint('list', 'dog', 2, {
+                pageSize: 5
+            });
+            var propertiesParamedRequest = tHelper.buildEndpoint('list', 'dog', {
+                properties: ['species', 'propName']
+            });
             expect(tHelper.buildEndpoint('save', 'cat')).to.match(/^\/api\/v1\/save\/cat\/?$/);
             expect(tHelper.buildEndpoint('remove', 'cat')).to.match(/^\/api\/v1\/remove\/cat\/?$/);
             expect(tHelper.buildEndpoint('model', 'dog')).to.match(/^\/api\/v1\/model\/dog\/?$/);
@@ -19,30 +27,22 @@ describe("tHelper", function () {
             expect(tHelper.buildEndpoint('species')).to.match(/^\/api\/v1\/species\/?$/);
             expect(tHelper.buildEndpoint('list', 'dog')).to.match(/^\/api\/v1\/list\/dog\/?$/);
             expect(tHelper.buildEndpoint('list', 'dog', {pageSize: 5})).to.match(/^\/api\/v1\/list\/dog\?pageSize=5$/);
-            expect(tHelper.buildEndpoint('list', 'dog', 2, {
-                pageSize: 5
-            })).to.match(/^\/api\/v1\/list\/dog\/2\?pageSize=5$/);
-            expect(tHelper.buildEndpoint('list', 'dog', {
-                properties: ['species', 'propName']
-            }))
-                .to.equal(tHelper.sprintf('/api/v1/list/dog?properties=%s', encodeURIComponent("['species','propName']")));
+            expect(pagedParamedRequest).to.match(/^\/api\/v1\/list\/dog\/2\?pageSize=5$/);
+            expect(propertiesParamedRequest).to.eql(tHelper.sprintf('/api/v1/list/dog?properties=%s', encodeURIComponent("['species','propName']")));
         })
     });
 
-    describe("speciesDBImages", function () {
+    describe("speciesDbImages", function () {
 
         it("are initialized correctly", function () {
 
-            expect(_.isArray(speciesDBImages)).to.be(true);
+            expect(speciesDbImages).to.be.an('Array');
 
-            _.forEach(speciesDBImages, function (dbImage) {
+            _.forEach(speciesDbImages, function (dbImage) {
 
-                expect(_.isString(dbImage.speciesName)).to.be(true);
-
-                expect(dbImage.speciesProps).not.to.be(undefined);
-
-                expect(_.isArray(dbImage.animals)).to.be(true);
-
+                expect(dbImage.speciesName).to.be.a('String');
+                expect(dbImage.speciesProps).to.exist;
+                expect(dbImage.animals).to.be.an('Array');
             });
 
         });

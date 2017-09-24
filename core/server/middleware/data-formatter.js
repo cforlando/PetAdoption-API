@@ -1,21 +1,24 @@
 var _ = require('lodash');
 
-module.exports = function(options) {
-    return function(request, response, next){
+module.exports = function (options) {
+    return function (req, res, next) {
         var formatter = function (animalProps) {
             return _.reduce(animalProps, function (collection, propData, propName) {
-                if (response.locals.reducedOuput && response.locals.reducedOuput.indexOf(propName) < 0) return collection;
-                collection[propName] = (response.locals.simplifiedFormat) ? propData.val : propData;
+                 if (!res.locals.requestedProperties) {
+                    collection[propName] = res.locals.simplifiedFormat ? propData.val : propData;
+                } else if (res.locals.requestedProperties.includes(propName)) {
+                     // only respond with values requested in properties field
+                    collection[propName] = res.locals.simplifiedFormat ? propData.val : propData;
+                }
+
                 return collection;
             }, {});
         };
 
-        if (response.locals.data) {
-            if (response.locals.simplifiedFormat || response.locals.reducedOuput) {
-                response.json(response.locals.data.map(formatter));
-            } else {
-                response.json(response.locals.data);
-            }
+        if (res.locals.data && (res.locals.simplifiedFormat || res.locals.requestedProperties)) {
+            res.json(res.locals.data.map(formatter));
+        } else if (res.locals.data)  {
+            res.json(res.locals.data);
         } else {
             next()
         }

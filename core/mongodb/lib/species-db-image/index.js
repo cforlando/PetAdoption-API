@@ -1,13 +1,12 @@
-
 /**
  *
- * @class SpeciesDBImage
+ * @class SpeciesDbImage
  * @param {String} speciesName
  * @param {Object[]} [animals]
  * @param {Object} [speciesProps]
  * @constructor
  */
-function SpeciesDBImage(speciesName, animals, speciesProps) {
+function SpeciesDbImage(speciesName, animals, speciesProps) {
     this.speciesName = speciesName;
     this.animals = animals || [];
     this.speciesProps = speciesProps || {};
@@ -16,7 +15,7 @@ function SpeciesDBImage(speciesName, animals, speciesProps) {
     return this;
 }
 
-SpeciesDBImage.prototype = {
+SpeciesDbImage.prototype = {
 
     getSpeciesName: function () {
         return this.speciesName;
@@ -31,4 +30,4 @@ SpeciesDBImage.prototype = {
     }
 };
 
-module.exports = SpeciesDBImage;
+module.exports = SpeciesDbImage;

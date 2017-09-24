@@ -1,10 +1,11 @@
 language: node_js
 before_script:
   - npm install -g mocha
+  - npm install -g yarn
   - sleep 15
   - mongo mydb_test --eval 'db.addUser("travis", "test");'
 node_js:
-  - "4.3.2"
+  - "6.9.0"
 addons:
   apt:
     sources:

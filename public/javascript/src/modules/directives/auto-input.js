@@ -1,28 +1,20 @@
-define([
-    'require',
-    'underscore',
-    'text!./views/auto-input.html',
-    'ngApp'
-], function (require) {
-    var _ = require('underscore'),
-        ngApp = require('ngApp');
+var _ = require('lodash'),
+    ngApp = require('ngApp');
 
-    ngApp.directive('autoInput', function () {
-        return {
-            restrict: 'C',
-            template: require('text!./views/auto-input.html'),
-            controller : ['$scope', function($scope){
-                $scope.getType = function(){
-                    return $scope.$parent.getPropType($scope.propData);
-                }
+module.exports = ngApp.directive('autoInput', function () {
+    return {
+        restrict: 'C',
+        template: require('raw-loader!./templates/auto-input.html'),
+        controller: function ($scope) {
 
-                $scope.isResetable = function(){
-                    return $scope.$parent.isPropResetable($scope.propData);
-                }
+            $scope.getType = function (propData) {
+                return $scope.getPropType(propData || $scope.propData);
+            };
 
-            }]
+            $scope.isResetable = function (propData) {
+                return $scope.isPropResetable(propData || $scope.propData);
+            }
+
         }
-    })
-
-    return ngApp;
+    }
 })

@@ -1,11 +1,13 @@
-var angular = require('angular'),
-    ngRoute = require('ng-route'),
-    jQueryUI = require('jquery-ui'),
-    jQUeryUITouchPunch = require('touch-punch'),
-    ngDragDrop = require('angular-dragdrop'),
-    slickCarousel = require('angular-slick-carousel'),
-    ngMessages = require('ng-messages'),
-    ngMaterial = require('ng-material');
+var angular = require('angular');
+var ngRoute = require('ng-route');
+var ngDragDrop = require('angular-dragdrop');
+var slickCarousel = require('angular-slick-carousel');
+var ngMessages = require('ng-messages');
+var ngMaterial = require('ng-material');
+// global dependencies
+require('jquery-ui');
+require('touch-punch');
+require('jquery-file-input-urls');
 
 var ngApp = angular.module('cfo-pet-adoption-data-entry', ['ngMaterial', 'ngMessages', 'ngRoute', 'slickCarousel', 'ngDragDrop'])
     .config(function ($mdThemingProvider) {

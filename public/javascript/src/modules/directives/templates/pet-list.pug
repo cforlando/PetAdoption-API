@@ -1,0 +1,17 @@
+include _auto-generated/_-all
+.list(layout-fill layout='column')
+    md-content
+        md-tabs(md-selected="currentSpeciesIndex" md-dynamic-height md-border-bottom md-autoselect md-stretch-tabs='auto')
+            md-tab(ng-repeat="speciesName in speciesList", label="{{speciesName}} ({{animals[speciesName].length}})")
+                md-grid-list(md-row-height="1:1", md-cols-xs= 2, md-cols-sm=3, md-cols-md=4, md-cols-lg=8, md-cols-gt-lg=12)
+                    md-grid-tile(ng-repeat="pet in animals[speciesName]" ng-style="{'background': 'url('+pet.getValue('images')[0]+') center, url(/images/placeholders/' + speciesName +'.png) center', 'background-size': 'cover' }")
+                        md-checkbox.checkbox(ng-checked!="selectedPets[pet.getId()]" ng-click!="togglePetSelection(pet)" aria-label="selected?")
+                        md-grid-tile-footer.tile-footer(ng-click="editPet(pet);")
+                            h3!="{{pet.getName() || pet.getId() || 'n/a'}}"
+    md-fab-speed-dial.md-fab-bottom-right.md-scale.pet-list-menu(ng-show="isBatchEditActive()", md-direction="up", md-open="isPetListMenuOpen", ng-click="isPetListMenuOpen!=isPetListMenuOpen")
+        md-fab-trigger
+            md-button.md-fab
+                md-icon.material-icons menu
+        md-fab-actions
+            md-button.md-fab.md-mini.md-raised(ng-click="batchEdit($event)")
+                md-icon.material-icons edit

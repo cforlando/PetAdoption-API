@@ -1,33 +1,32 @@
-var _ = require('lodash'),
+var _ = require('lodash');
 
-    Debuggable = require('../lib/debuggable'),
-    config = require('../config'),
+var config = require('../config');
 
-    TimestampedDatabase = require('./timestamped'),
-    SpeciesCollectionSchema = require('./schemas/species-collection'),
-    Collection = require('./lib/collection');
+var Collection = require('./lib/collection');
+var TimestampedDatabase = require('./lib/timestamped-database');
+var SpeciesCollectionSchema = require('./schemas/species-collection');
 
 /**
  *
  * @extends TimestampedDatabase
+ * @extends BaseDatabase
+ * @class SpeciesCollectionDatabase
  * @param options
  * @constructor
  */
 function SpeciesCollectionDatabase(options) {
-    var self = this,
-        _options = _.defaults(options, {
-            modelNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_'
-        });
+    var _options = _.defaults(options, {
+        modelNamePrefix: config.DEVELOPMENT_ENV ? 'dev_' : 'prod_'
+    });
+    var collection = new Collection(_options.collectionNamePrefix + 'species_collection', SpeciesCollectionSchema);
 
-    this.collection = new Collection(_options.collectionNamePrefix + 'species_collection', SpeciesCollectionSchema);
-    this.collection.setDebugTag(_options.debugTag);
-    this.collection.setDebugLevel(_options.debugLevel);
+    TimestampedDatabase.call(this, collection);
 
-    TimestampedDatabase.call(this, this.collection);
+    this.initDatabase();
 }
 
 SpeciesCollectionDatabase.prototype = {};
 
-_.defaults(SpeciesCollectionDatabase.prototype, TimestampedDatabase.prototype);
+SpeciesCollectionDatabase.prototype = Object.assign({}, TimestampedDatabase.prototype, SpeciesCollectionDatabase.prototype);
 
 module.exports = SpeciesCollectionDatabase;

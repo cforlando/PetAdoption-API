@@ -1,70 +1,61 @@
-var fs = require('fs'),
-    path = require('path'),
-    url = require('url'),
-    util = require('util'),
+var fs = require('fs');
+var path = require('path');
+var url = require('url');
+var util = require('util');
 
-    _ = require('lodash'),
-    async = require('async'),
-    multer = require('multer'),
+var _ = require('lodash');
+var async = require('async');
+var multer = require('multer');
+var log = require('debug')('pet-api:csv-importer');
 
-    config = require('../config'),
-    csvReader = require('./reader'),
-    Debuggable = require('../lib/debuggable');
+var config = require('../config');
+var csvReader = require('./reader');
 
 function CSVImporter() {
     this.reader = csvReader;
+    this.log = log;
 }
 
 CSVImporter.prototype = {
 
     /**
      *
-     * @param {Function} [callback]
+     * @returns {Promise.<pets>}
      */
-    run: function (callback) {
+    run: function () {
 
         var self = this;
-        this.reader.parseSpeciesProps({
-            readPath: [
-                path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Cats.csv'),
-                path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Dogs.csv')
-            ],
-            cache: true,
-            done: onSpeciesPropsParsed
-        });
-
-        function onSpeciesPropsParsed(speciesProps, options) {
-            self.log('species props parsed');
-            self.reader.parseOptions({
-                cache: true,
+        return this.reader.parseSpeciesProps({
                 readPath: [
-                    path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Small Animals.csv'),
-                    path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Rabbits.csv'),
-                    path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Reptiles.csv'),
-                    path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Birds.csv'),
-                    path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Dogs.csv'),
-                    path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Cats.csv')
+                    path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Cats.csv'),
+                    path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Model - Dogs.csv')
                 ],
-                done: onOptionsParsed
+                cache: true
             })
-        }
+            .then(function () {
+                self.log('species props parsed');
+                return self.reader.parseOptions({
+                    cache: true,
+                    readPath: [
+                        path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Small Animals.csv'),
+                        path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Rabbits.csv'),
+                        path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Reptiles.csv'),
+                        path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Birds.csv'),
+                        path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Dogs.csv'),
+                        path.resolve(process.cwd(), 'tmp/CfO_Animal_Adoption_DB_Options - Cats.csv')
+                    ]
+                })
 
-        function onOptionsParsed() {
-            self.log('options parsed');
-            self.reader.parseDataset({
-                cache: true,
-                done: onDatasetParsed
+            })
+            .then(function () {
+                self.log('options parsed');
+                return self.reader.parseDataset({cache: true});
+            })
+            .then(function (petCollection) {
+                self.log('done parsing csv data');
+                return petCollection
             });
-        }
-
-        function onDatasetParsed(petCollection, options) {
-            self.log('dataset parsed');
-            console.log('done parsing csv data');
-            if (callback) callback(petCollection);
-        }
     }
 };
-
-_.extend(CSVImporter.prototype, Debuggable.prototype);
 
 module.exports = CSVImporter;

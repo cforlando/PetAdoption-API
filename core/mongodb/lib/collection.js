@@ -1,28 +1,16 @@
-var _ = require('lodash'),
-    mongoose = require('mongoose'),
-
-    Debuggable = require('../../lib/debuggable');
+var _ = require('lodash');
+var mongoose = require('mongoose');
 
 /**
  * @class Collection
  * @param {String} namespace
  * @param {Object} schema
  * @param {Object} [options]
- * @param {Object} [options.debugLevel]
- * @param {String} [options.debugTag]
  * @returns {Collection}
  * @constructor
  */
 function Collection(namespace, schema, options) {
-    var self = this,
-        _options = _.defaults(options, {
-            debugLevel: Debuggable.PROD,
-            debugTag: 'TimestampedModelFactory: '
-        });
-
     this.setCollectionName(namespace);
-    this.setDebugTag(_options.debugTag);
-    this.setDebugLevel(_options.debugLevel);
     for (var propName in schema) {
         if (schema.hasOwnProperty(propName)) {
             var propData = schema[propName],
@@ -30,14 +18,13 @@ function Collection(namespace, schema, options) {
             this.addSchemaProp(propName, propValueSchemaType);
         }
     }
-    if (_options.init) _options.init.apply(this);
 }
 
 Collection.prototype = {
 
     /**
      *
-     * @param {MongoDBAdapter|String} adapter
+     * @param {MongoDbAdapter|String} adapter
      * @returns {Model|*}
      * @private
      */
@@ -56,7 +43,7 @@ Collection.prototype = {
 
     /**
      *
-     * @param {MongoDBAdapter} adapter
+     * @param {MongoDbAdapter} adapter
      * @returns {*|Aggregate|Model}
      */
     toMongooseModel: function (adapter) {
@@ -126,7 +113,7 @@ Collection.prototype = {
         }
     },
 
-    _buildSchema : function () {
+    _buildSchema: function () {
         this.mongooseSchema = mongoose.Schema(this.schema);
         for (var staticMethodName in this.statics) {
             if (this.statics.hasOwnProperty(staticMethodName)) {
@@ -163,7 +150,7 @@ Collection.prototype = {
      * @param {String} methodName
      * @param {Function} methodFunc
      */
-    addStaticMethod : function (methodName, methodFunc) {
+    addStaticMethod: function (methodName, methodFunc) {
         this.statics = this.statics || {}; // init if not created
         this.statics[methodName] = methodFunc;
     },
@@ -173,7 +160,7 @@ Collection.prototype = {
      * @param {String} methodName
      * @param {Function} methodFunc
      */
-    addMethod : function (methodName, methodFunc) {
+    addMethod: function (methodName, methodFunc) {
         this.methods = this.methods || {}; // init if not created
         this.methods[methodName] = methodFunc;
     },
@@ -183,7 +170,7 @@ Collection.prototype = {
      * @param {String} pluginName
      * @param {Function} pluginFunc
      */
-    addPlugin : function (pluginName, pluginFunc) {
+    addPlugin: function (pluginName, pluginFunc) {
         this.plugins = this.plugins || {}; // init if not created
         this.plugins[pluginName] = pluginFunc;
     },
@@ -194,7 +181,7 @@ Collection.prototype = {
      * @param {String} eventName
      * @param {Function} middlewareFunc
      */
-    addMiddleware : function (middlewareName, eventName, middlewareFunc) {
+    addMiddleware: function (middlewareName, eventName, middlewareFunc) {
         this.middleware = this.middleware || {
                 pre: {},
                 post: {}
@@ -207,7 +194,7 @@ Collection.prototype = {
      * @param {String} propName
      * @param {Function|Object} propType A valid Mongoose Schema Type
      */
-    addSchemaProp : function (propName, propType) {
+    addSchemaProp: function (propName, propType) {
         this.schema = this.schema || {};
         this.schema[propName] = propType;
     },
@@ -216,7 +203,7 @@ Collection.prototype = {
      *
      * @param {Object} schema
      */
-    setSchema : function(schema){
+    setSchema: function (schema) {
         this.schema = schema;
     },
 
@@ -224,19 +211,17 @@ Collection.prototype = {
      *
      * @returns {Function} propType A valid Mongoose Schema Type
      */
-    getSchema : function () {
+    getSchema: function () {
         return this.schema || {};
     },
 
     /**
      * @returns {Schema}
      */
-    toMongooseSchema : function () {
+    toMongooseSchema: function () {
         return this._buildSchema();
     }
 };
-
-_.extend(Collection.prototype, Debuggable.prototype);
 
 module.exports = Collection;
 

@@ -1,0 +1,6 @@
+include _auto-generated/_-all
+include includes/_mixins
++form-input('select')
+    md-input-container.md-block
+        label {{propData.fieldLabel}}
+        input(ng-model="propData.val" ng-change="setAnimalProperty(propData.key, propData)" type='number')
