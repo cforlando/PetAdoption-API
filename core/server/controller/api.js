@@ -79,11 +79,27 @@ APIController.prototype = {
 
             if (!userId) {
                 if (config.DEVELOPMENT_ENV) {
+                    var meta = [];
+
+                    if (process.env.DEFAULT_PROP_ORDER) {
+                        meta = (function(){
+                            try {
+                                return [{
+                                    name: 'propOrder',
+                                    value: process.env.DEFAULT_PROP_ORDER
+                                }];
+                            } catch (err) {
+                                return []
+                            }
+                        })()
+                    }
+
                     res.locals.data = {
                         id: 'dev',
                         defaults: [],
-                        meta: []
+                        meta: meta
                     };
+
                     next();
                     return;
                 }
@@ -96,7 +112,22 @@ APIController.prototype = {
                 .then(function (user) {
 
                     res.locals.simplifiedFormat = false;
+
+                    if (process.env.DEFAULT_PROP_ORDER && !(user.meta && user.meta.length)) {
+                        user.meta = (function(){
+                            try {
+                                return [{
+                                    name: 'propOrder',
+                                    value: process.env.DEFAULT_PROP_ORDER
+                                }];
+                            } catch (err) {
+                                return []
+                            }
+                        })()
+                    }
+
                     res.locals.data = user;
+
 
                     next();
                 })

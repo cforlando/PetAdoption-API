@@ -82,6 +82,9 @@ GOOGLE_CLIENT_SECRET=XXXXXXXXXXXXXXXXXXXXXXXX
 # You can find this via https://console.developers.google.com/apis/dashboard
 # This is used for front-end map input functionality
 GOOGLE_MAPS_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+# dictionary object defining order of propers (taken from https://gist.github.com/JohnLeeroy/9ce15afc258b8acaf4dce45962801bd1)
+DEFAULT_PROP_ORDER={"images":0,"petName":3,"species":4,"petId":3,"activityLevel":17,"actQuickly":11,"adoptable":10,"age":8,"caseActive":2,"caseNumber":1,"color":13,"crateTrained":18,"currentShots":19,"declawed":20,"description":15,"goodWithCats":21,"goodWithDogs":22,"goodWithKids":23,"hairLength":24,"houseTrained":25,"intakeDate":14,"lost":26,"lostGeoLat":37,"lostGeoLon":28,"microchip":30,"microchip_number":31,"primaryBreed":5,"purebred":27,"secondaryBreed":6,"sex":7,"shelterAddrCity":30,"shelterAddrLine1":31,"shelterAddrLine2":32,"shelterAddrSt":33,"shelterAddrZip":34,"shelterContact":35,"shelterEmail":36,"shelterGeoLat":37,"shelterGeoLon":38,"shelterId":39,"shelterName":16,"shelterPhone":41,"shelterUrl":42,"size":9,"spayedNeutered":12,"specialNeeds":45}
 ```
 
 
