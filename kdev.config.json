@@ -5,12 +5,18 @@
     {
       "name": "pug-html",
       "input": "public/javascript/src/modules/directives/templates/",
-      "output": "public/javascript/src/modules/directives/templates/"
+      "output": "public/javascript/src/modules/directives/templates/",
+      "options": {
+        "fileExtension": "html"
+      }
     },
     {
       "name": "pug-html",
       "input": "public/javascript/src/modules/views/",
-      "output": "public/javascript/src/modules/views/"
+      "output": "public/javascript/src/modules/views/",
+      "options": {
+        "fileExtension": "html"
+      }
     },
     {
       "name": "js",
