@@ -35,6 +35,11 @@
       "name": "stylus",
       "input": "public/stylesheets/",
       "output": "public/stylesheets/"
+    },
+    {
+      "name": "css",
+      "input": "public/stylesheets/",
+      "output": "public/stylesheets/"
     }
   ]
 }

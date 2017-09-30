@@ -533,6 +533,16 @@ md-sidenav {
 .view--login .view__content {
   text-align: center;
 }
+.menu--actions {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  padding: 0.75em;
+  -webkit-justify-content: flex-end;
+  -ms-justify-content: flex-end;
+  justify-content: flex-end;
+}
 @-moz-keyframes fadeIn {
   0% {
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";

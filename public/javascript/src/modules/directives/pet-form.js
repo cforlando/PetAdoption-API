@@ -486,24 +486,17 @@ module.exports = ngApp.directive('petForm', function () {
                     actions: [
                         {
                             onClick: function () {
-                                $scope.deletePet({successRedirect: true})
-                            },
-                            label: 'delete',
-                            icon: 'delete_forever'
-                        },
-                        {
-                            onClick: function () {
-                                $scope.clearPetValues()
-                            },
-                            label: 'clear',
-                            icon: 'clear'
-                        },
-                        {
-                            onClick: function () {
                                 $scope.savePet({visibleNotification: true, successRedirect: true})
                             },
                             label: 'save',
                             icon: 'save'
+                        },
+                        {
+                            onClick: function () {
+                                $scope.deletePet({successRedirect: true})
+                            },
+                            label: 'delete',
+                            icon: 'delete_forever'
                         }
                     ]
                 };

@@ -11,30 +11,21 @@ module.exports = ngApp.directive('speciesForm', function () {
         restrict: 'C',
         template: require('raw-loader!./templates/species-form.html'),
         controller: function ($scope, $routeParams, $location, $mdDialog, $controller, request, speciesDataService, userService) {
-            angular.extend(this, $controller('formController', {$scope: $scope}));
+            angular.extend(this, $controller('formController', { $scope: $scope }));
             $scope.valTypes = ['String', 'Date', 'Number', 'Boolean'];
             $scope.speciesName = $routeParams.speciesName;
             $scope.speciesProps = [];
-            $scope.actionMenu.actions = [
-                {
-                    onClick: function () {
-                        speciesDataService.deleteSpecies($scope.speciesName)
-                            .then(function () {
-                                $location.path('/species');
-                            })
-                    },
-                    icon: 'delete_forever',
-                    label: 'Delete'
-                },
-                {
-                    onClick: function () {
-                        $scope.uploadPhoto();
-                    },
-                    icon: 'photo',
-                    label: 'Placeholder'
-                }
-            ];
 
+            $scope.deleteSpecies = function () {
+                return speciesDataService.deleteSpecies($scope.speciesName)
+                    .then(function () {
+                        $location.path('/species');
+                    })
+            }
+
+            $scope.updatePlaceholder = function () {
+                return $scope.uploadPhoto();
+            }
 
             /**
              *
@@ -110,7 +101,7 @@ module.exports = ngApp.directive('speciesForm', function () {
                         $scope.hideLoading();
                         return $scope.showMessage("Deleted '" + propData.key + "'")
                     })
-                    .catch(function(){
+                    .catch(function () {
                         $scope.hideLoading();
                     })
             };
@@ -187,8 +178,8 @@ module.exports = ngApp.directive('speciesForm', function () {
                 return true;
             };
 
-            $scope.updateForm = function(){
-                return speciesDataService.getSpecies($scope.speciesName, {useCache: true})
+            $scope.updateForm = function () {
+                return speciesDataService.getSpecies($scope.speciesName, { useCache: true })
                     .then(function (species) {
                         var activeSpecies = species;
                         var defaultPropPriorities = {

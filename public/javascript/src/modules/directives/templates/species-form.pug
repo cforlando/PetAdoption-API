@@ -1,19 +1,31 @@
 include _auto-generated/_-all
+mixin species-menu
+        .menu.menu--actions
+            md-button.md-raised.md-primary.button.button--add-property(aria-label!="Add Propery", ng-click="createNewProp($event)")
+                |Add Property
+            md-button.md-raised.md-warn.button.button--delete-species(aria-label!="Delete species", ng-click="deleteSpecies()")
+                |Delete Species
+            md-button.md-raised.button.button--update-placeholder(aria-label!="Update placeholder image", ng-click="updatePlaceholder()")
+                |Update Placeholder
 .view.view--species(layout='column')
     .file-input(on-file-input-change="onFileMediaChange" trigger="uploadPhoto")
         md-content()
             md-subheader.md-primary!="{{speciesName}}"
             md-divider
+            +species-menu()
+            - 
+                const mdCardAttrs =  {
+                    'ng-if': "isVisibleProp(speciesProp)",
+                    'ng-repeat': "speciesProp in speciesProps",
+                    'data-drop': "true",
+                    'data-drag': "true",
+                    'ng-model': "speciesProps",
+                    'jqyoui-droppable': "{index: {{$index}}, onDrop: 'onDragDrop'}",
+                    'jqyoui-draggable': "{index: {{$index}}, animate:true, insertInline: true}",
+                    'data-jqyoui-options': "{revert: 'invalid', handle: 'md-card-title .md-headline'}"
+                };
             div(flex)
-                md-card(md-3-line
-                ng-if="isVisibleProp(speciesProp)"
-                ng-repeat="speciesProp in speciesProps"
-                data-drop="true"
-                data-drag="true"
-                ng-model="speciesProps"
-                jqyoui-droppable="{index: {{$index}}, onDrop: 'onDragDrop'}"
-                jqyoui-draggable="{index: {{$index}}, animate:true, insertInline: true}"
-                data-jqyoui-options="{revert: 'invalid', handle: 'md-card-title .md-headline'}")
+                md-card(md-3-line)&attributes(mdCardAttrs)
                     md-card-title
                         md-card-title-text
                             span.md-headline!="{{speciesProp.fieldLabel}}"
@@ -25,5 +37,4 @@ include _auto-generated/_-all
                             md-icon.material-icons mode_edit
                         md-button.md-icon-button(ng-click="deleteProp(speciesProp)")
                             md-icon.material-icons delete_forever
-    md-button.button.button--create-prop.md-fab.md-primary.md-fab-bottom-right(aria-label!="Add species", ng-click="createNewProp($event)")
-        md-icon.material-icons add
+            +species-menu()

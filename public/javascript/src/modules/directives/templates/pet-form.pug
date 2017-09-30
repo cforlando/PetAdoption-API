@@ -7,12 +7,11 @@ div
     .fields()
         .field(class="field--{{propData.key}}", ng-repeat="propData in formRenderData")
             .auto-input
-    md-fab-speed-dial.md-scale.md-fab-bottom-right(md-open="menu.isOpen" md-direction="up")
-        md-fab-trigger
-            md-button.md-fab.md-primary(aria-label="menu")
-                md-icon.material-icons menu
-        md-fab-actions
-            md-button.md-fab.md-raised.md-mini(ng-repeat="action in menu.actions" ng-click="action.onClick()")
-                md-tooltip(md-direction="left" md-visible="menu.isOpen") {{action.label}}
-                md-icon.material-icons {{action.icon}}
-
+            .menu.menu--actions(ng-if="$index === 0 || $last")
+                -
+                    const mdButtonClass = `{
+                        'md-primary': action.label === 'save',
+                        'md-warn': action.label === 'delete'
+                    }`;
+                md-button.md-raised(ng-class=mdButtonClass ng-repeat="action in menu.actions" ng-click="action.onClick()")
+                    | {{action.label}}
