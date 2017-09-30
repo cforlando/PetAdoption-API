@@ -78,6 +78,7 @@ S3_TEST_BUCKET_NAME=test-cfo
 # This is used for preferences/settings on a per basis user and minimal authentication
 GOOGLE_CLIENT_ID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 GOOGLE_CLIENT_SECRET=XXXXXXXXXXXXXXXXXXXXXXXX
+GOOGLE_AUTH_CALLBACK=http://localhost:8080/auth/google/callback
 
 # You can find this via https://console.developers.google.com/apis/dashboard
 # This is used for front-end map input functionality
