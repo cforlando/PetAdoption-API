@@ -1,0 +1,14 @@
+include _auto-generated/_-all
+include includes/_mixins
+.view.view--settings(layout='column')
+    md-content
+        md-card(md-3-line)&attributes(mdCardAttrs)
+            md-card-title
+                md-card-title-text
+                    span.md-headline User Settings
+            md-card-content(layout='column')
+                div(ng-repeat="setting in settings")
+                    auto-input(params="setting" has-default='false')
+            md-card-actions(layout='row', layout-align='end')
+                md-button.md-icon-button(ng-click="saveSettings()")
+                    md-icon.material-icons save
