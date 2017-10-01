@@ -1,31 +1,13 @@
 var path = require('path');
 
+var dotenv = require('dotenv');
 var webpack = require('webpack');
+
+dotenv.config();
 
 module.exports = {
     entry: {
-    	'app': 'app.js',
-		'vendor.app': [
-			'url',
-			'path',
-			'jquery',
-			'lodash',
-			'jquery-ui',
-			'touch-punch',
-			'angular',
-			'ng-animate',
-			'ng-aria',
-			'ng-material',
-			'ng-messages',
-			'ng-route',
-			'ng-sanitize',
-			'jquery-slick',
-			'angular-slick-carousel',
-			'angular-dragdrop',
-			'underscore',
-			'moment',
-			'async'
-		]
+    	'app': 'app.js'
 	},
 	context: __dirname,
 	output: {
@@ -63,14 +45,6 @@ module.exports = {
 		}
 	},
 	plugins: [
-		// new webpack.optimize.UglifyJsPlugin({
-		//     compress: {
-		//         drop_console: true,
-		//         drop_debugger: true
-		//     },
-		//     mangle: false
-		// }),
-
 		new webpack.ProvidePlugin({
 			'$': 'jquery',
 			'jQuery': 'jquery',
@@ -79,12 +53,21 @@ module.exports = {
 		}),
 
         new webpack.optimize.CommonsChunkPlugin({
-            names: ['app', 'vendor.app'],
+            name: 'vendor.app',
             minChunks: module => /node_modules|vendors/.test(module.context)
         })
-	],
+	].concat(process.env.DEVELOPMENT_ENV ? [] : [
+        new webpack.optimize.UglifyJsPlugin({
+            compress: {
+                drop_console: true,
+                drop_debugger: true
+            },
+            mangle: false
+        })
+	]),
 	node: {
 		'path': true,
 		'url': true
-	}
+	},
+	devtool: process.env.DEVELOPMENT_ENV ? 'source-map' : false
 };
