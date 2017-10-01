@@ -5,8 +5,9 @@ module.exports = ngApp.directive('fileInput', function () {
     return {
         restrict: 'EC',
         scope: {
-            onFileInputChangeCallback: '=onFileInputChange',
-            upload: '=trigger',
+            onFileInputChangeCallback: '=?onChange',
+            addTrigger: '=?',
+            removeTrigger: '=?',
             inputLimit: '@'
         },
         transclude: true,
@@ -14,13 +15,13 @@ module.exports = ngApp.directive('fileInput', function () {
         controller: function ($scope, $element, $timeout) {
             console.log("init fileInput @ %o", $element);
             $scope.namespaces = [];
-            $scope.get$inputs = function () {
-                return $element.find("input[type='file']");
-            };
-            $scope.$inputs = $scope.get$inputs();
 
             $scope.clear = function () {
                 $scope.namespaces = [];
+            };
+
+            $scope.get$inputs = function () {
+                return $element.find("input[type='file']");
             };
 
             /**
@@ -75,18 +76,17 @@ module.exports = ngApp.directive('fileInput', function () {
                 $scope.addFileInputListeners();
             };
 
-            $scope.onDestroy = function () {
-                $scope.removeFileInputListeners();
-            };
-
             (function init() {
-                if ($scope.registerMediaScope) $scope.registerMediaScope($scope);
+
+                $scope.$inputs = $scope.get$inputs();
+
+                $scope.addTrigger = $scope.upload;
+                $scope.removeTrigger = $scope.removeUploadByIndex;
+
+                $scope.$on("$destroy", function () {
+                    $scope.removeFileInputListeners();
+                });
             })();
-        },
-        link: function (scope, element, attributes) {
-            // When the destroy event is triggered, check to see if the above
-            // data is still available.
-            if (scope.onDestroy) scope.$on("$destroy", scope.onDestroy);
         }
     }
 })

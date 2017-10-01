@@ -1,5 +1,5 @@
 include _auto-generated/_-all
-.file-input(on-file-input-change="onFileMediaChange" trigger="uploadPhoto")
+.file-input(on-change="onFileMediaChange" add-trigger="uploadPhoto" remove-trigger="removeUploadByIndex")
     .gallery__wrap
         .images-nav
             .md-button.md-primary.md-fab.md-mini.btn-add(ng-click="uploadPhoto()")

@@ -63,7 +63,6 @@ module.exports = ngApp.directive('imagesInput', [function () {
                      $slides.remove();
                      */
                     $scope.propData.val = imagesArr;
-                    $scope.setAnimalProperty($scope.propData.key, {val: $scope.propData.val});
                     $scope.initSlick(callback);
                 })
             };
@@ -76,15 +75,16 @@ module.exports = ngApp.directive('imagesInput', [function () {
             };
 
             $scope.removePhotoByIndex = function (imageIndex) {
-                var savedImages = _.reject($scope.propData.val, function (imageURL) {
-                    return imageURL.match(/^data/)
+                var imageMetas = _.map($scope.propData.val, function (imageURL, idx) {
+                    return {
+                        isUploadPreview: imageURL.match(/^data/)
+                    }
                 });
 
-                var savedImagesCount = savedImages.length;
-
-                if (imageIndex >= savedImagesCount) {
+                if (imageMetas[imageIndex].isUploadPreview) {
                     // will trigger `onFileInputChange`, and consequently update the slider
-                    $scope.$media.removeUploadByIndex(imageIndex - savedImagesCount)
+                    // temporarily uploaded images are always first in the array
+                    $scope.removeUploadByIndex(imageIndex)
                 } else {
                     $scope.setImages(_.reject($scope.propData.val, function (savedImageURL, index) {
                         return index === imageIndex
@@ -99,7 +99,7 @@ module.exports = ngApp.directive('imagesInput', [function () {
              * @param imageURL
              */
             $scope.addPhoto = function (imageURL) {
-                $scope.setAnimalProperty($scope.propData.key, [imageURL].concat($scope.propData.val));
+                $scope.propData.val = [imageURL].concat($scope.propData.val);
             };
 
 

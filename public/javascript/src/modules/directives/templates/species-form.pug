@@ -8,7 +8,7 @@ mixin species-menu
             md-button.md-raised.button.button--update-placeholder(aria-label!="Update placeholder image", ng-click="updatePlaceholder()")
                 |Update Placeholder
 .view.view--species(layout='column')
-    .file-input(on-file-input-change="onFileMediaChange" trigger="uploadPhoto")
+    .file-input(on-change="onFileMediaChange" add-trigger="uploadPhoto")
         md-content()
             md-subheader.md-primary!="{{speciesName}}"
             md-divider
