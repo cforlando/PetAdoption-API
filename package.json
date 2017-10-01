@@ -5,6 +5,7 @@
     "pet-adoption-api-server": "bin/start-server.js"
   },
   "scripts": {
+    "postinstall": "kdev webpack && kdev stylus && kdev css",
     "start": "node bin/start-server.js",
     "create-cron": "node bin/create-cron.js",
     "compile:public:js": "webpack --display-reasons --config public/javascript/src/webpack.config.js",
