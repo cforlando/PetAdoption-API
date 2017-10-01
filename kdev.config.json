@@ -38,7 +38,7 @@
     },
     {
       "name": "css",
-      "input": "public/stylesheets/",
+      "input": "public/stylesheets/style.css",
       "output": "public/stylesheets/"
     }
   ]
