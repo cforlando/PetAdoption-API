@@ -14,9 +14,9 @@ public/javascript/app.js
 public/javascript/app.js.map
 public/javascript/vendor.app.js
 public/javascript/vendor.app.js.map
-public/javascript/src/views/*.html
-public/javascript/src/views/dialogs/*.html
-public/javascript/src/directives/templates/*.html
+public/javascript/src/modules/views/*.html
+public/javascript/src/modules/views/dialogs/*.html
+public/javascript/src/modules/directives/templates/*.html
 public/images/*.*
 tmp/*
 !tmp/*.csv
