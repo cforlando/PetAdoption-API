@@ -8,8 +8,8 @@ module.exports = {
     photo: String,
     meta: [
         {
-            name: String,
-            value: Schema.Types.Mixed
+            key: String,
+            val: Schema.Types.Mixed
         }
     ],
     defaults: [{

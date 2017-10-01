@@ -9,6 +9,38 @@ module.exports = ngApp.service('userService', function (request) {
         // Get user ID
     };
 
+    this.setUserMeta = function (key, val) {
+        var metaProp = _.find(this.user.meta, {key: key});
+
+        if (!metaProp) {
+            this.user.meta.push({
+                key: key,
+                val: val
+            });
+        } else {
+            metaProp.val = val;
+        }
+    };
+
+    /**
+     *
+     * @param {String} key
+     * @return {{key: String, val: *}}
+     */
+    this.getUserMeta = function (key) {
+        return _.find(this.user.meta, {key: key});
+    };
+
+    /**
+     *
+     * @param {String} key
+     * @return {*}
+     */
+    this.getUserMetaValue = function (key) {
+        var metaProp = _.find(this.user.meta, {key: key});
+        return metaProp && metaProp.val;
+    };
+
     /**
      *
      * @param propName
@@ -17,6 +49,9 @@ module.exports = ngApp.service('userService', function (request) {
         return _.find(this.user.defaults, {key: propName});
     };
 
+    /**
+     * @returns {Object[]}
+     */
     this.getUserDefaults = function () {
         return this.user.defaults;
     };
@@ -34,10 +69,9 @@ module.exports = ngApp.service('userService', function (request) {
      * @param propData
      */
     this.updateUserDefault = function (propData) {
-        var propDefault = _.find(this.user.defaults, function (propDefaultData) {
-            return propDefaultData.key == propData.key;
-        });
-        propDefault = _.pick(propData, ['key', 'val']);
+        var propDefault = this.getUserDefault(propData.key);
+        propDefault.key = propData.key;
+        propDefault.val = propData.val;
     };
 
     /**
@@ -59,17 +93,15 @@ module.exports = ngApp.service('userService', function (request) {
      * @param {Number} priorityVal
      */
     this.setUserAnimalPropertyOrder = function (propName, priorityVal) {
-        var propOrderData = _.find(this.user.meta, function (metaProp) {
-            return metaProp.name == 'propOrder';
-        });
+        var propOrderData = _.find(this.user.meta, {key: 'propOrder'});
         // define if not set
         if (!propOrderData) {
-            propOrderData = {name: 'propOrder', value: '{}'};
+            propOrderData = {key: 'propOrder', val: '{}'};
             this.user.meta.push(propOrderData);
         }
-        var propOrderValue = JSON.parse(propOrderData.value);
+        var propOrderValue = JSON.parse(propOrderData.val);
         propOrderValue[propName] = priorityVal;
-        propOrderData.value = JSON.stringify(propOrderValue);
+        propOrderData.val = JSON.stringify(propOrderValue);
     };
 
     /**
@@ -78,7 +110,7 @@ module.exports = ngApp.service('userService', function (request) {
      * @param {Number} priorityVal
      * @returns {Promise}
      */
-    this.saveUserAnimalPropertyOrder = function(propName, priorityVal){
+    this.saveUserAnimalPropertyOrder = function (propName, priorityVal) {
         this.setUserAnimalPropertyOrder(propName, priorityVal);
         return this.saveCurrentUser();
     };
@@ -90,33 +122,18 @@ module.exports = ngApp.service('userService', function (request) {
     };
 
     this.getUserAnimalPropertiesOrder = function () {
-        var propPriorities = _.find(this.user.meta, function (metaProp) {
-            return metaProp.name == 'propOrder';
-        });
+        var propPriorities = _.find(this.user.meta, {key: 'propOrder'});
         // define if not set
         if (!propPriorities) {
-            propPriorities = {name: 'propOrder', value: '{}'};
+            propPriorities = {key: 'propOrder', val: '{}'};
             this.user.meta.push(propPriorities);
         }
-        return JSON.parse(propPriorities.value);
+        return JSON.parse(propPriorities.val);
     };
 
     this.getPropPriority = function (propName) {
         var propPriorities = this.getUserAnimalPropertiesOrder();
         return propPriorities[propName];
-    };
-
-    this.sortSpeciesProps = function (props) {
-        var propPriorities = _.defaults(this.getUserAnimalPropertiesOrder(), {
-            petId: 0,
-            images: 1,
-            petName: 2,
-            species: 3
-        });
-        return _.sortBy(props, function (propData) {
-            // default to prop order in not specified
-            return propPriorities[propData.key] ? propPriorities[propData.key] : props.length - 1;
-        })
     };
 
     /**

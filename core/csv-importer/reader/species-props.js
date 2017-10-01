@@ -28,7 +28,7 @@ function parseModelCSV(csvModelData) {
      */
     var speciesProps = [{
         key: 'images',
-        valType: '[Image]',
+        valType: '[image]',
         defaultVal: ['http://placehold.it/500x500', 'http://placehold.it/720x480', 'http://placehold.it/480x480'],
         example: ['http://placehold.it/500x500', 'http://placehold.it/720x480', 'http://placehold.it/480x480']
     }];
@@ -63,9 +63,9 @@ function parseModelCSV(csvModelData) {
             switch (columnIndexName) {
                 case 'valType':
                     if (csvRow[columnIndex].match(/integer/i)) {
-                        speciesProp['valType'] = 'Number';
+                        speciesProp['valType'] = 'number';
                     } else {
-                        speciesProp['valType'] = _.capitalize(csvRow[columnIndex]);
+                        speciesProp['valType'] = _.camelCase(csvRow[columnIndex]);
                     }
                     break;
                 case 'defaultVal':
@@ -81,12 +81,12 @@ function parseModelCSV(csvModelData) {
         });
 
         switch (speciesProp['valType']) {
-            case 'Date':
+            case 'date':
                 if (!moment(speciesProp['defaultVal']).isValid()) {
                     speciesProp['defaultVal'] = null;
                 }
                 break;
-            case 'Boolean':
+            case 'boolean':
                 speciesProp['options'] = [true, false];
                 if (_.isString(speciesProp['defaultVal'])){
                     speciesProp['defaultVal'] = /yes|true/i.test(speciesProp['defaultVal'])
@@ -98,8 +98,8 @@ function parseModelCSV(csvModelData) {
         }
 
         if (speciesProp['key'].match(/(lostGeoL|shelterGeoL)/)) {
-            speciesProp['defaultVal'] = csvRow[columnIndices.example] || 'Location';
-            speciesProp['valType'] = 'Location';
+            speciesProp['defaultVal'] = csvRow[columnIndices.example] || 'location';
+            speciesProp['valType'] = 'location';
         }
 
         if (_.isString(speciesProp['required'])){

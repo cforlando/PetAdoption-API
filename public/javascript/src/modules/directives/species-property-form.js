@@ -7,9 +7,7 @@ ngApp.directive('speciesPropForm', function () {
     return {
         restrict: 'C',
         template: require('raw-loader!./templates/species-property-form.html'),
-        controller: function ($scope, $routeParams, $location, $mdDialog, $controller, speciesDataService, userService) {
-            angular.extend(this, $controller('formController', {$scope: $scope}));
-
+        controller: function ($scope, $routeParams, $location, $mdDialog, $controller, speciesDataService, userService, uiService, animalDataService) {
             $scope.speciesName = $routeParams.speciesName;
             $scope.propName = $routeParams.propName;
             $scope.propOrderValue = userService.getPropPriority($scope.propName);
@@ -28,7 +26,7 @@ ngApp.directive('speciesPropForm', function () {
                     return false;
                 }
 
-                switch ($scope.getPropType($scope.propData)) {
+                switch (animalDataService.getPropType($scope.propData)) {
                     case 'string':
                     case 'number':
                         return true;
@@ -46,7 +44,7 @@ ngApp.directive('speciesPropForm', function () {
                 if (!$scope.isFormValid()) {
                     var formErrMessage = "Form is invalid. Please fix.";
 
-                    $scope.showError(formErrMessage);
+                    uiService.showError(formErrMessage);
 
                     return Promise.reject(new Error(formErrMessage));
                 }
@@ -62,26 +60,23 @@ ngApp.directive('speciesPropForm', function () {
                 $scope.formatDefaultVal();
 
                 switch ($scope.propData.valType) {
-                    case 'Date':
-                    case 'Number':
+                    case 'date':
+                    case 'number':
                         $scope.propData.options = [];
                         break;
-                    case 'Boolean':
+                    case 'boolean':
                         $scope.propData.options = [true, false];
                         break;
                     default:
                         break;
                 }
 
-                $scope.showLoading();
                 return speciesDataService.saveSpeciesProp($scope.speciesName, _.omit($scope.propData, 'val'))
                     .then(function(){
-                        $scope.hideLoading();
-                        $scope.showMessage("Successfully saved property");
+                        uiService.showMessage("Successfully saved property");
                     })
                     .catch(function (err) {
-                        $scope.hideLoading();
-                        $scope.showError("Failed to save property");
+                        uiService.showError("Failed to save property");
                         console.error(err);
                         return Promise.reject(err);
                     })
@@ -104,20 +99,20 @@ ngApp.directive('speciesPropForm', function () {
                 var propType = defaultValType || $scope.propData.valType;
                 console.log('setting prop type to %s', propType);
                 switch (propType) {
-                    case 'Date':
+                    case 'date':
                         $scope.propData.defaultVal = moment.utc($scope.propData.defaultVal).toDate();
                         break;
-                    case 'Number':
+                    case 'number':
                         if (!_.isNumber($scope.propData.defaultVal)) {
                             $scope.propData.defaultVal = parseFloat($scope.propData.defaultVal) || 0;
                         }
                         break;
-                    case 'Boolean':
+                    case 'boolean':
                         if (!_.isBoolean($scope.propData.defaultVal)) {
                             $scope.propData.defaultVal = true;
                         }
                         break;
-                    case 'String':
+                    case 'string':
                     default:
                         if (!_.isString($scope.propData.defaultVal)) {
                             $scope.propData.defaultVal = '';
@@ -138,10 +133,10 @@ ngApp.directive('speciesPropForm', function () {
                                 valTypes.push(speciesProp.valType);
                             }
                             return valTypes;
-                        }, ['Number', 'String', 'Date', 'Boolean']);
+                        }, ['number', 'string', 'date', 'boolean']);
 
                         if (!$scope.activeSpecies.getProp($scope.propName)) {
-                            $scope.showError("Property not valid");
+                            uiService.showError("Property not valid");
                             console.error('invalid propName');
                             $location.path('/species/' + $scope.speciesName);
                         }

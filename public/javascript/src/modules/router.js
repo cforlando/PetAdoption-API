@@ -23,6 +23,9 @@ ngApp.config(function ($routeProvider, $locationProvider) {
         .when('/species/:speciesName/property/:propName', {
             template: require('raw-loader!modules/views/edit-species-prop.html')
         })
+        .when('/settings', {
+            template: require('raw-loader!modules/views/edit-settings.html')
+        })
         .otherwise({
             redirectTo: function () {
                 // roundabout way of determining if user is logged in

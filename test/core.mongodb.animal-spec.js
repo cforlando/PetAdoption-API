@@ -2,7 +2,6 @@ var _ = require('lodash');
 var moment = require('moment');
 var chai = require('chai');
 
-var Debuggable = require('../core/lib/debuggable');
 var Species = require('../core/lib/species');
 var Animal = require('../core/lib/animal');
 var AnimalDatabase = require('../core/mongodb/animal');
@@ -21,7 +20,7 @@ describe("AnimalDatabase", function () {
     var animalDb;
 
     before(function () {
-        animalDb = new AnimalDatabase({debugLevel: Debuggable.PROD});
+        animalDb = new AnimalDatabase();
     });
 
     after(function () {

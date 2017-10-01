@@ -69,7 +69,7 @@ describe("/species/all/query", function () {
                     queryProps = {species: speciesName};
 
                 // TODO implement tests for location
-                if (tSpeciesPropData.valType == 'Location') {
+                if (tSpeciesPropData.valType == 'location') {
                     // skip location fields
                     return;
                 }

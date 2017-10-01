@@ -17,17 +17,17 @@ describe("MongoAPIDatabase", function () {
     var speciesProps = [
         {
             key: 'species',
-            valType: 'String',
+            valType: 'string',
             defaultVal: 'aDefSpecies'
         },
         {
             key: 'aValue',
-            valType: 'String',
+            valType: 'string',
             defaultVal: 'aDefValue'
         },
         {
             key: 'bValue',
-            valType: 'Number',
+            valType: 'number',
             defaultVal: 3
         }
     ];
@@ -55,8 +55,7 @@ describe("MongoAPIDatabase", function () {
     before(function () {
         var dbOptions = {
             collectionNamePrefix: 'test_mongodb_',
-            preset: [],
-            debugTag: 'test_mongo_api_database: '
+            preset: []
         };
 
         testApiDatabase = new MongoAPIDatabase(dbOptions);
@@ -165,7 +164,7 @@ describe("MongoAPIDatabase", function () {
             var newPresetSpeciesProps = [
                 {
                     key: 'species',
-                    valType: 'String',
+                    valType: 'string',
                     defaultVal: 'aDefSpecies'
                 }, {
                     key: 'aNewProp',
@@ -175,7 +174,7 @@ describe("MongoAPIDatabase", function () {
                 {
                     key: 'aNewDateProp',
                     defaultVal: moment().subtract(5, 'days').toDate().toISOString(),
-                    valType: 'Date'
+                    valType: 'date'
                 }
             ];
             var newSpeciesTestAnimalProps = {

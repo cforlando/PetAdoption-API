@@ -97,12 +97,12 @@ Collection.prototype = {
             schemaResult = mongoose.Schema.Types.Mixed;
         if (propType) {
             switch (propData.valType) {
-                case 'String':
+                case 'string':
                     schemaResult = String;
                     break;
-                case 'Location':
-                case 'Number':
-                case 'Float':
+                case 'location':
+                case 'number':
+                case 'float':
                     schemaResult = Number;
                     break;
                 default:

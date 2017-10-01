@@ -5,7 +5,7 @@ module.exports = ngApp.directive('fileInput', function () {
     return {
         restrict: 'EC',
         scope: {
-            onFileInputChangeCallback: '&onFileInputChange',
+            onFileInputChangeCallback: '=onFileInputChange',
             upload: '=trigger',
             inputLimit: '@'
         },
@@ -58,7 +58,7 @@ module.exports = ngApp.directive('fileInput', function () {
 
             $scope.onFileInputChange = function (evt) {
                 $scope.$emit('file-input:change', $scope);
-                $scope.onFileInputChangeCallback()(evt, $scope.get$inputs(), $scope);
+                $scope.onFileInputChangeCallback(evt, $scope.get$inputs(), $scope);
             };
 
             $scope.addFileInputListeners = function () {

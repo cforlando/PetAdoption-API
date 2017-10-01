@@ -114,7 +114,7 @@ module.exports = ngApp.service('animalDataService', function (request) {
                     throw new Error('attempted to save invalid property');
                 }
 
-                if (propData.valType === '[Image]') {
+                if (propData.valType === '[image]') {
                     // remove temporary images that will be added on upload
                     propData.val = _.reject(propData.val, function (imageUrl) {
                         return /^data:/.test(imageUrl);
@@ -134,6 +134,38 @@ module.exports = ngApp.service('animalDataService', function (request) {
             .then(function success(response) {
                 return Promise.resolve(new Animal(response.data));
             })
+    };
+
+    this.getPropType = function (propData) {
+        if (!propData) {
+            return 'invalid';
+        }
+
+        switch (propData.key) {
+            case 'petId':
+                return 'hidden';
+            case 'species':
+                return 'select';
+            case 'description':
+                return 'textarea';
+            default:
+                break;
+        }
+
+        switch (propData.valType && propData.valType.toLowerCase()) {
+            case 'location':
+                return 'location';
+            case '[image]':
+                return 'gallery';
+            case 'date':
+                return 'date';
+            case 'number':
+                return 'number';
+            case 'boolean':
+                return 'boolean';
+            default:
+                return 'string';
+        }
     };
 
     return this;

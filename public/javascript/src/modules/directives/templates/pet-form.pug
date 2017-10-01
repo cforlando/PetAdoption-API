@@ -6,7 +6,7 @@ include _auto-generated/_-all
 div
     .fields()
         .field(class="field--{{propData.key}}", ng-repeat="propData in formRenderData")
-            .auto-input
+            auto-input(params="propData",  init-with-defaults='initWithDefaults')
             .menu.menu--actions(ng-if="$index === 0 || $last")
                 -
                     const mdButtonClass = `{

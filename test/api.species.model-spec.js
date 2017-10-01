@@ -25,7 +25,7 @@ describe("/species/:speciesName/model", function () {
             options: ['one', 'two', 'three'],
             description: 'a test property',
             label: 'whoops',
-            valType: 'String'
+            valType: 'string'
         }
     ];
 

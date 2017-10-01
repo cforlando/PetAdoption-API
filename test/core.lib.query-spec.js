@@ -9,12 +9,12 @@ describe("AnimalQuery", function () {
     var testQueryProps = [
         {
             key: 'propName',
-            valType: 'String',
+            valType: 'string',
             val: 'testValue'
         },
         {
             key: 'anotherPropName',
-            valType: 'Number',
+            valType: 'number',
             val: '2'
         }
     ];

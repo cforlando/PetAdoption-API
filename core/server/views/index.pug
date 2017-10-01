@@ -34,6 +34,7 @@ html
                                 md-list-item(ng-click="showAnimalSearch()") Search
                                 md-list-item(ng-click="showAnimalEditForm()") Add New Pet
                                 md-list-item(ng-click="showSpeciesSearch()") Edit Species
+                                md-list-item(ng-click="showSettings()") Settings
                         ng-view(flex, layout-fill, layout='column')
                     .action-menu(ng-if="actionMenu.actions.length > 0")
             else

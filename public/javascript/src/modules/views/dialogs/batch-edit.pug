@@ -8,10 +8,10 @@ include ../_auto-generated/_-all
                 md-button.md-icon-button(ng-click="close()")
                     md-icon.material-icons close
         md-dialog-content(layout-padding)
-            .batch-form(ng-if="isBatchEditActive()" ng-controller='formController')
+            .batch-form(ng-if="isBatchEditActive()")
                 .fields
-                    .field(class="field--{{propData.key}}", ng-repeat="propData in batchProperties")
-                        .auto-input
+                    .field(class="field--{{batchEditableProp.key}}", ng-repeat="batchEditableProp in batchProperties")
+                        auto-input(params="batchEditableProp" init-with-defaults="false")
                 .nav
                     md-input-container
                         md-button.btn-submit.md-primary.md-raised(ng-click='save()') Save

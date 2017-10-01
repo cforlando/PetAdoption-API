@@ -6,7 +6,6 @@ var url = require('url');
 var _ = require('lodash');
 var chai = require('chai');
 
-var Debuggable = require('../core/lib/debuggable');
 var APIDatabase = require('../core/mongodb');
 var APIDatabaseFormatter = require('../core/server/utils/formatter');
 var SpeciesDbImage = require('../core/mongodb/lib/species-db-image');
@@ -120,8 +119,8 @@ Helper.prototype = {
         }
         result = propData.example || propData.defaultVal;
         switch (propData.valType) {
-            case 'Location':
-            case 'Number':
+            case 'location':
+            case 'number':
                 if (!_.isNumber(result)) {
                     // TODO implement better handling of invalid number type options
                     console.warn('found invalid number option for "%s"(%s)', propData.key, propData.valType)
@@ -131,7 +130,7 @@ Helper.prototype = {
 
                 result = parseFloat(result);
                 break;
-            case 'Date':
+            case 'date':
                 var today = new Date(result);
                 result = today.toISOString();
                 break;
@@ -179,18 +178,18 @@ Helper.prototype = {
                     speciesProp = testSpecies.getProp(propName);
 
                     switch (speciesProp.valType) {
-                        case 'String':
+                        case 'string':
                             // if a string, check if they match regardless of case, (ie case of species)
                             var testRegex = new RegExp(self.escapeRegExp(expectedValue), 'i');
 
                             expect(actualValue).to.match(testRegex);
                             break;
 
-                        case 'Date':
+                        case 'date':
                             expect(new Date(actualValue)).to.eql(new Date(expectedValue));
                             break;
 
-                        case 'Boolean':
+                        case 'boolean':
                             var expectedBoolValue = (expectedValue === true || /y|yes/i.test(expectedValue));
 
                             expect(actualValue).to.eql(expectedBoolValue);
@@ -217,7 +216,6 @@ Helper.prototype = {
      */
     buildDatabase: function (options) {
         var dbDefaults = {
-            debugLevel: Debuggable.PROD,
             preset: [],
             collectionNamePrefix: 'test_api_'
         };
@@ -270,7 +268,7 @@ Helper.prototype = {
         if (!database) {
             return self.buildDatabase()
                 .then(function (newTestDb) {
-                    var server = new Server(newTestDb, {debugLevel: Debuggable.PROD});
+                    var server = new Server(newTestDb);
                     return server;
                 })
                 .catch(function (err) {
@@ -279,7 +277,7 @@ Helper.prototype = {
         }
 
         // pass formatted database to server
-        server = new Server(database, {debugLevel: Debuggable.PROD});
+        server = new Server(database);
 
         return Promise.resolve(server);
     },

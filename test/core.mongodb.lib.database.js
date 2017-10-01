@@ -2,7 +2,6 @@ var chai = require('chai');
 
 var Database = require('../core/mongodb/lib/database');
 var Collection = require('../core/mongodb/lib/collection');
-var Debuggable = require('../core/lib/debuggable');
 
 var expect = chai.expect;
 

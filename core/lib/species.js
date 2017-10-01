@@ -14,7 +14,7 @@ function Species(speciesName, data) {
     this.baseProps = [
         {
             key: 'petId',
-            valType: 'String',
+            valType: 'string',
             fieldLabel: "Pet ID",
             example: '',
             defaultVal: [],
@@ -25,7 +25,7 @@ function Species(speciesName, data) {
         },
         {
             key: 'species',
-            valType: 'String',
+            valType: 'string',
             fieldLabel: "Animal's Species",
             example: 'dog',
             defaultVal: speciesName,
@@ -36,7 +36,7 @@ function Species(speciesName, data) {
         },
         {
             key: 'images',
-            valType: '[Image]',
+            valType: '[image]',
             fieldLabel: "Pet images",
             example: ['http://placehold.it/500x500'],
             defaultVal: [],
@@ -47,7 +47,7 @@ function Species(speciesName, data) {
         },
         {
             key: 'petName',
-            valType: 'String',
+            valType: 'string',
             fieldLabel: 'Pet\'s name',
             example: 'Fido',
             defaultVal: '',
@@ -149,7 +149,7 @@ Species.prototype = {
         return _.chain(this.props)
             .reduce(function (props, speciesPropData) {
                 // fix for bad default location values
-                if (speciesPropData.valType === 'Location' && !_.isNumber(speciesPropData.defaultVal)) {
+                if (speciesPropData.valType === 'location' && !_.isNumber(speciesPropData.defaultVal)) {
                     speciesPropData.defaultVal = -1;
                 }
 

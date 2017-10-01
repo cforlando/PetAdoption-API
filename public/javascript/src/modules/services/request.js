@@ -1,11 +1,11 @@
 var ngApp = require('ngApp');
 var _ = require('lodash');
 
-ngApp.service('request', function ($http, $mdToast) {
+ngApp.service('request', function ($http, uiService) {
     var timeoutLimit = 10 * 1000;
 
     Request.onTimeout = function () {
-        $mdToast.show($mdToast.simple().textContent("Poor connection detected"));
+        uiService.showMessage("Poor connection detected");
     };
 
     Request.get = function () {
@@ -14,23 +14,26 @@ ngApp.service('request', function ($http, $mdToast) {
             self.onTimeout();
         }, timeoutLimit);
 
+        uiService.showLoading();
         return $http.get.apply($http, arguments)
             .then(function (response) {
                 clearTimeout(timeoutId);
+                uiService.hideLoading();
                 return Promise.resolve(response);
             })
             .catch(function (response) {
                 var statusCode = parseInt(response.status);
 
                 clearTimeout(timeoutId);
+                uiService.hideLoading();
                 switch (statusCode) {
                     case 401:
                         // location.href = '/auth/google';
-                        $mdToast.show($mdToast.simple().textContent("User not authorized"));
+                        uiService.showError("User not authorized");
                         break;
                     default:
                         if (statusCode >= 400) {
-                            $mdToast.show($mdToast.simple().textContent("Cannot connect to server"));
+                            uiService.showError("Cannot connect to server");
                         }
                 }
 
@@ -44,15 +47,18 @@ ngApp.service('request', function ($http, $mdToast) {
             self.onTimeout();
         }, timeoutLimit);
 
+        uiService.showLoading();
         return $http.post.apply($http, arguments)
             .then(function (response) {
                 clearTimeout(timeoutId);
+                uiService.hideLoading();
                 return Promise.resolve(response);
             })
             .catch(function (response) {
                 var statusCode = parseInt(response.status);
 
                 clearTimeout(timeoutId);
+                uiService.hideLoading();
                 switch (statusCode) {
                     case 401:
                         location.href = '/auth/google';
@@ -60,7 +66,7 @@ ngApp.service('request', function ($http, $mdToast) {
                 }
 
                 if (statusCode >= 400) {
-                    $mdToast.show($mdToast.simple().textContent("Cannot connect to server"));
+                    uiService.showError("Cannot connect to server");
                     return Promise.reject(response);
                 }
 

@@ -49,7 +49,7 @@ module.exports = ngApp.directive('locationInput', [function () {
                     marker = new google.maps.Marker({
                         position: new google.maps.LatLng(loc.lat, loc.lng),
                         map: map,
-                        title: 'Location'
+                        title: 'location'
                     }),
                     markerHTMLContent = "",
                     infowindow = new google.maps.InfoWindow({
