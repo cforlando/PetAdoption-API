@@ -8,7 +8,7 @@ console.log('loading speciesForm');
 
 module.exports = ngApp.directive('speciesForm', function () {
     return {
-        restrict: 'C',
+        restrict: 'EC',
         template: require('raw-loader!./templates/species-form.html'),
         controller: function ($scope, $routeParams, $location, $mdDialog, $controller, request, speciesDataService, userService, uiService) {
             $scope.valTypes = ['string', 'date', 'number', 'boolean'];

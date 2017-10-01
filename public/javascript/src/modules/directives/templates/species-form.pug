@@ -1,40 +1,40 @@
 include _auto-generated/_-all
 mixin species-menu
-        .menu.menu--actions
-            md-button.md-raised.md-primary.button.button--add-property(aria-label!="Add Propery", ng-click="createNewProp($event)")
-                |Add Property
-            md-button.md-raised.md-warn.button.button--delete-species(aria-label!="Delete species", ng-click="deleteSpecies()")
-                |Delete Species
-            md-button.md-raised.button.button--update-placeholder(aria-label!="Update placeholder image", ng-click="updatePlaceholder()")
-                |Update Placeholder
+    .menu.menu--actions
+        md-button.md-raised.md-primary.button.button--add-property(aria-label!="Add Propery", ng-click="createNewProp($event)")
+            |Add Property
+        md-button.md-raised.md-warn.button.button--delete-species(aria-label!="Delete species", ng-click="deleteSpecies()")
+            |Delete Species
+        md-button.md-raised.button.button--update-placeholder(aria-label!="Update placeholder image", ng-click="updatePlaceholder()")
+            |Update Placeholder
 .view.view--species(layout='column')
-    .file-input(on-change="onFileMediaChange" add-trigger="uploadPhoto")
-        md-content()
+    file-input(layout='column' on-change="onFileMediaChange" add-trigger="uploadPhoto")
+        md-content(ng-cloak layout='column')
             md-subheader.md-primary!="{{speciesName}}"
-            md-divider
-            +species-menu()
-            - 
-                const mdCardAttrs =  {
-                    'ng-if': "isVisibleProp(speciesProp)",
-                    'ng-repeat': "speciesProp in speciesProps",
-                    'data-drop': "true",
-                    'data-drag': "true",
-                    'ng-model': "speciesProps",
-                    'jqyoui-droppable': "{index: {{$index}}, onDrop: 'onDragDrop'}",
-                    'jqyoui-draggable': "{index: {{$index}}, animate:true, insertInline: true}",
-                    'data-jqyoui-options': "{revert: 'invalid', handle: 'md-card-title .md-headline'}"
-                };
-            div(flex)
-                md-card(md-3-line)&attributes(mdCardAttrs)
-                    md-card-title
-                        md-card-title-text
-                            span.md-headline!="{{speciesProp.fieldLabel}}"
-                            span.md-subhead!="{{speciesProp.key}}"
-                    md-card-content(layout='column')
-                        p!="{{speciesProp.description}}"
-                    md-card-actions(layout='row', layout-align='end')
-                        md-button.md-icon-button(ng-click="editProp(speciesName, speciesProp)", ng-if="isEditableProp(speciesProp)")
-                            md-icon.material-icons mode_edit
-                        md-button.md-icon-button(ng-click="deleteProp(speciesProp)")
-                            md-icon.material-icons delete_forever
-            +species-menu()
+            div(layout='column')
+                .species-props
+                    -
+                        const mdCardAttrs =  {
+                            'ng-if': "isVisibleProp(speciesProp)",
+                            'ng-repeat': "speciesProp in speciesProps",
+                            'data-drop': "true",
+                            'data-drag': "true",
+                            'ng-model': "speciesProps",
+                            'jqyoui-droppable': "{index: {{$index}}, onDrop: 'onDragDrop'}",
+                            'jqyoui-draggable': "{index: {{$index}}, animate:true, insertInline: true}",
+                            'data-jqyoui-options': "{revert: 'invalid', handle: 'md-card-title .md-headline'}"
+                        };
+                    md-card(md-3-line)&attributes(mdCardAttrs)
+                        md-card-title
+                            md-card-title-text
+                                span.md-headline!="{{speciesProp.fieldLabel}}"
+                                span.md-subhead!="{{speciesProp.key}}"
+                        md-card-content(layout='column')
+                            p!="{{speciesProp.description}}"
+                        md-card-actions(layout='row', layout-align='end')
+                            md-button.md-icon-button(ng-click="editProp(speciesName, speciesProp)", ng-if="isEditableProp(speciesProp)")
+                                md-icon.material-icons mode_edit
+                            md-button.md-icon-button(ng-click="deleteProp(speciesProp)")
+                                md-icon.material-icons delete_forever
+                md-divider
+                +species-menu()

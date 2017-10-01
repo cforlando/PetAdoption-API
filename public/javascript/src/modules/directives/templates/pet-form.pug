@@ -1,17 +1,12 @@
 include _auto-generated/_-all
-//.batch-edit-list(ng-if="isBatchMode()")
-//    .batch-edit-list__content
-//        .pet-thumbnail(ng-repeat="pet in $parent.selectedPetsDataCollection")
-//            .pet-thumbnail__placeholder(ng-style!="background:url('{{pet.images.val[0]}}')")
-div
-    .fields()
-        .field(class="field--{{propData.key}}", ng-repeat="propData in formRenderData")
-            auto-input(params="propData",  init-with-defaults='initWithDefaults')
-            .menu.menu--actions(ng-if="$index === 0 || $last")
-                -
-                    const mdButtonClass = `{
-                        'md-primary': action.label === 'save',
-                        'md-warn': action.label === 'delete'
-                    }`;
-                md-button.md-raised(ng-class=mdButtonClass ng-repeat="action in menu.actions" ng-click="action.onClick()")
-                    | {{action.label}}
+.fields.pet-props(ng-cloak)
+    .field(class="field--{{propData.key}}", ng-repeat="propData in formRenderData")
+        auto-input(params="propData",  init-with-defaults='initWithDefaults')
+.menu.menu--actions
+    -
+        const mdButtonClass = `{
+            'md-primary': action.label === 'save',
+            'md-warn': action.label === 'delete'
+        }`;
+    md-button.md-raised(ng-class=mdButtonClass ng-repeat="action in menu.actions" ng-click="action.onClick()")
+        | {{action.label}}

@@ -104,11 +104,14 @@ pet-list
     padding 0 em-auto(3px)
 
 species-form,
-.species-form
-  .md-button
-    &.button
-      &--create-prop
-        position: fixed
+pet-form
+  .menu--actions
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  .species-props,
+  .pet-props
+    overflow-y: auto;
 
 auto-input
   .input
@@ -228,8 +231,6 @@ auto-input
 
 .view
   &--species
-    md-content
-      padding-bottom 7em
     .md-subheader-wrapper
       transform translate3d(0,0,0)
     md-card-title

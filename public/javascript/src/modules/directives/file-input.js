@@ -10,6 +10,7 @@ module.exports = ngApp.directive('fileInput', function () {
             removeTrigger: '=?',
             inputLimit: '@'
         },
+        replace: true,
         transclude: true,
         template: require('raw-loader!./templates/file-input.html'),
         controller: function ($scope, $element, $timeout) {
