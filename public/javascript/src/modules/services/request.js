@@ -4,11 +4,11 @@ var _ = require('lodash');
 ngApp.service('request', function ($http, uiService) {
     var timeoutLimit = 10 * 1000;
 
-    Request.onTimeout = function () {
+    this.onTimeout = function () {
         uiService.showMessage("Poor connection detected");
     };
 
-    Request.get = function () {
+    this.get = function () {
         var self = this;
         var timeoutId = setTimeout(function () {
             self.onTimeout();
@@ -41,7 +41,7 @@ ngApp.service('request', function ($http, uiService) {
             });
     };
 
-    Request.post = function () {
+    this.post = function () {
         var self = this;
         var timeoutId = setTimeout(function () {
             self.onTimeout();
@@ -74,7 +74,7 @@ ngApp.service('request', function ($http, uiService) {
             });
     };
 
-    return Request;
+    return this;
 });
 
 module.exports = ngApp;
