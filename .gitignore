@@ -8,6 +8,13 @@ aws*.json
 !/data/props.cat.json
 !/data/models.json
 TODO
+public/stylesheets/style.css
+public/stylesheets/style.min.css
+public/javascript/app.js
+public/javascript/app.js.map
+public/javascript/vendor.app.js
+public/javascript/vendor.app.js.map
+public/images/*.*
 tmp/*
 !tmp/*.csv
 public/images/*.*
