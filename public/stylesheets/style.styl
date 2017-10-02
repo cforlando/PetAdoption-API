@@ -60,7 +60,8 @@ md-sidenav
   border-radius 50%;
   overflow hidden
 
-.pet-list
+pet-list
+  flex-grow: 1;
   .checkbox
     position absolute
     left 1em
@@ -103,13 +104,17 @@ md-sidenav
     font-size em-auto(14 * .75, 14) // multiply by .75 to match scale transform on other labels
     padding 0 em-auto(3px)
 
-.species-form
-  .md-button
-    &.button
-      &--create-prop
-        position: fixed
+species-form,
+pet-form
+  .menu--actions
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  .species-props,
+  .pet-props
+    overflow-y: auto;
 
-.pet-form
+auto-input
   .input
     padding 0 1.5em
     &__label
@@ -227,8 +232,6 @@ md-sidenav
 
 .view
   &--species
-    md-content
-      padding-bottom 7em
     .md-subheader-wrapper
       transform translate3d(0,0,0)
     md-card-title
@@ -238,3 +241,9 @@ md-sidenav
     justify-content center
     .view__content
       text-align center
+
+.menu
+  &--actions
+    display: flex;
+    padding: .75em;
+    justify-content: flex-end;

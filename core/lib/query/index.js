@@ -43,16 +43,16 @@ Query.prototype = {
             }
 
             switch (propType) {
-                case 'Boolean':
+                case 'boolean':
                     propValue = /^\s*(y|yes|true)\s*$/i.test(propValue);
                     break;
-                case 'Number':
+                case 'number':
                     propValue = parseInt(propValue);
                     break;
-                case 'Date':
+                case 'date':
                     propValue = propValue.toISOString ? propValue.toISOString() : propValue;
                     break;
-                case 'Float':
+                case 'float':
                     propValue = parseFloat(propValue);
                     break;
             }
@@ -164,16 +164,16 @@ Query.prototype = {
             return propData.valType;
 
         } else if (_.isDate(propValue)) {
-            return 'Date'
+            return 'date'
 
         } else if (_.isFinite(propValue)) {
-            return 'Number';
+            return 'number';
 
         } else if (_.isNumber(propValue)) {
-            return 'Float';
+            return 'float';
 
         } else if (propValue && /^\s*(y|yes|true|n|no|false)\s*$/i.test(propValue.toString())) {
-            return 'Boolean';
+            return 'boolean';
 
         } else {
             return null;
@@ -182,7 +182,7 @@ Query.prototype = {
 
     isPropRegex: function (propData) {
         var self = this,
-            isString = propData.valType && propData.valType.toLowerCase() == 'string' && !_.isRegExp(propData.val),
+            isString = propData.valType && propData.valType === 'string' && !_.isRegExp(propData.val),
             hasMeta = (function () {
                 var result = false;
                 _.forEach(self.queryMeta, function (queryMetaValue) {

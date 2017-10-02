@@ -192,7 +192,7 @@ module.exports = ngApp.service('speciesDataService', function (request, speciesF
         var species = this.animalSpecies[speciesName];
         var propData = _.defaults(options, {
             key: propName,
-            valType: 'String',
+            valType: 'string',
             defaultVal: '',
             fieldLabel: '',
             note: '',

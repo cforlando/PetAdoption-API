@@ -8,33 +8,23 @@ console.log('loading speciesForm');
 
 module.exports = ngApp.directive('speciesForm', function () {
     return {
-        restrict: 'C',
+        restrict: 'EC',
         template: require('raw-loader!./templates/species-form.html'),
-        controller: function ($scope, $routeParams, $location, $mdDialog, $controller, request, speciesDataService, userService) {
-            angular.extend(this, $controller('formController', {$scope: $scope}));
-            $scope.valTypes = ['String', 'Date', 'Number', 'Boolean'];
+        controller: function ($scope, $routeParams, $location, $mdDialog, $controller, request, speciesDataService, userService, uiService) {
+            $scope.valTypes = ['string', 'date', 'number', 'boolean'];
             $scope.speciesName = $routeParams.speciesName;
             $scope.speciesProps = [];
-            $scope.actionMenu.actions = [
-                {
-                    onClick: function () {
-                        speciesDataService.deleteSpecies($scope.speciesName)
-                            .then(function () {
-                                $location.path('/species');
-                            })
-                    },
-                    icon: 'delete_forever',
-                    label: 'Delete'
-                },
-                {
-                    onClick: function () {
-                        $scope.uploadPhoto();
-                    },
-                    icon: 'photo',
-                    label: 'Placeholder'
-                }
-            ];
 
+            $scope.deleteSpecies = function () {
+                return speciesDataService.deleteSpecies($scope.speciesName)
+                    .then(function () {
+                        $location.path('/species');
+                    })
+            }
+
+            $scope.updatePlaceholder = function () {
+                return $scope.uploadPhoto();
+            }
 
             /**
              *
@@ -49,7 +39,7 @@ module.exports = ngApp.directive('speciesForm', function () {
 
                 return userService.saveCurrentUser()
                     .then(function () {
-                        return $scope.showMessage('Saved order');
+                        return uiService.showMessage('Saved order');
                     })
             };
 
@@ -67,17 +57,14 @@ module.exports = ngApp.directive('speciesForm', function () {
             $scope.saveSpeciesPlaceholder = function (speciesName, fileInput, options) {
                 var opts = _.defaults(options, {});
 
-                $scope.showLoading();
                 return speciesDataService.saveSpeciesPlaceholder($scope.speciesName, fileInput, opts)
                     .then(function (result) {
-                        $scope.hideLoading();
-                        $scope.showMessage("Saved placeholder");
+                        uiService.showMessage("Saved placeholder");
                         return Promise.resolve(result);
                     })
                     .catch(function (err) {
                         console.error(err);
-                        $scope.hideLoading();
-                        $scope.showError('Could not save placeholder image');
+                        uiService.showError('Could not save placeholder image');
                         return Promise.reject(err);
                     })
             };
@@ -103,15 +90,10 @@ module.exports = ngApp.directive('speciesForm', function () {
                         console.log('cancelled');
                     })
                     .then(function () {
-                        $scope.showLoading();
                         return $scope.updateForm();
                     })
                     .then(function () {
-                        $scope.hideLoading();
-                        return $scope.showMessage("Deleted '" + propData.key + "'")
-                    })
-                    .catch(function(){
-                        $scope.hideLoading();
+                        return uiService.showMessage("Deleted '" + propData.key + "'")
                     })
             };
 
@@ -175,8 +157,8 @@ module.exports = ngApp.directive('speciesForm', function () {
                         'species'
                     ],
                     valTypes: [
-                        '[Image]',
-                        'Location'
+                        '[image]',
+                        'location'
                     ]
                 };
 
@@ -187,8 +169,8 @@ module.exports = ngApp.directive('speciesForm', function () {
                 return true;
             };
 
-            $scope.updateForm = function(){
-                return speciesDataService.getSpecies($scope.speciesName, {useCache: true})
+            $scope.updateForm = function () {
+                return speciesDataService.getSpecies($scope.speciesName, { useCache: true })
                     .then(function (species) {
                         var activeSpecies = species;
                         var defaultPropPriorities = {
@@ -225,7 +207,7 @@ module.exports = ngApp.directive('speciesForm', function () {
                 $scope.updateForm()
                     .catch(function (err) {
                         console.error(err);
-                        $scope.showError("Could not load '" + $scope.speciesName + "'")
+                        uiService.showError("Could not load '" + $scope.speciesName + "'")
                     })
             })()
 

@@ -17,7 +17,7 @@ var ServerRouter = require('./router');
 var assetsRedirect = require('./middleware/assests-redirect');
 var flags = require('./middleware/flags');
 var headers = require('./middleware/headers');
-var pagination = require('./middleware/pagination');
+var pagination = require('./middleware/data-pagination');
 var dataFormatter = require('./middleware/data-formatter');
 var localImageHandler = require('./middleware/local-image-handler');
 

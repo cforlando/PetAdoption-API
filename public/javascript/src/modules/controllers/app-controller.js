@@ -5,11 +5,7 @@ var angular = require('angular');
 console.log('loading app controller w/ %o', ngApp);
 
 module.exports = ngApp.controller('appController', function ($scope, request, $mdToast, $location, userService) {
-    console.log('init app controller');
     angular.element('.loading-text').remove();
-    $scope.loadingQueue = {
-        length: 0
-    };
 
     $scope.sideNav = {
         isOpen: false
@@ -21,39 +17,6 @@ module.exports = ngApp.controller('appController', function ($scope, request, $m
 
     $scope.login = function () {
         location.href = '/auth/google';
-    };
-
-    /**
-     *
-     * @param {String} errorMessage
-     */
-    $scope.showError = function (errorMessage) {
-        return $mdToast.show($mdToast.simple().textContent(errorMessage || 'Sorry. Try Again :-('));
-    };
-    /**
-     *
-     * @param {String} message
-     */
-    $scope.showMessage = function (message) {
-        return $mdToast.show($mdToast.simple().textContent(message || 'Success'))
-            .catch(function (err) {
-                console.error('$mdToast err: %o', err)
-                return Promise.resolve();
-            });
-    };
-
-    $scope.showLoading = function () {
-        $scope.loadingQueue.length++;
-        return Promise.resolve();
-    };
-
-    $scope.hideLoading = function () {
-        if ($scope.loadingQueue.length > 0) $scope.loadingQueue.length--;
-        return Promise.resolve();
-    };
-
-    $scope._persistCurrentPath = function () {
-        $location.path($location.path());
     };
 
     $scope.showAnimalSearch = function () {
@@ -88,6 +51,11 @@ module.exports = ngApp.controller('appController', function ($scope, request, $m
         $scope.closeSidebar();
     };
 
+    $scope.showSettings = function () {
+        $location.path('/settings');
+        $scope.closeSidebar();
+    };
+
     $scope.onTabSelected = function (tab) {
         $scope.$broadcast('change:tab', tab);
     };
@@ -108,12 +76,10 @@ module.exports = ngApp.controller('appController', function ($scope, request, $m
         $scope.$broadcast('reload:app');
     };
 
-
     $scope.toggleActionMenu = function () {
         console.log('$scope.$broadcast(toggle:action-menu)');
         $scope.$broadcast('toggle:action-menu');
     };
-
 
     (function init() {
         $scope.resetActionMenu();
@@ -127,4 +93,4 @@ module.exports = ngApp.controller('appController', function ($scope, request, $m
                 $scope.user = user;
             })
     })()
-})
+});

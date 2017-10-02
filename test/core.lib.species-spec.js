@@ -25,7 +25,7 @@ describe("Species", function () {
             testProps = [
                 {
                     key: aTestProp2Name,
-                    valType: 'String',
+                    valType: 'string',
                     options: ['red', 'white', 'blue']
                 }
             ],
@@ -39,7 +39,7 @@ describe("Species", function () {
             testProps = [
                 {
                     key: aTestProp2Name,
-                    valType: 'String',
+                    valType: 'string',
                     options: ['red', 'white', 'blue']
                 }
             ],
@@ -63,12 +63,12 @@ describe("Species", function () {
         var bTestSpeciesProps = [
             {
                 key: 'aPreviouslySavedProp',
-                valType: 'String',
+                valType: 'string',
                 val: 'aPreviouslySavedValue'
             },
             {
                 key: 'aPreviouslySavedProp2',
-                valType: 'String',
+                valType: 'string',
                 val: 'aPreviouslySavedValue2'
             }
         ];
@@ -76,7 +76,7 @@ describe("Species", function () {
         var newTestProps = [
             {
                 key: newTestPropName,
-                valType: 'String',
+                valType: 'string',
                 val: newTestPropVal
             }
         ];
@@ -122,7 +122,7 @@ describe("Species", function () {
             anotherTestSpecies = new Species('testSpecies', [
                 {
                     key: newTestPropName,
-                    valType: 'String'
+                    valType: 'string'
                 }
             ]);
 
@@ -140,7 +140,7 @@ describe("Species", function () {
             testProps = [
                 {
                     key: newTestPropName,
-                    valType: 'String'
+                    valType: 'string'
                 }
             ];
 
@@ -160,7 +160,7 @@ describe("Species", function () {
             testProps = [
                 {
                     key: newTestPropName,
-                    valType: 'String'
+                    valType: 'string'
                 }
             ];
 

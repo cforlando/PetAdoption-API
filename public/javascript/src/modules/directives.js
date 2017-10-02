@@ -16,6 +16,7 @@ module.exports = [
     require('modules/directives/pet-form'),
     require('modules/directives/pet-list'),
     require('modules/directives/species-form'),
+    require('modules/directives/settings-form'),
     require('modules/directives/species-property-form'),
     require('modules/directives/species-list')
 ];

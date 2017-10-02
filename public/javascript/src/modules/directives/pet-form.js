@@ -9,18 +9,14 @@ console.log('loading petFormController');
 
 module.exports = ngApp.directive('petForm', function () {
     return {
-        restrict: 'C',
+        restrict: 'E',
         template: require('raw-loader!./templates/pet-form.html'),
-        controller: function ($scope, $element, $mdDialog, $routeParams, $controller, speciesFactory, addressFinderService, animalDataService, speciesDataService, userService) {
-            console.log('init petForm.controller');
-            angular.extend(this, $controller('formController', {$scope: $scope}));
-
-            /**
-             *
-             * @type {Animal}
-             */
-            $scope.activeAnimal = null;
-
+        scope: {
+            activeAnimal: '=animal',
+            activeSpecies: '=species',
+            onPetChange: '='
+        },
+        controller: function ($scope, $element, $mdDialog, $routeParams, $controller, speciesFactory, addressFinderService, animalDataService, speciesDataService, userService, uiService) {
             $scope.fab = {
                 isOpen: false
             };
@@ -63,7 +59,7 @@ module.exports = ngApp.directive('petForm', function () {
                     species: 3
                 });
 
-                console.log('rendering with priorities: %j', propPriorities);
+                $scope.initWithDefaults = userService.getUserMetaValue('loadDefaults');
 
                 $scope.formRenderData = _.chain(activeAnimal.getProps())
                     .reduce(function (collection, prop) {
@@ -154,7 +150,7 @@ module.exports = ngApp.directive('petForm', function () {
                                     }
                                 });
 
-                                $parentScope.killSpeciesPrompt = function(){
+                                $parentScope.killSpeciesPrompt = function () {
                                     delete $parentScope.killSpeciesPrompt;
                                     speciesWatchHandler();
                                     $mdDialog.cancel();
@@ -205,7 +201,7 @@ module.exports = ngApp.directive('petForm', function () {
                     })
                     .then(function () {
                         $scope.render();
-                        $scope.showMessage('Created option, "' + val + '", for "' + fieldName + '"');
+                        uiService.showMessage('Created option, "' + val + '", for "' + fieldName + '"');
                     });
             };
 
@@ -216,24 +212,18 @@ module.exports = ngApp.directive('petForm', function () {
              * @return {Promise}
              */
             $scope.loadPetById = function (petId) {
-
-                console.log('petForm.loadPetById(%s)', petId);
-                $scope.showLoading();
-
                 return animalDataService.fetchAnimalById(petId)
                     .then(function (fetchedAnimal) {
                         if (!fetchedAnimal.getSpeciesName()) {
                             fetchedAnimal.setValue('species', $routeParams.speciesName);
                         }
                         $scope.activeAnimal = fetchedAnimal;
-                        $scope.hideLoading();
-                        $scope.showMessage('Successfully loaded pet');
+                        uiService.showMessage('Successfully loaded pet');
                     })
                     .catch(function (err) {
 
                         console.error(err);
-                        $scope.hideLoading();
-                        $scope.showError('Could not load pet');
+                        uiService.showError('Could not load pet');
 
                         return Promise.reject(err);
                     });
@@ -302,7 +292,6 @@ module.exports = ngApp.directive('petForm', function () {
 
                 return beforeSave()
                     .then(function () {
-                        $scope.showLoading();
                         // avoid polluting the form's data
                         $scope.sanitizePetMediaValues();
 
@@ -316,19 +305,18 @@ module.exports = ngApp.directive('petForm', function () {
                     })
                     .then(function (savedAnimal) {
                         $scope.activeAnimal = savedAnimal;
-                        $scope.hideLoading();
                         $scope.render();
 
                         if (opts.visibleNotification) {
-                            $scope.showMessage('Successfully saved');
+                            uiService.showMessage('Successfully saved');
                         }
 
                         if (opts.updatePetList) {
                             animalDataService.getAnimalsBySpecies($scope.activeAnimal.getSpeciesName())
                         }
 
-                        if (opts.successRedirect){
-                            $scope.editPet($scope.activeAnimal);
+                        if (opts.successRedirect) {
+                            $scope.onPetChange($scope.activeAnimal);
                         }
 
                         return Promise.resolve($scope.activeAnimal);
@@ -357,19 +345,19 @@ module.exports = ngApp.directive('petForm', function () {
 
                                 $scope.showAnimalSearch();
                                 if (opts.visibleNotification) {
-                                    $scope.showMessage('Updated pet list');
+                                    uiService.showMessage('Updated pet list');
                                 }
                             })
                             .catch(function (err) {
 
                                 if (opts.visibleNotification) {
-                                    $scope.showError('Could not update pet list');
+                                    uiService.showError('Could not update pet list');
                                 }
 
                                 return Promise.reject(err);
                             });
 
-                        if (opts.successRedirect){
+                        if (opts.successRedirect) {
                             $scope.showAnimalSearch()
                         }
                     })
@@ -421,64 +409,6 @@ module.exports = ngApp.directive('petForm', function () {
                 return $scope.activeAnimal.getSpeciesName();
             };
 
-
-            /**
-             *
-             * @param {Object} propData
-             * @return {boolean}
-             */
-            $scope.isDefaultAllowed = function (propData) {
-                return propData.key !== 'species';
-            };
-
-            /**
-             *
-             * @param {Object} propData
-             * @returns {Promise}
-             */
-            $scope.setAsDefault = function (propData, options) {
-                var opts = _.defaults(options, {
-                    visibleNotification: true
-                });
-
-                $scope.showLoading();
-                userService.setUserDefault(propData);
-
-                return userService.saveCurrentUser()
-                    .then(function () {
-                        $scope.hideLoading();
-
-                        if (opts.visibleNotification) {
-                            $scope.showMessage("Saved default for '" + propData.key + "'");
-                        }
-                    })
-                    .catch(function (err) {
-
-                        $scope.hideLoading();
-                        $scope.showError("Could not save default for '" + propData.key + "'");
-
-                        return Promise.reject(err);
-                    })
-            };
-
-            /**
-             *
-             * @param {String} propData
-             * @returns {Promise}
-             */
-            $scope.resetFromDefault = function (propData) {
-                var userDefault = userService.getUserDefault(propData.key);
-
-                if (userDefault) {
-                    $scope.activeAnimal.setValue(propData.key, userDefault.val);
-                } else {
-                    $scope.activeAnimal.setValue(propData.key, propData.defaultVal);
-                }
-
-                $scope.showMessage("Reset '" + propData.key + "'");
-                return $scope.render();
-            };
-
             (function init() {
                 console.log('init form: %o', $routeParams);
                 $scope.menu = {
@@ -486,24 +416,17 @@ module.exports = ngApp.directive('petForm', function () {
                     actions: [
                         {
                             onClick: function () {
-                                $scope.deletePet({successRedirect: true})
-                            },
-                            label: 'delete',
-                            icon: 'delete_forever'
-                        },
-                        {
-                            onClick: function () {
-                                $scope.clearPetValues()
-                            },
-                            label: 'clear',
-                            icon: 'clear'
-                        },
-                        {
-                            onClick: function () {
                                 $scope.savePet({visibleNotification: true, successRedirect: true})
                             },
                             label: 'save',
                             icon: 'save'
+                        },
+                        {
+                            onClick: function () {
+                                $scope.deletePet({successRedirect: true})
+                            },
+                            label: 'delete',
+                            icon: 'delete_forever'
                         }
                     ]
                 };
@@ -518,7 +441,7 @@ module.exports = ngApp.directive('petForm', function () {
                                     .then(function () {
                                         return $scope.render();
                                     })
-                                    .then(function(){
+                                    .then(function () {
                                         return $scope.activeAnimal.getSpeciesName();
                                     });
                             }
@@ -532,7 +455,7 @@ module.exports = ngApp.directive('petForm', function () {
                         .then(function (speciesName) {
                             return speciesDataService.getSpecies(speciesName);
                         })
-                        .then(function(species){
+                        .then(function (species) {
                             $scope.activeSpecies = species;
                             return speciesDataService.getSpeciesList()
                         })
@@ -550,9 +473,12 @@ module.exports = ngApp.directive('petForm', function () {
                             }
 
                             // $apply necessary to inform angular of data change
-                            $scope.$apply(function(){
+                            $scope.$apply(function () {
                                 $scope.render();
                             })
+                        })
+                        .catch(function (err) {
+                            console.error('species watch err: %o', err)
                         });
 
                     var formDestroyHandler = $scope.$on('$destroy', function () {

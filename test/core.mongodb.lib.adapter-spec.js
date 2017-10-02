@@ -1,15 +1,12 @@
 var expect = require('chai').expect;
 
-var Debuggable = require('../core/lib/debuggable');
 var MongoDbAdapter = require('../core/mongodb/lib/adapter');
 
 describe('Adapter', function () {
     var dbAdapter;
 
     beforeEach(function () {
-        dbAdapter = new MongoDbAdapter({
-            debugLevel: Debuggable.PROD
-        });
+        dbAdapter = new MongoDbAdapter();
     });
 
     afterEach(function (done) {

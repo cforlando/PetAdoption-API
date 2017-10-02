@@ -92,18 +92,18 @@ Animal.prototype = {
             speciesName: this.getSpeciesName(),
             props: this.getProps().map(function (propData) {
                 switch (propData.valType) {
-                    case 'Number':
+                    case 'number':
                         propData.val = parseInt(propData.val);
                         break;
-                    case 'Float':
+                    case 'float':
                         propData.val = parseFloat(propData.val);
                         break;
-                    case 'Boolean':
+                    case 'boolean':
                         if (!_.isBoolean(propData.val)) {
                             propData.val = /yes|true/i.test(propData.val)
                         }
                         break;
-                    case 'Date':
+                    case 'date':
                         if (_.isDate(propData.val)) {
                             propData.val = propData.val.toISOString();
                         }
@@ -140,13 +140,13 @@ Animal.prototype = {
             }
 
             switch (propData.valType) {
-                case 'Boolean':
+                case 'boolean':
                     // convert boolean values that are strings to proper boolean value
                     if (_.isString(propData.val)) {
                         propValue = /yes|true/i.test(propData.val)
                     }
                     break;
-                case 'Date':
+                case 'date':
                     if (_.isDate(propData.val)) {
                         propValue = propData.val.toISOString();
                     }

@@ -2,7 +2,6 @@ var _ = require('lodash');
 var chai = require('chai');
 
 var tHelper = require('./helper')._global;
-var Debuggable = require('../core/lib/debuggable');
 var DbFormatter = require('../core/server/utils/formatter');
 var APIDatabase = require('../core/mongodb');
 var Species = require('../core/lib/species');
@@ -19,7 +18,7 @@ describe("Formatter", function () {
         // only test props that have options and are a String or Boolean type
         defaultTestProps = defaultSpeciesProps.filter(function (speciesPropData) {
             return speciesPropData.options
-                && (speciesPropData.valType == 'String' || speciesPropData.valType == 'Boolean')
+                && (speciesPropData.valType == 'string' || speciesPropData.valType == 'boolean')
                 && speciesPropData.options.length > 0
         }),
 
@@ -79,7 +78,6 @@ describe("Formatter", function () {
 
         before(function () {
             apiDatabase = new APIDatabase({
-                debugLevel: Debuggable.PROD,
                 preset: [],
                 collectionNamePrefix: 'test_formatter_'
             });

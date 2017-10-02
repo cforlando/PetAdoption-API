@@ -1,7 +1,6 @@
 var chai = require('chai');
 
 var Collection = require('../core/mongodb/lib/collection');
-var Debuggable = require('../core/lib/debuggable');
 var UserSchema = require('../core/mongodb/schemas/user');
 var MongoDbAdapter = require('../core/mongodb/lib/adapter');
 
@@ -15,16 +14,10 @@ describe("Collection", function () {
     var TestUserModel;
 
     before(function (done) {
-        dbAdapter = new MongoDbAdapter({
-            debugLevel: Debuggable.PROD
-        });
+        dbAdapter = new MongoDbAdapter();
         dbAdapter.connect({
             onSuccess: function () {
-                var collectionOpts = {
-                    debugTag: 'aSpecies: ',
-                    debugLevel: Debuggable.PROD
-                };
-                user = new Collection('test_model_factory', UserSchema, collectionOpts);
+                user = new Collection('test_model_factory', UserSchema);
                 TestUserModel = user.toMongooseModel(dbAdapter);
                 done();
             },

@@ -3,10 +3,12 @@ var _ = require('lodash');
 
 module.exports = ngApp.directive('petList', function () {
     return {
-        restrict: 'C',
-        replace: true,
+        restrict: 'EC',
         template: require('raw-loader!./templates/pet-list.html'),
-        controller: function ($scope, $mdDialog, animalDataService, speciesDataService) {
+        scope: {
+            onPetChange: '='
+        },
+        controller: function ($scope, $mdDialog, animalDataService, speciesDataService, uiService) {
             $scope.currentSpeciesIndex = 0;
             $scope.animals = {};
             $scope.selectedPets = {};
@@ -49,6 +51,14 @@ module.exports = ngApp.directive('petList', function () {
              *
              * @param {Animal} animal
              */
+            $scope.editPet = function (animal) {
+                $scope.onPetChange(animal);
+            };
+
+            /**
+             *
+             * @param {Animal} animal
+             */
             $scope.deselectPet = function (animal) {
                 delete $scope.selectedPets[animal.getId()];
             };
@@ -77,10 +87,10 @@ module.exports = ngApp.directive('petList', function () {
                         break;
                 }
                 switch (propData.valType) {
-                    case 'String':
-                    case 'Number':
-                    case 'Boolean':
-                    case 'Date':
+                    case 'string':
+                    case 'number':
+                    case 'boolean':
+                    case 'date':
                         return true;
                     default:
                         return false;
@@ -88,7 +98,6 @@ module.exports = ngApp.directive('petList', function () {
             };
 
             $scope.setBatchSpecies = function (speciesName) {
-                $scope.showLoading();
                 return speciesDataService.getSpecies(speciesName, {useCache: true})
                     .then(function (species) {
                         $scope.batchProperties = species.getProps().filter($scope.isEditableByBatch);
@@ -101,12 +110,8 @@ module.exports = ngApp.directive('petList', function () {
                             .value();
                     })
                     .catch(function (err) {
-                        $scope.showError('Could not get model for ' + speciesName);
-
+                        uiService.showError('Could not get model for ' + speciesName);
                         console.error(err);
-                    })
-                    .then(function () {
-                        $scope.hideLoading();
                     })
             };
 
@@ -151,10 +156,10 @@ module.exports = ngApp.directive('petList', function () {
                         break;
                 }
                 switch (propData.valType) {
-                    case 'String':
-                    case 'Number':
-                    case 'Boolean':
-                    case 'Date':
+                    case 'string':
+                    case 'number':
+                    case 'boolean':
+                    case 'date':
                         return true;
                     default:
                         return false;
@@ -185,7 +190,6 @@ module.exports = ngApp.directive('petList', function () {
                     visibleNotification: true
                 });
 
-                $scope.showLoading();
                 return Promise.all(Object.keys($scope.selectedPets).map(function (animalId, idx) {
                         var animal = $scope.selectedPets[animalId];
 
@@ -206,38 +210,35 @@ module.exports = ngApp.directive('petList', function () {
                                     })
                             })
                             .catch(function (err) {
-                                if (opts.visibleNotification) $scope.showError('Could not save pet');
+                                if (opts.visibleNotification) uiService.showError('Could not save pet');
                                 console.error(err);
                             })
                     }))
                     .then(function () {
-                        if (opts.visibleNotification) $scope.showMessage('All pets saved');
+                        if (opts.visibleNotification) uiService.showMessage('All pets saved');
                     })
                     .catch(function (err) {
                         console.error(err);
-                        if (opts.visibleNotification) $scope.showError('Failed to save all pets');
+                        if (opts.visibleNotification) uiService.showError('Failed to save all pets');
                     })
                     .then(function () {
-                        $scope.hideLoading();
                         loadPets();
                     })
             };
 
 
             $scope.delete = function (options) {
-                $scope.showLoading();
                 return Promise.all(Object.keys($scope.selectedPets).map(function (selectedPetId) {
                         return animalDataService.deleteAnimal($scope.selectedPets[selectedPetId])
                     }))
                     .then(function () {
-                        if ($scope.visibleNotification) $scope.showMessage('All pets deleted');
+                        if ($scope.visibleNotification) uiService.showMessage('All pets deleted');
                     })
                     .catch(function (err) {
                         console.error(err);
-                        if ($scope.visibleNotification) $scope.showError('Could not delete all pets');
+                        if ($scope.visibleNotification) uiService.showError('Could not delete all pets');
                     })
                     .then(function () {
-                        $scope.hideLoading();
                         loadPets()
                     })
             };

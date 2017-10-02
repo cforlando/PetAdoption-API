@@ -5,9 +5,9 @@ module.exports = ngApp.directive('defaultSpeciesPropInput', function () {
     return {
         restrict: 'C',
         template: require('raw-loader!./templates/default-species-prop-input.html'),
-        controller: function ($scope) {
+        controller: function ($scope, animalDataService) {
             $scope.getType = function () {
-                return $scope.getPropType($scope.propData);
+                return animalDataService.getPropType($scope.propData);
             }
         }
     }

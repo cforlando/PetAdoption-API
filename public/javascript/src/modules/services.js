@@ -1,5 +1,6 @@
 console.log('loading services');
 module.exports = [
+    require('modules/services/ui-service'),
     require('modules/services/animal-data-service'),
     require('modules/services/species-data-service'),
     require('modules/services/user-service'),
