@@ -167,12 +167,14 @@ properties     | (String) Array  | Will only supply fields specified in array. e
 
 If you would like to join the API group, our contact info is below.  You can also check out the other projects Code for Orlando has been working on @ (https://github.com/cforlando) and (http://codefororlando.com/) <br />
 
-**Luis Moraguez** (lmoraguez@kissimmee.org) - Slack (@lmoraguez) - API Group Lead <br />
 **Eric Fisher** (EricJFisher@Live.com) - Slack (@ericjfisher) <br />
 **Andrew Studnicky** (a.j.studnicky@gmail.com) - Slack (@studnicky) <br />
 **Khalid Hoffman** - Slack (@khalidhoffman) <br />
 **Jim Sandridge** - Twitter (@zero_map) <br />
-**Tim Ferrell** - Twitter (@ferrell_tim)
+**Tim Ferrell** - Twitter (@ferrell_tim) <br />
+
+Inactive Contributors
+**Luis Moraguez** <br />
 
 ## License
 
